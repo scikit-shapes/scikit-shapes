@@ -54,42 +54,42 @@ class LandmarkSetter:
             return Dataset(shapes=shapes, landmarks=self.landmarks)
 
 
-class Decimation:
+# class Decimation:
 
-    def __init__(self, target_reduction):
-        self.target_reduction = target_reduction
+#     def __init__(self, target_reduction):
+#         self.target_reduction = target_reduction
 
-    def fit(self, shapes):
-        pass
+#     def fit(self, shapes):
+#         pass
 
-    def fit_transform(self, shapes):
-        self.fit(shapes)
+#     def fit_transform(self, shapes):
+#         self.fit(shapes)
 
-        #Check wether shape is a list or a Dataset
-        if isinstance(shapes, Dataset):
+#         #Check wether shape is a list or a Dataset
+#         if isinstance(shapes, Dataset):
             
-            if shapes.landmarks is None:
-                pass
-            elif shapes.landmarks == "all":
-                pass
-            else:
-                landmarks_points = torch.cat([shapes.shape[i].points[shapes.landmarks[i]] for i in range(len(shapes))])
-                
+#             if shapes.landmarks is None:
+#                 pass
+#             elif shapes.landmarks == "all":
+#                 pass
+#             else:
+#                 landmarks_points = torch.cat([shapes.shape[i].points[shapes.landmarks[i]] for i in range(len(shapes))])
+
             
-            if shapes.landmarks is not None:
+#             if shapes.landmarks is not None:
 
-                landmarks_points = torch.cat([shapes.shape[i].points[shapes.landmarks[i]] for i in range(len(shapes))])
+#                 landmarks_points = torch.cat([shapes.shape[i].points[shapes.landmarks[i]] for i in range(len(shapes))])
 
-            new_polydata = [shape.to_pyvista().decimate_pro(self.target_reduction, preserve_topology=True) for shape in shapes.shapes]
-            new_shapes = [Shape.from_pyvista(polydata) for polydata in new_polydata]
+#             new_polydata = [shape.to_pyvista().decimate_pro(self.target_reduction, preserve_topology=True) for shape in shapes.shapes]
+#             new_shapes = [Shape.from_pyvista(polydata) for polydata in new_polydata]
 
-            shapes.shapes = [s.to_decimate(self.factor) for s in shapes.shapes]
-            return shapes
+#             shapes.shapes = [s.to_decimate(self.factor) for s in shapes.shapes]
+#             return shapes
         
 
-        else:
+#         else:
 
 
-            return Dataset(shapes=[s.decimate(self.factor) for s in shapes])
+#             return Dataset(shapes=[s.decimate(self.factor) for s in shapes])
 
             

@@ -190,6 +190,18 @@ class Shape:
         self.device = device
 
         return self
+    
+    def to_pyvista(self):
+        """Return a pyvista object from the shape"""
+        return pyvista.PolyData(self.points.cpu().numpy(), faces=self.faces.cpu().numpy())
+    
+    @classmethod
+    def from_pyvista(cls, pyvista_object):
+        """Construct a shape from a pyvista mesh"""
+        return cls(
+            points=torch.from_numpy(pyvista_object.points),
+            faces=torch.from_numpy(pyvista_object.faces),
+        )
 
 
     @property
