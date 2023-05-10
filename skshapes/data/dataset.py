@@ -1,4 +1,6 @@
-class Dataset:
+from collections import Sequence
+
+class Dataset(Sequence):
 
     def __init__(self, *, shapes=None, labels=None, landmarks=None, affine=None, **kwargs) -> None:
         
@@ -10,4 +12,7 @@ class Dataset:
 
     def __len__(self):
         return len(self.shapes)
+    
+    def __getitem__(self, index):
+        return self.shapes[index]
     
