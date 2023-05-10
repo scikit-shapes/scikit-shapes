@@ -251,3 +251,8 @@ class Shape:
         C = self.points[self.triangles[2]]
 
         return torch.cross(B - A, C - A).norm(dim=1) / 2
+    
+    @property
+    def dim(self):
+        """Return the dimension of the shape"""
+        return self.points.shape[1]
