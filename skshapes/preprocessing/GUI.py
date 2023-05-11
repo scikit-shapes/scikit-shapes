@@ -1,6 +1,7 @@
 """This module contains the GUI for the skshapes program.
 """
 import os
+
 os.environ["QT_API"] = "pyqt5"
 
 
@@ -11,6 +12,7 @@ from typing import Optional, Tuple
 import numpy as np
 import yaml
 from enum import Enum
+
 
 class ShapesViewer(MainWindow):
     def __init__(
@@ -116,7 +118,6 @@ class ShapesViewer(MainWindow):
     def print_landmarks_type(self):
 
         print(self.chooseLandmarksType.currentText())
-
 
     def load_files(self):
         """Load new files into the program."""
@@ -395,7 +396,7 @@ class Scene:
     def __init__(self, plotter: QtInteractor) -> None:
 
         self.plotter = plotter
-        
+
         self.actors = []
         self.visibilities = []
         self.meshes = []
@@ -533,5 +534,3 @@ if __name__ == "__main__":
     window = ShapesViewer(title="Preprocessing Viewer", show=True)
     os.rmdir("tmp_run")
     sys.exit(app.exec_())
-
-    
