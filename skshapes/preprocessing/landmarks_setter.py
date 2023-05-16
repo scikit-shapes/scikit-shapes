@@ -17,6 +17,7 @@ class LandmarkSetter:
         - 'all' if it is intendend to be applied on shapes that are in correspondence
         - if by_indices = True : a list of list of integers with same length (indices of the landmarks for each shape)
         - if by_indices = False : a list of point clouds
+        TODO : is it useful to have the by_indices parameter ? Maybe it is better to guess the type of landmarks
 
         The validity of the landmarks is checked.
 
