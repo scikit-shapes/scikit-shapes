@@ -1,5 +1,6 @@
 import torch
 
+
 class Registration:
     def __init__(
         self,
@@ -14,7 +15,6 @@ class Registration:
         device="auto",
         **kwargs,
     ) -> None:
-
         self.model = model
         self.loss = loss
         self.optimizer = optimizer
@@ -34,7 +34,6 @@ class Registration:
         source,
         target,
     ) -> None:
-
         # Make copies of the source and target and move them to the device
         source = source.copy().to(self.device)
         target = target.copy().to(self.device)

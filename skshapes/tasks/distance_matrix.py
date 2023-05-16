@@ -17,7 +17,6 @@ class DistanceMatrix:
         device="auto",
         **kwargs,
     ) -> None:
-
         if device == "auto":
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -40,7 +39,6 @@ class DistanceMatrix:
         *,
         shapes,
     ) -> None:
-
         # Make copies of the shapes and move them to the device
         shapes = [shape.copy().to(self.device) for shape in shapes]
         n = len(shapes)
@@ -50,7 +48,6 @@ class DistanceMatrix:
         # Loop over pairs of shapes
         for i in range(len(shapes)):
             for j in range(i + 1, len(shapes)):
-
                 if self.verbose > 0:
                     print(f"Fitting shapes {i} and {j}...")
 
@@ -63,6 +60,5 @@ class DistanceMatrix:
         *,
         shapes,
     ) -> np.ndarray:
-
         self.fit(shapes=shapes)
         return self.distance_matrix

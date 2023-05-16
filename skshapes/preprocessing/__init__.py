@@ -18,11 +18,9 @@ from .affine_transformation import AffineTransformation
 
 class Pipeline:
     def __init__(self, steps):
-
         self.steps = steps
 
     def fit_transform(self, shapes):
-
         dataset = shapes
         for step in self.steps:
             dataset = step.fit_transform(shapes=dataset)

@@ -8,7 +8,6 @@ class OptimalTransportLoss:
         self.loss = loss
 
     def fit(self, *, source, target):
-
         self.source_triangles = source.triangles
 
         self.target_centers = target.triangle_centers

@@ -3,9 +3,9 @@ import pyvista
 import numpy as np
 import numba
 
-def read(filename, affine=None, device='cpu'):
 
-    #First, read the file with pyvista
+def read(filename, affine=None, device="cpu"):
+    # First, read the file with pyvista
     pyvista_object = pyvista.read(filename)
 
     # If the object is a PolyData, we extract the faces
@@ -16,29 +16,30 @@ def read(filename, affine=None, device='cpu'):
 
     # If the object is a structured grid, it's an image
     elif isinstance(pyvista_object, pyvista.StructuredGrid):
-        #Not implemented yet
+        # Not implemented yet
         raise NotImplementedError
+
 
 @numba.jit
 def _read_faces(faces):
     len_faces = len(faces)
-    i  = 0
+    i = 0
     edges = []
     triangles = []
     while i < len_faces:
-        #Get the number of points in the face
+        # Get the number of points in the face
         n = faces[i]
         if n == 2:
-            #Get the points of the edge
-            face = faces[i+1:i+n+1]
+            # Get the points of the edge
+            face = faces[i + 1 : i + n + 1]
             edges.append(face)
         elif n == 3:
-            #Get the points of the triangle
-            face = faces[i+1:i+n+1]
+            # Get the points of the triangle
+            face = faces[i + 1 : i + n + 1]
             triangles.append(face)
 
         i += n + 1
-    
+
     return edges, triangles
 
 
@@ -58,6 +59,7 @@ def _sort_edges(edges, inverse_ordering):
 
     return sorted_edges
 
+
 def _edges_from_triangles(triangles):
     """Get the edges of a shape from its triangles
     Args:
@@ -67,7 +69,7 @@ def _edges_from_triangles(triangles):
 
     # - 1 construct a pyvista object from the triangles in order to extract the edges
 
-    # Convert the triangles to a faces list 
+    # Convert the triangles to a faces list
     faces = torch.zeros((triangles.shape[1], 4), dtype=torch.int64)
     faces[:, 0] = 3
     faces[:, 1:] = triangles.T
@@ -85,10 +87,12 @@ def _edges_from_triangles(triangles):
         )
     )
 
-    # - 2 Extract the edges using pyvista (does not preserve the points labelling)
-    edges_mesh = pyvista.PolyData(points.numpy(), faces=faces.numpy()).extract_all_edges()
+    # - 2 Extract the edges using pyvista (does not preserve the points labelling)
+    edges_mesh = pyvista.PolyData(
+        points.numpy(), faces=faces.numpy()
+    ).extract_all_edges()
 
-    # - 3 Sort the edges in order to retrieve the original labelling
+    # - 3 Sort the edges in order to retrieve the original labelling
     edges_ordering = np.lexsort(
         (
             edges_mesh.points[:, 2],
@@ -109,8 +113,7 @@ def _edges_from_triangles(triangles):
 
 
 def _edges_and_triangles_from_faces(faces):
-
-    # We convert the faces to a list (works wether for torch tensor or numpy array)
+    # We convert the faces to a list (works wether for torch tensor or numpy array)
     # then we convert it to a numba typed list to avoid warning in numba
     edges, triangles = _read_faces(faces.cpu().numpy())
 
@@ -119,14 +122,13 @@ def _edges_and_triangles_from_faces(faces):
         edges = None
     else:
         edges = torch.from_numpy(np.array(edges)).T
-    
+
     if len(triangles) == 0:
         triangles = None
     else:
         triangles = torch.from_numpy(np.array(triangles)).T
 
     return edges, triangles
-
 
 
 class Shape:
@@ -136,7 +138,7 @@ class Shape:
     - edges (optionnal, default to None) : (2, M) array of edges
     - triangles (optionnal, default to None) : (3, K) array of faces
     """
-    
+
     def __init__(
         self,
         *,
@@ -146,8 +148,7 @@ class Shape:
         triangles=None,
         device="cpu",
         **kwargs,
-        ) -> None:
-
+    ) -> None:
         self.points = points
         self.faces = faces
         self.edges = edges
@@ -156,11 +157,10 @@ class Shape:
 
         # If edges and triangles are not defined, we compute them from the faces
         if self.edges is None and self.triangles is None and self.faces is not None:
-
             self.edges, self.triangles = _edges_and_triangles_from_faces(faces)
-        
+
         # If edges are not defined, we compute them from the triangles
-        # TODO : do we want to impose that edges are defined if triangles are defined ?
+        # TODO : do we want to impose that edges are defined if triangles are defined ?
         if self.edges is None and self.triangles is not None:
             self.edges = _edges_from_triangles(self.triangles)
 
@@ -190,11 +190,13 @@ class Shape:
         self.device = device
 
         return self
-    
+
     def to_pyvista(self):
         """Return a pyvista object from the shape"""
-        return pyvista.PolyData(self.points.cpu().numpy(), faces=self.faces.cpu().numpy())
-    
+        return pyvista.PolyData(
+            self.points.cpu().numpy(), faces=self.faces.cpu().numpy()
+        )
+
     @classmethod
     def from_pyvista(cls, pyvista_object):
         """Construct a shape from a pyvista mesh"""
@@ -203,22 +205,21 @@ class Shape:
             faces=torch.from_numpy(pyvista_object.faces),
         )
 
-
     @property
     def edge_centers(self):
         """Return the center of each edge"""
 
-        #Raise an error if edges are not defined
+        # Raise an error if edges are not defined
         if self.edges is None:
             raise ValueError("Edges are not defined")
 
         return (self.points[self.edges[0]] + self.points[self.edges[1]]) / 2
-    
+
     @property
     def edge_lengths(self):
         """Return the length of each edge"""
 
-        #Raise an error if edges are not defined
+        # Raise an error if edges are not defined
         if self.edges is None:
             raise ValueError("Edges are not defined")
 
@@ -228,7 +229,7 @@ class Shape:
     def triangle_centers(self):
         """Return the center of each triangle"""
 
-        #Raise an error if triangles are not defined
+        # Raise an error if triangles are not defined
         if self.triangles is None:
             raise ValueError("Triangles are not defined")
 
@@ -242,7 +243,7 @@ class Shape:
     def triangle_areas(self):
         """Return the area of each triangle"""
 
-        #Raise an error if triangles are not defined
+        # Raise an error if triangles are not defined
         if self.triangles is None:
             raise ValueError("Triangles are not defined")
 
@@ -251,7 +252,7 @@ class Shape:
         C = self.points[self.triangles[2]]
 
         return torch.cross(B - A, C - A).norm(dim=1) / 2
-    
+
     @property
     def dim(self):
         """Return the dimension of the shape"""

@@ -116,7 +116,6 @@ class ShapesViewer(MainWindow):
             self.show()
 
     def print_landmarks_type(self):
-
         print(self.chooseLandmarksType.currentText())
 
     def load_files(self):
@@ -131,7 +130,6 @@ class ShapesViewer(MainWindow):
 
         # Add selected files to file list widget
         for fileName in fileNames:
-
             item = QtWidgets.QListWidgetItem(fileName.split("/")[-1])
             item.setCheckState(False)
             self.fileList.addItem(item)
@@ -249,7 +247,6 @@ class LandmarkSelector(MainWindow):
         self.show()
 
     def add_landmark(self, plotter, shape, landmarks):
-
         if plotter.picked_point is None:
             pass
         else:
@@ -275,14 +272,12 @@ class LandmarkSelector(MainWindow):
         self.select_landmarks_on_a_new_shape()
 
     def select_landmarks_on_a_new_shape(self):
-
         if self.current_shape_index == len(self.scene.meshes):
             # If all the shapes have been processed, save the landmarks and close the window
             self.scene.landmarks = self.landmarks
             self.close()
 
         else:
-
             # If there are still shapes to process, reinitialize the active landmarks and the active shape
             self.active_landmarks = []
             self.active_shape = self.scene.meshes[self.current_shape_index]
@@ -324,9 +319,7 @@ class LandmarkSelector(MainWindow):
             self.addLanmdarkButton.clicked.connect(self.make_correspondence)
 
     def make_correspondence(self):
-
         if self.plotter2.picked_point is not None:
-
             index = (
                 ((self.active_shape.points - self.plotter2.picked_point) ** 2)
                 .sum(axis=1)
@@ -374,7 +367,6 @@ class LandmarkSelector(MainWindow):
         pass
 
     def updateInstructionsText(self):
-
         self.instructionsText.clear()
         self.instructionsText.insert(
             "Set landmark {}/{} on the shape {}/{}".format(
@@ -394,7 +386,6 @@ class Scene:
     """
 
     def __init__(self, plotter: QtInteractor) -> None:
-
         self.plotter = plotter
 
         self.actors = []

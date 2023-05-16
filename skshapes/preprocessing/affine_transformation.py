@@ -28,7 +28,6 @@ class AffineTransformation:
                 self.matrix = matrix
 
     def fit(self, shapes):
-
         dim_mat = self.matrix.shape[0]
         dim_shapes = shapes[0].dim
         # Check that the dimension of the matrix is dim of the shape or dim of the shape + 1
@@ -38,12 +37,10 @@ class AffineTransformation:
             )
 
     def transform(self, shapes):
-
         dim_mat = self.matrix.shape[0]
         dim_shapes = shapes[0].dim
 
         if dim_mat == dim_shapes:
-
             new_points = [(self.matrix @ shape.points.T).T for shape in shapes]
 
         if isinstance(shapes, Dataset):

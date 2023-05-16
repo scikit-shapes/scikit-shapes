@@ -40,7 +40,6 @@ class Decimation:
 
         # If the points are not in correspondence, we simply decimate each shape independently
         if not isinstance(shapes, Dataset) or shapes.landmarks != "all":
-
             # In this case, we simply decimate independently each shape
             new_polydata = [
                 shape.to_pyvista().decimate_pro(

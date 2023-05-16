@@ -6,7 +6,6 @@ class IntrinsicMetric:
         pass
 
     def morph(self, parameter, return_path=False):
-
         N, D = self.source_points.shape
 
         if return_path:
@@ -26,11 +25,9 @@ class IntrinsicMetric:
             )
 
         else:
-
             return self.source_points + torch.sum(parameter, dim=0)
 
     def regularization(self, parameter):
-
         shape_sequence = self.morph(parameter, return_path=True)
         reg = 0
         for i in range(self.n_steps):
@@ -39,7 +36,6 @@ class IntrinsicMetric:
 
     @property
     def parameter_template(self):
-
         return torch.zeros(
             self.n_steps, *self.source_points.shape, device=self.source_points.device
         )
@@ -50,7 +46,6 @@ class ElasticMetric(IntrinsicMetric):
         pass
 
     def fit(self, *, source, n_steps=1):
-
         assert hasattr(
             source, "edges"
         ), "The shape must have edges to use the as-isometric-as-possible metric"

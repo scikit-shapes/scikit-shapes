@@ -90,7 +90,6 @@ class LandmarkSetter:
 
         # Check wether shape is a list or a Dataset
         if isinstance(shapes, Dataset):
-
             setattr(shapes, "landmarks", self.landmarks)
             return shapes
 
