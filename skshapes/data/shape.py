@@ -20,7 +20,7 @@ def read(filename, affine=None, device="cpu"):
         raise NotImplementedError
 
 
-@numba.jit
+@numba.jit(nopython=True, fastmath=True)
 def _read_faces(faces):
     len_faces = len(faces)
     i = 0
@@ -201,8 +201,8 @@ class Shape:
     def from_pyvista(cls, pyvista_object):
         """Construct a shape from a pyvista mesh"""
         return cls(
-            points=torch.from_numpy(pyvista_object.points),
-            faces=torch.from_numpy(pyvista_object.faces),
+            points=torch.from_numpy(pyvista_object.points.copy()),
+            faces=torch.from_numpy(pyvista_object.faces.copy()),
         )
 
     @property
