@@ -146,6 +146,7 @@ class Shape:
         faces=None,
         edges=None,
         triangles=None,
+        landmarks=None,
         device="cpu",
         **kwargs,
     ) -> None:
@@ -153,6 +154,7 @@ class Shape:
         self.faces = faces
         self.edges = edges
         self.triangles = triangles
+        self.landmarks = landmarks
         self.device = device
 
         # If edges and triangles are not defined, we compute them from the faces
@@ -175,6 +177,7 @@ class Shape:
             edges=self.edges.clone(),
             triangles=self.triangles.clone(),
             device=self.device,
+            landmarks=self.landmarks,
         )
 
     def to(self, device):
@@ -188,6 +191,8 @@ class Shape:
         if self.triangles is not None:
             self.triangles = self.triangles.to(device)
         self.device = device
+        if self.landmarks is not None:
+            self.landmarks = self.landmarks.to(device)
 
         return self
 
