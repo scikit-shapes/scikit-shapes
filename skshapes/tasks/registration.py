@@ -11,7 +11,6 @@ class Registration:
         regularization=1,
         n_iter=10,
         verbose=0,
-        n_steps=1,
         device="auto",
         **kwargs,
     ) -> None:
@@ -19,7 +18,6 @@ class Registration:
         self.loss = loss
         self.optimizer = optimizer
         self.verbose = verbose
-        self.n_steps = n_steps
         self.n_iter = n_iter
         self.regularization = regularization
 
@@ -39,7 +37,7 @@ class Registration:
         target = target.copy().to(self.device)
 
         # Load the tensors and fit the models/loss
-        self.model.fit(source=source, n_steps=self.n_steps)
+        self.model.fit(source=source)
         self.loss.fit(source=source, target=target)
 
         def loss_fn(parameter):
@@ -74,6 +72,22 @@ class Registration:
                 print(f"Loss value at iteration {i} : {loss_value}")
 
         self.parameter = parameter.detach()
-        self.distance = (
-            loss_value.detach()
-        )  # Is it the right way to compute the distance ?
+        self.distance = self.model.regularization(
+            parameter=parameter
+        ).detach()  # Is it the right way to compute the distance ?
+
+    def transform(self, *, source) -> torch.Tensor:
+
+        morphed_points = self.model.morph(parameter=self.parameter)
+        morphed_shape = source.copy()
+        morphed_shape.points = morphed_points
+        return morphed_shape
+
+    def fit_transform(
+        self,
+        *,
+        source,
+        target,
+    ) -> torch.Tensor:
+        self.fit(source=source, target=target)
+        return self.transform(source=source)

@@ -12,7 +12,6 @@ class DistanceMatrix:
         optimizer="LBFGS",
         n_iter=10,
         verbose=0,
-        n_steps=1,
         regularization=1,
         device="auto",
         **kwargs,
@@ -29,7 +28,6 @@ class DistanceMatrix:
             optimizer=optimizer,
             n_iter=n_iter,
             verbose=verbose,
-            n_steps=n_steps,
             regularization=regularization,
             device=device,
         )

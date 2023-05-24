@@ -2,8 +2,8 @@ import torch
 
 
 class IntrinsicMetric:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, n_steps) -> None:
+        self.n_steps = n_steps
 
     def morph(self, parameter, return_path=False):
         N, D = self.source_points.shape
@@ -42,10 +42,10 @@ class IntrinsicMetric:
 
 
 class ElasticMetric(IntrinsicMetric):
-    def __init__(self) -> None:
-        pass
+    def __init__(self, **kwargs) -> None:
+        super().__init__(**kwargs)
 
-    def fit(self, *, source, n_steps=1):
+    def fit(self, *, source):
         assert hasattr(
             source, "edges"
         ), "The shape must have edges to use the as-isometric-as-possible metric"
@@ -54,7 +54,6 @@ class ElasticMetric(IntrinsicMetric):
         self.edges_1 = source.edges[1]
 
         self.source_points = source.points
-        self.n_steps = n_steps
 
     def metric(self, points, parameter):
         a1 = (
