@@ -1,217 +1,284 @@
-import torch
+# TODO write devdoc
+# TODO write tests
+# TODO types at the root of the package
+
 import pyvista
+import torch
 import numpy as np
-import numba
+
+from beartype import beartype
+from jaxtyping import jaxtyped, Float32, Int64
+from typing import Optional, Union, TypeVar, Generic
 
 
-def read(filename, affine=None, device="cpu"):
-    # First, read the file with pyvista
-    pyvista_object = pyvista.read(filename)
-
-    # If the object is a PolyData, we extract the faces
-    if isinstance(pyvista_object, pyvista.PolyData):
-        faces = torch.from_numpy(pyvista_object.faces)
-        points = torch.from_numpy(pyvista_object.points)
-        return Shape(points=points, faces=faces, device=device)
-
-    # If the object is a structured grid, it's an image
-    elif isinstance(pyvista_object, pyvista.StructuredGrid):
-        # Not implemented yet
-        raise NotImplementedError
+def typecheck(func):
+    return jaxtyped(beartype(func))
 
 
-@numba.jit(nopython=True, fastmath=True)
-def _read_faces(faces):
-    len_faces = len(faces)
-    i = 0
-    edges = []
-    triangles = []
-    while i < len_faces:
-        # Get the number of points in the face
-        n = faces[i]
-        if n == 2:
-            # Get the points of the edge
-            face = faces[i + 1 : i + n + 1]
-            edges.append(face)
-        elif n == 3:
-            # Get the points of the triangle
-            face = faces[i + 1 : i + n + 1]
-            triangles.append(face)
-
-        i += n + 1
-
-    return edges, triangles
+pointsType = Float32[torch.Tensor, "_ 3"]
+edgesType = Int64[torch.Tensor, "2 _"]
+trianglesType = Int64[torch.Tensor, "3 _"]
+floatTensorArrayType = Float32[torch.Tensor, "_"]
+landmarksType = Int64[torch.Tensor, "_"]
 
 
-@numba.jit(nopython=True, fastmath=True)
-def _sort_edges(edges, inverse_ordering):
-    """Sort the edges of a mesh, given inverse ordering
-    Args:
-        edges (array): the edges of the mesh
-        inverse_ordering (list): the inverse order
-    Returns:
-        sorted_edges (array): the sorted edges
-    """
-    sorted_edges = np.repeat(2, len(edges))
-    for i in range(len(edges)):
-        if i % 3 != 0:
-            sorted_edges[i] = inverse_ordering[edges[i]]
-
-    return sorted_edges
+class PolyDataType:
+    # Empty for the moment, will be useful if we want to rename our PolyData class without rewriting every annotation
+    # And if later we want to make it possible to replace a PolyData by a string or a pyVista mesh
+    pass
 
 
-def _edges_from_triangles(triangles):
-    """Get the edges of a shape from its triangles
-    Args:
-        triangles (3, K): the triangles of the shape
-    Returns:
-        edges (2, M): the edges of the shape"""
+@typecheck
+def read(filename: str) -> PolyDataType:
 
-    # - 1 construct a pyvista object from the triangles in order to extract the edges
-
-    # Convert the triangles to a faces list
-    faces = torch.zeros((triangles.shape[1], 4), dtype=torch.int64)
-    faces[:, 0] = 3
-    faces[:, 1:] = triangles.T
-    faces = faces.reshape(-1)
-
-    # Generate arbitrary points in order to create a pyvista object
-    points = torch.rand((triangles.max() + 1, 3))
-
-    # Keep the lexicographic ordering of the points
-    points_ordering = np.lexsort(
-        (
-            points[:, 2].cpu().numpy(),
-            points[:, 1].cpu().numpy(),
-            points[:, 0].cpu().numpy(),
-        )
-    )
-
-    # - 2 Extract the edges using pyvista (does not preserve the points labelling)
-    edges_mesh = pyvista.PolyData(
-        points.numpy(), faces=faces.numpy()
-    ).extract_all_edges()
-
-    # - 3 Sort the edges in order to retrieve the original labelling
-    edges_ordering = np.lexsort(
-        (
-            edges_mesh.points[:, 2],
-            edges_mesh.points[:, 1],
-            edges_mesh.points[:, 0],
-        )
-    )
-    inverse_edges_ordering = np.argsort(edges_ordering)
-
-    edges = _sort_edges(
-        edges_mesh.lines, inverse_edges_ordering
-    )  # To lexicographic order
-    edges = _sort_edges(edges, points_ordering)  # Back to the original order
-    edges = edges.reshape(-1, 3)[:, 1:]  # Remove padding
-    edges = torch.Tensor(edges).T.long()
-
-    return edges
-
-
-def _edges_and_triangles_from_faces(faces):
-    # We convert the faces to a list (works wether for torch tensor or numpy array)
-    # then we convert it to a numba typed list to avoid warning in numba
-    edges, triangles = _read_faces(faces.cpu().numpy())
-
-    # return edges, triangles
-    if len(edges) == 0:
-        edges = None
+    mesh = pyvista.read(filename)
+    if type(mesh) == pyvista.PolyData:
+        return Shape.from_pyvista(mesh)
     else:
-        edges = torch.from_numpy(np.array(edges)).T
-
-    if len(triangles) == 0:
-        triangles = None
-    else:
-        triangles = torch.from_numpy(np.array(triangles)).T
-
-    return edges, triangles
+        raise NotImplementedError("Images will be supported in Scikit-Shapes 2.0")
 
 
-class Shape:
-    """A class for representing a shape. Shapes can have those attributes:
-    - points : (N, 3) or (N, 2) array of points
-    - faces (F, ) int array that can store arbitrary cell structure with padding
-    - edges (optionnal, default to None) : (2, M) array of edges
-    - triangles (optionnal, default to None) : (3, K) array of faces
-    """
-
+class Shape(PolyDataType):
+    @typecheck
     def __init__(
         self,
-        *,
-        points=None,
-        faces=None,
-        edges=None,
-        triangles=None,
-        landmarks=None,
-        device="cpu",
-        **kwargs,
+        points: pointsType,
+        edges: Optional[edgesType] = None,
+        triangles: Optional[trianglesType] = None,
+        device: Optional[Union[str, torch.device]] = None,
+        landmarks: Optional[landmarksType] = None,
     ) -> None:
-        self.points = points
-        self.faces = faces
-        self.edges = edges
-        self.triangles = triangles
-        self.landmarks = landmarks
-        self.device = device
 
-        # If edges and triangles are not defined, we compute them from the faces
-        if self.edges is None and self.triangles is None and self.faces is not None:
-            self.edges, self.triangles = _edges_and_triangles_from_faces(faces)
+        if device is None:
+            device = points.device
 
-        # If edges are not defined, we compute them from the triangles
-        # TODO : do we want to impose that edges are defined if triangles are defined ?
-        if self.edges is None and self.triangles is not None:
-            self.edges = _edges_from_triangles(self.triangles)
+        self._device = device
 
-        # Pass tensors to the right device
-        self.to(device)
+        # We don't call the setters here because the setter of points is meant to be used when the shape is modified
+        # in order to check the validity of the new points
+        self._points = points.clone().to(device)
 
-    def copy(self):
+        # /!\ If triangles is not None, edges will be ignored
+        if triangles is not None:
+            # Call the setter that will clone and check the validity of the triangles
+            self.triangles = triangles
+
+        elif edges is not None:
+            # Call the setter that will clone and check the validity of the edges
+            self.edges = edges
+
+        else:
+            self._triangles = None
+            self._edges = None
+
+        if landmarks is not None:
+            # Call the setter that will clone and check the validity of the landmarks
+            self.landmarks = landmarks
+
+        else:
+            self._landmarks = None
+
+    #########################
+    #### Copy functions #####
+    #########################
+    @typecheck
+    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyDataType:
         """Return a copy of the shape"""
-        return Shape(
-            points=self.points.clone(),
-            faces=self.faces.clone(),
-            edges=self.edges.clone(),
-            triangles=self.triangles.clone(),
-            device=self.device,
-            landmarks=self.landmarks,
-        )
+        if device is None:
+            device = self.device
 
-    def to(self, device):
-        """Move the shape to the specified device"""
-        if self.points is not None:
-            self.points = self.points.to(device)
-        if self.faces is not None:
-            self.faces = self.faces.to(device)
-        if self.edges is not None:
-            self.edges = self.edges.to(device)
-        if self.triangles is not None:
-            self.triangles = self.triangles.to(device)
-        self.device = device
-        if self.landmarks is not None:
-            self.landmarks = self.landmarks.to(device)
+        kwargs = {"points": self._points.clone(), "device": device}
 
-        return self
+        if self._triangles is not None:
+            kwargs["triangles"] = self._triangles.clone()
+        if self._edges is not None:
+            kwargs["edges"] = self._edges.clone()
+        return Shape(**kwargs)
 
-    def to_pyvista(self):
-        """Return a pyvista object from the shape"""
-        return pyvista.PolyData(
-            self.points.cpu().numpy(), faces=self.faces.cpu().numpy()
-        )
+    @typecheck
+    def to(self, device: Union[str, torch.device]) -> PolyDataType:
+        return self.copy(device=device)
+
+    ###########################
+    #### PyVista interface ####
+    ###########################
+    @typecheck
+    def to_pyvista(self) -> pyvista.PolyData:
+        """Convert the shape to a PyVista PolyData."""
+
+        if self._triangles is not None:
+            np_triangles = self._triangles.detach().cpu().numpy().T
+            faces = np.concatenate(
+                [np.ones((np_triangles.shape[0], 1), dtype=np.int64) * 3, np_triangles],
+                axis=1,
+            )
+            return pyvista.PolyData(self._points.detach().cpu().numpy(), faces=faces)
+
+        elif self._edges is not None:
+            np_edges = self._edges.detach().cpu().numpy().T
+            lines = np.concatenate(
+                [np.ones((np_edges.shape[0], 1), dtype=np.int64) * 2, np_edges], axis=1
+            )
+            return pyvista.PolyData(self._points.detach().cpu().numpy(), lines=lines)
+
+        else:
+            return pyvista.PolyData(self._points.detach().cpu().numpy())
 
     @classmethod
-    def from_pyvista(cls, pyvista_object):
-        """Construct a shape from a pyvista mesh"""
-        return cls(
-            points=torch.from_numpy(pyvista_object.points.copy()),
-            faces=torch.from_numpy(pyvista_object.faces.copy()),
-        )
+    @typecheck
+    def from_pyvista(
+        cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = None
+    ) -> PolyDataType:
+
+        points = torch.from_numpy(mesh.points)
+
+        if mesh.is_all_triangles():
+            triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
+            edges = None
+
+        if mesh.triangulate().is_all_triangles():
+            triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:].T
+            edges = None
+
+        if len(mesh.lines) > 0:
+            edges = mesh.lines.reshape(-1, 3)[:, 1:].T
+            triangles = None
+
+        else:
+            edges = None
+            triangles = None
+
+        return cls(points=points, edges=edges, triangles=triangles, device=device)
+
+    #############################
+    #### Edges getter/setter ####
+    #############################
+    @property
+    @typecheck
+    def edges(self) -> Optional[edgesType]:
+        if self._edges is not None:
+            return self._edges
+
+        elif self._triangles is not None:
+            # Compute the edges of the triangles and sort them
+            repeated_edges = torch.concat(
+                [
+                    self.triangles[[0, 1], :],
+                    self.triangles[[1, 2], :],
+                    self.triangles[[0, 2], :],
+                ],
+                dim=1,
+            ).sort(dim=0)[0]
+
+            # Remove the duplicates and return
+            return torch.unique(repeated_edges, dim=1)
+
+    @edges.setter
+    @typecheck
+    def edges(self, edges: edgesType) -> None:
+        """Set the edges of the shape. This will also set the triangles to None."""
+        self._edges = edges.clone().to(self.device)
+        self._triangles = None
+
+    #################################
+    #### Triangles getter/setter ####
+    #################################
+    @property
+    @typecheck
+    def triangles(self) -> Optional[trianglesType]:
+        return self._triangles
+
+    @triangles.setter
+    @typecheck
+    def triangles(self, triangles: trianglesType) -> None:
+        """Set the triangles of the shape. This will also set the edges to None."""
+        if triangles.max() >= self.npoints:
+            raise ValueError(
+                "The maximum vertex index in the triangles is larger than the number of points."
+            )
+
+        self._triangles = triangles.clone().to(self.device)
+        self._edges = None
+
+    ##############################
+    #### Points getter/setter ####
+    ##############################
+    @property
+    @typecheck
+    def points(self) -> pointsType:
+        return self._points
+
+    @points.setter
+    @typecheck
+    def points(self, points: pointsType) -> None:
+        if points.shape[0] != self.npoints:
+            raise ValueError("The number of points cannot be changed.")
+
+        self._points = points.clone().to(self.device)
+
+    ##############################
+    #### Device getter/setter ####
+    ##############################
+    @property
+    @typecheck
+    def device(self) -> Union[str, torch.device]:
+        return self._device
+
+    @device.setter
+    @typecheck
+    def device(self, device: Union[str, torch.device]) -> None:
+        for attr in dir(self):
+            if attr.startswith("_"):
+                if type(getattr(self, attr)) == torch.Tensor:
+
+                    setattr(self, attr, getattr(self, attr).to(device))
+        self._device = device
+
+    #################################
+    #### Landmarks getter/setter ####
+    #################################
+    @property
+    @typecheck
+    def landmarks(self) -> Optional[landmarksType]:
+        return self._landmarks
+
+    @landmarks.setter
+    @typecheck
+    def landmarks(self, landmarks: landmarksType) -> None:
+        """Set the landmarks of the shape."""
+        if landmarks.max() >= self.npoints:
+            raise ValueError(
+                "The maximum vertex index in the landmarks is larger than the number of points."
+            )
+        self._landmarks = landmarks.clone().to(self.device)
+
+    ##########################
+    #### Shape properties ####
+    ##########################
+    @property
+    @typecheck
+    def npoints(self) -> int:
+        return self._points.shape[0]
 
     @property
-    def edge_centers(self):
+    @typecheck
+    def nedges(self) -> int:
+        if self._edges is not None:
+            return self._edges.shape[1]
+        else:
+            return 0
+
+    @property
+    @typecheck
+    def ntriangles(self) -> int:
+        if self._triangles is not None:
+            return self._triangles.shape[1]
+        else:
+            return 0
+
+    @property
+    @typecheck
+    def edge_centers(self) -> pointsType:
         """Return the center of each edge"""
 
         # Raise an error if edges are not defined
@@ -221,7 +288,8 @@ class Shape:
         return (self.points[self.edges[0]] + self.points[self.edges[1]]) / 2
 
     @property
-    def edge_lengths(self):
+    @typecheck
+    def edge_lengths(self) -> floatTensorArrayType:
         """Return the length of each edge"""
 
         # Raise an error if edges are not defined
@@ -231,8 +299,9 @@ class Shape:
         return (self.points[self.edges[0]] - self.points[self.edges[1]]).norm(dim=1)
 
     @property
-    def triangle_centers(self):
-        """Return the center of each triangle"""
+    @typecheck
+    def triangle_centers(self) -> pointsType:
+        """Return the center of the triangles"""
 
         # Raise an error if triangles are not defined
         if self.triangles is None:
@@ -245,7 +314,8 @@ class Shape:
         return (A + B + C) / 3
 
     @property
-    def triangle_areas(self):
+    @typecheck
+    def triangle_areas(self) -> floatTensorArrayType:
         """Return the area of each triangle"""
 
         # Raise an error if triangles are not defined
@@ -257,8 +327,3 @@ class Shape:
         C = self.points[self.triangles[2]]
 
         return torch.cross(B - A, C - A).norm(dim=1) / 2
-
-    @property
-    def dim(self):
-        """Return the dimension of the shape"""
-        return self.points.shape[1]
