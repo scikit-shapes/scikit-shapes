@@ -13,6 +13,7 @@ class RigidMotion:
 
     def fit(self, source):
         self.source_points = source.points.clone()
+        return self
 
     def morph(self, parameter):
 

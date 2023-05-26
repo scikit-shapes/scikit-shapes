@@ -54,6 +54,7 @@ class ElasticMetric(IntrinsicMetric):
         self.edges_1 = source.edges[1]
 
         self.source_points = source.points
+        return self
 
     def metric(self, points, parameter):
         a1 = (
