@@ -41,6 +41,11 @@ class Registration:
         self.loss.fit(source=source, target=target)
 
         def loss_fn(parameter):
+
+            if self.regularization == 0:
+                return self.loss(
+                    self.model.morph(parameter=parameter)
+                )
             return self.loss(
                 self.model.morph(parameter=parameter)
             ) + self.regularization * self.model.regularization(parameter=parameter)
