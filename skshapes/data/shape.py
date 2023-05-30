@@ -35,10 +35,14 @@ def read(filename: str) -> PolyDataType:
     if type(mesh) == pyvista.PolyData:
         return Shape.from_pyvista(mesh)
     else:
-        raise NotImplementedError("Images will be supported in Scikit-Shapes 2.0")
+        raise NotImplementedError("Images are not supported yet")
 
 
 class Shape(PolyDataType):
+    """A class to represent a surface mesh as a set of points, edges and/or triangles.
+    """
+
+
     @typecheck
     def __init__(
         self,
@@ -48,6 +52,15 @@ class Shape(PolyDataType):
         device: Optional[Union[str, torch.device]] = None,
         landmarks: Optional[landmarksType] = None,
     ) -> None:
+        """Initialize a Shape object.
+
+        Args:
+            points (pointsType): the points of the shape.
+            edges (Optional[edgesType], optional): the edges of the shape. Defaults to None.
+            triangles (Optional[trianglesType], optional): the triangles of the shape. Defaults to None.
+            device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to None.
+            landmarks (Optional[landmarksType], optional): _description_. Defaults to None.
+        """
 
         if device is None:
             device = points.device
@@ -97,6 +110,7 @@ class Shape(PolyDataType):
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> PolyDataType:
+        """Return a copy of the shape on the specified device"""
         return self.copy(device=device)
 
     ###########################
@@ -129,24 +143,30 @@ class Shape(PolyDataType):
     def from_pyvista(
         cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = None
     ) -> PolyDataType:
+        """Create a Shape from a PyVista PolyData object."""
 
         points = torch.from_numpy(mesh.points)
 
+
         if mesh.is_all_triangles():
             triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
+            triangles = torch.from_numpy(triangles)
             edges = None
 
-        if mesh.triangulate().is_all_triangles():
+        elif mesh.triangulate().is_all_triangles():
             triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:].T
+            triangles = torch.from_numpy(triangles)
             edges = None
 
-        if len(mesh.lines) > 0:
+        elif len(mesh.lines) > 0:
             edges = mesh.lines.reshape(-1, 3)[:, 1:].T
+            edges = torch.from_numpy(edges)
             triangles = None
 
         else:
             edges = None
             triangles = None
+
 
         return cls(points=points, edges=edges, triangles=triangles, device=device)
 
@@ -196,6 +216,7 @@ class Shape(PolyDataType):
             raise ValueError(
                 "The maximum vertex index in the triangles is larger than the number of points."
             )
+        
 
         self._triangles = triangles.clone().to(self.device)
         self._edges = None
@@ -283,7 +304,7 @@ class Shape(PolyDataType):
 
         # Raise an error if edges are not defined
         if self.edges is None:
-            raise ValueError("Edges are not defined")
+            raise ValueError("Edges cannot be computed")
 
         return (self.points[self.edges[0]] + self.points[self.edges[1]]) / 2
 
@@ -294,7 +315,7 @@ class Shape(PolyDataType):
 
         # Raise an error if edges are not defined
         if self.edges is None:
-            raise ValueError("Edges are not defined")
+            raise ValueError("Edges cannot be computed")
 
         return (self.points[self.edges[0]] - self.points[self.edges[1]]).norm(dim=1)
 
