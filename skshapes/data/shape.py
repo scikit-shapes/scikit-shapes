@@ -20,8 +20,7 @@ def read(filename: str) -> PolyDataType:
 
 
 class PolyData(PolyDataType):
-    """A class to represent a surface mesh as a set of points, edges and/or triangles.
-    """
+    """A class to represent a surface mesh as a set of points, edges and/or triangles."""
 
     @typecheck
     def __init__(
@@ -127,7 +126,6 @@ class PolyData(PolyDataType):
 
         points = torch.from_numpy(mesh.points)
 
-
         if mesh.is_all_triangles():
             triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
             triangles = torch.from_numpy(triangles)
@@ -146,7 +144,6 @@ class PolyData(PolyDataType):
         else:
             edges = None
             triangles = None
-
 
         return cls(points=points, edges=edges, triangles=triangles, device=device)
 
@@ -196,7 +193,6 @@ class PolyData(PolyDataType):
             raise ValueError(
                 "The maximum vertex index in the triangles is larger than the number of points."
             )
-        
 
         self._triangles = triangles.clone().to(self.device)
         self._edges = None
