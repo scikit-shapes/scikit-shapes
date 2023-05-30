@@ -18,11 +18,12 @@ target.landmarks = torch.arange(target.points.shape[0], dtype=torch.int64)
 def foo(regularization):
 
     r = Registration(
-        model=ElasticMetric(n_steps=5),
+        model=ElasticMetric(n_steps=10),
         loss=LandmarkLoss(),
         verbose=1,
         n_iter=15,
         regularization=regularization,
+        device='cpu'
     )
 
     newshape = r.fit_transform(source=source, target=target)
@@ -45,5 +46,5 @@ def foo(regularization):
     plt = Browser(meshes, resetcam=0, axes=0)  # a vedo.Plotter
     plt.show().close()
 
-foo(regularization=1e3)
+foo(regularization=1e4)
 foo(regularization=0)

@@ -6,26 +6,7 @@ import pyvista
 import torch
 import numpy as np
 
-from beartype import beartype
-from jaxtyping import jaxtyped, Float32, Int64
-from typing import Optional, Union, TypeVar, Generic
-
-
-def typecheck(func):
-    return jaxtyped(beartype(func))
-
-
-pointsType = Float32[torch.Tensor, "_ 3"]
-edgesType = Int64[torch.Tensor, "2 _"]
-trianglesType = Int64[torch.Tensor, "3 _"]
-floatTensorArrayType = Float32[torch.Tensor, "_"]
-landmarksType = Int64[torch.Tensor, "_"]
-
-
-class PolyDataType:
-    # Empty for the moment, will be useful if we want to rename our PolyData class without rewriting every annotation
-    # And if later we want to make it possible to replace a PolyData by a string or a pyVista mesh
-    pass
+from .._typing import *
 
 
 @typecheck
@@ -33,15 +14,14 @@ def read(filename: str) -> PolyDataType:
 
     mesh = pyvista.read(filename)
     if type(mesh) == pyvista.PolyData:
-        return Shape.from_pyvista(mesh)
+        return PolyData.from_pyvista(mesh)
     else:
         raise NotImplementedError("Images are not supported yet")
 
 
-class Shape(PolyDataType):
+class PolyData(PolyDataType):
     """A class to represent a surface mesh as a set of points, edges and/or triangles.
     """
-
 
     @typecheck
     def __init__(
@@ -52,7 +32,7 @@ class Shape(PolyDataType):
         device: Optional[Union[str, torch.device]] = None,
         landmarks: Optional[landmarksType] = None,
     ) -> None:
-        """Initialize a Shape object.
+        """Initialize a PolyData object.
 
         Args:
             points (pointsType): the points of the shape.
@@ -106,7 +86,7 @@ class Shape(PolyDataType):
             kwargs["triangles"] = self._triangles.clone()
         if self._edges is not None:
             kwargs["edges"] = self._edges.clone()
-        return Shape(**kwargs)
+        return PolyData(**kwargs)
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> PolyDataType:

@@ -1,2 +1,2 @@
-from .shape import Shape, read
+from .shape import PolyData, read
 from .dataset import Dataset
