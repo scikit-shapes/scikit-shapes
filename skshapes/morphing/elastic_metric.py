@@ -10,7 +10,7 @@ class IntrinsicMetric:
     @typecheck
     def morph(
         self, parameter: float3dTensorType, return_path: bool = False
-    ):  # -> Union[float2dTensorType, float3dTensorType]:
+    ) -> Union[float2dTensorType, float3dTensorType]:
 
         N, D = self.source_points.shape
 
@@ -97,6 +97,7 @@ class ElasticMetric2:
     ) -> Union[PolyDataType, List[PolyDataType]]:
 
         N, D = shape.points.shape
+
 
         if return_path:
 

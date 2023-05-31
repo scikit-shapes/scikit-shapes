@@ -26,3 +26,9 @@ class PolyDataType:
     # Empty for the moment, will be useful if we want to rename our PolyData class without rewriting every annotation
     # And if later we want to make it possible to replace a PolyData by a string or a pyVista mesh
     pass
+
+class OptimizerType:
+    pass
+
+class Shape:
+    pass
