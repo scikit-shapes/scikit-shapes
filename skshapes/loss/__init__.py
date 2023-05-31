@@ -4,6 +4,7 @@ from .nearest_neighbors import NearestNeighborsLoss
 
 
 from .._typing import *
+
 # class BaseLoss:
 
 #     def __init__(self, **kwargs):

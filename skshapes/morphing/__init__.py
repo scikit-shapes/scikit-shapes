@@ -17,7 +17,7 @@ from .._typing import *
 #         # Store the source shape attributes (all shapes, landmarks, etc.)
 #         # for later use
 #         return self
-    
+
 #     def morph(
 #             self,
 #             parameter: torch.Tensor,
@@ -29,7 +29,7 @@ from .._typing import *
 #                 (Shape, floatScalarType),
 #                 (List[Shape], floatScalarType),
 #                 ]:
-        
+
 #         """Morph the source shape given the parameter
 #             depending on the values of return_path and return_regularization
 #             the method returns different things :

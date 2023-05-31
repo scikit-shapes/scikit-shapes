@@ -98,7 +98,6 @@ class ElasticMetric2:
 
         N, D = shape.points.shape
 
-
         if return_path:
 
             if self.n_steps == 1:

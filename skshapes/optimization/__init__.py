@@ -4,29 +4,27 @@ from .._typing import *
 
 
 class BaseOptimizer(OptimizerType):
-
     def __init__(self, name, **kwargs):
-        """Initialize the optimizer with the given hyperparameters
-        """
+        """Initialize the optimizer with the given hyperparameters"""
         self.kwargs = kwargs
         self.name = name
         for key, value in kwargs.items():
             setattr(self, key, value)
-    
+
     def __call__(self, params):
-        """Return the optimizer object
-        """
+        """Return the optimizer object"""
         return torch.optim.__dict__[self.name](params, **self.kwargs)
-    
 
 
 class LBFGS(BaseOptimizer):
-    def __init__(self, line_search_fn='strong_wolfe', **kwargs):
+    def __init__(self, line_search_fn="strong_wolfe", **kwargs):
         super().__init__("LBFGS", line_search_fn=line_search_fn, **kwargs)
+
 
 class Adam(BaseOptimizer):
     def __init__(self, **kwargs):
         super().__init__("Adam", **kwargs)
+
 
 class Adagrad(BaseOptimizer):
     def __init__(self, **kwargs):
@@ -34,7 +32,7 @@ class Adagrad(BaseOptimizer):
 
 
 class SGD(BaseOptimizer):
-    def __init__(self, lr=.01, **kwargs):
+    def __init__(self, lr=0.01, **kwargs):
         super().__init__("SGD", lr=lr, **kwargs)
 
 
@@ -54,7 +52,7 @@ class SGD(BaseOptimizer):
 
 #     def __call__(self, params):
 #         return torch.optim.__dict__[name](params, **self.kwargs)
-    
+
 #     #TODO define setters and getters for the attributes ?
 
 #     base = (OptimizerType,)

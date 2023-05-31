@@ -32,7 +32,7 @@ def foo(regularization):
         verbose=1,
         n_iter=5,
         regularization=regularization,
-        device='cpu'
+        device="cpu",
     )
 
     newshape = r.fit_transform(source=source, target=target)
@@ -40,7 +40,7 @@ def foo(regularization):
     parameter = r.parameter.detach().cpu().clone()
     n_frames = parameter.shape[0] + 1
 
-    meshes = [source.copy(device='cpu') for _ in range(n_frames)]
+    meshes = [source.copy(device="cpu") for _ in range(n_frames)]
     for i in range(n_frames - 1):
         meshes[i + 1].points = meshes[i].points + parameter[i]
 

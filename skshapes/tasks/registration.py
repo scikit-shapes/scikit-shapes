@@ -184,7 +184,6 @@ class Registration2:
             if self.verbose > 0:
                 print(f"Loss value at iteration {i} : {loss_value}")
 
-
         self.parameter = parameter.detach()
         self.distance = self.model.regularization(
             shape=source, parameter=parameter

@@ -27,8 +27,10 @@ class PolyDataType:
     # And if later we want to make it possible to replace a PolyData by a string or a pyVista mesh
     pass
 
+
 class OptimizerType:
     pass
+
 
 class Shape:
     pass
