@@ -9,7 +9,7 @@ class Registration:
         *,
         model,
         loss,
-        optimizer="LBFGS",
+        optimizer,
         regularization=1,
         n_iter=10,
         verbose=0,
@@ -55,14 +55,16 @@ class Registration:
         parameter = self.model.parameter_template
         parameter.requires_grad = True
 
+        optimizer = self.optimizer([parameter])
+
         # Initialize the optimizer
-        if self.optimizer == "LBFGS":
-            optimizer = torch.optim.LBFGS(
-                params=[parameter], line_search_fn="strong_wolfe"
-            )
-        else:
-            # TODO : add other optimizers
-            raise NotImplementedError
+        # if self.optimizer == "LBFGS":
+        #     optimizer = torch.optim.LBFGS(
+        #         params=[parameter], line_search_fn="strong_wolfe"
+        #     )
+        # else:
+        #     # TODO : add other optimizers
+        #     raise NotImplementedError
 
         # Define the closure
         def closure():
@@ -131,8 +133,10 @@ class Registration2:
         target,
     ) -> None:
         # Make copies of the source and target and move them to the device
-        source = source.copy().to(self.device)
-        target = target.copy().to(self.device)
+        if source.device != self.device:
+            source = source.to(self.device)
+        if target.device != self.device:
+            target = target.to(self.device)
 
         # Load the tensors and fit the models/loss
         # self.model.fit(source=source)
@@ -158,13 +162,14 @@ class Registration2:
         parameter.requires_grad = True
 
         # Initialize the optimizer
-        if self.optimizer == "LBFGS":
-            optimizer = torch.optim.LBFGS(
-                params=[parameter], line_search_fn="strong_wolfe"
-            )
-        else:
-            # TODO : add other optimizers
-            raise NotImplementedError
+        optimizer = self.optimizer([parameter])
+        # if self.optimizer == "LBFGS":
+        #     optimizer = torch.optim.LBFGS(
+        #         params=[parameter], line_search_fn="strong_wolfe"
+        #     )
+        # else:
+        #     # TODO : add other optimizers
+        #     raise NotImplementedError
 
         # Define the closure
         def closure():
@@ -194,5 +199,9 @@ class Registration2:
         source,
         target,
     ) -> torch.Tensor:
+        if source.device != self.device:
+            source = source.to(self.device)
+        if target.device != self.device:
+            target = target.to(self.device)
         self.fit(source=source, target=target)
         return self.transform(source=source)
