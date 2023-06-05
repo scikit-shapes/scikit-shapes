@@ -1,6 +1,6 @@
 from beartype import beartype
 from jaxtyping import jaxtyped, Float32, Int64
-from typing import Optional, Union, TypeVar, Generic, List
+from typing import Optional, Union, TypeVar, Generic, List, Tuple
 
 import torch
 

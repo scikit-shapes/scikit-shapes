@@ -140,36 +140,30 @@ class Registration2:
 
         # Load the tensors and fit the models/loss
         # self.model.fit(source=source)
-        self.loss.fit(source=source, target=target)
+        # self.loss.fit(source=source, target=target)
 
         def loss_fn(parameter):
 
             if self.regularization == 0:
                 return self.loss(
-                    self.model.morph(shape=source, parameter=parameter).points
+                    self.model.morph(shape=source, parameter=parameter, return_path=False, return_regularization=False).points
                 )
+            
+            else:
+                morphed_shape, regularization_value = self.model.morph(shape=source, parameter=parameter, return_path=False, return_regularization=True)
 
-            return self.loss(
-                self.model.morph(shape=source, parameter=parameter).points
-            ) + self.regularization * self.model.regularization(
-                shape=source, parameter=parameter
-            )
+                return self.loss(
+                    shape1 = morphed_shape,
+                    shape2 = target
+                ) + self.regularization * regularization_value
 
         # Initialize the parameter tensor using the template provided by the model
-        N, D = source.points.shape
-        parameter = torch.zeros((self.model.n_steps, N, D), device=self.device)
-        # parameter = self.model.parameter_template
+        parameter_shape = self.model.parameter_shape(shape=source)
+        parameter = torch.zeros(parameter_shape, device=self.device)
         parameter.requires_grad = True
 
         # Initialize the optimizer
         optimizer = self.optimizer([parameter])
-        # if self.optimizer == "LBFGS":
-        #     optimizer = torch.optim.LBFGS(
-        #         params=[parameter], line_search_fn="strong_wolfe"
-        #     )
-        # else:
-        #     # TODO : add other optimizers
-        #     raise NotImplementedError
 
         # Define the closure
         def closure():
@@ -185,9 +179,10 @@ class Registration2:
                 print(f"Loss value at iteration {i} : {loss_value}")
 
         self.parameter = parameter.detach()
-        self.distance = self.model.regularization(
-            shape=source, parameter=parameter
-        ).detach()  # Is it the right way to compute the distance ?
+
+        self.distance = self.model.morph(
+            shape=source, parameter=parameter, return_path=False, return_regularization=True
+        )[1].detach()  # Is it the right way to compute the distance ?
 
     def transform(self, *, source) -> torch.Tensor:
 

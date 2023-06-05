@@ -1,5 +1,5 @@
 from .optimal_transport import OptimalTransportLoss
-from .landmarks import LandmarkLoss
+from .landmarks import LandmarkLoss, LandmarkLoss2
 from .nearest_neighbors import NearestNeighborsLoss
 
 

@@ -82,6 +82,8 @@ class ElasticMetric(IntrinsicMetric):
         return torch.sum(a1 * a2)
 
 
+
+#TODO : is it better to have an explicit regularization function or to have a regularization parameter in the morph function ?
 class ElasticMetric2:
     @typecheck
     def __init__(self, n_steps: int) -> None:
@@ -92,78 +94,83 @@ class ElasticMetric2:
     def morph(
         self,
         shape: PolyDataType,
-        parameter: Union[float2dTensorType, float3dTensorType],
+        parameter: float3dTensorType,
         return_path: bool = False,
-    ) -> Union[PolyDataType, List[PolyDataType]]:
+        return_regularization: bool = False,
+    ) -> Union[PolyDataType, List[PolyDataType], Tuple[PolyDataType, floatScalarType], Tuple[List[PolyDataType], floatScalarType]]:
 
         N, D = shape.points.shape
 
+        # Compute the cumulative sum of the velocity sequence
+        cumvelocities = torch.cat(
+            (
+                torch.zeros(size=(1, N, D), device=parameter.device),
+                torch.cumsum(parameter, dim=0),
+            )
+        )
+        # Compute the sequence of points by adding the cumulative sum of the velocity sequence to the initial shape
+        newpoints = (
+            shape.points.repeat(self.n_steps + 1, 1).reshape(
+                self.n_steps + 1, N, D
+            )
+            + cumvelocities
+        )
+
+        if return_regularization:
+            # Compute the regularization value
+            self.regularization_value = self.metric(newpoints[:-1], shape.edges, parameter) / (2 * self.n_steps)
+
+
         if return_path:
-
-            if self.n_steps == 1:
-                # In this case, we only need to return the initial shape and the final shape
-                return [shape.copy(), self.morph(shape, parameter, return_path=False)]
-
+            newshapes = [shape.copy() for _ in range(self.n_steps + 1)]
+            for i in range(self.n_steps + 1):
+                newshapes[i].points = newpoints[i]
+            
+            if return_regularization:
+                return newshapes, self.regularization_value
             else:
-                # Compute the cumulative sum of the velocity sequence
-                cumvelocities = torch.cat(
-                    (
-                        torch.zeros(size=(1, N, D), device=parameter.device),
-                        torch.cumsum(parameter, dim=0),
-                    )
-                )
-                # Compute the path by adding the cumulative sum of the velocity sequence to the initial shape
-                newpoints = (
-                    shape.points.repeat(self.n_steps + 1, 1).reshape(
-                        self.n_steps + 1, N, D
-                    )
-                    + cumvelocities
-                )
-                newshapes = [shape.copy() for _ in range(self.n_steps + 1)]
-                for i in range(self.n_steps + 1):
-                    newshapes[i].points = newpoints[i]
-
                 return newshapes
-
+        
         else:
-            if self.n_steps == 1:
-                newpoints = shape.points + parameter
-            else:
-                newpoints = shape.points + torch.sum(parameter, dim=0)
-
             newshape = shape.copy()
-            newshape.points = newpoints
-            return newshape
-
+            newshape.points = newpoints[-1]
+            if return_regularization:
+                return newshape, self.regularization_value
+            else:
+                return newshape
+        
     @typecheck
     def metric(
-        self, shape: PolyDataType, velocity: float2dTensorType
+            self, points: float3dTensorType, edges: edgesType, velocities: float3dTensorType
     ) -> floatScalarType:
+        '''Compute the sum of the norms of a sequence of speed vectors in Riemannian metric with respect to associated points.
 
-        e0, e1 = shape.edges
+        Args:
+            velocity (float3dTensorType (n, N, d) ): The sequence of speed vectors ).
+            points (float3dTensorType (n, N, d) ): The sequence of points.
+
+        Returns:
+            floatScalarType: The sum of the squared norm of the sequence of speed vectors in the Riemannian metric.
+           
+        '''
+        e0, e1 = edges
 
         a1 = (
-            (velocity[e0] - velocity[e1]) * (shape.points[e0] - shape.points[e1])
-        ).sum(dim=1)
-        a2 = (
-            (velocity[e0] - velocity[e1]) * (shape.points[e0] - shape.points[e1])
-        ).sum(dim=1)
+            (velocities[:, e0, :] - velocities[:, e1, :]) * (points[:, e0, :] - points[:, e1, :])
+        ).sum(dim=2)
 
-        return torch.sum(a1 * a2)
+        return torch.sum(a1 ** 2)
+
+    # @typecheck
+    # def regularization(
+    #     self,
+    #     shape: PolyDataType,
+    #     parameter: Union[float2dTensorType, float3dTensorType],
+    # ) -> floatScalarType:
+        
+    #     return self.regularization_value
+    
 
     @typecheck
-    def regularization(
-        self,
-        shape: PolyDataType,
-        parameter: Union[float2dTensorType, float3dTensorType],
-    ) -> floatScalarType:
-
-        if self.n_steps == 1:
-            return self.metric(shape, parameter)
-        else:
-
-            shape_sequence = self.morph(shape, parameter, return_path=True)
-            reg = 0
-            for i in range(self.n_steps):
-                reg += self.metric(shape_sequence[i], parameter[i])
-            return reg / (2 * self.n_steps)
+    def parameter_shape(self, shape: PolyDataType) -> Tuple[int, int, int]:
+        return (self.n_steps, *shape.points.shape)
