@@ -4,199 +4,185 @@ import numpy as np
 # import pyvista as pv
 
 
-class LandmarksSelector(vedo.Plotter):
-    """
-    Display  a mesh and allow the user to select points on it
+class LandmarkSetter(vedo.Plotter):
+    def __init__(self, meshes, **kwargs):
+        super().__init__(N=2, sharecam=False, resetcam=True, **kwargs)
 
-    Args:
-        mesh (vedo.Mesh): the mesh on which the points are displayed
-    """
+        self.meshes = [meshes.clone().linewidth(1).pickable(True) for meshes in meshes]
 
-    def __init__(self, mesh, n_landmarks=None, **kwargs):
-        """ """
-        super().__init__(**kwargs)
+        self.reference = meshes[0]
+        self.others = meshes[1:]
 
-        mesh = mesh.clone()  # Clone the mesh to avoid modifying the original one
+        self.landmarks3d = [[] for i in range(len(meshes))]
 
-        if n_landmarks is None:
-            n_landmarks = 1e5
+        self.reference_vertices = vedo.Points(self.reference.points())
+        self.current_other = self.others[0]
 
-        self.n_landmarks = n_landmarks
+        # At the beginning, the reference is active
+        self.active = 0
+        self.active_actor = self.reference
 
-        # Set the mesh properties
-        self.mesh = mesh.linewidth(1)
-        self.mesh.pickable(
-            True
-        )  # Make the mesh pickable to be able to select points on it
-        self.vertices = vedo.Points(self.mesh.points())
+        self.reference_lpoints = []
 
-        self.lpoints = []  # List of landmarks points
-        self.active = True  # Flag to know if the interaction is active or not
+        self.mode = "reference"
 
-        # Instructions
-        t = "Press e to add a point on the surface\nPress z to add a vertice\nPress d to delete the last point\nPress q to quit"
-        self.instructions = vedo.Text2D(
-            t, pos="bottom-left", c="white", bg="green", font="Calco"
+        text_reference = "Start by selecting landmarks on the reference mesh\nPress z to add a point on the surface\nPress e to add a vertice\nPress d to delete the last point\nPress s when you are done"
+        self.reference_lpoints_pointcloud = (
+            vedo.Points(self.reference_lpoints, r=15).pickable(False).c("r")
+        )
+        self.instructions_reference = vedo.Text2D(
+            text_reference, pos="bottom-left", c="white", bg="green", font="Calco"
         )
 
-        # Add the objects to the scene
-        self += [self.mesh, self.instructions]
+        text_other = "Now select the same landmarks on the other meshes\nPress z to add a point on the surface\nPress e to add a vertice\nPress d to delete the last point\nPress s when you are done"
+        self.instructions_other = vedo.Text2D(
+            text_other, pos="bottom-left", c="white", bg="green", font="Calco"
+        )
 
-        # Callbacks
-        self.callid1 = self.add_callback("KeyPress", self._key_press)
+        self.add_callback("KeyPress", self._key_press)
 
-    def points(self, newpts=None):
-        """Retrieve the 3D coordinates of the clicked points"""
-        return np.array(self.lpoints)
+        # At initialization, add the reference and the first other mesh to the scene
+        self.at(0).add(self.instructions_reference)
+        self.at(0).add(self.reference.linewidth(1))
+        self.at(1).add(self.current_other.linewidth(1))
+
+    def start(self):
+        self._update()
+        self.show(interactive=True)
+        # return self
+
+    def _done(self):
+
+        if self.mode == "reference":
+
+            self.n_landmarks = len(self.reference_lpoints)
+            self.mode = "others"
+            self.at(0).remove(self.instructions_reference)
+            self.at(1).add(self.instructions_other)
+            self.other_id = 0
+            self.other_lpoints = []
+
+            self.current_other = self.others[self.other_id]
+
+            self.active_actor = self.current_other
+            self.other_lpoints_pointcloud = (
+                vedo.Points(self.other_lpoints, r=15).pickable(False).c("r")
+            )
+            self.reference_lpoints_pointcloud.c("grey")
+            self.point_to_pick = (
+                vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15)
+                .pickable(False)
+                .c("green")
+            )
+
+            self.landmarks3d[0] = self.reference_lpoints
+            self._update()
+
+        else:
+
+            self.landmarks3d[self.other_id + 1] = self.other_lpoints.copy()
+            self.other_lpoints = []
+            self.other_id += 1
+
+            if self.other_id < len(self.others):
+
+                print("other_id", self.other_id)
+
+                self.current_other = self.others[self.other_id]
+                self.active_actor = self.current_other
+
+                self.at(1).clear()
+                self.at(1).add(self.current_other.linewidth(1))
+
+                self.other_lpoints_pointcloud = (
+                    vedo.Points(self.other_lpoints, r=15).pickable(False).c("r")
+                )
+                # self.point_to_pick = vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15).pickable(False).c("green")
+                self._update()
+
+            else:
+                self.close()
+
+    def _update(self):
+
+        if self.mode == "reference":
+
+            self.at(0).remove(self.reference_lpoints_pointcloud)
+            self.reference_lpoints_pointcloud = (
+                vedo.Points(self.reference_lpoints, r=15).pickable(False).c("r")
+            )
+            self.at(0).add(self.reference_lpoints_pointcloud)
+
+        else:
+
+            self.at(0).remove(self.point_to_pick)
+            if len(self.other_lpoints) < self.n_landmarks:
+                self.point_to_pick = (
+                    vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15)
+                    .pickable(False)
+                    .c("green")
+                )
+            else:
+                self.point_to_pick = (
+                    vedo.Points(self.reference_lpoints, r=15).pickable(False).c("green")
+                )
+            self.at(0).add(self.point_to_pick)
+
+            self.at(1).remove(self.other_lpoints_pointcloud)
+            self.other_lpoints_pointcloud = (
+                vedo.Points(self.other_lpoints, r=15).pickable(False).c("r")
+            )
+            self.at(1).add(self.other_lpoints_pointcloud)
 
     def _key_press(self, evt):
 
-        if not self.active:
-            return
+        if self.mode == "reference" and evt.actor == self.reference:
 
-        if (
-            evt.keypress == "z" and evt.actor == self.mesh
-        ):  # If the key pressed is z and the cursor is on the mesh
-            pt = self.vertices.closest_point(
-                evt.picked3d
-            )  # get the closest point on the set of vertices (computed in __init__)
+            if evt.keypress == "z":
+                pt = self.active_actor.closest_point(evt.picked3d)
+                self.reference_lpoints.append(pt)
 
-            self.lpoints.append(pt)  # Add the point to the list of landmarks
-            if len(self.lpoints) > 1:
-                self.pop()  # Remove the last set of landmarks from the scene
-            # Add the new landmarks to the scene
-            self.add(vedo.Points(self.lpoints, r=15).pickable(False).c("r"))
+            if evt.keypress == "e":
+                pt = vedo.Points(self.active_actor.points()).closest_point(evt.picked3d)
+                self.reference_lpoints.append(pt)
 
-        if (
-            evt.keypress == "e" and evt.actor == self.mesh
-        ):  # If the key pressed is e and the cursor is on the mesh
-            pt = self.mesh.closest_point(
-                evt.picked3d
-            )  # get the closest point on the mesh
-            self.lpoints.append(pt)  # Add the point to the list of landmarks
+            if evt.keypress == "d":
+                if len(self.reference_lpoints) > 0:
+                    self.reference_lpoints.pop()
 
-            if len(self.lpoints) > 1:
-                self.pop()  # Remove the last set of landmarks from the scene
-            # Add the new landmarks to the scene
-            self.add(vedo.Points(self.lpoints, r=15).pickable(False).c("r"))
+            if evt.keypress == "s":
+                self._done()
 
-        if evt.keypress == "d":
-            if len(self.lpoints) > 0:  # If there are landmarks
-                self.lpoints.pop()  # Remove the last landmark
-                self.pop()  # Remove the last set of landmarks from the scene
-                if len(self.lpoints) > 0:  # If there are still landmarks
-                    self.add(
-                        vedo.Points(self.lpoints, r=15).pickable(False).c("r"),
-                        resetcam=False,
-                    )  # Add the new landmarks to the scene
+            self._update()
 
-        if len(self.lpoints) == self.n_landmarks:
-            self.inactivate()
+        elif self.mode == "others" and evt.actor == self.current_other:
 
-    def start(self):
-        """Start the interaction"""
-        self.show(self.mesh, self.instructions, interactive=None)
-        return self
+            if evt.keypress == "z" and len(self.other_lpoints) < self.n_landmarks:
+                pt = self.active_actor.closest_point(evt.picked3d)
+                self.other_lpoints.append(pt)
 
-    def inactivate(self):
-        """Stop the interaction"""
-        print("inactive")
+            if evt.keypress == "e" and len(self.other_lpoints) < self.n_landmarks:
+                pt = vedo.Points(self.active_actor.points()).closest_point(evt.picked3d)
+                self.other_lpoints.append(pt)
 
-        if len(self.lpoints) > 0:
-            self.pop()  # Remove the points
-            self.pop()  # Remove the mesh
-            self.pop()  # Remove the instructions
-            self.add(self.mesh)  # Add the mesh
-            self.add(
-                vedo.Points(self.lpoints, r=15).pickable(False).c("grey")
-            )  # Add the points in grey
+            if evt.keypress == "d":
+                if len(self.other_lpoints) > 0:
+                    self.other_lpoints.pop()
 
-        else:
-            self.pop()  # Remove the mesh
-            self.pop()  # Remove the instructions
-            self.add(self.mesh)  # Add the mesh
-
-        self.active = False
-
-    def highlight_point(self, point_id):
-
-        if point_id < len(self.lpoints):
-            self.clear()  # Remove everything from the scene
-            self.add(self.mesh)  # Add the mesh
-            self.add(
-                vedo.Points(self.lpoints, r=15).c("grey")
-            )  # Add the points in grey
-            self.add(
-                vedo.Points([self.lpoints[point_id]], r=15).c("green")
-            )  # Add the selected point in red
-
-
-import sys
-from PyQt5 import Qt
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vedo import Plotter, Cone, load, Sphere, Points, Mesh
-import pyvista as pv
-
-
-class MainWindow(Qt.QMainWindow):
-    def __init__(self, mesh1, mesh2, parent=None):
-
-        Qt.QMainWindow.__init__(self, parent)
-        self.frame = Qt.QFrame()
-        self.layout = Qt.QGridLayout()
-
-        # Add a horizontal layout
-        self.window1 = QVTKRenderWindowInteractor(self.frame)
-        self.window2 = QVTKRenderWindowInteractor(self.frame)
-
-        # Create renderer and add the vedo objects and callbacks
-        self.ls1 = LandmarksSelector(mesh=mesh1, axes=0, qt_widget=self.window1)
-        self.ls1.start()
-        self.empty_plotter = Plotter(qt_widget=self.window2)
-        self.empty_plotter.show()
-
-        # Set up the rest of the Qt window
-        button = Qt.QPushButton("My Button makes the cone red")
-        button.setToolTip("This is an example button")
-        button.clicked.connect(self.onClick)
-        self.layout.addWidget(self.window1, 0, 0)
-        self.layout.addWidget(self.window2, 0, 1)
-        self.layout.addWidget(button, 1, 0, 1, 2)
-        self.frame.setLayout(self.layout)
-        self.setCentralWidget(self.frame)
-        self.show()  # NB: qt, not a Plotter method
-
-    @Qt.pyqtSlot()
-    def onClick(self):
-        self.ls1.inactivate()
-        self.ls1.highlight_point(0)
-
-        n_landmarks = len(self.ls1.points())
-
-        del self.empty_plotter
-        self.ls2 = LandmarksSelector(
-            mesh=mesh2, n_landmarks=n_landmarks, axes=0, qt_widget=self.window2
-        )
-        self.ls2.start()
-
-        # TODO evenement pour passer au point suivant ?
-
-    def onClose(self):
-        self.window1.close()
-        self.window2.close()
+            if evt.keypress == "s" and len(self.other_lpoints) == self.n_landmarks:
+                self._done()
+            else:
+                self._update()
 
 
 if __name__ == "__main__":
 
-    mesh1 = vedo.load(vedo.dataurl + "cow.vtk")  # Load a mesh from vedo data repository
+    meshes = [
+        vedo.load("../../data/SCAPE_low_resolution/mesh00{}.ply".format(i))
+        for i in range(1, 5)
+    ]
 
-    mesh2 = mesh1.clone().rotate_x(90)  # Clone the mesh and rotate it
+    app = LandmarkSetter(meshes=meshes)
+    app.start()
 
-    # Create the landmark selector
-    # ls = LandmarksSelector(mesh)
-    # ls2 = LandmarksSelector(mesh2)
-
-    app = Qt.QApplication(sys.argv)
-    window = MainWindow(mesh1=mesh1, mesh2=mesh2)
-    app.aboutToQuit.connect(window.onClose)
-    app.exec_()
+    print(app.landmarks3d)
