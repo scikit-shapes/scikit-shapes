@@ -1,4 +1,4 @@
-from .elastic_metric import ElasticMetric, ElasticMetric2
+from .elastic_metric import ElasticMetric
 from .rigid import RigidMotion
 
 from .._typing import *

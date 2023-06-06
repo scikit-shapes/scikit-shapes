@@ -1,2 +1,2 @@
-from .registration import Registration, Registration2
+from .registration import Registration
 from .distance_matrix import DistanceMatrix

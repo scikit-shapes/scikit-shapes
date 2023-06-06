@@ -324,3 +324,18 @@ class PolyData(PolyDataType):
         C = self.points[self.triangles[2]]
 
         return torch.cross(B - A, C - A).norm(dim=1) / 2
+
+    @property
+    @typecheck
+    def triangle_normals(self) -> float2dTensorType:
+        """Return the normal of each triangle"""
+
+        # Raise an error if triangles are not defined
+        if self.triangles is None:
+            raise ValueError("Triangles are not defined")
+
+        A = self.points[self.triangles[0]]
+        B = self.points[self.triangles[1]]
+        C = self.points[self.triangles[2]]
+
+        return torch.cross(B - A, C - A)
