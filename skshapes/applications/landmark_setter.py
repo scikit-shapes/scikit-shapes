@@ -1,57 +1,83 @@
 import vedo
 import numpy as np
 
+from .._typing import *
+
 # import pyvista as pv
 
 
 class LandmarkSetter(vedo.Plotter):
-    def __init__(self, meshes, **kwargs):
-        super().__init__(N=2, sharecam=False, resetcam=True, **kwargs)
+    """A LandmarkSetter is a vedo application that allows the user to select landmarks on a set of meshes.
 
-        self.meshes = [meshes.clone().linewidth(1).pickable(True) for meshes in meshes]
+    Args:
+        meshes (List[vedo.Mesh]): The meshes on which the landmarks are selected.
+        **kwargs: Keyword arguments passed to the vedo.Plotter constructor.
+    """
 
+    @typecheck
+    def __init__(self, meshes: List[vedo.Mesh], **kwargs) -> None:
+        super().__init__(N=2, sharecam=False, **kwargs)
+
+        # The 3D landmarks are stored in a list of lists of 3D points
+        self.landmarks3d = [[] for i in range(len(meshes))]
+
+        # Clone the meshes to avoid modifying the original ones
+        self.meshes = [meshes.clone() for meshes in meshes]
+
+        # The first mesh is the reference
         self.reference = meshes[0]
         self.others = meshes[1:]
 
-        self.landmarks3d = [[] for i in range(len(meshes))]
-
-        self.reference_vertices = vedo.Points(self.reference.points())
+        # At the beginning : the reference mesh is plotted on the left
+        # and the first other mesh is plotted on the right
         self.current_other = self.others[0]
+        self.at(0).add(self.reference.linewidth(1))
+        self.at(1).add(self.current_other.linewidth(1))
 
-        # At the beginning, the reference is active
+        # At the beginning, we are in 'reference' mode, meaning that we are
+        # selecting landmarks on the reference mesh
         self.active = 0
         self.active_actor = self.reference
-
         self.reference_lpoints = []
-
-        self.mode = "reference"
-
-        text_reference = "Start by selecting landmarks on the reference mesh\nPress z to add a point on the surface\nPress e to add a vertice\nPress d to delete the last point\nPress s when you are done"
+        # The reference landmarks are stored in a vedo.Points object
+        # dor display purposes
         self.reference_lpoints_pointcloud = (
             vedo.Points(self.reference_lpoints, r=15).pickable(False).c("r")
         )
+        self.mode = "reference"
+        # The reference vertices are stored in a vedo.Points object, we do not display them but we store them to be able to
+        # pick them
+        self.reference_vertices = vedo.Points(self.reference.points())
+
+        # Instructions corresponding to the "reference" mode
+        text_reference = "Start by selecting landmarks on the reference mesh\nPress z to add a point on the surface\nPress e to add a vertice\nPress d to delete the last point\nPress s when you are done"
         self.instructions_reference = vedo.Text2D(
             text_reference, pos="bottom-left", c="white", bg="green", font="Calco"
         )
+        self.at(0).add(
+            self.instructions_reference
+        )  # Add the instructions to the left plot
 
+        # Instructions corresponding to the "other" mode (not displayed at the beginning)
         text_other = "Now select the same landmarks on the other meshes\nPress z to add a point on the surface\nPress e to add a vertice\nPress d to delete the last point\nPress s when you are done"
         self.instructions_other = vedo.Text2D(
             text_other, pos="bottom-left", c="white", bg="green", font="Calco"
         )
 
+        # Add the callback keypress
         self.add_callback("KeyPress", self._key_press)
 
-        # At initialization, add the reference and the first other mesh to the scene
-        self.at(0).add(self.instructions_reference)
-        self.at(0).add(self.reference.linewidth(1))
-        self.at(1).add(self.current_other.linewidth(1))
-
     def start(self):
+        """Start the landmark setter."""
         self._update()
         self.show(interactive=True)
         # return self
 
     def _done(self):
+        """The _done method is called when the user presses the 's' key.
+        If the current mode is 'reference', it stores information about the number of landmarks to be set on the other meshes and switches to 'others' mode.
+        If the current mode is 'others', it stores the landmarks for the current mesh and switches to the next mesh. If no other mesh is left, it closes the window.
+        """
 
         if self.mode == "reference":
 
@@ -97,13 +123,13 @@ class LandmarkSetter(vedo.Plotter):
                 self.other_lpoints_pointcloud = (
                     vedo.Points(self.other_lpoints, r=15).pickable(False).c("r")
                 )
-                # self.point_to_pick = vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15).pickable(False).c("green")
                 self._update()
 
             else:
                 self.close()
 
     def _update(self):
+        """The _update method update the display of the landmarks with the right color depending on the current mode and the current state of the landmarks selection."""
 
         if self.mode == "reference":
 
@@ -135,6 +161,7 @@ class LandmarkSetter(vedo.Plotter):
             self.at(1).add(self.other_lpoints_pointcloud)
 
     def _key_press(self, evt):
+        """The _key_press method is called when the user presses a key. It is used to add or delete landmarks."""
 
         if self.mode == "reference" and evt.actor == self.reference:
 
@@ -173,16 +200,3 @@ class LandmarkSetter(vedo.Plotter):
                 self._done()
             else:
                 self._update()
-
-
-if __name__ == "__main__":
-
-    meshes = [
-        vedo.load("../../data/SCAPE_low_resolution/mesh00{}.ply".format(i))
-        for i in range(1, 5)
-    ]
-
-    app = LandmarkSetter(meshes=meshes)
-    app.start()
-
-    print(app.landmarks3d)
