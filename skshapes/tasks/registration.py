@@ -1,19 +1,19 @@
 import torch
-
-# from .._typing import *
+from ..types import typecheck, Shape, Morphing, Loss, Optimizer, Union
 
 
 class Registration:
+    @typecheck
     def __init__(
         self,
         *,
-        model,
-        loss,
-        optimizer,
-        regularization=1,
-        n_iter=10,
-        verbose=0,
-        device="auto",
+        model: Morphing,
+        loss: Loss,
+        optimizer: Optimizer,
+        regularization: Union[int, float] = 1,
+        n_iter: int = 10,
+        verbose: int = 0,
+        device: Union[str, torch.device] = "auto",
         **kwargs,
     ) -> None:
         self.model = model
@@ -28,11 +28,12 @@ class Registration:
 
         self.device = device
 
+    @typecheck
     def fit(
         self,
         *,
-        source,
-        target,
+        source: Shape,
+        target: Shape,
     ) -> None:
         # Make copies of the source and target and move them to the device
         if source.device != self.device:
@@ -88,16 +89,18 @@ class Registration:
             1
         ].detach()  # Is it the right way to compute the distance ?
 
-    def transform(self, *, source) -> torch.Tensor:
+    @typecheck
+    def transform(self, *, source: Shape) -> Shape:
 
         return self.model.morph(shape=source, parameter=self.parameter).morphed_shape
 
+    @typecheck
     def fit_transform(
         self,
         *,
-        source,
-        target,
-    ) -> torch.Tensor:
+        source: Shape,
+        target: Shape,
+    ) -> Shape:
         if source.device != self.device:
             source = source.to(self.device)
         if target.device != self.device:

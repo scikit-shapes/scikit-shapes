@@ -1,5 +1,5 @@
 from beartype import beartype
-from jaxtyping import jaxtyped, Float32, Float64, Int64, Int32
+from jaxtyping import jaxtyped, Float32, Int64
 from typing import Optional, Union, TypeVar, Generic, List, Tuple, NamedTuple
 import torch
 
@@ -11,8 +11,8 @@ def typecheck(func):
 # Type aliases
 float = torch.float32
 int = torch.int64
-JaxFloat = Float32 if float == torch.float32 else Float64
-JaxInt = Int64 if int == torch.int64 else Int32
+JaxFloat = Float32
+JaxInt = Int64
 
 # Numerical types
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]
