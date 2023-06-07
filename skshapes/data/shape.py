@@ -1,16 +1,23 @@
-# TODO write devdoc
-# TODO write tests
-# TODO types at the root of the package
-
 import pyvista
 import torch
 import numpy as np
 
-from .._typing import *
+from ..types import (
+    typecheck,
+    PolyData,
+    Points,
+    Edges,
+    Triangles,
+    Landmarks,
+    Optional,
+    Union,
+    Float1dTensor,
+    Float2dTensor,
+)
 
 
 @typecheck
-def read(filename: str) -> PolyDataType:
+def read(filename: str) -> PolyData:
 
     mesh = pyvista.read(filename)
     if type(mesh) == pyvista.PolyData:
@@ -19,26 +26,26 @@ def read(filename: str) -> PolyDataType:
         raise NotImplementedError("Images are not supported yet")
 
 
-class PolyData(PolyDataType):
+class PolyData(PolyData):
     """A class to represent a surface mesh as a set of points, edges and/or triangles."""
 
     @typecheck
     def __init__(
         self,
-        points: pointsType,
-        edges: Optional[edgesType] = None,
-        triangles: Optional[trianglesType] = None,
+        points: Points,
+        edges: Optional[Edges] = None,
+        triangles: Optional[Triangles] = None,
         device: Optional[Union[str, torch.device]] = None,
-        landmarks: Optional[landmarksType] = None,
+        landmarks: Optional[Landmarks] = None,
     ) -> None:
         """Initialize a PolyData object.
 
         Args:
-            points (pointsType): the points of the shape.
-            edges (Optional[edgesType], optional): the edges of the shape. Defaults to None.
-            triangles (Optional[trianglesType], optional): the triangles of the shape. Defaults to None.
+            points (Points): the points of the shape.
+            edges (Optional[Edges], optional): the edges of the shape. Defaults to None.
+            triangles (Optional[Triangles], optional): the triangles of the shape. Defaults to None.
             device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to None.
-            landmarks (Optional[landmarksType], optional): _description_. Defaults to None.
+            landmarks (Optional[Landmarks], optional): _description_. Defaults to None.
         """
 
         if device is None:
@@ -74,7 +81,7 @@ class PolyData(PolyDataType):
     #### Copy functions #####
     #########################
     @typecheck
-    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyDataType:
+    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyData:
         """Return a copy of the shape"""
         if device is None:
             device = self.device
@@ -88,7 +95,7 @@ class PolyData(PolyDataType):
         return PolyData(**kwargs)
 
     @typecheck
-    def to(self, device: Union[str, torch.device]) -> PolyDataType:
+    def to(self, device: Union[str, torch.device]) -> PolyData:
         """Return a copy of the shape on the specified device"""
         return self.copy(device=device)
 
@@ -121,17 +128,17 @@ class PolyData(PolyDataType):
     @typecheck
     def from_pyvista(
         cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = None
-    ) -> PolyDataType:
+    ) -> PolyData:
         """Create a Shape from a PyVista PolyData object."""
 
         points = torch.from_numpy(mesh.points)
 
-        if mesh.is_all_triangles():
+        if mesh.is_all_triangles:
             triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
             triangles = torch.from_numpy(triangles)
             edges = None
 
-        elif mesh.triangulate().is_all_triangles():
+        elif mesh.triangulate().is_all_triangles:
             triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:].T
             triangles = torch.from_numpy(triangles)
             edges = None
@@ -152,7 +159,7 @@ class PolyData(PolyDataType):
     #############################
     @property
     @typecheck
-    def edges(self) -> Optional[edgesType]:
+    def edges(self) -> Optional[Edges]:
         if self._edges is not None:
             return self._edges
 
@@ -172,7 +179,7 @@ class PolyData(PolyDataType):
 
     @edges.setter
     @typecheck
-    def edges(self, edges: edgesType) -> None:
+    def edges(self, edges: Edges) -> None:
         """Set the edges of the shape. This will also set the triangles to None."""
         self._edges = edges.clone().to(self.device)
         self._triangles = None
@@ -182,14 +189,14 @@ class PolyData(PolyDataType):
     #################################
     @property
     @typecheck
-    def triangles(self) -> Optional[trianglesType]:
+    def triangles(self) -> Optional[Triangles]:
         return self._triangles
 
     @triangles.setter
     @typecheck
-    def triangles(self, triangles: trianglesType) -> None:
+    def triangles(self, triangles: Triangles) -> None:
         """Set the triangles of the shape. This will also set the edges to None."""
-        if triangles.max() >= self.npoints:
+        if triangles.max() >= self.n_points:
             raise ValueError(
                 "The maximum vertex index in the triangles is larger than the number of points."
             )
@@ -202,13 +209,13 @@ class PolyData(PolyDataType):
     ##############################
     @property
     @typecheck
-    def points(self) -> pointsType:
+    def points(self) -> Points:
         return self._points
 
     @points.setter
     @typecheck
-    def points(self, points: pointsType) -> None:
-        if points.shape[0] != self.npoints:
+    def points(self, points: Points) -> None:
+        if points.shape[0] != self.n_points:
             raise ValueError("The number of points cannot be changed.")
 
         self._points = points.clone().to(self.device)
@@ -236,14 +243,14 @@ class PolyData(PolyDataType):
     #################################
     @property
     @typecheck
-    def landmarks(self) -> Optional[landmarksType]:
+    def landmarks(self) -> Optional[Landmarks]:
         return self._landmarks
 
     @landmarks.setter
     @typecheck
-    def landmarks(self, landmarks: landmarksType) -> None:
+    def landmarks(self, landmarks: Landmarks) -> None:
         """Set the landmarks of the shape."""
-        if landmarks.max() >= self.npoints:
+        if landmarks.max() >= self.n_points:
             raise ValueError(
                 "The maximum vertex index in the landmarks is larger than the number of points."
             )
@@ -254,20 +261,21 @@ class PolyData(PolyDataType):
     ##########################
     @property
     @typecheck
-    def npoints(self) -> int:
+    def n_points(self) -> int:
         return self._points.shape[0]
 
     @property
     @typecheck
-    def nedges(self) -> int:
-        if self._edges is not None:
-            return self._edges.shape[1]
+    def n_edges(self) -> int:
+        edges = self.edges
+        if edges is not None:
+            return edges.shape[1]
         else:
             return 0
 
     @property
     @typecheck
-    def ntriangles(self) -> int:
+    def n_triangles(self) -> int:
         if self._triangles is not None:
             return self._triangles.shape[1]
         else:
@@ -275,7 +283,7 @@ class PolyData(PolyDataType):
 
     @property
     @typecheck
-    def edge_centers(self) -> pointsType:
+    def edge_centers(self) -> Points:
         """Return the center of each edge"""
 
         # Raise an error if edges are not defined
@@ -286,7 +294,7 @@ class PolyData(PolyDataType):
 
     @property
     @typecheck
-    def edge_lengths(self) -> floatTensorArrayType:
+    def edge_lengths(self) -> Float1dTensor:
         """Return the length of each edge"""
 
         # Raise an error if edges are not defined
@@ -297,7 +305,7 @@ class PolyData(PolyDataType):
 
     @property
     @typecheck
-    def triangle_centers(self) -> pointsType:
+    def triangle_centers(self) -> Points:
         """Return the center of the triangles"""
 
         # Raise an error if triangles are not defined
@@ -312,7 +320,7 @@ class PolyData(PolyDataType):
 
     @property
     @typecheck
-    def triangle_areas(self) -> floatTensorArrayType:
+    def triangle_areas(self) -> Float1dTensor:
         """Return the area of each triangle"""
 
         # Raise an error if triangles are not defined
@@ -327,7 +335,7 @@ class PolyData(PolyDataType):
 
     @property
     @typecheck
-    def triangle_normals(self) -> float2dTensorType:
+    def triangle_normals(self) -> Float2dTensor:
         """Return the normal of each triangle"""
 
         # Raise an error if triangles are not defined
