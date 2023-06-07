@@ -1,9 +1,8 @@
 import vedo
 import numpy as np
+import torch
 
 from .._typing import *
-
-# import pyvista as pv
 
 
 class LandmarkSetter(vedo.Plotter):
@@ -15,18 +14,20 @@ class LandmarkSetter(vedo.Plotter):
     """
 
     @typecheck
-    def __init__(self, meshes: List[vedo.Mesh], **kwargs) -> None:
+    def __init__(self, meshes: List[PolyDataType], **kwargs) -> None:
         super().__init__(N=2, sharecam=False, **kwargs)
 
         # The 3D landmarks are stored in a list of lists of 3D points
         self.landmarks3d = [[] for i in range(len(meshes))]
 
-        # Clone the meshes to avoid modifying the original ones
-        self.meshes = [meshes.clone() for meshes in meshes]
+        self.original_meshes = meshes
+
+        # Convert the meshes to vedo.Mesh objects
+        self.meshes = [vedo.Mesh(mesh.to_pyvista()) for mesh in meshes]
 
         # The first mesh is the reference
-        self.reference = meshes[0]
-        self.others = meshes[1:]
+        self.reference = self.meshes[0]
+        self.others = self.meshes[1:]
 
         # At the beginning : the reference mesh is plotted on the left
         # and the first other mesh is plotted on the right
@@ -111,8 +112,6 @@ class LandmarkSetter(vedo.Plotter):
             self.other_id += 1
 
             if self.other_id < len(self.others):
-
-                print("other_id", self.other_id)
 
                 self.current_other = self.others[self.other_id]
                 self.active_actor = self.current_other
@@ -200,3 +199,107 @@ class LandmarkSetter(vedo.Plotter):
                 self._done()
             else:
                 self._update()
+
+    @property
+    def landmarks(self, barycentric=True):
+        """Return the landmarks as a list of two lists of 3D points."""
+
+        torch_landmarks = [
+            torch.from_numpy(np.array(landmarks)).type(floatdtype)
+            for landmarks in self.landmarks3d
+        ]
+        if not barycentric:
+            return torch_landmarks
+
+        else:
+            return [
+                [
+                    barycentric_coordinates(self.original_meshes[i], l)
+                    for l in torch_landmarks[i]
+                ]
+                for i in range(len(self.original_meshes))
+            ]
+
+
+@typecheck
+def barycentric_coordinates(mesh, point):
+
+    # Compute the vectors from the point to the vertices
+    vertices = mesh.points
+    vectors = vertices - point
+    norms = torch.norm(vectors, dim=1)
+
+    tol = 1e-5  # TODO tol can be computed from the mesh resolution ?
+
+    # Test if a vector is zero (that means the point is a vertex of the mesh)
+    if torch.sum(vectors.abs().sum(dim=1) < tol):
+        indice = torch.where(
+            torch.all(torch.eq(vectors, torch.zeros_like(vectors)), dim=1)
+        )[0]
+        vertex_indice = int(indice[0])
+
+        # The point is a vertex
+        return (torch.tensor(1.0), torch.tensor([vertex_indice]))
+
+    else:
+        # Normalize the vectors
+        vectors /= norms.reshape(-1, 1)
+
+        A = mesh.edges[0]
+        B = mesh.edges[1]
+
+        cos_angles = (vectors[A] * vectors[B]).sum(dim=1)
+        # If cos(angle) = -1 <=> angle = pi, the point is on an edge
+
+        if torch.sum((cos_angles - (-1)).abs() < tol):
+            indice = torch.where((cos_angles - (-1)).abs() < tol)[0]
+            edge_indice = int(indice[0])
+
+            # The point is on an edge
+            # Coordinates
+            a, b = mesh.edges[:, edge_indice]
+            alpha = norms[b] / torch.norm(vertices[a] - vertices[b])
+            beta = norms[a] / torch.norm(vertices[a] - vertices[b])
+
+            return (torch.tensor([alpha, beta]), torch.tensor([a, b]))
+
+        else:
+
+            A = mesh.triangles[0]
+            B = mesh.triangles[1]
+            C = mesh.triangles[2]
+
+            angles_1 = torch.acos((vectors[A] * vectors[B]).sum(dim=1))
+            angles_2 = torch.acos((vectors[B] * vectors[C]).sum(dim=1))
+            angles_3 = torch.acos((vectors[C] * vectors[A]).sum(dim=1))
+
+            sum_angles = angles_1 + angles_2 + angles_3
+            # If sum_angles is close to 2pi, the point is inside the triangle, or its projection is inside the triangle
+
+            if torch.sum((sum_angles - (2 * torch.pi)).abs() < tol):
+
+                indices = torch.where((sum_angles - (2 * torch.pi)).abs() < tol)[0]
+                # If several indices, we must find the one for which the point is inside irself the triangle, and not only its projection
+                for i in indices:
+                    a, b, c = mesh.triangles[:, i]
+                    normals = mesh.triangle_normals[i]
+
+                    if (
+                        torch.abs(vectors[a].dot(normals))
+                        + torch.abs(vectors[b].dot(normals))
+                        + torch.abs(vectors[c].dot(normals))
+                        < tol
+                    ):
+                        indice_triangle = i
+
+                # The point is inside a triangle
+                # Coordinates
+                a, b, c = mesh.triangles[:, indice_triangle]
+                mat = torch.cat((vertices[a], vertices[b], vertices[c])).reshape(3, 3).T
+                alpha, beta, gamma = torch.inverse(mat) @ point
+
+                return (torch.tensor([alpha, beta, gamma]), torch.tensor([a, b, c]))
+
+            else:
+                # The point is outside the mesh
+                return None

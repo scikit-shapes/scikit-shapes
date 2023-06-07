@@ -1,11 +1,9 @@
-import vedo
 from skshapes.applications import LandmarkSetter
+from skshapes.data import read
 
-meshes = [
-    vedo.load("data/SCAPE_low_resolution/mesh00{}.ply".format(i)) for i in range(1, 5)
-]
+meshes = [read("data/SCAPE_low_resolution/mesh00{}.ply".format(i)) for i in range(1, 5)]
 
 app = LandmarkSetter(meshes=meshes)
 app.start()
 
-print(app.landmarks3d)
+print(app.landmarks)
