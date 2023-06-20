@@ -1,16 +1,21 @@
 import inspect
+import sys
+
+sys.path.append(sys.path[0][:-4])
+
+print(sys.path)
 
 
 def check_module_annotations(module, template, type):
     """Check that the type and the classes' annotations of the methods of a module are correct.
-    More precisely, we chack that all the classes in the module are subclasses of the given type,
+    More precisely, we check that all the classes in the module are subclasses of the given type,
     then we check that the methods of the template are in the class, and finally we check that the
     annotations of the methods are correct.
 
     Args:
         module : the module to check
         template (dict): a dictionary of the form {method_name: {annotation_name: annotation_type}}
-        type : the type of the annotations
+        type : the desired type of the classes in the module
     """
 
     def check_annotations(annotations, reference_annotations):
