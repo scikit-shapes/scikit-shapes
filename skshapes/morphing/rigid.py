@@ -1,5 +1,4 @@
 import torch
-from pytorch3d.transforms import axis_angle_to_matrix
 
 
 from ..types import (
@@ -33,12 +32,28 @@ class RigidMotion(Morphing):
         return_regularization: bool = False,
     ) -> MorphingOutput:
 
-        rotation = parameter[0]
+        rotation_angles = parameter[0]
+        matrix = axis_angle_to_matrix(rotation_angles)
+
+        # theta1 = rotation_angles[0]
+        # theta2 = rotation_angles[1]
+        # theta3 = rotation_angles[2]
+        # c1 = torch.cos(theta1)
+        # s1 = torch.sin(theta1)
+        # c2 = torch.cos(theta2)
+        # s2 = torch.sin(theta2)
+        # c3 = torch.cos(theta3)
+        # s3 = torch.sin(theta3)
+
+        # matrix = torch.Tensor([[c2*c3, -c2*s3, s2],
+        #                  [c1*s3+c3*s1*s2, c1*c3-s1*s2*s3, -c2*s1],
+        #                  [s1*s3-c1*c3*s2, c3*s1+c1*s2*s3, c1*c2]]).to(parameter.device)
+
         translation = parameter[1]
 
-        matrix = axis_angle_to_matrix(rotation)
+        center = shape.points.mean(dim=0)
 
-        newpoints = (matrix @ shape.points.T).T + translation
+        newpoints = (matrix @ (shape.points - center).T).T + center + translation
 
         morphed_shape = shape.copy()
         morphed_shape.points = newpoints
@@ -59,3 +74,71 @@ class RigidMotion(Morphing):
     def parameter_shape(self, shape: Shape) -> Tuple[int, int]:
 
         return (2, 3)
+
+
+def axis_angle_to_quaternion(axis_angle: torch.Tensor) -> torch.Tensor:
+    """
+    Convert rotations given as axis/angle to quaternions.
+
+    Args:
+        axis_angle: Rotations given as a vector in axis angle form,
+            as a tensor of shape (..., 3), where the magnitude is
+            the angle turned anticlockwise in radians around the
+            vector's direction.
+
+    Returns:
+        quaternions with real part first, as tensor of shape (..., 4).
+    """
+    angles = torch.norm(axis_angle, p=2, dim=-1, keepdim=True)
+    half_angles = angles * 0.5
+    eps = 1e-6
+    small_angles = angles.abs() < eps
+    sin_half_angles_over_angles = torch.empty_like(angles)
+    sin_half_angles_over_angles[~small_angles] = (
+        torch.sin(half_angles[~small_angles]) / angles[~small_angles]
+    )
+    # for x small, sin(x/2) is about x/2 - (x/2)^3/6
+    # so sin(x/2)/x is about 1/2 - (x*x)/48
+    sin_half_angles_over_angles[small_angles] = (
+        0.5 - (angles[small_angles] * angles[small_angles]) / 48
+    )
+    quaternions = torch.cat(
+        [torch.cos(half_angles), axis_angle * sin_half_angles_over_angles], dim=-1
+    )
+    return quaternions
+
+
+def quaternion_to_matrix(quaternions: torch.Tensor) -> torch.Tensor:
+    """
+    Convert rotations given as quaternions to rotation matrices.
+
+    Args:
+        quaternions: quaternions with real part first,
+            as tensor of shape (..., 4).
+
+    Returns:
+        Rotation matrices as tensor of shape (..., 3, 3).
+    """
+    r, i, j, k = torch.unbind(quaternions, -1)
+    # pyre-fixme[58]: `/` is not supported for operand types `float` and `Tensor`.
+    two_s = 2.0 / (quaternions * quaternions).sum(-1)
+
+    o = torch.stack(
+        (
+            1 - two_s * (j * j + k * k),
+            two_s * (i * j - k * r),
+            two_s * (i * k + j * r),
+            two_s * (i * j + k * r),
+            1 - two_s * (i * i + k * k),
+            two_s * (j * k - i * r),
+            two_s * (i * k - j * r),
+            two_s * (j * k + i * r),
+            1 - two_s * (i * i + j * j),
+        ),
+        -1,
+    )
+    return o.reshape(quaternions.shape[:-1] + (3, 3))
+
+
+def axis_angle_to_matrix(axis_angle: torch.Tensor) -> torch.Tensor:
+    return quaternion_to_matrix(axis_angle_to_quaternion(axis_angle))

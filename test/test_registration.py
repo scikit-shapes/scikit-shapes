@@ -1,16 +1,26 @@
+import sys
+
+sys.path.append(sys.path[0][:-4])
+
+from skshapes.tasks import Registration
+from skshapes.data import read
+import torch
+import skshapes
+
+from skshapes.loss import NearestNeighborsLoss, OptimalTransportLoss, L2Loss
+from skshapes.morphing import ElasticMetric, RigidMotion
+from skshapes.optimization import LBFGS
+
+
 def test_registration():
-
-    from skshapes.tasks import Registration
-    from skshapes.data import read
-    import torch
-    import skshapes
-
-    from skshapes.loss import NearestNeighborsLoss, OptimalTransportLoss, LandmarkLoss
-    from skshapes.morphing import ElasticMetric, RigidMotion
-    from skshapes.optimization import LBFGS
 
     # Load two meshes
     datafolder = "data/SCAPE_low_resolution"
+    import os
+
+    os.chdir(sys.path[-1])
+    print(os.getcwd())
+    print(datafolder + "/" + "mesh001.ply")
     source = read(datafolder + "/" + "mesh001.ply")
     target = read(datafolder + "/" + "mesh041.ply")
 
@@ -20,12 +30,16 @@ def test_registration():
 
     assert source.landmarks is None
     # Add landmarks
-    source.landmarks = torch.arange(source.points.shape[0], dtype=skshapes.int)
-    target.landmarks = torch.arange(target.points.shape[0], dtype=skshapes.int)
-    assert source.landmarks is not None
+    # source.landmarks = source.points
+    # target.landmarks = target.points
+    # assert source.landmarks is not None
 
-    for loss in [NearestNeighborsLoss(), OptimalTransportLoss(), LandmarkLoss()]:
-        for model in [ElasticMetric(), RigidMotion()]:
+    # Try different combinations of loss and model for registration
+    # and check that no error is raised
+    losses = [NearestNeighborsLoss(), OptimalTransportLoss(), L2Loss()]
+    models = [ElasticMetric(), RigidMotion()]
+    for loss in losses:
+        for model in models:
 
             r = Registration(
                 model=model,
