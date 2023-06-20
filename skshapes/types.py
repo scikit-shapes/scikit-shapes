@@ -25,7 +25,11 @@ FloatScalar = JaxFloat[torch.Tensor, ""]
 Points = JaxFloat[torch.Tensor, "_ 3"]
 Edges = JaxInt[torch.Tensor, "2 _"]
 Triangles = JaxInt[torch.Tensor, "3 _"]
-Landmarks = JaxInt[torch.Tensor, "_"]
+
+# Jaxtyping does not provide annotation for sparse tensors
+# Then we use the torch.Tensor type and checks are made at runtime
+# with assert statements
+Landmarks = Optional[torch.Tensor]
 
 
 # Shape types

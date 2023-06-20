@@ -2,7 +2,7 @@ import vedo
 import numpy as np
 import torch
 
-from .._typing import *
+from ..types import typecheck, PolyData, List, float, int
 
 
 class LandmarkSetter(vedo.Plotter):
@@ -14,7 +14,7 @@ class LandmarkSetter(vedo.Plotter):
     """
 
     @typecheck
-    def __init__(self, meshes: List[PolyDataType], **kwargs) -> None:
+    def __init__(self, meshes: List[PolyData], **kwargs) -> None:
         super().__init__(N=2, sharecam=False, **kwargs)
 
         # The 3D landmarks are stored in a list of lists of 3D points
@@ -23,11 +23,12 @@ class LandmarkSetter(vedo.Plotter):
         self.original_meshes = meshes
 
         # Convert the meshes to vedo.Mesh objects
-        self.meshes = [vedo.Mesh(mesh.to_pyvista()) for mesh in meshes]
+        self.meshes = meshes
+        self.actors = [vedo.Mesh(mesh.to_pyvista()) for mesh in meshes]
 
         # The first mesh is the reference
-        self.reference = self.meshes[0]
-        self.others = self.meshes[1:]
+        self.reference = self.actors[0]
+        self.others = self.actors[1:]
 
         # At the beginning : the reference mesh is plotted on the left
         # and the first other mesh is plotted on the right
@@ -41,7 +42,7 @@ class LandmarkSetter(vedo.Plotter):
         self.active_actor = self.reference
         self.reference_lpoints = []
         # The reference landmarks are stored in a vedo.Points object
-        # dor display purposes
+        # for display purposes
         self.reference_lpoints_pointcloud = (
             vedo.Points(self.reference_lpoints, r=15).pickable(False).c("r")
         )
@@ -125,6 +126,11 @@ class LandmarkSetter(vedo.Plotter):
                 self._update()
 
             else:
+
+                ls = self.landmarks
+                for i in range(len(ls)):
+                    self.original_meshes[i].landmarks = ls[i]
+
                 self.close()
 
     def _update(self):
@@ -205,18 +211,39 @@ class LandmarkSetter(vedo.Plotter):
         """Return the landmarks as a list of two lists of 3D points."""
 
         torch_landmarks = [
-            torch.from_numpy(np.array(landmarks)).type(floatdtype)
+            torch.from_numpy(np.array(landmarks)).type(float)
             for landmarks in self.landmarks3d
         ]
         if not barycentric:
             return torch_landmarks
 
         else:
+
+            # Réécrire cette partie : il faut avoir l'info sur le nb de points par mesh
+            # pour fixer la taille de la matrice sparse
+
+            def to_coo(landmarks, n):
+
+                values = torch.tensor([], dtype=float)
+                indices = torch.zeros((2, 0), dtype=int)
+
+                for i, (c, v) in enumerate(landmarks):
+
+                    tmp = torch.concat((v, i * torch.ones_like(v))).reshape(2, -1)
+                    indices = torch.cat((indices, tmp), dim=1)
+
+                    values = torch.concat((values, c), dim=0)
+
+                return torch.sparse_coo_tensor(indices, values, (n, len(landmarks)))
+
             return [
-                [
-                    barycentric_coordinates(self.original_meshes[i], l)
-                    for l in torch_landmarks[i]
-                ]
+                to_coo(
+                    [
+                        barycentric_coordinates(self.original_meshes[i], l)
+                        for l in torch_landmarks[i]
+                    ],
+                    self.original_meshes[i].n_points,
+                )
                 for i in range(len(self.original_meshes))
             ]
 
@@ -236,10 +263,10 @@ def barycentric_coordinates(mesh, point):
         indice = torch.where(
             torch.all(torch.eq(vectors, torch.zeros_like(vectors)), dim=1)
         )[0]
-        vertex_indice = int(indice[0])
+        vertex_indice = indice[0]
 
         # The point is a vertex
-        return (torch.tensor(1.0), torch.tensor([vertex_indice]))
+        return (torch.tensor([1.0]), torch.tensor([vertex_indice]))
 
     else:
         # Normalize the vectors
