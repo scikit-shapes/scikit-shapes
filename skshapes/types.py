@@ -51,6 +51,14 @@ class Image(Shape):
 class Loss:
     @typecheck
     def __add__(self, other: "Loss") -> "Loss":
+        """Add two losses
+
+        Args:
+            other (Loss): the other loss to add
+
+        Returns:
+            Loss: a new loss which __call__ method is the sum of the two __call__ methods
+        """
         class newloss(Loss):
             def __init__(self, loss1, loss2):
 
@@ -68,18 +76,26 @@ class Loss:
         return newloss(loss1=loss1, loss2=loss2)
 
     @typecheck
-    def __rmul__(self, other: Number) -> "Loss":
+    def __rmul__(self, scalar: Number) -> "Loss":
+        """Multiply a loss by a scalar
+
+        Args:
+            other (Number): the scalar to multiply the loss by
+
+        Returns:
+            Loss: a new loss which __call__ method is the product of the scalaer and the self.__call__ method
+        """
         class newloss(Loss):
-            def __init__(self, loss, other):
+            def __init__(self, loss, scalar):
 
                 self.loss = loss
-                self.other = other
+                self.scalar = scalar
 
             def __call__(self, source: Shape, target: Shape) -> FloatScalar:
-                return self.other * self.loss.__call__(source=source, target=target)
+                return self.scalar * self.loss.__call__(source=source, target=target)
 
         loss = self
-        return newloss(loss=loss, other=other)
+        return newloss(loss=loss, scalar=scalar)
 
 
 class Morphing:

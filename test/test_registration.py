@@ -36,7 +36,7 @@ def test_registration():
 
     # Try different combinations of loss and model for registration
     # and check that no error is raised
-    losses = [NearestNeighborsLoss(), OptimalTransportLoss(), L2Loss()]
+    losses = [NearestNeighborsLoss(), OptimalTransportLoss(), L2Loss(), 0.8 * L2Loss() + 2 * OptimalTransportLoss()]
     models = [ElasticMetric(), RigidMotion()]
     for loss in losses:
         for model in models:
