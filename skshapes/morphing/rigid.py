@@ -35,20 +35,6 @@ class RigidMotion(Morphing):
         rotation_angles = parameter[0]
         matrix = axis_angle_to_matrix(rotation_angles)
 
-        # theta1 = rotation_angles[0]
-        # theta2 = rotation_angles[1]
-        # theta3 = rotation_angles[2]
-        # c1 = torch.cos(theta1)
-        # s1 = torch.sin(theta1)
-        # c2 = torch.cos(theta2)
-        # s2 = torch.sin(theta2)
-        # c3 = torch.cos(theta3)
-        # s3 = torch.sin(theta3)
-
-        # matrix = torch.Tensor([[c2*c3, -c2*s3, s2],
-        #                  [c1*s3+c3*s1*s2, c1*c3-s1*s2*s3, -c2*s1],
-        #                  [s1*s3-c1*c3*s2, c3*s1+c1*s2*s3, c1*c2]]).to(parameter.device)
-
         translation = parameter[1]
 
         center = shape.points.mean(dim=0)

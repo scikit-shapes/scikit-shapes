@@ -5,7 +5,7 @@ import numpy as np
 from ..types import (
     typecheck,
     PolyData,
-    float,
+    float_dtype,
     Points,
     Edges,
     Triangles,
@@ -93,6 +93,8 @@ class PolyData(PolyData):
             kwargs["triangles"] = self._triangles.clone()
         if self._edges is not None:
             kwargs["edges"] = self._edges.clone()
+        if self._landmarks is not None:
+            kwargs["landmarks"] = self._landmarks.clone()
         return PolyData(**kwargs)
 
     @typecheck
@@ -250,13 +252,21 @@ class PolyData(PolyData):
     @landmarks.setter
     @typecheck
     def landmarks(self, landmarks: Landmarks) -> None:
-        """Set the landmarks of the shape."""
-        assert (landmarks.is_sparse and landmarks.shape[0] == self.n_points) or (
-            not landmarks.is_sparse and landmarks.shape[1] == 3
-        )
-        assert landmarks.dtype == float
+        """Set the landmarks of the shape. The landmarks should be a sparse tensor of shape
+        (n_landmarks, n_points) (barycentric coordinates) or a ."""
+        assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
+        assert landmarks.dtype == float_dtype
 
         self._landmarks = landmarks.clone().to(self.device)
+
+    @property
+    @typecheck
+    def landmarks_3d(self) -> Optional[Landmarks]:
+        """Return the landmarks in 3D."""
+        if self.landmarks is None:
+            return None
+        else:
+            return self.landmarks @ self.points
 
     ##########################
     #### Shape properties ####

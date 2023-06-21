@@ -1,6 +1,6 @@
 from beartype import beartype
 from jaxtyping import jaxtyped, Float32, Int64
-from typing import Optional, Union, TypeVar, Generic, List, Tuple, NamedTuple
+from typing import Any, Optional, Union, TypeVar, Generic, List, Tuple, NamedTuple
 import torch
 
 
@@ -9,8 +9,10 @@ def typecheck(func):
 
 
 # Type aliases
-float = torch.float32
-int = torch.int64
+Number = Union[int, float]
+
+float_dtype = torch.float32
+int_dtype = torch.int64
 JaxFloat = Float32
 JaxInt = Int64
 
@@ -47,7 +49,37 @@ class Image(Shape):
 
 # Morphing types
 class Loss:
-    pass
+    @typecheck
+    def __add__(self, other: "Loss") -> "Loss":
+        class newloss(Loss):
+            def __init__(self, loss1, loss2):
+
+                self.loss1 = loss1
+                self.loss2 = loss2
+
+            def __call__(self, source: Shape, target: Shape) -> FloatScalar:
+                return self.loss1.__call__(
+                    source=source, target=target
+                ) + self.loss2.__call__(source=source, target=target)
+
+        loss1 = self
+        loss2 = other
+
+        return newloss(loss1=loss1, loss2=loss2)
+
+    @typecheck
+    def __rmul__(self, other: Number) -> "Loss":
+        class newloss(Loss):
+            def __init__(self, loss, other):
+
+                self.loss = loss
+                self.other = other
+
+            def __call__(self, source: Shape, target: Shape) -> FloatScalar:
+                return self.other * self.loss.__call__(source=source, target=target)
+
+        loss = self
+        return newloss(loss=loss, other=other)
 
 
 class Morphing:

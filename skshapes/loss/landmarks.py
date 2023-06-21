@@ -12,6 +12,4 @@ class LandmarkLoss(Loss):
     @typecheck
     def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
 
-        return torch.norm(
-            source.points[source.landmarks] - target.points[target.landmarks], p=self.p
-        )
+        return torch.norm(source.landmarks_3d - target.landmarks_3d, p=self.p)

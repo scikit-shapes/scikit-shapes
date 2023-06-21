@@ -2,7 +2,7 @@ import vedo
 import numpy as np
 import torch
 
-from ..types import typecheck, PolyData, List, float, int
+from ..types import typecheck, PolyData, List, float_dtype, int_dtype
 
 
 class LandmarkSetter(vedo.Plotter):
@@ -224,17 +224,17 @@ class LandmarkSetter(vedo.Plotter):
 
             def to_coo(landmarks, n):
 
-                values = torch.tensor([], dtype=float)
-                indices = torch.zeros((2, 0), dtype=int)
+                values = torch.tensor([], dtype=float_dtype)
+                indices = torch.zeros((2, 0), dtype=int_dtype)
 
                 for i, (c, v) in enumerate(landmarks):
 
-                    tmp = torch.concat((v, i * torch.ones_like(v))).reshape(2, -1)
+                    tmp = torch.concat((i * torch.ones_like(v), v)).reshape(2, -1)
                     indices = torch.cat((indices, tmp), dim=1)
 
                     values = torch.concat((values, c), dim=0)
 
-                return torch.sparse_coo_tensor(indices, values, (n, len(landmarks)))
+                return torch.sparse_coo_tensor(indices, values, (len(landmarks), n))
 
             return [
                 to_coo(
@@ -280,7 +280,7 @@ def barycentric_coordinates(mesh, point):
 
         if torch.sum((cos_angles - (-1)).abs() < tol):
             indice = torch.where((cos_angles - (-1)).abs() < tol)[0]
-            edge_indice = int(indice[0])
+            edge_indice = indice[0]
 
             # The point is on an edge
             # Coordinates
