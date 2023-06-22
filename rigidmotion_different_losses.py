@@ -1,4 +1,3 @@
-# Load data
 from skshapes.data import read
 import pyvista
 from skshapes.morphing import ElasticMetric, RigidMotion
@@ -23,9 +22,9 @@ def foo(model, loss, optimizer, regularization, nframes=5):
         loss=loss,
         optimizer=optimizer,
         n_iter=5,
-        device="cpu",
+        device="cuda",
         regularization=regularization,
-        verbose=0,
+        verbose=1,
     )
 
     newshape = r.fit_transform(source=source, target=target)
@@ -52,13 +51,16 @@ def foo(model, loss, optimizer, regularization, nframes=5):
 source = read("data/SCAPE_low_resolution/mesh001.ply")
 target = read("data/SCAPE_low_resolution/mesh041.ply")
 
+source = read("../scikit-shapes-draft/data/SCAPE/scapecomp/mesh001.ply")
+target = read("../scikit-shapes-draft/data/SCAPE/scapecomp/mesh041.ply")
+
 print("Two meshes to be registered:")
 vedo.show([vedo.Mesh(source.to_pyvista()), vedo.Mesh(target.to_pyvista())])
 
 
 print("L2 Loss (assume the correspondence is known)")
 model = RigidMotion()
-loss = L2Loss() + OptimalTransportLoss()
+loss = L2Loss()
 optimizer = LBFGS()
 foo(model, loss, optimizer, regularization=0)
 
@@ -78,9 +80,9 @@ loss = LandmarkLoss()
 optimizer = LBFGS()
 foo(model, loss, optimizer, regularization=0)
 
-# TODO : 0.8 * LandmarkLoss + 0.2 * NearestNeighborsLoss
+
 print("Landmark Loss (user correspondence)")
 model = RigidMotion()
-loss = LandmarkLoss() + 10 * NearestNeighborsLoss()
+loss = LandmarkLoss() + 1.5 * NearestNeighborsLoss()
 optimizer = LBFGS()
 foo(model, loss, optimizer, regularization=0)

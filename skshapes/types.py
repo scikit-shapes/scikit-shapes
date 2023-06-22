@@ -59,7 +59,8 @@ class Loss:
         Returns:
             Loss: a new loss which __call__ method is the sum of the two __call__ methods
         """
-        class newloss(Loss):
+
+        class sum_of_losses(Loss):
             def __init__(self, loss1, loss2):
 
                 self.loss1 = loss1
@@ -73,7 +74,7 @@ class Loss:
         loss1 = self
         loss2 = other
 
-        return newloss(loss1=loss1, loss2=loss2)
+        return sum_of_losses(loss1=loss1, loss2=loss2)
 
     @typecheck
     def __rmul__(self, scalar: Number) -> "Loss":
@@ -85,6 +86,7 @@ class Loss:
         Returns:
             Loss: a new loss which __call__ method is the product of the scalaer and the self.__call__ method
         """
+
         class newloss(Loss):
             def __init__(self, loss, scalar):
 

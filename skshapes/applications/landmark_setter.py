@@ -211,7 +211,7 @@ class LandmarkSetter(vedo.Plotter):
         """Return the landmarks as a list of two lists of 3D points."""
 
         torch_landmarks = [
-            torch.from_numpy(np.array(landmarks)).type(float)
+            torch.from_numpy(np.array(landmarks)).type(float_dtype)
             for landmarks in self.landmarks3d
         ]
         if not barycentric:
@@ -224,17 +224,23 @@ class LandmarkSetter(vedo.Plotter):
 
             def to_coo(landmarks, n):
 
-                values = torch.tensor([], dtype=float_dtype)
-                indices = torch.zeros((2, 0), dtype=int_dtype)
+                device = landmarks[0][0].device
+
+                values = torch.tensor([], dtype=float_dtype, device=device)
+                indices = torch.zeros((2, 0), dtype=int_dtype, device=device)
 
                 for i, (c, v) in enumerate(landmarks):
 
-                    tmp = torch.concat((i * torch.ones_like(v), v)).reshape(2, -1)
+                    tmp = torch.concat(
+                        (i * torch.ones_like(v, device=device), v)
+                    ).reshape(2, -1)
                     indices = torch.cat((indices, tmp), dim=1)
 
                     values = torch.concat((values, c), dim=0)
 
-                return torch.sparse_coo_tensor(indices, values, (len(landmarks), n))
+                return torch.sparse_coo_tensor(
+                    indices, values, (len(landmarks), n), device=device
+                )
 
             return [
                 to_coo(
@@ -251,6 +257,9 @@ class LandmarkSetter(vedo.Plotter):
 @typecheck
 def barycentric_coordinates(mesh, point):
 
+    device = mesh.device
+    point = point.to(device)
+
     # Compute the vectors from the point to the vertices
     vertices = mesh.points
     vectors = vertices - point
@@ -261,12 +270,17 @@ def barycentric_coordinates(mesh, point):
     # Test if a vector is zero (that means the point is a vertex of the mesh)
     if torch.sum(vectors.abs().sum(dim=1) < tol):
         indice = torch.where(
-            torch.all(torch.eq(vectors, torch.zeros_like(vectors)), dim=1)
+            torch.all(
+                torch.eq(vectors, torch.zeros_like(vectors), device=device), dim=1
+            )
         )[0]
         vertex_indice = indice[0]
 
         # The point is a vertex
-        return (torch.tensor([1.0]), torch.tensor([vertex_indice]))
+        return (
+            torch.tensor([1.0], device=device),
+            torch.tensor([vertex_indice], device=device),
+        )
 
     else:
         # Normalize the vectors
@@ -288,7 +302,10 @@ def barycentric_coordinates(mesh, point):
             alpha = norms[b] / torch.norm(vertices[a] - vertices[b])
             beta = norms[a] / torch.norm(vertices[a] - vertices[b])
 
-            return (torch.tensor([alpha, beta]), torch.tensor([a, b]))
+            return (
+                torch.tensor([alpha, beta], device=device),
+                torch.tensor([a, b], device=device),
+            )
 
         else:
 
@@ -325,7 +342,10 @@ def barycentric_coordinates(mesh, point):
                 mat = torch.cat((vertices[a], vertices[b], vertices[c])).reshape(3, 3).T
                 alpha, beta, gamma = torch.inverse(mat) @ point
 
-                return (torch.tensor([alpha, beta, gamma]), torch.tensor([a, b, c]))
+                return (
+                    torch.tensor([alpha, beta, gamma], device=device),
+                    torch.tensor([a, b, c], device=device),
+                )
 
             else:
                 # The point is outside the mesh
