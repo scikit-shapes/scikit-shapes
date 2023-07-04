@@ -127,11 +127,12 @@ class LandmarkSetter(vedo.Plotter):
 
             else:
 
+                self.close()
+
                 ls = self.landmarks
                 for i in range(len(ls)):
                     self.original_meshes[i].landmarks = ls[i]
 
-                self.close()
 
     def _update(self):
         """The _update method update the display of the landmarks with the right color depending on the current mode and the current state of the landmarks selection."""
@@ -207,6 +208,17 @@ class LandmarkSetter(vedo.Plotter):
                 self._update()
 
     @property
+    def landmarks_as_3d_point_cloud(self):
+        """Return the landmarks as a list of two lists of 3D points."""
+
+        torch_landmarks = [
+            torch.from_numpy(np.array(landmarks)).type(float_dtype)
+            for landmarks in self.landmarks3d
+        ]
+
+        return torch_landmarks
+
+    @property
     def landmarks(self, barycentric=True):
         """Return the landmarks as a list of two lists of 3D points."""
 
@@ -218,9 +230,6 @@ class LandmarkSetter(vedo.Plotter):
             return torch_landmarks
 
         else:
-
-            # Réécrire cette partie : il faut avoir l'info sur le nb de points par mesh
-            # pour fixer la taille de la matrice sparse
 
             def to_coo(landmarks, n):
 
@@ -271,7 +280,7 @@ def barycentric_coordinates(mesh, point):
     if torch.sum(vectors.abs().sum(dim=1) < tol):
         indice = torch.where(
             torch.all(
-                torch.eq(vectors, torch.zeros_like(vectors), device=device), dim=1
+                torch.eq(vectors, torch.zeros_like(vectors)), dim=1
             )
         )[0]
         vertex_indice = indice[0]

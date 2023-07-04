@@ -83,6 +83,6 @@ foo(model, loss, optimizer, regularization=0)
 
 print("Landmark Loss (user correspondence)")
 model = RigidMotion()
-loss = LandmarkLoss() + 1.5 * NearestNeighborsLoss()
+loss = LandmarkLoss() + 1.0 * NearestNeighborsLoss()
 optimizer = LBFGS()
 foo(model, loss, optimizer, regularization=0)

@@ -31,6 +31,7 @@ Triangles = JaxInt[torch.Tensor, "3 _"]
 # Jaxtyping does not provide annotation for sparse tensors
 # Then we use the torch.Tensor type and checks are made at runtime
 # with assert statements
+# TODO : use beartype validators to create a custom validator for sparse tensors
 Landmarks = Optional[torch.Tensor]
 
 
