@@ -32,8 +32,8 @@ class ElasticMetric(Morphing):
         # Compute the cumulative sum of the velocity sequence
         cumvelocities = torch.cat(
             (
-                torch.zeros(size=(1, N, D), device=parameter.device),
-                torch.cumsum(parameter, dim=0),
+                torch.zeros(size=(1, N, D), device=shape.device),
+                torch.cumsum(parameter.to(shape.device), dim=0),
             )
         )
         # Compute the sequence of points by adding the cumulative sum of the velocity sequence to the initial shape
@@ -49,7 +49,7 @@ class ElasticMetric(Morphing):
         morphed_shape.points = newpoints[-1]
 
         # Compute the regularization value if needed (0 by default)
-        regularization = torch.tensor(0.0, device=parameter.device)
+        regularization = torch.tensor(0.0, device=shape.device)
         if return_regularization:
             regularization = self.metric(newpoints[:-1], shape.edges, parameter) / (
                 2 * self.n_steps
