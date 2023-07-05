@@ -134,7 +134,7 @@ class PolyData(PolyData):
     ) -> PolyData:
         """Create a Shape from a PyVista PolyData object."""
 
-        points = torch.from_numpy(mesh.points)
+        points = torch.from_numpy(mesh.points).to(float_dtype)
 
         if mesh.is_all_triangles:
             triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
@@ -261,7 +261,7 @@ class PolyData(PolyData):
 
     @property
     @typecheck
-    def landmarks_3d(self) -> Optional[Landmarks]:
+    def landmarks_3d(self) -> Optional[Points]:
         """Return the landmarks in 3D."""
         if self.landmarks is None:
             return None

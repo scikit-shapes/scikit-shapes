@@ -133,7 +133,6 @@ class LandmarkSetter(vedo.Plotter):
                 for i in range(len(ls)):
                     self.original_meshes[i].landmarks = ls[i]
 
-
     def _update(self):
         """The _update method update the display of the landmarks with the right color depending on the current mode and the current state of the landmarks selection."""
 
@@ -279,9 +278,7 @@ def barycentric_coordinates(mesh, point):
     # Test if a vector is zero (that means the point is a vertex of the mesh)
     if torch.sum(vectors.abs().sum(dim=1) < tol):
         indice = torch.where(
-            torch.all(
-                torch.eq(vectors, torch.zeros_like(vectors)), dim=1
-            )
+            torch.all(torch.eq(vectors, torch.zeros_like(vectors)), dim=1)
         )[0]
         vertex_indice = indice[0]
 
@@ -332,18 +329,19 @@ def barycentric_coordinates(mesh, point):
             if torch.sum((sum_angles - (2 * torch.pi)).abs() < tol):
 
                 indices = torch.where((sum_angles - (2 * torch.pi)).abs() < tol)[0]
-                # If several indices, we must find the one for which the point is inside irself the triangle, and not only its projection
+                # If several indices, we must find the one for which the point is inside the triangle, and not only its projection
+                tmp = []
                 for i in indices:
                     a, b, c = mesh.triangles[:, i]
                     normals = mesh.triangle_normals[i]
 
-                    if (
+                    tmp.append(
                         torch.abs(vectors[a].dot(normals))
                         + torch.abs(vectors[b].dot(normals))
                         + torch.abs(vectors[c].dot(normals))
-                        < tol
-                    ):
-                        indice_triangle = i
+                    )
+
+                indice_triangle = indices[torch.argmin(torch.tensor(tmp))]
 
                 # The point is inside a triangle
                 # Coordinates

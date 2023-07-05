@@ -40,8 +40,8 @@ def foo(model, loss, optimizer, regularization):
     plt.show().close()
 
 
-source = read("data/SCAPE_low_resolution/mesh014.ply")
-target = read("data/SCAPE_low_resolution/mesh016.ply")
+source = read("data/SCAPE/mesh014.ply")
+target = read("data/SCAPE/mesh016.ply")
 
 # Align the two meshes
 r = Registration(
