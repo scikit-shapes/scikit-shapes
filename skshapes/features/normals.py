@@ -1,12 +1,13 @@
 import torch
 from pykeops.torch import LazyTensor
-from ..utils import diagonal_ranges
+import torch.nn.functional as F
 
+from ..utils import diagonal_ranges
 from ..types import typecheck, Points, Optional, Triangles
 
 
 @typecheck
-def mesh_normals_areas(
+def smooth_normals(
     *,
     vertices: Points,
     triangles=Optional[Triangles],
@@ -41,7 +42,6 @@ def mesh_normals_areas(
 
     Returns:
         (Tensor): (N,3) or (N,S,3) point normals.
-        (Tensor): (N,) point areas, if triangles were provided.
     """
 
     # Single- or Multi-scale mode:
@@ -63,14 +63,15 @@ def mesh_normals_areas(
         V = (B - A).cross(C - A)  # (N, 3)
 
         # Vertice areas:
-        S = (V**2).sum(-1).sqrt() / 6  # (N,) 1/3 of a triangle area
-        areas = torch.zeros(len(vertices)).type_as(vertices)  # (N,)
-        areas.scatter_add_(0, triangles[0, :], S)  # Aggregate from "A's"
-        areas.scatter_add_(0, triangles[1, :], S)  # Aggregate from "B's"
-        areas.scatter_add_(0, triangles[2, :], S)  # Aggregate from "C's"
+        if False:
+            S = (V**2).sum(-1).sqrt() / 6  # (N,) 1/3 of a triangle area
+            areas = torch.zeros(len(vertices)).type_as(vertices)  # (N,)
+            areas.scatter_add_(0, triangles[0, :], S)  # Aggregate from "A's"
+            areas.scatter_add_(0, triangles[1, :], S)  # Aggregate from "B's"
+            areas.scatter_add_(0, triangles[2, :], S)  # Aggregate from "C's"
 
     else:  # Use "normals" instead
-        areas = None
+        # areas = None
         V = normals
         centers = vertices
 
@@ -97,4 +98,30 @@ def mesh_normals_areas(
 
     normals = F.normalize(U, p=2, dim=-1)  # (N, 3) or (N, S, 3)
 
-    return normals, areas
+    return normals  # , areas
+
+
+def tangent_vectors(normals):
+    """Returns a pair of vector fields u and v to complete the orthonormal basis [n,u,v].
+
+          normals        ->             uv
+    (N, 3) or (N, S, 3)  ->  (N, 2, 3) or (N, S, 2, 3)
+
+    This routine assumes that the 3D "normal" vectors are normalized.
+    It is based on the 2017 paper from Pixar, "Building an orthonormal basis, revisited".
+
+    Args:
+        normals (Tensor): (N,3) or (N,S,3) normals `n_i`, i.e. unit-norm 3D vectors.
+
+    Returns:
+        (Tensor): (N,2,3) or (N,S,2,3) unit vectors `u_i` and `v_i` to complete
+            the tangent coordinate systems `[n_i,u_i,v_i].
+    """
+    x, y, z = normals[..., 0], normals[..., 1], normals[..., 2]
+    s = (2 * (z >= 0)) - 1.0  # = z.sign(), but =1. if z=0.
+    a = -1 / (s + z)
+    b = x * y * a
+    uv = torch.stack((1 + s * x * x * a, s * b, -s * x, b, s + y * y * a, -y), dim=-1)
+    uv = uv.view(uv.shape[:-1] + (2, 3))
+
+    return uv

@@ -1,37 +1,21 @@
 import torch
 from pykeops.torch import LazyTensor
 
-# Compute tangent planes and curvatures ========================================
+from ..utils import diagonal_ranges
+from ..types import typecheck, Points, Optional, Triangles, Number
+
+from .normals import smooth_normals, tangent_vectors
 
 
-def tangent_vectors(normals):
-    """Returns a pair of vector fields u and v to complete the orthonormal basis [n,u,v].
-
-          normals        ->             uv
-    (N, 3) or (N, S, 3)  ->  (N, 2, 3) or (N, S, 2, 3)
-
-    This routine assumes that the 3D "normal" vectors are normalized.
-    It is based on the 2017 paper from Pixar, "Building an orthonormal basis, revisited".
-
-    Args:
-        normals (Tensor): (N,3) or (N,S,3) normals `n_i`, i.e. unit-norm 3D vectors.
-
-    Returns:
-        (Tensor): (N,2,3) or (N,S,2,3) unit vectors `u_i` and `v_i` to complete
-            the tangent coordinate systems `[n_i,u_i,v_i].
-    """
-    x, y, z = normals[..., 0], normals[..., 1], normals[..., 2]
-    s = (2 * (z >= 0)) - 1.0  # = z.sign(), but =1. if z=0.
-    a = -1 / (s + z)
-    b = x * y * a
-    uv = torch.stack((1 + s * x * x * a, s * b, -s * x, b, s + y * y * a, -y), dim=-1)
-    uv = uv.view(uv.shape[:-1] + (2, 3))
-
-    return uv
-
-
-def curvatures(
-    vertices, triangles=None, scales=[1.0], batch=None, normals=None, reg=0.01
+@typecheck
+def smooth_curvatures(
+    *,
+    vertices: Points,
+    triangles=Optional[Triangles],
+    scales=[1.0],
+    batch=None,
+    normals=Optional[Points],
+    reg: Number = 0.01
 ):
     """Returns a collection of mean (H) and Gauss (K) curvatures at different scales.
 
@@ -76,13 +60,19 @@ def curvatures(
     N, S = vertices.shape[0], len(scales)
     ranges = diagonal_ranges(batch)
 
-    # Compute the normals at different scales + vertice areas:
-    normals_s, _ = mesh_normals_areas(
-        vertices, triangles=triangles, normals=normals, scale=scales, batch=batch
-    )  # (N, S, 3), (N,)
+    # Compute the normals at different scales + vertice areas - (N, S, 3):
+    normals_s = smooth_normals(
+        vertices=vertices,
+        triangles=triangles,
+        normals=normals,
+        scale=scales,
+        batch=batch,
+    )
+    assert normals_s.shape == (N, S, 3)
 
-    # Local tangent bases:
-    uv_s = tangent_vectors(normals_s)  # (N, S, 2, 3)
+    # Local tangent bases - (N, S, 2, 3):
+    uv_s = tangent_vectors(normals_s)
+    assert uv_s.shape == (N, S, 2, 3)
 
     features = []
 
@@ -130,8 +120,8 @@ def curvatures(
 
         # (minus) Shape operator, i.e. the differential of the Gauss map:
         # = (PPt^-1 @ PQt) : simple estimation through linear regression
-        S = torch.solve(PQt, PPt).solution
-        a, b, c, d = S[:, 0, 0], S[:, 0, 1], S[:, 1, 0], S[:, 1, 1]  # (N,)
+        Sh = torch.linalg.solve(PPt, PQt)
+        a, b, c, d = Sh[:, 0, 0], Sh[:, 0, 1], Sh[:, 1, 0], Sh[:, 1, 1]  # (N,)
 
         # Normalization
         mean_curvature = a + d
@@ -139,4 +129,5 @@ def curvatures(
         features += [mean_curvature.clamp(-1, 1), gauss_curvature.clamp(-1, 1)]
 
     features = torch.stack(features, dim=-1)
+    assert features.shape == (N, S * 2)
     return features
