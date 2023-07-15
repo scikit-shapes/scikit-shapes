@@ -3,6 +3,7 @@ from pykeops.torch import LazyTensor
 
 # Compute tangent planes and curvatures ========================================
 
+
 def tangent_vectors(normals):
     """Returns a pair of vector fields u and v to complete the orthonormal basis [n,u,v].
 
@@ -103,7 +104,7 @@ def curvatures(
         # Pseudo-geodesic squared distance:
         d2_ij = ((x_j - x_i) ** 2).sum(-1) * ((2 - (n_i | n_j)) ** 2)  # (N, N, 1)
         # Gaussian window:
-        window_ij = (-d2_ij / (2 * (scale ** 2))).exp()  # (N, N, 1)
+        window_ij = (-d2_ij / (2 * (scale**2))).exp()  # (N, N, 1)
 
         # Project on the tangent plane:
         P_ij = uv_i.matvecmult(x_j - x_i)  # (N, N, 2)

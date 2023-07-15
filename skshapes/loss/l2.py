@@ -11,5 +11,4 @@ class L2Loss(Loss):
 
     @typecheck
     def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
-
         return torch.norm(source.points - target.points, p=self.p)

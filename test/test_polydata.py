@@ -61,7 +61,6 @@ def _cube():
 
 
 def test_polydata_creation():
-
     # Shape with points and triangles
     points = torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float32)
     triangles = torch.tensor([[0], [1], [2]], dtype=torch.int64)
@@ -100,7 +99,6 @@ def test_polydata_creation():
 
 
 def test_interaction_with_pyvista():
-
     # Import/export from/to pyvista
     import pyvista
     from pyvista.examples import load_sphere

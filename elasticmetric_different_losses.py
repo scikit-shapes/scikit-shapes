@@ -16,7 +16,6 @@ from vedo.applications import Browser
 
 
 def foo(model, loss, optimizer, regularization):
-
     r = Registration(
         model=model,
         loss=loss,

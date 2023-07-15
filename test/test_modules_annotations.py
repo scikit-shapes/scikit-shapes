@@ -37,7 +37,6 @@ def check_module_annotations(module, template, type):
             # Loop over the methods of the class
             print("Inspecting annotations of class {}:".format(name))
             for method_name, method in inspect.getmembers(obj):
-
                 if method_name in template.keys():
                     print("Method name: {}".format(method_name))
                     # get the annotations of the method

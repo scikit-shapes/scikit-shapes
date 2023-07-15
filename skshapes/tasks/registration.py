@@ -43,7 +43,6 @@ class Registration:
 
         # Define the loss function
         def loss_fn(parameter):
-
             return_regularization = False if self.regularization == 0 else True
             morphing = self.model.morph(
                 shape=source,
@@ -91,7 +90,6 @@ class Registration:
 
     @typecheck
     def transform(self, *, source: Shape) -> Shape:
-
         return self.model.morph(shape=source, parameter=self.parameter).morphed_shape
 
     @typecheck

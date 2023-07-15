@@ -2,20 +2,18 @@ import torch
 from pykeops.torch import LazyTensor
 from ..utils import diagonal_ranges
 
-from ..types import (
-    typecheck,
-    Points,
-    Optional,
-    Triangles
-)
+from ..types import typecheck, Points, Optional, Triangles
+
 
 @typecheck
-def mesh_normals_areas(*,
-                       vertices: Points, 
-                       triangles=Optional[Triangles], 
-                       scale=[1.0], 
-                       batch=None, 
-                       normals=Optional[Points]):
+def mesh_normals_areas(
+    *,
+    vertices: Points,
+    triangles=Optional[Triangles],
+    scale=[1.0],
+    batch=None,
+    normals=Optional[Points]
+):
     """Returns a smooth field of normals, possibly at different scales.
 
     points, triangles or normals, scale(s)  ->      normals
@@ -65,7 +63,7 @@ def mesh_normals_areas(*,
         V = (B - A).cross(C - A)  # (N, 3)
 
         # Vertice areas:
-        S = (V ** 2).sum(-1).sqrt() / 6  # (N,) 1/3 of a triangle area
+        S = (V**2).sum(-1).sqrt() / 6  # (N,) 1/3 of a triangle area
         areas = torch.zeros(len(vertices)).type_as(vertices)  # (N,)
         areas.scatter_add_(0, triangles[0, :], S)  # Aggregate from "A's"
         areas.scatter_add_(0, triangles[1, :], S)  # Aggregate from "B's"
@@ -83,7 +81,7 @@ def mesh_normals_areas(*,
     s = LazyTensor(scales[None, None, :])  # (1, 1, S)
 
     D_ij = ((x_i - y_j) ** 2).sum(-1)  #  (N, M, 1)
-    K_ij = (-D_ij / (2 * s ** 2)).exp()  # (N, M, S)
+    K_ij = (-D_ij / (2 * s**2)).exp()  # (N, M, S)
 
     # Support for heterogeneous batch processing:
     if batch is not None:

@@ -31,7 +31,6 @@ class RigidMotion(Morphing):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
-
         rotation_angles = parameter[0]
         matrix = axis_angle_to_matrix(rotation_angles)
 
@@ -58,7 +57,6 @@ class RigidMotion(Morphing):
 
     @typecheck
     def parameter_shape(self, shape: Shape) -> Tuple[int, int]:
-
         return (2, 3)
 
 

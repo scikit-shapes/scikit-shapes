@@ -73,7 +73,6 @@ class Loss:
 
         class sum_of_losses(Loss):
             def __init__(self, loss1, loss2):
-
                 self.loss1 = loss1
                 self.loss2 = loss2
 
@@ -100,7 +99,6 @@ class Loss:
 
         class newloss(Loss):
             def __init__(self, loss, scalar):
-
                 self.loss = loss
                 self.scalar = scalar
 

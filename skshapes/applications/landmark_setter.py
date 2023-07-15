@@ -82,7 +82,6 @@ class LandmarkSetter(vedo.Plotter):
         """
 
         if self.mode == "reference":
-
             self.n_landmarks = len(self.reference_lpoints)
             self.mode = "others"
             self.at(0).remove(self.instructions_reference)
@@ -107,13 +106,11 @@ class LandmarkSetter(vedo.Plotter):
             self._update()
 
         else:
-
             self.landmarks3d[self.other_id + 1] = self.other_lpoints.copy()
             self.other_lpoints = []
             self.other_id += 1
 
             if self.other_id < len(self.others):
-
                 self.current_other = self.others[self.other_id]
                 self.active_actor = self.current_other
 
@@ -126,7 +123,6 @@ class LandmarkSetter(vedo.Plotter):
                 self._update()
 
             else:
-
                 self.close()
 
                 ls = self.landmarks
@@ -137,7 +133,6 @@ class LandmarkSetter(vedo.Plotter):
         """The _update method update the display of the landmarks with the right color depending on the current mode and the current state of the landmarks selection."""
 
         if self.mode == "reference":
-
             self.at(0).remove(self.reference_lpoints_pointcloud)
             self.reference_lpoints_pointcloud = (
                 vedo.Points(self.reference_lpoints, r=15).pickable(False).c("r")
@@ -145,7 +140,6 @@ class LandmarkSetter(vedo.Plotter):
             self.at(0).add(self.reference_lpoints_pointcloud)
 
         else:
-
             self.at(0).remove(self.point_to_pick)
             if len(self.other_lpoints) < self.n_landmarks:
                 self.point_to_pick = (
@@ -169,7 +163,6 @@ class LandmarkSetter(vedo.Plotter):
         """The _key_press method is called when the user presses a key. It is used to add or delete landmarks."""
 
         if self.mode == "reference" and evt.actor == self.reference:
-
             if evt.keypress == "z":
                 pt = self.active_actor.closest_point(evt.picked3d)
                 self.reference_lpoints.append(pt)
@@ -188,7 +181,6 @@ class LandmarkSetter(vedo.Plotter):
             self._update()
 
         elif self.mode == "others" and evt.actor == self.current_other:
-
             if evt.keypress == "z" and len(self.other_lpoints) < self.n_landmarks:
                 pt = self.active_actor.closest_point(evt.picked3d)
                 self.other_lpoints.append(pt)
@@ -231,14 +223,12 @@ class LandmarkSetter(vedo.Plotter):
         else:
 
             def to_coo(landmarks, n):
-
                 device = landmarks[0][0].device
 
                 values = torch.tensor([], dtype=float_dtype, device=device)
                 indices = torch.zeros((2, 0), dtype=int_dtype, device=device)
 
                 for i, (c, v) in enumerate(landmarks):
-
                     tmp = torch.concat(
                         (i * torch.ones_like(v, device=device), v)
                     ).reshape(2, -1)
@@ -264,7 +254,6 @@ class LandmarkSetter(vedo.Plotter):
 
 @typecheck
 def barycentric_coordinates(mesh, point):
-
     device = mesh.device
     point = point.to(device)
 
@@ -314,7 +303,6 @@ def barycentric_coordinates(mesh, point):
             )
 
         else:
-
             A = mesh.triangles[0]
             B = mesh.triangles[1]
             C = mesh.triangles[2]
@@ -327,7 +315,6 @@ def barycentric_coordinates(mesh, point):
             # If sum_angles is close to 2pi, the point is inside the triangle, or its projection is inside the triangle
 
             if torch.sum((sum_angles - (2 * torch.pi)).abs() < tol):
-
                 indices = torch.where((sum_angles - (2 * torch.pi)).abs() < tol)[0]
                 # If several indices, we must find the one for which the point is inside the triangle, and not only its projection
                 tmp = []

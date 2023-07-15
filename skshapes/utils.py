@@ -1,5 +1,6 @@
 import torch
 
+
 def ranges_slices(batch):
     """Helper function for the diagonal ranges function."""
     Ns = batch.bincount()

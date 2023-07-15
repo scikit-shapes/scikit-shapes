@@ -11,7 +11,6 @@ class OptimalTransportLoss(Loss):
 
     @typecheck
     def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
-
         target_centers = target.triangle_centers
         target_weights = target.triangle_areas
 
