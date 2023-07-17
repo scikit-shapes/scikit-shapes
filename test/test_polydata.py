@@ -133,3 +133,11 @@ def test_interaction_with_pyvista():
     assert cube2.n_points == 8
     assert cube2.is_all_triangles
     assert np.allclose(cube.points, cube2.points)
+
+
+def test_gpu():
+
+    cube = PolyData.from_pyvista(_cube())
+    cube_gpu = cube.to("cuda")
+
+    assert cube_gpu.points.device == torch.Tensor().cuda().device

@@ -5,7 +5,7 @@ from ..types import typecheck, Loss, PolyData, FloatScalar
 
 class OptimalTransportLoss(Loss):
     @typecheck
-    def __init__(self, loss: int = "sinkhorn", **kwargs) -> None:
+    def __init__(self, loss: str = "sinkhorn", **kwargs) -> None:
         self.kwargs = kwargs
         self.loss = loss
 

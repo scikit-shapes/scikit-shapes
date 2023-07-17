@@ -24,6 +24,9 @@ class ElasticMetric(Morphing):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
+        if parameter.device != shape.device:
+            parameter = parameter.to(shape.device)
+
         ##### First, we compute the sequence of morphed points #####
 
         N, D = shape.points.shape

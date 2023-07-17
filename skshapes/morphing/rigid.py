@@ -31,11 +31,14 @@ class RigidMotion(Morphing):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
+
+        if parameter.device != shape.device:
+            parameter = parameter.to(shape.device)
+
         rotation_angles = parameter[0]
         matrix = axis_angle_to_matrix(rotation_angles)
 
         translation = parameter[1]
-
         center = shape.points.mean(dim=0)
 
         newpoints = (matrix @ (shape.points - center).T).T + center + translation

@@ -1,12 +1,12 @@
 from typing import Any
 import torch
 
-from ..types import typecheck, Loss, PolyData, FloatScalar
+from ..types import typecheck, Loss, PolyData, FloatScalar, Number
 
 
 class LandmarkLoss(Loss):
     @typecheck
-    def __init__(self, p=2) -> None:
+    def __init__(self, p: Number = 2) -> None:
         self.p = p
 
     @typecheck

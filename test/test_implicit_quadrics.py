@@ -43,7 +43,7 @@ def test_quadratic_function(*, n_points: int):
     X -= mean_point
     X /= sigma
 
-    X = torch.cat([X, torch.ones_like(X[:,:1])], dim=1)
+    X = torch.cat([X, torch.ones_like(X[:, :1])], dim=1)
     assert X.shape == (N, 4)
 
     XXt = X.view(N, 4, 1) * X.view(N, 1, 4)
