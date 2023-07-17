@@ -14,7 +14,6 @@ from ..types import (
 class ElasticMetric(Morphing):
     @typecheck
     def __init__(self, n_steps: int = 1) -> None:
-
         self.n_steps = n_steps
 
     @typecheck
@@ -25,7 +24,6 @@ class ElasticMetric(Morphing):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
-
         ##### First, we compute the sequence of morphed points #####
 
         N, D = shape.points.shape

@@ -13,7 +13,6 @@ from skshapes.optimization import LBFGS
 
 
 def test_registration():
-
     # Load two meshes
     datafolder = "data/SCAPE_low_resolution"
     import os
@@ -45,7 +44,6 @@ def test_registration():
     models = [ElasticMetric(), RigidMotion()]
     for loss in losses:
         for model in models:
-
             r = Registration(
                 model=model,
                 loss=loss,

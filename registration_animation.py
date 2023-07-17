@@ -22,7 +22,6 @@ target.landmarks = torch.arange(target.points.shape[0], dtype=torch.int64)
 
 
 def foo(regularization):
-
     n_steps = 5
 
     r = Registration(

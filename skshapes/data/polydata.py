@@ -19,7 +19,6 @@ from ..types import (
 
 @typecheck
 def read(filename: str) -> PolyData:
-
     mesh = pyvista.read(filename)
     if type(mesh) == pyvista.PolyData:
         return PolyData.from_pyvista(mesh)
@@ -237,7 +236,6 @@ class PolyData(PolyData):
         for attr in dir(self):
             if attr.startswith("_"):
                 if type(getattr(self, attr)) == torch.Tensor:
-
                     setattr(self, attr, getattr(self, attr).to(device))
         self._device = device
 
