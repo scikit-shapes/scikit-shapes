@@ -108,12 +108,13 @@ def test_interaction_with_pyvista():
     n_triangles = mesh.n_cells
 
     # Create a PolyData from a pyvista mesh
-    polydata = PolyData.from_pyvista(mesh)
+    polydata = PolyData(mesh)
     assert polydata.n_points == n_points
     assert polydata.n_triangles == n_triangles
 
     # back to pyvista, check that the mesh is the same
     mesh2 = polydata.to_pyvista()
+    print(np.max(np.abs(mesh.points - mesh2.points)))
     assert np.allclose(mesh.points, mesh2.points)
     assert np.allclose(mesh.faces, mesh2.faces)
 
@@ -124,7 +125,7 @@ def test_interaction_with_pyvista():
     assert cube.n_cells == 6
     assert cube.n_points == 8
     # Create a PolyData from a pyvista mesh and check that the faces are converted to triangles
-    polydata = PolyData.from_pyvista(cube)
+    polydata = PolyData(cube)
     assert polydata.n_points == 8
     assert polydata.n_triangles == 12
     # back to pyvista, check that the mesh is the same
@@ -135,9 +136,44 @@ def test_interaction_with_pyvista():
     assert np.allclose(cube.points, cube2.points)
 
 
-def test_gpu():
+import skshapes as sks
 
-    cube = PolyData.from_pyvista(_cube())
+
+def test_decimation():
+    mesh = pyvista.Sphere().decimate(0.5)  # use pyvista to decimate
+    polydata = sks.PolyData(pyvista.Sphere()).decimate(0.5)  # use skshapes to decimate
+
+    # Check that the points are the same
+    assert np.allclose(polydata.points.numpy(), mesh.points)
+
+
+def test_mesh_cleaning():
+    # Example of a mesh with duplicated points
+    points = np.array(
+        [
+            [0, 0, 0],
+            [1, 0, 0],
+            [0, 1, 0],
+            [0, 0, 0],
+            [1, 0, 0],
+            [0, 0, 1],
+        ],
+        dtype=np.float64,
+    )
+
+    faces = np.array([3, 0, 1, 2, 3, 3, 4, 5])
+
+    mesh = pyvista.PolyData(points, faces=faces)
+    clean_mesh = mesh.clean()
+
+    test = sks.PolyData(mesh)
+
+    # Check that the mesh is cleaned when loaded by skshapes
+    assert np.allclose(test.points.numpy(), clean_mesh.points)
+
+
+def test_gpu():
+    cube = sks.PolyData(_cube())
     cube_gpu = cube.to("cuda")
 
     assert cube_gpu.points.device == torch.Tensor().cuda().device
