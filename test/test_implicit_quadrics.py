@@ -77,7 +77,7 @@ def test_quadratic_function(*, n_points: int):
 
     print(self_scores)
     print(quadrics[0])
-    assert False
+    assert self_scores.abs().max() < 1e-2
 
 
 def display_quadratic_fit(points, highlight=0, scale=1):
