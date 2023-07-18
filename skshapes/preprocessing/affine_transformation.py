@@ -3,7 +3,7 @@
 
 import torch
 import numpy as np
-from ..data import Dataset, Shape
+from ..data import Dataset
 
 
 class AffineTransformation:

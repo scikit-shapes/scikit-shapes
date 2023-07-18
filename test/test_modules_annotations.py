@@ -51,18 +51,20 @@ import skshapes.loss
 import skshapes.morphing
 import skshapes
 
+from skshapes.types import ShapeType
+
 # Define the templates for the annotations of Loss and Morphing
 loss_template = {
     "__call__": {
-        "source": skshapes.Shape,
-        "target": skshapes.Shape,
+        "source": skshapes.ShapeType,
+        "target": skshapes.ShapeType,
         "return": skshapes.FloatScalar,
     }
 }
 
 morphing_template = {
     "morph": {
-        "shape": skshapes.Shape,
+        "shape": skshapes.ShapeType,
         "return_path": bool,
         "return_regularization": bool,
         "return": skshapes.MorphingOutput,

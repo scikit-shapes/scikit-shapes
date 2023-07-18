@@ -46,15 +46,15 @@ Landmarks = Annotated[
 
 
 # Shape types
-class Shape:
+class ShapeType:
     pass
 
 
-class PolyData(Shape):
+class PolyDataType(ShapeType):
     pass
 
 
-class Image(Shape):
+class ImageType(ShapeType):
     pass
 
 
@@ -76,7 +76,7 @@ class Loss:
                 self.loss1 = loss1
                 self.loss2 = loss2
 
-            def __call__(self, source: Shape, target: Shape) -> FloatScalar:
+            def __call__(self, source: ShapeType, target: ShapeType) -> FloatScalar:
                 return self.loss1.__call__(
                     source=source, target=target
                 ) + self.loss2.__call__(source=source, target=target)
@@ -102,7 +102,7 @@ class Loss:
                 self.loss = loss
                 self.scalar = scalar
 
-            def __call__(self, source: Shape, target: Shape) -> FloatScalar:
+            def __call__(self, source: ShapeType, target: ShapeType) -> FloatScalar:
                 return self.scalar * self.loss.__call__(source=source, target=target)
 
         loss = self
@@ -118,6 +118,6 @@ class Optimizer:
 
 
 class MorphingOutput(NamedTuple):
-    morphed_shape: Optional[Shape] = None
+    morphed_shape: Optional[ShapeType] = None
     regularization: Optional[FloatScalar] = None
-    path: Optional[List[Shape]] = None
+    path: Optional[List[ShapeType]] = None

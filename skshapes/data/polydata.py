@@ -4,7 +4,7 @@ import numpy as np
 
 from ..types import (
     typecheck,
-    PolyData,
+    PolyDataType,
     float_dtype,
     Points,
     Edges,
@@ -17,16 +17,7 @@ from ..types import (
 )
 
 
-@typecheck
-def read(filename: str) -> PolyData:
-    mesh = pyvista.read(filename)
-    if type(mesh) == pyvista.PolyData:
-        return PolyData.from_pyvista(mesh)
-    else:
-        raise NotImplementedError("Images are not supported yet")
-
-
-class PolyData(PolyData):
+class PolyData(PolyDataType):
     """A class to represent a surface mesh as a set of points, edges and/or triangles."""
 
     @typecheck
@@ -81,7 +72,7 @@ class PolyData(PolyData):
     #### Copy functions #####
     #########################
     @typecheck
-    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyData:
+    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyDataType:
         """Return a copy of the shape"""
         if device is None:
             device = self.device
@@ -97,7 +88,7 @@ class PolyData(PolyData):
         return PolyData(**kwargs)
 
     @typecheck
-    def to(self, device: Union[str, torch.device]) -> PolyData:
+    def to(self, device: Union[str, torch.device]) -> PolyDataType:
         """Return a copy of the shape on the specified device"""
         return self.copy(device=device)
 
@@ -130,7 +121,7 @@ class PolyData(PolyData):
     @typecheck
     def from_pyvista(
         cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = None
-    ) -> PolyData:
+    ) -> PolyDataType:
         """Create a Shape from a PyVista PolyData object."""
 
         points = torch.from_numpy(mesh.points).to(float_dtype)

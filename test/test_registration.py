@@ -24,8 +24,8 @@ def test_registration():
     target = read(datafolder + "/" + "mesh041.ply")
 
     # Few type checks
-    assert isinstance(source, skshapes.Shape)
-    assert isinstance(target, skshapes.PolyData)
+    assert isinstance(source, skshapes.ShapeType)
+    assert isinstance(target, skshapes.PolyDataType)
 
     assert source.landmarks is None
     # Add landmarks

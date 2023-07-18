@@ -1,4 +1,4 @@
-from .polydata import PolyData, read
+from .polydata import PolyData
 from .dataset import Dataset
-
-from .polydata import PolyData as Shape
+from .image import Image
+from .utils import read

@@ -2,7 +2,7 @@ import vedo
 import numpy as np
 import torch
 
-from ..types import typecheck, PolyData, List, float_dtype, int_dtype
+from ..types import typecheck, PolyDataType, List, float_dtype, int_dtype
 
 
 class LandmarkSetter(vedo.Plotter):
@@ -14,7 +14,7 @@ class LandmarkSetter(vedo.Plotter):
     """
 
     @typecheck
-    def __init__(self, meshes: List[PolyData], **kwargs) -> None:
+    def __init__(self, meshes: List[PolyDataType], **kwargs) -> None:
         super().__init__(N=2, sharecam=False, **kwargs)
 
         # The 3D landmarks are stored in a list of lists of 3D points
