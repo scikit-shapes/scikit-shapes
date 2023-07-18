@@ -4,7 +4,6 @@ import torch
 
 
 def test():
-
     bunny = sks.PolyData.from_pyvista(pyvista.examples.download_bunny_coarse())
     airplane = sks.PolyData.from_pyvista(pyvista.examples.load_airplane())
 
@@ -12,7 +11,6 @@ def test():
     airplane = airplane.to("cuda")
 
     for model in [sks.RigidMotion(), sks.ElasticMetric()]:
-
         r = sks.Registration(
             model=model,
             loss=sks.NearestNeighborsLoss(),
@@ -49,7 +47,6 @@ def test():
         sks.OptimalTransportLoss(),
         sks.L2Loss(),
     ]:
-
         try:
             sks.NearestNeighborsLoss()(bunny_cuda, bunny_cpu)
         except:

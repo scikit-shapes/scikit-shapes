@@ -136,7 +136,6 @@ def test_interaction_with_pyvista():
 
 
 def test_gpu():
-
     cube = PolyData.from_pyvista(_cube())
     cube_gpu = cube.to("cuda")
 
