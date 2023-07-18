@@ -18,15 +18,25 @@ from ..types import (
 
 
 class PolyData(PolyDataType):
-    """A class to represent a surface mesh as a set of points, edges and/or triangles."""
+    """A polygonal data object. It is composed of points, edges and triangles.
+
+
+    Three types of objects can be provided to initialize a PolyData object:
+    - a pyvista mesh
+    - a path to a mesh
+    - points, edges and triangles as torch tensors
+
+    For all these cases, it is possible to provide landmarks as a sparse tensor and device as a string or a torch device ("cpu" by default)
+    """
 
     @typecheck
     def __init__(
         self,
-        points: Points,
+        points: Union[Points, pyvista.PolyData, str],
+        *,
         edges: Optional[Edges] = None,
         triangles: Optional[Triangles] = None,
-        device: Optional[Union[str, torch.device]] = None,
+        device: Union[str, torch.device] = "cpu",
         landmarks: Optional[Landmarks] = None,
     ) -> None:
         """Initialize a PolyData object.
@@ -35,9 +45,42 @@ class PolyData(PolyDataType):
             points (Points): the points of the shape.
             edges (Optional[Edges], optional): the edges of the shape. Defaults to None.
             triangles (Optional[Triangles], optional): the triangles of the shape. Defaults to None.
-            device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to None.
+            device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to "cpu".
             landmarks (Optional[Landmarks], optional): _description_. Defaults to None.
         """
+
+        # If the user provides a pyvista mesh, we extract the points, edges and triangles from it
+        # If the user provides a path to a mesh, we read it with pyvista and extract the points, edges and triangles from it
+        if type(points) == pyvista.PolyData or type(points) == str:
+            mesh = points if type(points) == pyvista.PolyData else pyvista.read(points)
+
+            cleaned_mesh = mesh.clean()
+            if cleaned_mesh.n_points != mesh.n_points:
+                mesh = cleaned_mesh
+                if landmarks is not None:
+                    print(f"Warning: Mesh has been cleaned. Landmarks are ignored.")
+                    landmarks = None
+
+            points = torch.from_numpy(mesh.points).to(float_dtype)
+
+            if mesh.is_all_triangles:
+                triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
+                triangles = torch.from_numpy(triangles.copy())
+                edges = None
+
+            elif mesh.triangulate().is_all_triangles:
+                triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:].T
+                triangles = torch.from_numpy(triangles.copy())
+                edges = None
+
+            elif len(mesh.lines) > 0:
+                edges = mesh.lines.reshape(-1, 3)[:, 1:].T
+                edges = torch.from_numpy(edges.copy())
+                triangles = None
+
+            else:
+                edges = None
+                triangles = None
 
         if device is None:
             device = points.device
@@ -67,6 +110,39 @@ class PolyData(PolyDataType):
 
         else:
             self._landmarks = None
+
+    @typecheck
+    def decimate(self, target_reduction: float) -> PolyDataType:
+        """Decimate the shape using the Quadric Decimation algorithm.
+
+        Args:
+            target_reduction (float): the target reduction ratio. Must be between 0 and 1.
+
+        Returns:
+            PolyDataType: the decimated PolyData
+        """
+
+        assert (
+            target_reduction > 0 and target_reduction < 1
+        ), "target_reduction must be between 0 and 1"
+
+        mesh = self.to_pyvista()
+        mesh = mesh.decimate(target_reduction)
+        return PolyData(mesh, device=self.device)
+
+    @typecheck
+    def save(self, filename: str) -> None:
+        """Save the shape at the specified location.
+        Format accepted by PyVista are supported (.ply, .stl, .vtk)
+        see : https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/pointset.py#L439-L1283
+
+        Args:
+            path (str): the path where to save the shape.
+        """
+        # TODO : how to save landmarks ? Features ?
+
+        mesh = self.to_pyvista()
+        mesh.save(filename)
 
     #########################
     #### Copy functions #####
@@ -120,8 +196,13 @@ class PolyData(PolyDataType):
     @classmethod
     @typecheck
     def from_pyvista(
-        cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = None
+        cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = "cpu"
     ) -> PolyDataType:
+        import warnings
+
+        warnings.warn(
+            "from_pyvista is deprecated, use PolyData(mesh) instead", DeprecationWarning
+        )
         """Create a Shape from a PyVista PolyData object."""
 
         points = torch.from_numpy(mesh.points).to(float_dtype)
