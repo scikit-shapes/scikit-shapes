@@ -11,10 +11,10 @@ from .normals import smooth_normals, tangent_vectors
 def smooth_curvatures(
     *,
     vertices: Points,
-    triangles=Optional[Triangles],
+    triangles: Optional[Triangles] = None,
     scales=[1.0],
     batch=None,
-    normals=Optional[Points],
+    normals:Optional[Points] = None,
     reg: Number = 0.01
 ):
     """Returns a collection of mean (H) and Gauss (K) curvatures at different scales.
@@ -131,3 +131,91 @@ def smooth_curvatures(
     features = torch.stack(features, dim=-1)
     assert features.shape == (N, S * 2)
     return features
+
+
+
+@typecheck
+def smooth_curvatures_2(
+        *,
+        points: Points,
+        triangles:Optional[Triangles] = None,
+        scale=1.0,
+        batch=None,
+        normals:Optional[Points] = None,
+        reg: Number = 0.01
+    ):
+    # Number of points:
+    N = points.shape[0]
+    ranges = diagonal_ranges(batch)
+
+    # Compute the normals at different scales + vertice areas - (N, S, 3):
+    normals = smooth_normals(
+        vertices=points,
+        triangles=triangles,
+        normals=normals,
+        scale=scale,
+        batch=batch,
+    )
+    assert normals.shape == (N, 3)
+
+    # Local tangent bases - (N, 2, 3):
+    uv = tangent_vectors(normals)
+    assert uv.shape == (N, 2, 3)
+
+    # Encode as symbolic tensors:
+    # Points:
+    x_i = LazyTensor(points.view(N, 1, 3))
+    x_j = LazyTensor(points.view(1, N, 3))
+    # Normals:
+    n_i = LazyTensor(normals.view(N, 1, 3))
+    # Tangent bases:
+    uv_i = LazyTensor(uv.view(N, 1, 6))
+
+    # Squared distance:
+    d2_ij = ((x_j - x_i) ** 2).sum(-1)  # (N, N, 1)
+    # Gaussian window:
+    window_ij = (-d2_ij / (2 * (scale**2))).exp()  # (N, N, 1)
+
+    # Project on the tangent plane:
+    P_ij = uv_i.matvecmult(x_j - x_i)  # (N, N, 2)
+    Q_ij = P_ij[0] * P_ij[1] # (N, N, 1)
+    # Concatenate:
+    R_ij = (P_ij ** 2).concat(Q_ij)  # (N, N, 2+1)
+
+    N_ij = n_i.matvecmult(x_j - x_i)  # (N, N, 1)
+    
+    # Concatenate:
+    R_N_ij = R_ij.concat(N_ij)  # (N, N, 4)
+
+    # Covariances, with a scale-dependent weight:
+    RRt_RNt_ij = R_ij.tensorprod(R_N_ij)  # (N, N, 3*(3+1))
+    RRt_RNt_ij = window_ij * RRt_RNt_ij  #  (N, N, 3*(3+1))
+
+    # Reduction - with batch support:
+    RRt_RNt_ij.ranges = ranges
+    RRt_RNt = RRt_RNt_ij.sum(1)  # (N, 3*(3+1))
+
+    # Reshape to get the two covariance matrices:
+    RRt_RNt = RRt_RNt.view(N, 3, 3+1)
+    RRt, RNt = RRt_RNt[:, :, :3].contiguous(), RRt_RNt[:, :, 3].contiguous()  # (N, 3, 3), (N, 3)
+    assert RRt.shape == (N, 3, 3)
+    assert RNt.shape == (N, 3)
+
+    # Add a small ridge regression:
+    RRt[:, 0, 0] += reg
+    RRt[:, 1, 1] += reg
+    RRt[:, 2, 2] += reg
+
+    # (RRt^-1 @ RNt) : simple estimation through linear regression
+    acb = torch.linalg.solve(RRt, RNt)
+    assert acb.shape == (N, 3)
+    a, c, b = acb[:, 0], acb[:, 1], acb[:, 2]  # (N,)
+
+    # Normalization
+    mean_curvature = a + c
+    gauss_curvature = a * c - b * b
+    
+    return {
+        "mean": mean_curvature,
+        "gauss": gauss_curvature,
+    }
