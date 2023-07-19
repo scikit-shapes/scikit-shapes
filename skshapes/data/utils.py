@@ -1,4 +1,4 @@
-from ..types import typecheck, PolyDataType
+from ..types import typecheck, PolyDataType, Union
 from .polydata import PolyData
 import pyvista
 

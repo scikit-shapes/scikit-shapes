@@ -1,4 +1,4 @@
-from skshapes.data import PolyData
+# from skshapes.data import PolyData
 import torch
 import numpy as np
 import pyvista
@@ -106,7 +106,7 @@ def test_interaction_with_pyvista():
     n_triangles = mesh.n_cells
 
     # Create a PolyData from a pyvista mesh
-    polydata = PolyData(mesh)
+    polydata = sks.PolyData(mesh)
     assert polydata.n_points == n_points
     assert polydata.n_triangles == n_triangles
 
@@ -165,6 +165,68 @@ def test_mesh_cleaning():
 
     # Check that the mesh is cleaned when loaded by skshapes
     assert np.allclose(test.points.numpy(), clean_mesh.points)
+
+
+def test_features():
+    mesh = sks.PolyData(pyvista.Sphere())
+
+    # Add some features
+    mesh.features["hessians"] = torch.rand(mesh.n_points, 3, 3)
+    mesh.features["normals"] = torch.rand(mesh.n_points, 3)
+    mesh.features.append(torch.rand(mesh.n_points))
+
+    try:
+        mesh.features.append(torch.rand(mesh.n_points + 1))
+    except:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the size of the tensor is not correct"
+        )
+
+    # Check that the features are correctly copied
+    copy = mesh.copy()
+    assert torch.allclose(copy.features["hessians"], mesh.features["hessians"])
+    copy.features["hessians"] = torch.rand(
+        mesh.n_points, 3, 3
+    )  # If the copy was not correct, this would also change the features of the original mesh
+    assert not torch.allclose(copy.features["hessians"], mesh.features["hessians"])
+
+    new_features = {
+        "rotations": torch.rand(mesh.n_points, 3, 3),
+        "colors": torch.rand(mesh.n_points, 3),
+    }
+
+    mesh.features = new_features  # Replace the features
+    mesh.features.append(torch.rand(mesh.n_points, 2))  # Add a new feature
+    assert list(mesh.features.keys()) == [
+        "rotations",
+        "colors",
+        "feature_0",
+    ]  # Check the name of the features
+
+    # Check that trying to set the features with a wrong type raises an error
+    try:
+        mesh.features = 4
+    except:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the features should be a dict"
+        )
+
+    # Check that trying to set the features with an invalid dict (here the size of the tensors is not correct) raises an error
+    try:
+        mesh.features = {
+            "colors": torch.rand(mesh.n_points + 2, 3),
+            "normals": torch.rand(mesh.n_points, 3),
+        }
+    except:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the size of the colors tensor is not correct"
+        )
 
 
 def test_gpu():

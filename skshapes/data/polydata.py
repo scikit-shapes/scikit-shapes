@@ -15,7 +15,13 @@ from ..types import (
     Union,
     Float1dTensor,
     Float2dTensor,
+    Any,
+    Features,
+    FloatTensor,
+    IntTensor,
 )
+
+# from .features import Features
 
 
 class PolyData(PolyDataType):
@@ -39,6 +45,7 @@ class PolyData(PolyDataType):
         triangles: Optional[Triangles] = None,
         device: Union[str, torch.device] = "cpu",
         landmarks: Optional[Landmarks] = None,
+        features: Optional[Features] = None,
     ) -> None:
         """Initialize a PolyData object.
 
@@ -48,6 +55,7 @@ class PolyData(PolyDataType):
             triangles (Optional[Triangles], optional): the triangles of the shape. Defaults to None.
             device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to "cpu".
             landmarks (Optional[Landmarks], optional): _description_. Defaults to None.
+            features (Optional[Features], optional): _description_. Defaults to None.
         """
 
         # If the user provides a pyvista mesh, we extract the points, edges and triangles from it
@@ -112,6 +120,15 @@ class PolyData(PolyDataType):
         else:
             self._landmarks = None
 
+        # Initialize the features
+        if features is None:
+            self._features = Features(n=self.n_points, device=self.device)
+        else:
+            assert (
+                features.n == self.n_points
+            ), "Features must have the same number of points as the shape"
+            self._features = features
+
     @typecheck
     def decimate(self, target_reduction: float) -> PolyDataType:
         """Decimate the shape using the Quadric Decimation algorithm.
@@ -162,6 +179,8 @@ class PolyData(PolyDataType):
             kwargs["edges"] = self._edges.clone()
         if self._landmarks is not None:
             kwargs["landmarks"] = self._landmarks.clone()
+        if self._features is not None:
+            kwargs["features"] = self._features.clone()
         return PolyData(**kwargs)
 
     @typecheck
@@ -335,6 +354,27 @@ class PolyData(PolyDataType):
                 if type(getattr(self, attr)) == torch.Tensor:
                     setattr(self, attr, getattr(self, attr).to(device))
         self._device = device
+
+    ##############################
+    #### Features getter/setter ##
+    ##############################
+    @property
+    @typecheck
+    def features(self) -> Features:
+        return self._features
+
+    @features.setter
+    @typecheck
+    def features(self, features_dict: dict) -> None:
+        if not isinstance(features_dict, Features):
+            # Convert the features to a Features object
+            # the from_dict method will check that the features are valid
+            features_dict = Features.from_dict(features_dict)
+
+        assert (
+            features_dict.n == self.n_points
+        ), "The number of points in the features should be the same as the number of points in the shape."
+        self._features = features_dict.to(self.device)
 
     #################################
     #### Landmarks getter/setter ####
