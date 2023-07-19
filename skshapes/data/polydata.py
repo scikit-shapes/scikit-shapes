@@ -1,4 +1,5 @@
 import pyvista
+import vedo
 import torch
 import numpy as np
 
@@ -167,6 +168,30 @@ class PolyData(PolyDataType):
     def to(self, device: Union[str, torch.device]) -> PolyDataType:
         """Return a copy of the shape on the specified device"""
         return self.copy(device=device)
+
+    ###########################
+    #### Vedo interface #######
+    ###########################
+    @typecheck
+    def to_vedo(self) -> vedo.Mesh:
+        """Convert the shape to a vedo Mesh."""
+
+        if self._triangles is not None:
+            return vedo.Mesh(
+                [
+                    self.points.detach().cpu().numpy(),
+                    self.triangles.detach().cpu().numpy().T,
+                ]
+            )
+        elif self._edges is not None:
+            return vedo.Mesh(
+                [
+                    self.points.detach().cpu().numpy(),
+                    self.edges.detach().cpu().numpy().T,
+                ]
+            )
+        else:
+            return vedo.Mesh(self.points.detach().cpu().numpy())
 
     ###########################
     #### PyVista interface ####
