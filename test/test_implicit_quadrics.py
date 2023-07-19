@@ -49,7 +49,7 @@ def quadratic_gradient(*, points, quadric, offset=0, scale=1):
 
     X = dim4(points=points, offset=offset, scale=scale)
 
-    return (2 / scale) * (X @ quadric)[:,:3]
+    return (2 / scale) * (X @ quadric)[:, :3]
 
 
 @given(n_points=st.integers(min_value=5, max_value=10))
@@ -88,7 +88,7 @@ def display_quadratic_fit(points, highlight=0, scale=1):
     # Our surface points:
     spheres = vd.Spheres(points, r=0.03, c="blue")
 
-    main_sphere = vd.Spheres(points[highlight:highlight+1], r=0.06, c="red")
+    main_sphere = vd.Spheres(points[highlight : highlight + 1], r=0.06, c="red")
 
     # Gradients:
     v = quadratic_gradient(
@@ -100,20 +100,20 @@ def display_quadratic_fit(points, highlight=0, scale=1):
     quiver = vd.Arrows(points, points + v, c="green", alpha=0.9)
 
     # generate an isosurface the volume for each thresholds
-    thresholds = [-.05, 0., .05]
+    thresholds = [-0.05, 0.0, 0.05]
 
     n = 100
     t = torch.linspace(-1, 1, n)
     X, Y, Z = torch.meshgrid(t, t, t, indexing="ij")
     scalar_field = quadratic_function(
-        points = torch.stack([X.reshape(-1), Y.reshape(-1), Z.reshape(-1)], dim=1),
-        quadric = quadric,
-        offset = mean_point,
-        scale = sigma,
+        points=torch.stack([X.reshape(-1), Y.reshape(-1), Z.reshape(-1)], dim=1),
+        quadric=quadric,
+        offset=mean_point,
+        scale=sigma,
     )
     scalar_field = scalar_field.reshape(X.shape).cpu().numpy()
 
-    vol = vd.Volume(scalar_field, origin=(-1, -1, -1), spacing=(2/n,) * 3)
+    vol = vd.Volume(scalar_field, origin=(-1, -1, -1), spacing=(2 / n,) * 3)
     surf = vol.isosurface(thresholds).cmap("RdBu_r").alpha(0.5)
     surf.add_scalarbar3d()
 
@@ -122,11 +122,9 @@ def display_quadratic_fit(points, highlight=0, scale=1):
     plt.close()
 
 
-
-
 if __name__ == "__main__":
     functions = [
-        lambda x, y: (1.5 - .5 * x**2 - y**2).abs().sqrt() - 1,
+        lambda x, y: (1.5 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
         lambda x, y: x**2 - y**2,
     ]
     for f in functions:
@@ -134,4 +132,4 @@ if __name__ == "__main__":
             n_points=20,
             f=f,
         )
-        display_quadratic_fit(points, highlight=55, scale=.3)
+        display_quadratic_fit(points, highlight=55, scale=0.3)

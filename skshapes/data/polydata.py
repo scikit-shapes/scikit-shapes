@@ -85,7 +85,7 @@ class PolyData(PolyDataType):
         if device is None:
             device = points.device
 
-        self._device = device
+        self._device = torch.device(device)
 
         # We don't call the setters here because the setter of points is meant to be used when the shape is modified
         # in order to check the validity of the new points

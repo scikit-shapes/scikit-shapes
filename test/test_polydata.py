@@ -1,10 +1,8 @@
-import sys
-
-sys.path.append(sys.path[0][:-4])
 from skshapes.data import PolyData
 import torch
 import numpy as np
 import pyvista
+import skshapes as sks
 
 
 def _cube():
@@ -64,7 +62,7 @@ def test_polydata_creation():
     # Shape with points and triangles
     points = torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float32)
     triangles = torch.tensor([[0], [1], [2]], dtype=torch.int64)
-    triangle = PolyData(points=points, triangles=triangles)
+    triangle = sks.PolyData(points=points, triangles=triangles)
 
     # edges are computed on the fly when the getter is called, and _edges remains None
     assert triangle.edges is not None
@@ -125,7 +123,7 @@ def test_interaction_with_pyvista():
     assert cube.n_cells == 6
     assert cube.n_points == 8
     # Create a PolyData from a pyvista mesh and check that the faces are converted to triangles
-    polydata = PolyData(cube)
+    polydata = sks.PolyData(cube)
     assert polydata.n_points == 8
     assert polydata.n_triangles == 12
     # back to pyvista, check that the mesh is the same
@@ -134,9 +132,6 @@ def test_interaction_with_pyvista():
     assert cube2.n_points == 8
     assert cube2.is_all_triangles
     assert np.allclose(cube.points, cube2.points)
-
-
-import skshapes as sks
 
 
 def test_decimation():

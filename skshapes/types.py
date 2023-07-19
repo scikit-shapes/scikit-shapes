@@ -108,6 +108,10 @@ class Loss:
         loss = self
         return newloss(loss=loss, scalar=scalar)
 
+    @typecheck
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        pass
+
 
 class Morphing:
     pass
