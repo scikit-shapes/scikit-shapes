@@ -11,46 +11,7 @@ from hypothesis import strategies as st
 import numpy as np
 import vedo as vd
 
-
-def create_point_cloud(n_points: int, f: callable):
-    """Create a point cloud from a function f: R^3 -> R."""
-    x = torch.linspace(-1, 1, n_points)
-    y = torch.linspace(-1, 1, n_points)
-    x, y = torch.meshgrid(x, y, indexing="ij")
-    x = x.reshape(-1)
-    y = y.reshape(-1)
-    z = f(x, y)
-
-    N = len(x)
-    assert N == n_points**2
-
-    points = torch.stack([x, y, z], dim=1).view(N, 3)
-    return points
-
-
-def dim4(*, points, offset=0, scale=1):
-    """Rescales and adds a fourth dimension to the point cloud."""
-    assert points.shape == (len(points), 3)
-    points = points - offset
-    points = points / scale
-    return torch.cat([points, torch.ones_like(points[:, :1])], dim=1)
-
-
-def quadratic_function(*, points, quadric, offset=0, scale=1):
-    assert quadric.shape == (4, 4)
-    X = dim4(points=points, offset=offset, scale=scale)
-    return ((X @ quadric) * X).sum(-1)
-
-
-def quadratic_gradient(*, points, quadric, offset=0, scale=1):
-    # Make sure that the quadric is symmetric:
-    assert quadric.shape == (4, 4)
-    quadric = (quadric + quadric.T) / 2
-
-    X = dim4(points=points, offset=offset, scale=scale)
-
-    return (2 / scale) * (X @ quadric)[:, :3]
-
+from .utils import create_point_cloud, dim4, quadratic_function, quadratic_gradient
 
 @given(n_points=st.integers(min_value=5, max_value=10))
 @settings(deadline=1000)
@@ -123,13 +84,51 @@ def display_quadratic_fit(points, highlight=0, scale=1):
 
 
 if __name__ == "__main__":
+    
     functions = [
         lambda x, y: (1.5 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
         lambda x, y: x**2 - y**2,
     ]
-    for f in functions:
-        points = create_point_cloud(
-            n_points=20,
-            f=f,
+
+    if True:
+        for f in functions:
+            points = create_point_cloud(
+                n_points=20,
+                f=f,
+            )
+            display_quadratic_fit(points, highlight=55, scale=.3)
+
+    else:
+        from torch.profiler import profile, ProfilerActivity
+
+        activities = [ProfilerActivity.CPU]
+        if torch.cuda.is_available():
+            activities.append(ProfilerActivity.CUDA)
+
+        myprof = profile(
+            activities=activities,
+            record_shapes=True,
+            profile_memory=True,
+            with_stack=True,
+            experimental_config=torch._C._profiler._ExperimentalConfig(verbose=True),
         )
-        display_quadratic_fit(points, highlight=55, scale=0.3)
+
+        with myprof as prof:
+            points = create_point_cloud(
+                n_points=3,
+                f=functions[0],
+            )
+            quadrics, mean_point, sigma = sks.implicit_quadrics(points=points, scale=1)
+        
+        # Create an "output/" foler if it doesn't exist
+        import os
+
+        if not os.path.exists("output"):
+            os.makedirs("output")
+
+        # Export to chrome://tracing
+        prof.export_chrome_trace(f"output/trace_implicit_quadrics.json")
+        prof.export_stacks(
+            f"output/stacks_implicit_quadrics.txt",
+            "self_cpu_time_total", # "self_cuda_time_total",
+        )
