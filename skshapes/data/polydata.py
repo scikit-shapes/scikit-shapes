@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import pyvista
+import vedo
 import torch
 import numpy as np
 
 from ..types import (
     typecheck,
-    PolyDataType,
     float_dtype,
     Points,
     Edges,
@@ -14,10 +16,19 @@ from ..types import (
     Union,
     Float1dTensor,
     Float2dTensor,
+    Any,
+    FloatTensor,
+    IntTensor,
 )
 
+# from .features import Features
 
-class PolyData(PolyDataType):
+# from .shape import Shape
+from .baseshape import BaseShape
+from .utils import Features
+
+
+class PolyData(BaseShape):
     """A polygonal data object. It is composed of points, edges and triangles.
 
 
@@ -38,6 +49,7 @@ class PolyData(PolyDataType):
         triangles: Optional[Triangles] = None,
         device: Union[str, torch.device] = "cpu",
         landmarks: Optional[Landmarks] = None,
+        features: Optional[Features] = None,
     ) -> None:
         """Initialize a PolyData object.
 
@@ -47,6 +59,7 @@ class PolyData(PolyDataType):
             triangles (Optional[Triangles], optional): the triangles of the shape. Defaults to None.
             device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to "cpu".
             landmarks (Optional[Landmarks], optional): _description_. Defaults to None.
+            features (Optional[Features], optional): _description_. Defaults to None.
         """
 
         # If the user provides a pyvista mesh, we extract the points, edges and triangles from it
@@ -85,7 +98,7 @@ class PolyData(PolyDataType):
         if device is None:
             device = points.device
 
-        self._device = device
+        self._device = torch.device(device)
 
         # We don't call the setters here because the setter of points is meant to be used when the shape is modified
         # in order to check the validity of the new points
@@ -111,15 +124,24 @@ class PolyData(PolyDataType):
         else:
             self._landmarks = None
 
+        # Initialize the features
+        if features is None:
+            self._features = Features(n=self.n_points, device=self.device)
+        else:
+            assert (
+                features.n == self.n_points
+            ), "Features must have the same number of points as the shape"
+            self._features = features
+
     @typecheck
-    def decimate(self, target_reduction: float) -> PolyDataType:
+    def decimate(self, target_reduction: float) -> PolyData:
         """Decimate the shape using the Quadric Decimation algorithm.
 
         Args:
             target_reduction (float): the target reduction ratio. Must be between 0 and 1.
 
         Returns:
-            PolyDataType: the decimated PolyData
+            PolyData: the decimated PolyData
         """
 
         assert (
@@ -148,7 +170,7 @@ class PolyData(PolyDataType):
     #### Copy functions #####
     #########################
     @typecheck
-    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyDataType:
+    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyData:
         """Return a copy of the shape"""
         if device is None:
             device = self.device
@@ -161,12 +183,38 @@ class PolyData(PolyDataType):
             kwargs["edges"] = self._edges.clone()
         if self._landmarks is not None:
             kwargs["landmarks"] = self._landmarks.clone()
+        if self._features is not None:
+            kwargs["features"] = self._features.clone()
         return PolyData(**kwargs)
 
     @typecheck
-    def to(self, device: Union[str, torch.device]) -> PolyDataType:
+    def to(self, device: Union[str, torch.device]) -> PolyData:
         """Return a copy of the shape on the specified device"""
         return self.copy(device=device)
+
+    ###########################
+    #### Vedo interface #######
+    ###########################
+    @typecheck
+    def to_vedo(self) -> vedo.Mesh:
+        """Convert the shape to a vedo Mesh."""
+
+        if self._triangles is not None:
+            return vedo.Mesh(
+                [
+                    self.points.detach().cpu().numpy(),
+                    self.triangles.detach().cpu().numpy().T,
+                ]
+            )
+        elif self._edges is not None:
+            return vedo.Mesh(
+                [
+                    self.points.detach().cpu().numpy(),
+                    self.edges.detach().cpu().numpy().T,
+                ]
+            )
+        else:
+            return vedo.Mesh(self.points.detach().cpu().numpy())
 
     ###########################
     #### PyVista interface ####
@@ -197,7 +245,7 @@ class PolyData(PolyDataType):
     @typecheck
     def from_pyvista(
         cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = "cpu"
-    ) -> PolyDataType:
+    ) -> PolyData:
         import warnings
 
         warnings.warn(
@@ -310,6 +358,27 @@ class PolyData(PolyDataType):
                 if type(getattr(self, attr)) == torch.Tensor:
                     setattr(self, attr, getattr(self, attr).to(device))
         self._device = device
+
+    ##############################
+    #### Features getter/setter ##
+    ##############################
+    @property
+    @typecheck
+    def features(self) -> Features:
+        return self._features
+
+    @features.setter
+    @typecheck
+    def features(self, features_dict: dict) -> None:
+        if not isinstance(features_dict, Features):
+            # Convert the features to a Features object
+            # the from_dict method will check that the features are valid
+            features_dict = Features.from_dict(features_dict)
+
+        assert (
+            features_dict.n == self.n_points
+        ), "The number of points in the features should be the same as the number of points in the shape."
+        self._features = features_dict.to(self.device)
 
     #################################
     #### Landmarks getter/setter ####

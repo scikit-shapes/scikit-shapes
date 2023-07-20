@@ -1,57 +1,74 @@
-import pyvista.examples
 import skshapes as sks
-import torch
+import pyvista.examples
+
+shape1 = sks.PolyData(pyvista.Sphere())
+shape2 = sks.PolyData(pyvista.Sphere()).decimate(0.5)
 
 
-def test():
-    bunny = sks.PolyData.from_pyvista(pyvista.examples.download_bunny_coarse())
-    airplane = sks.PolyData.from_pyvista(pyvista.examples.load_airplane())
+def test_registration_device():
+    """This test ensure the behavior of the registration task with respect to the devices of the source, target and the gpu argument.
+    Expected behavior:
+        - If the gpu argument is True, the optimization should occurs on the gpu
+        - If the gpu argument is False, the optimization should occurs on the gpu
+        - The device of the output of .transform() and of .parameter_ should be the same as the device of the source and the target
+        - If source.device != target.device, an error should be raised
+    """
+    model = sks.RigidMotion()
+    loss = sks.OptimalTransportLoss()
+    optimizer = sks.LBFGS()
 
-    bunny = bunny.to("cpu")
-    airplane = airplane.to("cuda")
+    for device in ["cpu", "cuda"]:
+        for gpu in [False, True]:
+            source = shape1.to(device)
+            target = shape2.to(device)
 
-    for model in [sks.RigidMotion(), sks.ElasticMetric()]:
-        r = sks.Registration(
-            model=model,
-            loss=sks.NearestNeighborsLoss(),
-            optimizer=sks.SGD(),
-            n_iter=2,
-            device="cuda",
-        )
+            task = sks.Registration(
+                model=model,
+                loss=loss,
+                optimizer=optimizer,
+                n_iter=3,
+                gpu=gpu,
+                regularization=10,
+                verbose=1,
+            )
 
-        r.fit_transform(source=bunny, target=airplane)
+            newshape = task.fit_transform(source=source, target=target)
 
-        cuda_device = torch.Tensor().cuda().device
-        cpu_device = torch.Tensor().cpu().device
+            # Check that the device on which the optimization is performed corresponds to the gpu argument
+            if gpu:
+                assert task.internal_parameter_device_type == "cuda"
+            else:
+                assert task.internal_parameter_device_type == "cpu"
 
-        # Test that the device of the parameter is correct
-        assert r.parameter.device == cuda_device
+            # Check that the device of the output is the same as the input's shapes
+            assert task.parameter_.device.type == source.device.type
+            assert newshape.device.type == target.device.type
 
-        # Check that the device of the shapes is not changed
-        assert airplane.points.device == cuda_device
-        assert airplane.triangles.device == cuda_device
-        assert bunny.points.device == cpu_device
-        assert bunny.triangles.device == cpu_device
+    # Check that if source and target are on different devices, an error is raised
+    source = shape1.to("cpu")
+    target = shape2.to("cuda")
+    try:
+        task.fit(source=source, target=target)
+    except:
+        pass
+    else:
+        raise AssertionError("Should have raised an error")
 
-        # Check that Model.morph gives priority to the device of the shape
-        newshape = model.morph(shape=bunny, parameter=r.parameter).morphed_shape
-        assert newshape.points.device == cpu_device
-        assert newshape.triangles.device == cpu_device
 
-    # Check that the loss cannot compare shapes on different devices
-    bunny_cuda = bunny.to("cuda")
-    bunny_cpu = bunny.to("cpu")
+def test_loss_device():
+    source = shape1.to("cpu")
+    target = shape2.to("cuda")
 
-    for loss in [
-        sks.NearestNeighborsLoss(),
-        sks.OptimalTransportLoss(),
-        sks.L2Loss(),
-    ]:
+    list_of_losses = [
+        i
+        for i in sks.loss.__dict__.values()
+        if isinstance(i, type) and issubclass(i, sks.Loss)
+    ]
+    for loss in list_of_losses:
+        l = loss()
         try:
-            sks.NearestNeighborsLoss()(bunny_cuda, bunny_cpu)
+            l(source=source, target=target)
         except:
             pass
         else:
-            raise AssertionError(
-                "Loss should not be able to compare shapes on different devices"
-            )
+            raise AssertionError("Should have raised an error")

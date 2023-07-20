@@ -1,6 +1,6 @@
 from beartype import beartype
 from jaxtyping import jaxtyped, Float32, Int64
-from typing import Any, Optional, Union, TypeVar, Generic, List, Tuple, NamedTuple
+from typing import Any, Optional, Union, TypeVar, Generic, List, Tuple, NamedTuple, Dict
 import torch
 
 
@@ -17,7 +17,10 @@ JaxFloat = Float32
 JaxInt = Int64
 
 # Numerical types
+FloatTensor = JaxFloat[torch.Tensor, "..."]
+IntTensor = JaxInt[torch.Tensor, "..."]
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]
+IntTensorArray = JaxInt[torch.Tensor, "_"]
 Float1dTensor = JaxFloat[torch.Tensor, "_"]
 Float2dTensor = JaxFloat[torch.Tensor, "_ _"]
 Float3dTensor = JaxFloat[torch.Tensor, "_ _ _"]
@@ -31,7 +34,6 @@ Triangles = JaxInt[torch.Tensor, "3 _"]
 # Jaxtyping does not provide annotation for sparse tensors
 # Then we use the torch.Tensor type and checks are made at runtime
 # with assert statements
-# TODO : use beartype validators to create a custom validator for landmarks
 try:
     from typing import Annotated  # Python >= 3.9
 except ImportError:
@@ -39,23 +41,9 @@ except ImportError:
 
 from beartype.vale import Is
 
-
 Landmarks = Annotated[
     torch.Tensor, Is[lambda tensor: tensor.dtype == float_dtype and tensor.is_sparse]
 ]
-
-
-# Shape types
-class ShapeType:
-    pass
-
-
-class PolyDataType(ShapeType):
-    pass
-
-
-class ImageType(ShapeType):
-    pass
 
 
 # Morphing types
@@ -76,7 +64,7 @@ class Loss:
                 self.loss1 = loss1
                 self.loss2 = loss2
 
-            def __call__(self, source: ShapeType, target: ShapeType) -> FloatScalar:
+            def __call__(self, source, target) -> FloatScalar:
                 return self.loss1.__call__(
                     source=source, target=target
                 ) + self.loss2.__call__(source=source, target=target)
@@ -102,11 +90,15 @@ class Loss:
                 self.loss = loss
                 self.scalar = scalar
 
-            def __call__(self, source: ShapeType, target: ShapeType) -> FloatScalar:
+            def __call__(self, source, target) -> FloatScalar:
                 return self.scalar * self.loss.__call__(source=source, target=target)
 
         loss = self
         return newloss(loss=loss, scalar=scalar)
+
+    @typecheck
+    def __call__(self, *args: Any, **kwds: Any) -> Any:
+        pass
 
 
 class Morphing:
@@ -115,9 +107,3 @@ class Morphing:
 
 class Optimizer:
     pass
-
-
-class MorphingOutput(NamedTuple):
-    morphed_shape: Optional[ShapeType] = None
-    regularization: Optional[FloatScalar] = None
-    path: Optional[List[ShapeType]] = None

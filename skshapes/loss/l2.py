@@ -1,7 +1,8 @@
 from typing import Any
 import torch
+from ..data import PolyData
 
-from ..types import typecheck, Loss, PolyDataType, FloatScalar
+from ..types import typecheck, Loss, FloatScalar
 
 
 class L2Loss(Loss):
@@ -10,5 +11,5 @@ class L2Loss(Loss):
         self.p = p
 
     @typecheck
-    def __call__(self, source: PolyDataType, target: PolyDataType) -> FloatScalar:
+    def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
         return torch.norm(source.points - target.points, p=self.p)

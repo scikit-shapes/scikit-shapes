@@ -5,6 +5,8 @@ sys.path.append(sys.path[0][:-4])
 
 print(sys.path)
 
+from typing import Union, get_origin, get_args
+
 
 def check_module_annotations(module, template, type):
     """Check that the type and the classes' annotations of the methods of a module are correct.
@@ -22,7 +24,16 @@ def check_module_annotations(module, template, type):
         # Loop over the annotations
         for key in reference_annotations.keys():
             assert key in annotations.keys()
-            assert issubclass(annotations[key], reference_annotations[key])
+            if get_origin(reference_annotations[key]) is Union:
+                # If the reference annotation is a Union, check that the annotation is the Union itself or one of its arguments
+                # useful for example as Shape is defined as Union of specific shapes structures (PolyData, Image, etc.) and
+                # some losses/morphings are limited to specific shapes
+                # see : https://stackoverflow.com/questions/45957615/check-a-variable-against-union-type-at-runtime-in-python-3-6
+                assert annotations[key] == reference_annotations[key] or annotations[
+                    key
+                ] in get_args(reference_annotations[key])
+            else:
+                assert issubclass(annotations[key], reference_annotations[key])
 
     # Find the classes in the module
     for name, obj in inspect.getmembers(module):
@@ -47,39 +58,39 @@ def check_module_annotations(module, template, type):
                     check_annotations(annotations, template[method_name])
 
 
+import skshapes as sks
+
 import skshapes.loss
 import skshapes.morphing
 import skshapes
 
-from skshapes.types import ShapeType
+# from skshapes.types import ShapeType
 
 # Define the templates for the annotations of Loss and Morphing
 loss_template = {
     "__call__": {
-        "source": skshapes.ShapeType,
-        "target": skshapes.ShapeType,
-        "return": skshapes.FloatScalar,
+        "source": sks.Shape,
+        "target": sks.Shape,
+        "return": sks.FloatScalar,
     }
 }
 
 morphing_template = {
     "morph": {
-        "shape": skshapes.ShapeType,
+        "shape": sks.Shape,
         "return_path": bool,
         "return_regularization": bool,
-        "return": skshapes.MorphingOutput,
+        "return": sks.morphing.utils.MorphingOutput,
     }
 }
 
 
 # Define the tests
 def test_losses():
-    check_module_annotations(
-        module=skshapes.loss, template=loss_template, type=skshapes.Loss
-    )
+    check_module_annotations(module=sks.loss, template=loss_template, type=sks.Loss)
 
 
 def test_morphing():
     check_module_annotations(
-        module=skshapes.morphing, template=morphing_template, type=skshapes.Morphing
+        module=sks.morphing, template=morphing_template, type=sks.Morphing
     )
