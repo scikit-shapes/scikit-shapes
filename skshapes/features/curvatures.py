@@ -170,6 +170,7 @@ def smooth_curvatures_2(
     n_i = LazyTensor(normals.view(N, 1, 3))
     # Tangent bases:
     uv_i = LazyTensor(uv.view(N, 1, 6))
+    ones_ = LazyTensor(torch.ones(1, 1, 1, device=points.device, dtype=points.dtype))
 
     # Squared distance:
     d2_ij = ((x_j - x_i) ** 2).sum(-1)  # (N, N, 1)
@@ -181,35 +182,35 @@ def smooth_curvatures_2(
     Q_ij = P_ij[0] * P_ij[1] # (N, N, 1)
     # Concatenate:
     R_ij = (P_ij ** 2).concat(Q_ij)  # (N, N, 2+1)
+    R_ij = R_ij.concat(ones_)  # (N, N, 2+1+1)
 
     N_ij = n_i.matvecmult(x_j - x_i)  # (N, N, 1)
     
     # Concatenate:
-    R_N_ij = R_ij.concat(N_ij)  # (N, N, 4)
+    R_N_ij = R_ij.concat(N_ij)  # (N, N, 4+1)
 
     # Covariances, with a scale-dependent weight:
-    RRt_RNt_ij = R_ij.tensorprod(R_N_ij)  # (N, N, 3*(3+1))
-    RRt_RNt_ij = window_ij * RRt_RNt_ij  #  (N, N, 3*(3+1))
+    RRt_RNt_ij = R_ij.tensorprod(R_N_ij)  # (N, N, 4*(4+1))
+    RRt_RNt_ij = window_ij * RRt_RNt_ij  #  (N, N, 4*(4+1))
 
     # Reduction - with batch support:
     RRt_RNt_ij.ranges = ranges
-    RRt_RNt = RRt_RNt_ij.sum(1)  # (N, 3*(3+1))
+    RRt_RNt = RRt_RNt_ij.sum(1)  # (N, 4*(4+1))
 
     # Reshape to get the two covariance matrices:
-    RRt_RNt = RRt_RNt.view(N, 3, 3+1)
-    RRt, RNt = RRt_RNt[:, :, :3].contiguous(), RRt_RNt[:, :, 3].contiguous()  # (N, 3, 3), (N, 3)
-    assert RRt.shape == (N, 3, 3)
-    assert RNt.shape == (N, 3)
+    RRt_RNt = RRt_RNt.view(N, 4, 4+1)
+    RRt, RNt = RRt_RNt[:, :, :4].contiguous(), RRt_RNt[:, :, 4].contiguous()  # (N, 4, 4), (N, 4)
+    assert RRt.shape == (N, 4, 4)
+    assert RNt.shape == (N, 4)
 
     # Add a small ridge regression:
-    RRt[:, 0, 0] += reg
-    RRt[:, 1, 1] += reg
-    RRt[:, 2, 2] += reg
+    for i in range(4):
+        RRt[:, i, i] += reg
 
     # (RRt^-1 @ RNt) : simple estimation through linear regression
-    acb = torch.linalg.solve(RRt, RNt)
-    assert acb.shape == (N, 3)
-    a, c, b = acb[:, 0], acb[:, 1], acb[:, 2]  # (N,)
+    acbo = torch.linalg.solve(RRt, RNt)
+    assert acbo.shape == (N, 4)
+    a, c, b = acbo[:, 0], acbo[:, 1], acbo[:, 2]  # (N,)
 
     # Normalization
     mean_curvature = a + c
