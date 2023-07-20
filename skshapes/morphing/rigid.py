@@ -1,17 +1,17 @@
 from ..data import PolyData, Shape
+from .basemodel import BaseModel
 import torch
 
 from ..types import (
     typecheck,
     Float2dTensor,
     Tuple,
-    Morphing,
 )
 
 from .utils import MorphingOutput
 
 
-class RigidMotion(Morphing):
+class RigidMotion(BaseModel):
     """
     Rigid motion morphing. The parameter is a (2, 3) tensor, where the first row
     is the rotation axis-angle and the second row is the translation vector.

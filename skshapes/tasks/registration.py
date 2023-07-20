@@ -1,5 +1,8 @@
 from ..data import Shape
-from ..types import typecheck, Morphing, Loss, Optimizer, Union
+from ..optimization import Optimizer
+from ..types import typecheck, Union
+from ..loss import Loss
+from ..morphing import Model
 import torch
 
 
@@ -8,7 +11,7 @@ class Registration:
     def __init__(
         self,
         *,
-        model: Morphing,
+        model: Model,
         loss: Loss,
         optimizer: Optimizer,
         regularization: Union[int, float] = 1,

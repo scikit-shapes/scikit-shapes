@@ -2,10 +2,11 @@ from geomloss import SamplesLoss
 import torch
 from ..data import PolyData
 
-from ..types import typecheck, Loss, FloatScalar
+from ..types import typecheck, FloatScalar
+from .baseloss import BaseLoss
 
 
-class OptimalTransportLoss(Loss):
+class OptimalTransportLoss(BaseLoss):
     @typecheck
     def __init__(self, loss: str = "sinkhorn", **kwargs) -> None:
         self.kwargs = kwargs

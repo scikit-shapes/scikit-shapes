@@ -21,9 +21,7 @@ from ..types import (
     IntTensor,
 )
 
-# from .features import Features
 
-# from .shape import Shape
 from .baseshape import BaseShape
 from .utils import Features
 

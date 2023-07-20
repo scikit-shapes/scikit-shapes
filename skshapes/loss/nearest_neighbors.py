@@ -1,10 +1,11 @@
 from pykeops.torch import Vi, Vj
 import torch
 from ..data import PolyData
-from ..types import typecheck, Loss, FloatScalar
+from ..types import typecheck, FloatScalar
+from .baseloss import BaseLoss
 
 
-class NearestNeighborsLoss(Loss):
+class NearestNeighborsLoss(BaseLoss):
     @typecheck
     def __init__(self) -> None:
         pass
