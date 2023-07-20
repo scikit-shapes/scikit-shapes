@@ -21,12 +21,13 @@ def display_curvatures(*, function: callable, scale=1):
         f=function,
         normals=True
     )
+    points = points + .05 * torch.randn(len(points), 3)
 
     # Fit a quadratic function to the point cloud
     curvatures = sks.smooth_curvatures_2(points=points, normals=normals, scale=scale)
 
     # Our surface points:
-    spheres = vd.Points(points, r=40).cmap("RdBu_r", curvatures["gauss"].cpu().numpy())
+    spheres = vd.Points(points, r=40).cmap("RdBu_r", curvatures["mean"])
     spheres = spheres.add_scalarbar3d()
 
     quiver = vd.Arrows(points, points + .2 * normals, c="green", alpha=0.9)
@@ -47,7 +48,7 @@ if __name__ == "__main__":
 
     if True:
         for f in functions:
-            display_curvatures(function = f, scale=.2)
+            display_curvatures(function = f, scale=.4)
 
     else:
         from torch.profiler import profile, ProfilerActivity
