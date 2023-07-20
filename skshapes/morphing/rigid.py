@@ -1,15 +1,14 @@
+from ..data import PolyData, Shape
 import torch
-
 
 from ..types import (
     typecheck,
-    MorphingOutput,
-    PolyDataType,
     Float2dTensor,
-    ShapeType,
     Tuple,
     Morphing,
 )
+
+from .utils import MorphingOutput
 
 
 class RigidMotion(Morphing):
@@ -26,7 +25,7 @@ class RigidMotion(Morphing):
     @typecheck
     def morph(
         self,
-        shape: PolyDataType,
+        shape: PolyData,
         parameter: Float2dTensor,
         return_path: bool = False,
         return_regularization: bool = False,
@@ -58,7 +57,7 @@ class RigidMotion(Morphing):
         )
 
     @typecheck
-    def parameter_shape(self, shape: ShapeType) -> Tuple[int, int]:
+    def parameter_shape(self, shape: Shape) -> Tuple[int, int]:
         return (2, 3)
 
 

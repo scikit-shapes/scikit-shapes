@@ -1,5 +1,5 @@
-from ..types import ImageType
+from .baseshape import BaseShape
 
 
-class Image(ImageType):
+class Image(BaseShape):
     pass

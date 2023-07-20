@@ -1,4 +1,11 @@
 from .polydata import PolyData
-from .dataset import Dataset
 from .image import Image
-from .utils import read
+from .baseshape import BaseShape
+
+
+from .dataset import Dataset
+from .utils import Features
+
+from typing import Union
+
+Shape = Union[Image, PolyData]

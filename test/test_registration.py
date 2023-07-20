@@ -9,8 +9,8 @@ def test_registration():
     target = sks.PolyData(datafolder + "/" + "mesh041.ply")
 
     # Few type checks
-    assert isinstance(source, sks.ShapeType)
-    assert isinstance(target, sks.PolyDataType)
+    assert isinstance(source, sks.BaseShape)
+    assert isinstance(target, sks.PolyData)
     assert source.landmarks is None
 
     losses = [

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pyvista
 import vedo
 import torch
@@ -5,7 +7,6 @@ import numpy as np
 
 from ..types import (
     typecheck,
-    PolyDataType,
     float_dtype,
     Points,
     Edges,
@@ -16,15 +17,18 @@ from ..types import (
     Float1dTensor,
     Float2dTensor,
     Any,
-    Features,
     FloatTensor,
     IntTensor,
 )
 
 # from .features import Features
 
+# from .shape import Shape
+from .baseshape import BaseShape
+from .utils import Features
 
-class PolyData(PolyDataType):
+
+class PolyData(BaseShape):
     """A polygonal data object. It is composed of points, edges and triangles.
 
 
@@ -130,14 +134,14 @@ class PolyData(PolyDataType):
             self._features = features
 
     @typecheck
-    def decimate(self, target_reduction: float) -> PolyDataType:
+    def decimate(self, target_reduction: float) -> PolyData:
         """Decimate the shape using the Quadric Decimation algorithm.
 
         Args:
             target_reduction (float): the target reduction ratio. Must be between 0 and 1.
 
         Returns:
-            PolyDataType: the decimated PolyData
+            PolyData: the decimated PolyData
         """
 
         assert (
@@ -166,7 +170,7 @@ class PolyData(PolyDataType):
     #### Copy functions #####
     #########################
     @typecheck
-    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyDataType:
+    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyData:
         """Return a copy of the shape"""
         if device is None:
             device = self.device
@@ -184,7 +188,7 @@ class PolyData(PolyDataType):
         return PolyData(**kwargs)
 
     @typecheck
-    def to(self, device: Union[str, torch.device]) -> PolyDataType:
+    def to(self, device: Union[str, torch.device]) -> PolyData:
         """Return a copy of the shape on the specified device"""
         return self.copy(device=device)
 
@@ -241,7 +245,7 @@ class PolyData(PolyDataType):
     @typecheck
     def from_pyvista(
         cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = "cpu"
-    ) -> PolyDataType:
+    ) -> PolyData:
         import warnings
 
         warnings.warn(

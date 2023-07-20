@@ -1,6 +1,7 @@
 from pykeops.torch import Vi, Vj
 import torch
-from ..types import typecheck, Loss, PolyDataType, FloatScalar
+from ..data import PolyData
+from ..types import typecheck, Loss, FloatScalar
 
 
 class NearestNeighborsLoss(Loss):
@@ -9,7 +10,7 @@ class NearestNeighborsLoss(Loss):
         pass
 
     @typecheck
-    def __call__(self, source: PolyDataType, target: PolyDataType) -> FloatScalar:
+    def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
         """
         Args:
             x (torch.Tensor): the current mesh
