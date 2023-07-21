@@ -8,6 +8,9 @@ import numpy as np
 from ..types import (
     typecheck,
     float_dtype,
+    int_dtype,
+    NumericalArray,
+    NumericalTensor,
     Points,
     Edges,
     Triangles,
@@ -31,6 +34,7 @@ class PolyData(BaseShape):
 
 
     Three types of objects can be provided to initialize a PolyData object:
+    - a vedo mesh
     - a pyvista mesh
     - a path to a mesh
     - points, edges and triangles as torch tensors
@@ -41,13 +45,13 @@ class PolyData(BaseShape):
     @typecheck
     def __init__(
         self,
-        points: Union[Points, pyvista.PolyData, str],
+        points: Union[Points, vedo.Mesh, pyvista.PolyData, str],
         *,
         edges: Optional[Edges] = None,
         triangles: Optional[Triangles] = None,
         device: Union[str, torch.device] = "cpu",
         landmarks: Optional[Landmarks] = None,
-        features: Optional[Features] = None,
+        point_data: Optional[Features] = None,
     ) -> None:
         """Initialize a PolyData object.
 
@@ -57,13 +61,20 @@ class PolyData(BaseShape):
             triangles (Optional[Triangles], optional): the triangles of the shape. Defaults to None.
             device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to "cpu".
             landmarks (Optional[Landmarks], optional): _description_. Defaults to None.
-            features (Optional[Features], optional): _description_. Defaults to None.
+            point_data (Optional[Features], optional): _description_. Defaults to None.
         """
 
         # If the user provides a pyvista mesh, we extract the points, edges and triangles from it
         # If the user provides a path to a mesh, we read it with pyvista and extract the points, edges and triangles from it
-        if type(points) == pyvista.PolyData or type(points) == str:
-            mesh = points if type(points) == pyvista.PolyData else pyvista.read(points)
+
+        if type(points) in [vedo.Mesh, pyvista.PolyData, str]:
+            
+            if type(points) == vedo.Mesh:
+                mesh = pyvista.PolyData(points.polydata())
+            elif type(points) == str:
+                mesh = pyvista.read(points)
+            elif type(points) == pyvista.PolyData:
+                mesh = points
 
             cleaned_mesh = mesh.clean()
             if cleaned_mesh.n_points != mesh.n_points:
@@ -71,6 +82,14 @@ class PolyData(BaseShape):
                 if landmarks is not None:
                     print(f"Warning: Mesh has been cleaned. Landmarks are ignored.")
                     landmarks = None
+                    point_data = None
+
+                if point_data is not None:
+                    print(f"Warning: Mesh has been cleaned. Point_data are ignored.")
+                    point_data = None
+
+                if len(mesh.point_data) > 0:
+                    print(f"Warning: Mesh has been cleaned. Point_data from original shape are ignored.")
 
             points = torch.from_numpy(mesh.points).to(float_dtype)
 
@@ -92,6 +111,9 @@ class PolyData(BaseShape):
             else:
                 edges = None
                 triangles = None
+
+            if len(mesh.point_data) > 0:
+                point_data = Features.from_pyvista_datasetattributes(mesh.point_data)
 
         if device is None:
             device = points.device
@@ -122,14 +144,22 @@ class PolyData(BaseShape):
         else:
             self._landmarks = None
 
-        # Initialize the features
-        if features is None:
-            self._features = Features(n=self.n_points, device=self.device)
+        # Initialize the point_data
+        if point_data is None:
+            self._point_data = Features(n=self.n_points, device=self.device)
         else:
             assert (
-                features.n == self.n_points
+                point_data.n == self.n_points
             ), "Features must have the same number of points as the shape"
-            self._features = features
+            if point_data.device != self.device:
+                point_data = point_data.to(self.device)
+
+            self._point_data = point_data
+
+    @typecheck
+    def _init_from_pyvista(self, mesh: pyvista.PolyData) -> None:
+        pass
+
 
     @typecheck
     def decimate(self, target_reduction: float) -> PolyData:
@@ -181,8 +211,8 @@ class PolyData(BaseShape):
             kwargs["edges"] = self._edges.clone()
         if self._landmarks is not None:
             kwargs["landmarks"] = self._landmarks.clone()
-        if self._features is not None:
-            kwargs["features"] = self._features.clone()
+        if self._point_data is not None:
+            kwargs["point_data"] = self._point_data.clone()
         return PolyData(**kwargs)
 
     @typecheck
@@ -198,21 +228,29 @@ class PolyData(BaseShape):
         """Convert the shape to a vedo Mesh."""
 
         if self._triangles is not None:
-            return vedo.Mesh(
+            mesh = vedo.Mesh(
                 [
                     self.points.detach().cpu().numpy(),
                     self.triangles.detach().cpu().numpy().T,
                 ]
             )
         elif self._edges is not None:
-            return vedo.Mesh(
+            mesh =  vedo.Mesh(
                 [
                     self.points.detach().cpu().numpy(),
                     self.edges.detach().cpu().numpy().T,
                 ]
             )
         else:
-            return vedo.Mesh(self.points.detach().cpu().numpy())
+            mesh =  vedo.Mesh(self.points.detach().cpu().numpy())
+
+        # Add the point data if any
+        if len(self.point_data) > 0:
+            point_data_dict = self.point_data.to_numpy_dict()
+            for key in point_data_dict:
+                mesh.pointdata[key] = point_data_dict[key]
+
+        return mesh
 
     ###########################
     #### PyVista interface ####
@@ -227,17 +265,25 @@ class PolyData(BaseShape):
                 [np.ones((np_triangles.shape[0], 1), dtype=np.int64) * 3, np_triangles],
                 axis=1,
             )
-            return pyvista.PolyData(self._points.detach().cpu().numpy(), faces=faces)
+            polydata = pyvista.PolyData(self._points.detach().cpu().numpy(), faces=faces)
 
         elif self._edges is not None:
             np_edges = self._edges.detach().cpu().numpy().T
             lines = np.concatenate(
                 [np.ones((np_edges.shape[0], 1), dtype=np.int64) * 2, np_edges], axis=1
             )
-            return pyvista.PolyData(self._points.detach().cpu().numpy(), lines=lines)
+            polydata = pyvista.PolyData(self._points.detach().cpu().numpy(), lines=lines)
 
         else:
-            return pyvista.PolyData(self._points.detach().cpu().numpy())
+            polydata = pyvista.PolyData(self._points.detach().cpu().numpy())
+
+        # Add the point data if any
+        if len(self.point_data) > 0:
+            point_data_dict = self.point_data.to_numpy_dict()
+            for key in point_data_dict:
+                polydata.point_data[key] = point_data_dict[key]
+
+        return polydata
 
     @classmethod
     @typecheck
@@ -362,21 +408,21 @@ class PolyData(BaseShape):
     ##############################
     @property
     @typecheck
-    def features(self) -> Features:
-        return self._features
+    def point_data(self) -> Features:
+        return self._point_data
 
-    @features.setter
+    @point_data.setter
     @typecheck
-    def features(self, features_dict: dict) -> None:
-        if not isinstance(features_dict, Features):
-            # Convert the features to a Features object
-            # the from_dict method will check that the features are valid
-            features_dict = Features.from_dict(features_dict)
+    def point_data(self, point_data_dict: dict) -> None:
+        if not isinstance(point_data_dict, Features):
+            # Convert the point_data to a Features object
+            # the from_dict method will check that the point_data are valid
+            point_data_dict = Features.from_dict(point_data_dict)
 
         assert (
-            features_dict.n == self.n_points
-        ), "The number of points in the features should be the same as the number of points in the shape."
-        self._features = features_dict.to(self.device)
+            point_data_dict.n == self.n_points
+        ), "The number of points in the point_data entries should be the same as the number of points in the shape."
+        self._point_data = point_data_dict.to(self.device)
 
     #################################
     #### Landmarks getter/setter ####

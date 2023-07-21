@@ -14,7 +14,7 @@ def smooth_curvatures(
     triangles: Optional[Triangles] = None,
     scales=[1.0],
     batch=None,
-    normals:Optional[Points] = None,
+    normals: Optional[Points] = None,
     reg: Number = 0.01
 ):
     """Returns a collection of mean (H) and Gauss (K) curvatures at different scales.
@@ -133,17 +133,16 @@ def smooth_curvatures(
     return features
 
 
-
 @typecheck
 def smooth_curvatures_2(
-        *,
-        points: Points,
-        triangles:Optional[Triangles] = None,
-        scale=1.0,
-        batch=None,
-        normals:Optional[Points] = None,
-        reg: Number = 0.01
-    ):
+    *,
+    points: Points,
+    triangles: Optional[Triangles] = None,
+    scale=1.0,
+    batch=None,
+    normals: Optional[Points] = None,
+    reg: Number = 0.01
+):
     # Number of points:
     N = points.shape[0]
     ranges = diagonal_ranges(batch)
@@ -179,13 +178,13 @@ def smooth_curvatures_2(
 
     # Project on the tangent plane:
     P_ij = uv_i.matvecmult(x_j - x_i)  # (N, N, 2)
-    Q_ij = P_ij[0] * P_ij[1] # (N, N, 1)
+    Q_ij = P_ij[0] * P_ij[1]  # (N, N, 1)
     # Concatenate:
-    R_ij = (P_ij ** 2).concat(Q_ij)  # (N, N, 2+1)
+    R_ij = (P_ij**2).concat(Q_ij)  # (N, N, 2+1)
     R_ij = R_ij.concat(ones_)  # (N, N, 2+1+1)
 
     N_ij = n_i.matvecmult(x_j - x_i)  # (N, N, 1)
-    
+
     # Concatenate:
     R_N_ij = R_ij.concat(N_ij)  # (N, N, 4+1)
 
@@ -198,8 +197,11 @@ def smooth_curvatures_2(
     RRt_RNt = RRt_RNt_ij.sum(1)  # (N, 4*(4+1))
 
     # Reshape to get the two covariance matrices:
-    RRt_RNt = RRt_RNt.view(N, 4, 4+1)
-    RRt, RNt = RRt_RNt[:, :, :4].contiguous(), RRt_RNt[:, :, 4].contiguous()  # (N, 4, 4), (N, 4)
+    RRt_RNt = RRt_RNt.view(N, 4, 4 + 1)
+    RRt, RNt = (
+        RRt_RNt[:, :, :4].contiguous(),
+        RRt_RNt[:, :, 4].contiguous(),
+    )  # (N, 4, 4), (N, 4)
     assert RRt.shape == (N, 4, 4)
     assert RNt.shape == (N, 4)
 
@@ -215,7 +217,7 @@ def smooth_curvatures_2(
     # Normalization
     mean_curvature = a + c
     gauss_curvature = a * c - b * b
-    
+
     return {
         "mean": mean_curvature,
         "gauss": gauss_curvature,

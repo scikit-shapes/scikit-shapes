@@ -48,7 +48,22 @@ class RigidMotion(BaseModel):
 
         path = None
         if return_path:
-            path = [shape.copy(), morphed_shape.copy()]
+            if self.n_steps == 1:
+                path = [shape.copy(), morphed_shape.copy()]
+
+            else:
+                path = [shape.copy()]
+                for i in range(self.n_steps):
+                    local_parameter = ((i + 1) / self.n_steps) * parameter
+                    translation = local_parameter[1]
+                    center = shape.points.mean(dim=0)
+
+                    newpoints = (
+                        (matrix @ (shape.points - center).T).T + center + translation
+                    )
+                    newshape = shape.copy()
+                    newshape.points = newpoints
+                    path.append(newshape)
 
         return MorphingOutput(
             morphed_shape=morphed_shape,

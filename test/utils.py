@@ -1,5 +1,6 @@
 import torch
 
+
 def create_point_cloud(n_points: int, f: callable, normals=False):
     """Create a point cloud from a function f: R^3 -> R."""
     x = torch.linspace(-1, 1, n_points)
@@ -21,7 +22,7 @@ def create_point_cloud(n_points: int, f: callable, normals=False):
 
     if not normals:
         return points
-    
+
     grad_x, grad_y = torch.autograd.grad(z.sum(), [x, y])
     assert grad_x.shape == (N,)
     assert grad_y.shape == (N,)
@@ -30,7 +31,6 @@ def create_point_cloud(n_points: int, f: callable, normals=False):
     n = torch.nn.functional.normalize(n, p=2, dim=-1)
 
     return points.detach(), n.detach()
-
 
 
 def dim4(*, points, offset=0, scale=1):
@@ -54,4 +54,4 @@ def quadratic_gradient(*, points, quadric, offset=0, scale=1):
 
     X = dim4(points=points, offset=offset, scale=scale)
 
-    return (2 / scale) * (X @ quadric)[:,:3]
+    return (2 / scale) * (X @ quadric)[:, :3]

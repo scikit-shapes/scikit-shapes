@@ -103,14 +103,19 @@ class Registration:
         # Move the parameter to the output device
         self.parameter_ = parameter.detach().to(self.output_device)
 
-        self.distance = self.model.morph(
+        morphing = self.model.morph(
             shape=source,
-            parameter=parameter,
-            return_path=False,
+            parameter=self.parameter_,
+            return_path=True,
             return_regularization=True,
-        )[
-            1
-        ].detach()  # Is it the right way to compute the distance ?
+        )
+
+        self.regularization_ = morphing.regularization.to(self.output_device)
+        self.transformed_shape_ = morphing.morphed_shape
+        self.path_ = morphing.path
+
+        if self.path_[0].device != self.output_device:
+            self.path_ = [s.to(self.output_device) for s in self.path_]
 
     @typecheck
     def transform(self, *, source: Shape) -> Shape:
