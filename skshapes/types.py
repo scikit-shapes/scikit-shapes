@@ -34,14 +34,14 @@ int_dtype = torch.int64
 JaxFloat = Float32
 JaxInt = Int64
 
-# Numpy array types
-FloatArray = Float[np.ndarray, "..."] # Any float format numpy array
-IntArray = Int[np.ndarray, "..."] # Any int format numpy array
+# Numpy array types
+FloatArray = Float[np.ndarray, "..."]  # Any float format numpy array
+IntArray = Int[np.ndarray, "..."]  # Any int format numpy array
 NumericalArray = Union[FloatArray, IntArray]
 
 # Numerical types
-FloatTensor = JaxFloat[torch.Tensor, "..."] # Only Float32 tensors are FloatTensors
-IntTensor = JaxInt[torch.Tensor, "..."] # Only Int64 tensors are IntTensors
+FloatTensor = JaxFloat[torch.Tensor, "..."]  # Only Float32 tensors are FloatTensors
+IntTensor = JaxInt[torch.Tensor, "..."]  # Only Int64 tensors are IntTensors
 NumericalTensor = Union[FloatTensor, IntTensor]
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]
 IntTensorArray = JaxInt[torch.Tensor, "_"]

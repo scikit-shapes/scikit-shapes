@@ -213,7 +213,7 @@ def test_point_data():
         pass
     else:
         raise AssertionError(
-            "Should have raised an error, the point_data should be a dict or a sks.data.Features object"
+            "Should have raised an error, the point_data should be a dict or a sks.data.utils.DataAttributes object"
         )
 
     # Check that trying to set the point_data with an invalid dict (here the size of the tensors is not correct) raises an error
@@ -228,9 +228,9 @@ def test_point_data():
         raise AssertionError(
             "Should have raised an error, the size of the colors tensor is not correct"
         )
-    
-def test_point_data():
 
+
+def test_point_data():
     # Load a pyvista.PolyData and add an attribute
     pv_mesh = pyvista.Sphere()
     pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 3)
@@ -238,24 +238,27 @@ def test_point_data():
     # Convert it to a skshapes.PolyData
     sks_mesh = sks.PolyData(pv_mesh)
 
-    # Assert that the attribute curvature is correctly copied
+    # Assert that the attribute curvature is correctly copied
     dtype = sks_mesh.point_data["curvature"].dtype
-    assert torch.allclose(sks_mesh.point_data["curvature"], torch.from_numpy(pv_mesh.point_data["curvature"]).to(dtype))
+    assert torch.allclose(
+        sks_mesh.point_data["curvature"],
+        torch.from_numpy(pv_mesh.point_data["curvature"]).to(dtype),
+    )
 
-    # Assert that both device attributes for the mesh and the point_data are cpu
+    # Assert that both device attributes for the mesh and the point_data are cpu
     assert sks_mesh.device.type == "cpu"
     assert sks_mesh.point_data.device.type == "cpu"
 
-    # Move the mesh to cuda
+    # Move the mesh to cuda
     sks_mesh_cuda = sks_mesh.to("cuda")
 
-    # Assert that both device attributes for the mesh and the point_data are cuda
+    # Assert that both device attributes for the mesh and the point_data are cuda
     assert sks_mesh_cuda.device.type == "cuda"
     assert sks_mesh_cuda.point_data.device.type == "cuda"
 
-    # If you assign a new point_data to the mesh, it is automatically moved to the same device as the mesh
+    # If you assign a new point_data to the mesh, it is automatically moved to the same device as the mesh
     sks_mesh_cuda.point_data["color"] = torch.rand(sks_mesh_cuda.n_points, 3).cpu()
-    # It is also possible to assign a numpy array, it will be automatically converted to a torch.Tensor
+    # It is also possible to assign a numpy array, it will be automatically converted to a torch.Tensor
     sks_mesh_cuda.point_data["normals"] = np.random.rand(sks_mesh_cuda.n_points, 3)
 
     assert sks_mesh_cuda.point_data["color"].device.type == "cuda"
@@ -264,17 +267,24 @@ def test_point_data():
     back_to_pyvista = sks_mesh_cuda.to_pyvista()
     assert type(back_to_pyvista) == pyvista.PolyData
 
-    # Assert that the point_data attributes are correctly copied
+    # Assert that the point_data attributes are correctly copied
     assert "color" in back_to_pyvista.point_data.keys()
-    assert np.allclose(back_to_pyvista.point_data["normals"], sks_mesh_cuda.point_data["normals"].cpu().numpy())
+    assert np.allclose(
+        back_to_pyvista.point_data["normals"],
+        sks_mesh_cuda.point_data["normals"].cpu().numpy(),
+    )
 
     back_to_vedo = sks_mesh_cuda.to_vedo()
     assert type(back_to_vedo) == vedo.Mesh
-    assert np.allclose(back_to_vedo.pointdata["curvature"], sks_mesh.point_data["curvature"].numpy())
+    assert np.allclose(
+        back_to_vedo.pointdata["curvature"], sks_mesh.point_data["curvature"].numpy()
+    )
 
-    # From vedo to sks
+    # From vedo to sks
     sks_again = sks.PolyData(back_to_vedo)
-    assert np.allclose(sks_again.point_data["curvature"].numpy(), pv_mesh.point_data["curvature"])
+    assert np.allclose(
+        sks_again.point_data["curvature"].numpy(), pv_mesh.point_data["curvature"]
+    )
 
 
 def test_gpu():
