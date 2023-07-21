@@ -5,7 +5,7 @@ from ..utils import diagonal_ranges
 from ..types import typecheck, Points, Optional, Triangles, Number
 
 from .normals import smooth_normals, tangent_vectors
-
+from .structure_tensors import structure_tensors
 
 @typecheck
 def smooth_curvatures(
@@ -148,15 +148,32 @@ def smooth_curvatures_2(
     N = points.shape[0]
     ranges = diagonal_ranges(batch)
 
-    # Compute the normals at different scales + vertice areas - (N, S, 3):
-    normals = smooth_normals(
-        vertices=points,
-        triangles=triangles,
-        normals=normals,
-        scale=scale,
-        batch=batch,
-    )
-    assert normals.shape == (N, 3)
+    if False:
+        # Compute the normals at different scales + vertice areas - (N, 3):
+        normals = smooth_normals(
+            vertices=points,
+            triangles=triangles,
+            normals=normals,
+            scale=scale,
+            batch=batch,
+        )
+        assert normals.shape == (N, 3)
+
+    else:
+        ST = structure_tensors(points=points, scale=scale / 3, ranges=ranges)
+        # Perform an SVD decomposition:
+        decomp = torch.linalg.eigh(ST)
+        assert decomp.eigenvalues.shape == (N, 3)
+        assert (decomp.eigenvalues[:,1:] >= decomp.eigenvalues[:,:-1]).all()
+
+        # Extract the eigenvectors:
+        n = decomp.eigenvectors[:, :, 0].contiguous()  # (N, 3)
+
+        if normals is None:
+            normals = n
+        else:
+            # Align n with the normals
+            normals = n * torch.sign((n * normals).sum(-1, keepdim=True))
 
     # Local tangent bases - (N, 2, 3):
     uv = tangent_vectors(normals)

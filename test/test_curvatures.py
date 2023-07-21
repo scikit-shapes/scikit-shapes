@@ -17,7 +17,7 @@ from .utils import create_point_cloud, dim4, quadratic_function, quadratic_gradi
 def display_curvatures(*, function: callable, scale=1):
 
     points, normals = create_point_cloud(
-        n_points=20,
+        n_points=10,
         f=function,
         normals=True
     )
@@ -27,8 +27,9 @@ def display_curvatures(*, function: callable, scale=1):
     curvatures = sks.smooth_curvatures_2(points=points, normals=normals, scale=scale)
 
     # Our surface points:
-    spheres = vd.Points(points, r=40).cmap("RdBu_r", curvatures["mean"])
-    spheres = spheres.add_scalarbar3d()
+    r = 500 / np.sqrt(len(points))
+    spheres = vd.Points(points, r=r).cmap("RdBu_r", curvatures["mean"])
+    spheres = spheres.add_scalarbar()
 
     quiver = vd.Arrows(points, points + .2 * normals, c="green", alpha=0.9)
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
 
     if True:
         for f in functions:
-            display_curvatures(function = f, scale=.4)
+            display_curvatures(function = f, scale=.5)
 
     else:
         from torch.profiler import profile, ProfilerActivity
