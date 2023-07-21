@@ -9,6 +9,7 @@ from ..types import (
     typecheck,
     float_dtype,
     int_dtype,
+    Number,
     NumericalArray,
     NumericalTensor,
     Points,
@@ -164,7 +165,7 @@ class PolyData(BaseShape):
         pass
 
     @typecheck
-    def decimate(self, target_reduction: float) -> PolyData:
+    def decimate(self, *, target_reduction: Optional[float] = None, n_points: Optional[Number] = None) -> PolyData:
         """Decimate the shape using the Quadric Decimation algorithm.
 
         Args:
@@ -173,9 +174,18 @@ class PolyData(BaseShape):
         Returns:
             PolyData: the decimated PolyData
         """
+        if target_reduction is None and n_points is None:
+            raise ValueError("Either target_reduction or n_points must be provided.")
+        
+        if target_reduction is not None and n_points is not None:
+            raise ValueError("Only one of target_reduction or n_points must be provided.")
+
+        if n_points is not None:
+            assert n_points > 0, "n_points must be positive"
+            target_reduction = max(0, 1 - n_points / self.n_points)
 
         assert (
-            target_reduction > 0 and target_reduction < 1
+            target_reduction >= 0 and target_reduction <= 1
         ), "target_reduction must be between 0 and 1"
 
         mesh = self.to_pyvista()
@@ -480,6 +490,26 @@ class PolyData(BaseShape):
             return self._triangles.shape[1]
         else:
             return 0
+
+
+    @property
+    @typecheck
+    def mean_point(self) -> Points:
+        """Returns the mean point of the shape as a (N_batch, 3) tensor."""
+        # TODO: add support for batch vectors
+        # TODO: add support for point weights
+        return self._points.mean(dim=0, keepdim=True)
+
+
+    @property
+    @typecheck
+    def standard_deviation(self) -> Float1dTensor:
+        """Returns the standard deviation (radius) of the shape as a (N_batch,) tensor."""
+        # TODO: add support for batch vectors
+        # TODO: add support for point weights
+        return ((self._points - self.mean_point) ** 2).sum(dim=1).mean(dim=0).sqrt().view(-1)
+
+
 
     @property
     @typecheck
