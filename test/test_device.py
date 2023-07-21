@@ -1,5 +1,6 @@
 import skshapes as sks
 import pyvista.examples
+from typing import get_args
 
 shape1 = sks.PolyData(pyvista.Sphere())
 shape2 = sks.PolyData(pyvista.Sphere()).decimate(0.5)
@@ -62,13 +63,16 @@ def test_loss_device():
     list_of_losses = [
         i
         for i in sks.loss.__dict__.values()
-        if isinstance(i, type) and issubclass(i, sks.Loss)
+        if isinstance(i, type) and i in get_args(sks.Loss)
     ]
     for loss in list_of_losses:
         l = loss()
+
         try:
             l(source=source, target=target)
         except:
             pass
         else:
+            l(source=source, target=target)
+            print(loss)
             raise AssertionError("Should have raised an error")

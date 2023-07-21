@@ -13,6 +13,7 @@ import vedo as vd
 
 from .utils import create_point_cloud, dim4, quadratic_function, quadratic_gradient
 
+
 @given(n_points=st.integers(min_value=5, max_value=10))
 @settings(deadline=1000)
 def test_quadratic_function(*, n_points: int):
@@ -84,7 +85,6 @@ def display_quadratic_fit(points, highlight=0, scale=1):
 
 
 if __name__ == "__main__":
-    
     functions = [
         lambda x, y: (1.5 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
         lambda x, y: x**2 - y**2,
@@ -96,7 +96,7 @@ if __name__ == "__main__":
                 n_points=20,
                 f=f,
             )
-            display_quadratic_fit(points, highlight=55, scale=.3)
+            display_quadratic_fit(points, highlight=55, scale=0.3)
 
     else:
         from torch.profiler import profile, ProfilerActivity
@@ -119,7 +119,7 @@ if __name__ == "__main__":
                 f=functions[0],
             )
             quadrics, mean_point, sigma = sks.implicit_quadrics(points=points, scale=1)
-        
+
         # Create an "output/" foler if it doesn't exist
         import os
 
@@ -130,5 +130,5 @@ if __name__ == "__main__":
         prof.export_chrome_trace(f"output/trace_implicit_quadrics.json")
         prof.export_stacks(
             f"output/stacks_implicit_quadrics.txt",
-            "self_cpu_time_total", # "self_cuda_time_total",
+            "self_cpu_time_total",  # "self_cuda_time_total",
         )

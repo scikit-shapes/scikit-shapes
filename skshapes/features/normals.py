@@ -10,10 +10,10 @@ from ..types import typecheck, Points, Optional, Triangles
 def smooth_normals(
     *,
     vertices: Points,
-    triangles:Optional[Triangles] = None,
+    triangles: Optional[Triangles] = None,
     scale=[1.0],
     batch=None,
-    normals:Optional[Points] = None,
+    normals: Optional[Points] = None,
 ):
     """Returns a smooth field of normals, possibly at different scales.
 

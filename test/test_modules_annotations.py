@@ -1,11 +1,6 @@
 import inspect
-import sys
-
-sys.path.append(sys.path[0][:-4])
-
-print(sys.path)
-
 from typing import Union, get_origin, get_args
+import skshapes as sks
 
 
 def check_module_annotations(module, template, type):
@@ -58,14 +53,6 @@ def check_module_annotations(module, template, type):
                     check_annotations(annotations, template[method_name])
 
 
-import skshapes as sks
-
-import skshapes.loss
-import skshapes.morphing
-import skshapes
-
-# from skshapes.types import ShapeType
-
 # Define the templates for the annotations of Loss and Morphing
 loss_template = {
     "__call__": {
@@ -87,10 +74,14 @@ morphing_template = {
 
 # Define the tests
 def test_losses():
-    check_module_annotations(module=sks.loss, template=loss_template, type=sks.Loss)
+    check_module_annotations(
+        module=sks.loss, template=loss_template, type=sks.loss.baseloss.BaseLoss
+    )
 
 
 def test_morphing():
     check_module_annotations(
-        module=sks.morphing, template=morphing_template, type=sks.Morphing
+        module=sks.morphing,
+        template=morphing_template,
+        type=sks.morphing.basemodel.BaseModel,
     )

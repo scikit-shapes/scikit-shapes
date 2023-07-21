@@ -1,8 +1,11 @@
 import torch.optim
-from ..types import Optimizer
+
+# from ..types import Optimizer
+
+from typing import Union
 
 
-class BaseOptimizer(Optimizer):
+class BaseOptimizer:
     def __init__(self, name, **kwargs):
         """Initialize the optimizer with the given hyperparameters"""
         self.kwargs = kwargs
@@ -33,3 +36,6 @@ class Adagrad(BaseOptimizer):
 class SGD(BaseOptimizer):
     def __init__(self, lr=0.01, **kwargs):
         super().__init__("SGD", lr=lr, **kwargs)
+
+
+Optimizer = Union[LBFGS, Adam, Adagrad, SGD]

@@ -1,6 +1,7 @@
 import torch
 
 from ..data import PolyData
+from .basemodel import BaseModel
 
 from ..types import (
     typecheck,
@@ -8,13 +9,12 @@ from ..types import (
     FloatScalar,
     Edges,
     Tuple,
-    Morphing,
 )
 
 from .utils import MorphingOutput
 
 
-class ElasticMetric(Morphing):
+class ElasticMetric(BaseModel):
     @typecheck
     def __init__(self, n_steps: int = 1) -> None:
         self.n_steps = n_steps

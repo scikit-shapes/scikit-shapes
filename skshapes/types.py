@@ -1,7 +1,26 @@
+"""In this module, we define the basic types used in the library (those who are only relying on third-part libraries).
+These types are used to annotate the functions and classes of the library.
+Types that corresponds to classes are defined in the classes module to avoid circular import.
+
+Ex: the generic type Shape is defned in skshapes.data, the generic type Loss is defined in skshapes.loss
+"""
+
 from beartype import beartype
-from jaxtyping import jaxtyped, Float32, Int64
-from typing import Any, Optional, Union, TypeVar, Generic, List, Tuple, NamedTuple, Dict
+from jaxtyping import jaxtyped, Float32, Int64, Float, Int
+from typing import (
+    Any,
+    Optional,
+    Union,
+    TypeVar,
+    Generic,
+    List,
+    Tuple,
+    NamedTuple,
+    Dict,
+    TypeVar,
+)
 import torch
+import numpy as np
 
 
 def typecheck(func):
@@ -10,15 +29,20 @@ def typecheck(func):
 
 # Type aliases
 Number = Union[int, float]
-
 float_dtype = torch.float32
 int_dtype = torch.int64
 JaxFloat = Float32
 JaxInt = Int64
 
+# Numpy array types
+FloatArray = Float[np.ndarray, "..."]  # Any float format numpy array
+IntArray = Int[np.ndarray, "..."]  # Any int format numpy array
+NumericalArray = Union[FloatArray, IntArray]
+
 # Numerical types
-FloatTensor = JaxFloat[torch.Tensor, "..."]
-IntTensor = JaxInt[torch.Tensor, "..."]
+FloatTensor = JaxFloat[torch.Tensor, "..."]  # Only Float32 tensors are FloatTensors
+IntTensor = JaxInt[torch.Tensor, "..."]  # Only Int64 tensors are IntTensors
+NumericalTensor = Union[FloatTensor, IntTensor]
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]
 IntTensorArray = JaxInt[torch.Tensor, "_"]
 Float1dTensor = JaxFloat[torch.Tensor, "_"]
@@ -44,66 +68,3 @@ from beartype.vale import Is
 Landmarks = Annotated[
     torch.Tensor, Is[lambda tensor: tensor.dtype == float_dtype and tensor.is_sparse]
 ]
-
-
-# Morphing types
-class Loss:
-    @typecheck
-    def __add__(self, other: "Loss") -> "Loss":
-        """Add two losses
-
-        Args:
-            other (Loss): the other loss to add
-
-        Returns:
-            Loss: a new loss which __call__ method is the sum of the two __call__ methods
-        """
-
-        class sum_of_losses(Loss):
-            def __init__(self, loss1, loss2):
-                self.loss1 = loss1
-                self.loss2 = loss2
-
-            def __call__(self, source, target) -> FloatScalar:
-                return self.loss1.__call__(
-                    source=source, target=target
-                ) + self.loss2.__call__(source=source, target=target)
-
-        loss1 = self
-        loss2 = other
-
-        return sum_of_losses(loss1=loss1, loss2=loss2)
-
-    @typecheck
-    def __rmul__(self, scalar: Number) -> "Loss":
-        """Multiply a loss by a scalar
-
-        Args:
-            other (Number): the scalar to multiply the loss by
-
-        Returns:
-            Loss: a new loss which __call__ method is the product of the scalaer and the self.__call__ method
-        """
-
-        class newloss(Loss):
-            def __init__(self, loss, scalar):
-                self.loss = loss
-                self.scalar = scalar
-
-            def __call__(self, source, target) -> FloatScalar:
-                return self.scalar * self.loss.__call__(source=source, target=target)
-
-        loss = self
-        return newloss(loss=loss, scalar=scalar)
-
-    @typecheck
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
-
-
-class Morphing:
-    pass
-
-
-class Optimizer:
-    pass
