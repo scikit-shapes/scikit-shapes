@@ -588,3 +588,4 @@ class PolyData(BaseShape):
         return torch.cross(B - A, C - A)
 
     from ..convolutions import point_convolution
+    from ..features import point_moments

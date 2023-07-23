@@ -71,7 +71,7 @@ def point_convolution(
     window: Literal[None, "ball", "knn", "spectral"] = None,
     cutoff: Optional[Number] = None,
     geodesic: bool = False,
-    normalize: bool = True,
+    normalize: bool = False,
 ) -> LinearOperator:
     """Creates a convolution kernel on a PolyData as a (N, N) linear operator."""
     N = self.n_points
