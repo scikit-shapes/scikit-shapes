@@ -66,8 +66,8 @@ def squared_distances(
 def point_convolution(
     self,
     *,
-    kernel: Literal["gaussian", "uniform"] = "gaussian",
-    scale: Number = 1.0,
+    kernel: Literal["uniform", "gaussian"] = "gaussian",
+    scale: Optional[Number] = None,
     window: Literal[None, "ball", "knn", "spectral"] = None,
     cutoff: Optional[Number] = None,
     geodesic: bool = False,
@@ -82,10 +82,15 @@ def point_convolution(
         points=self.points, window=window, cutoff=cutoff, geodesic=geodesic
     )
 
-    if kernel == "gaussian":
-        K_ij = (-D_ij / (2 * scale**2)).exp()
-    elif kernel == "uniform":
-        K_ij = 1.0 * (D_ij <= scale**2)
+    if scale is None:
+        # scale = +infinity, the kernel is always equal to 1
+        K_ij = 1.0 * (D_ij >= -1.0)
+    
+    else:
+        if kernel == "gaussian":
+            K_ij = (-D_ij / (2 * scale**2)).exp()
+        elif kernel == "uniform":
+            K_ij = 1.0 * (D_ij <= scale**2)
 
     if normalize:
         total_weights_i = K_ij @ weights_j

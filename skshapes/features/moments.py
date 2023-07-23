@@ -16,7 +16,7 @@ def point_moments(
     features: Optional[Float2dTensor] = None,
     central: bool = False,
     rescale: bool = False,
-    scale: Number = 1.0,
+    scale: Optional[Number] = None,
     **kwargs,
 ) -> FloatTensorArray:
     """Compute the local moments of a point cloud."""
@@ -54,6 +54,9 @@ def point_moments(
         )
 
     if rescale:
+        if scale is None:
+            raise ValueError("A finite scale must be provided if rescale is True")
+        
         moments = moments / scale**order
 
     return moments
