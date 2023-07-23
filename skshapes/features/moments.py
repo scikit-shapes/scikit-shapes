@@ -56,7 +56,7 @@ def point_moments(
     if rescale:
         if scale is None:
             raise ValueError("A finite scale must be provided if rescale is True")
-        
+
         moments = moments / scale**order
 
     return moments

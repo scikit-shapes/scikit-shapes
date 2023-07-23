@@ -587,5 +587,23 @@ class PolyData(BaseShape):
 
         return torch.cross(B - A, C - A)
 
+    @property
+    @typecheck
+    def point_weights(self) -> Float1dTensor:
+        """Return the weights of each point"""
+        if self.triangles is not None:
+            areas = self.triangle_areas / 3
+            return torch.bincount(
+                self.triangles.flatten(), weights=areas, minlength=self.n_points
+            )
+
+        elif self.edges is not None:
+            lengths = self.edge_lengths / 2
+            return torch.bincount(
+                self.edges.flatten(), weights=lengths, minlength=self.n_points
+            )
+
+        return torch.ones(self.n_points, dtype=float_dtype, device=self.device)
+
     from ..convolutions import point_convolution
     from ..features import point_moments
