@@ -49,5 +49,3 @@ def structure_tensors(*, points: Points, scale=1.0, ranges=None):
     ST = ST_ij.sum(1)  # (N, 3, 3)
     ST = ST.view(N, 3, 3) / wsum.view(N, 1, 1)
     return ST
-
-
