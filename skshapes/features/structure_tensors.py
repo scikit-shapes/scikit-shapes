@@ -5,6 +5,7 @@ from ..utils import diagonal_ranges
 from ..types import typecheck, Points, Optional, Triangles, Number
 
 
+
 def structure_tensors(*, points: Points, scale=1.0, ranges=None):
     """Compute the structure tensors of a point cloud.
 
