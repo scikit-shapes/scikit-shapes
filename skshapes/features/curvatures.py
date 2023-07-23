@@ -7,6 +7,7 @@ from ..types import typecheck, Points, Optional, Triangles, Number
 from .normals import smooth_normals, tangent_vectors
 from .structure_tensors import structure_tensors
 
+
 @typecheck
 def smooth_curvatures(
     *,
@@ -163,7 +164,7 @@ def smooth_curvatures_2(
         # Perform an SVD decomposition:
         decomp = torch.linalg.eigh(ST)
         assert decomp.eigenvalues.shape == (N, 3)
-        assert (decomp.eigenvalues[:,1:] >= decomp.eigenvalues[:,:-1]).all()
+        assert (decomp.eigenvalues[:, 1:] >= decomp.eigenvalues[:, :-1]).all()
 
         # Extract the eigenvectors:
         n = decomp.eigenvectors[:, :, 0].contiguous()  # (N, 3)

@@ -18,6 +18,7 @@ from typing import (
     NamedTuple,
     Dict,
     TypeVar,
+    Literal,
 )
 import torch
 import numpy as np

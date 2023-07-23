@@ -214,13 +214,14 @@ class DataAttributes(dict):
 
 
 if False:
+
     class cached_property(object):
         """
         A property that is only computed once per instance and then replaces itself
         with an ordinary attribute. Deleting the attribute resets the property."""
 
         def __init__(self, func):
-            self.__doc__ = getattr(func, '__doc__')
+            self.__doc__ = getattr(func, "__doc__")
             self.func = func
 
         def __get__(self, obj, cls):
@@ -236,6 +237,7 @@ else:
 import functools
 import weakref
 
+
 def cached_method(*lru_args, **lru_kwargs):
     def decorator(func):
         @functools.wraps(func)
@@ -243,26 +245,31 @@ def cached_method(*lru_args, **lru_kwargs):
             # We're storing the wrapped method inside the instance. If we had
             # a strong reference to self the instance would never die.
             self_weak = weakref.ref(self)
+
             @functools.wraps(func)
             @functools.lru_cache(*lru_args, **lru_kwargs)
             def cached_method(*args, **kwargs):
                 return func(self_weak(), *args, **kwargs)
+
             setattr(self, func.__name__, cached_method)
             return cached_method(*args, **kwargs)
+
         return wrapped_func
+
     return decorator
 
 
 from functools import cached_property, lru_cache, partial, update_wrapper
 from typing import Callable, Optional, TypeVar, Union
 
-T = TypeVar("T") 
+T = TypeVar("T")
+
 
 def instance_lru_cache(
     method: Optional[Callable[..., T]] = None,
     *,
     maxsize: Optional[int] = 128,
-    typed: bool = False
+    typed: bool = False,
 ) -> Union[Callable[..., T], Callable[[Callable[..., T]], Callable[..., T]]]:
     """Least-recently-used cache decorator for instance methods.
 
