@@ -1,12 +1,11 @@
 import skshapes as sks
+import pyvista
 
 
 def test_registration():
     # Load two meshes
-    datafolder = "data/SCAPE_low_resolution"
-    print(datafolder + "/" + "mesh001.ply")
-    source = sks.PolyData(datafolder + "/" + "mesh001.ply")
-    target = sks.PolyData(datafolder + "/" + "mesh041.ply")
+    source = sks.PolyData(pyvista.Sphere())
+    target = sks.PolyData(pyvista.Sphere())
 
     # Few type checks
     assert isinstance(source, sks.data.baseshape.BaseShape)

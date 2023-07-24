@@ -4,6 +4,7 @@ import numpy as np
 import pyvista
 import vedo
 import skshapes as sks
+import pytest
 
 
 def _cube():
@@ -205,7 +206,7 @@ def test_point_data():
     assert list(mesh.point_data.keys()) == [
         "rotations",
         "colors",
-        "feature_0",
+        "attribute_0",
     ]  # Check the name of the point_data
 
     # Check that trying to set the point_data with a wrong type raises an error
@@ -251,6 +252,61 @@ def test_point_data2():
     assert sks_mesh.device.type == "cpu"
     assert sks_mesh.point_data.device.type == "cpu"
 
+    sks_mesh.point_data["color"] = torch.rand(sks_mesh.n_points, 3).cpu()
+    # It is also possible to assign a numpy array, it will be automatically converted to a torch.Tensor
+    sks_mesh.point_data["normals"] = np.random.rand(sks_mesh.n_points, 3)
+
+    back_to_pyvista = sks_mesh.to_pyvista()
+    assert type(back_to_pyvista) == pyvista.PolyData
+
+    # Assert that the point_data attributes are correctly copied
+    assert "color" in back_to_pyvista.point_data.keys()
+    assert np.allclose(
+        back_to_pyvista.point_data["normals"],
+        sks_mesh.point_data["normals"].numpy(),
+    )
+
+    back_to_vedo = sks_mesh.to_vedo()
+    assert type(back_to_vedo) == vedo.Mesh
+    assert np.allclose(
+        back_to_vedo.pointdata["curvature"], sks_mesh.point_data["curvature"].numpy()
+    )
+
+    # From vedo to sks
+    sks_again = sks.PolyData(back_to_vedo)
+    assert np.allclose(
+        sks_again.point_data["curvature"].numpy(), pv_mesh.point_data["curvature"]
+    )
+
+
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Cuda is required for this test"
+)
+def test_point_data_cuda():
+    # Load a pyvista.PolyData and add an attribute
+    pv_mesh = pyvista.Sphere()
+    pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 3)
+
+    # Convert it to a skshapes.PolyData
+    sks_mesh = sks.PolyData(pv_mesh)
+
+    # Assert that the attribute curvature is correctly copied
+    dtype = sks_mesh.point_data["curvature"].dtype
+    assert torch.allclose(
+        sks_mesh.point_data["curvature"],
+        torch.from_numpy(pv_mesh.point_data["curvature"]).to(dtype),
+    )
+
+    # Assert that both device attributes for the mesh and the point_data are cpu
+    assert sks_mesh.device.type == "cpu"
+    assert sks_mesh.point_data.device.type == "cpu"
+
+    sks_mesh.point_data["color"] = torch.rand(sks_mesh.n_points, 3).cpu()
+    # It is also possible to assign a numpy array, it will be automatically converted to a torch.Tensor
+    sks_mesh.point_data["normals"] = np.random.rand(sks_mesh.n_points, 3)
+
+    ############" CUDA PART ############"
+
     # Move the mesh to cuda
     sks_mesh_cuda = sks_mesh.to("cuda")
 
@@ -266,29 +322,10 @@ def test_point_data2():
     assert sks_mesh_cuda.point_data["color"].device.type == "cuda"
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"
 
-    back_to_pyvista = sks_mesh_cuda.to_pyvista()
-    assert type(back_to_pyvista) == pyvista.PolyData
 
-    # Assert that the point_data attributes are correctly copied
-    assert "color" in back_to_pyvista.point_data.keys()
-    assert np.allclose(
-        back_to_pyvista.point_data["normals"],
-        sks_mesh_cuda.point_data["normals"].cpu().numpy(),
-    )
-
-    back_to_vedo = sks_mesh_cuda.to_vedo()
-    assert type(back_to_vedo) == vedo.Mesh
-    assert np.allclose(
-        back_to_vedo.pointdata["curvature"], sks_mesh.point_data["curvature"].numpy()
-    )
-
-    # From vedo to sks
-    sks_again = sks.PolyData(back_to_vedo)
-    assert np.allclose(
-        sks_again.point_data["curvature"].numpy(), pv_mesh.point_data["curvature"]
-    )
-
-
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Cuda is required for this test"
+)
 def test_gpu():
     cube = sks.PolyData(_cube())
     cube_gpu = cube.to("cuda")
