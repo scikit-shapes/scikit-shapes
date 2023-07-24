@@ -1,6 +1,6 @@
 from ..types import (
     typecheck,
-    FloatTensorArray,
+    FloatTensor,
     Optional,
     Float2dTensor,
     Number,
@@ -18,7 +18,7 @@ def point_moments(
     rescale: bool = False,
     scale: Optional[Number] = None,
     **kwargs,
-) -> FloatTensorArray:
+) -> FloatTensor:
     """Compute the local moments of a point cloud."""
     X = self.points if features is None else features
 

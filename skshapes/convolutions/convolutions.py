@@ -32,6 +32,14 @@ class LinearOperator:
         return o_s * (self.matrix @ (i_s * other))
 
     @property
+    def T(self):
+        return LinearOperator(
+            self.matrix.T,
+            input_scaling=self.output_scaling,
+            output_scaling=self.input_scaling,
+        )
+
+    @property
     def shape(self):
         return self.matrix.shape
 
