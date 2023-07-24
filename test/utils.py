@@ -1,4 +1,5 @@
 import torch
+import vedo as vd
 
 
 def create_point_cloud(n_points: int, f: callable, normals=False):
@@ -55,3 +56,10 @@ def quadratic_gradient(*, points, quadric, offset=0, scale=1):
     X = dim4(points=points, offset=offset, scale=scale)
 
     return (2 / scale) * (X @ quadric)[:, :3]
+
+
+def vedo_frames(points, frames):
+    n = vd.Arrows(points, points + frames[:, :, 0], c="red", alpha=0.9)
+    u = vd.Arrows(points, points + frames[:, :, 1], c="blue", alpha=0.9)
+    v = vd.Arrows(points, points + frames[:, :, 2], c="green", alpha=0.9)
+    return [n, u, v]

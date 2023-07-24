@@ -593,12 +593,18 @@ class PolyData(BaseShape):
         """Return the weights of each point"""
         if self.triangles is not None:
             areas = self.triangle_areas / 3
+            # Triangles are stored in a (3, n_triangles) tensor,
+            # so we must repeat the areas 3 times, without interleaving.
+            areas = areas.repeat(3)
             return torch.bincount(
                 self.triangles.flatten(), weights=areas, minlength=self.n_points
             )
 
         elif self.edges is not None:
             lengths = self.edge_lengths / 2
+            # Edges are stored in a (2, n_edges) tensor,
+            # so we must repeat the lengths 2 times, without interleaving.
+            lengths = lengths.repeat(2)
             return torch.bincount(
                 self.edges.flatten(), weights=lengths, minlength=self.n_points
             )

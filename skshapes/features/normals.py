@@ -3,7 +3,16 @@ from pykeops.torch import LazyTensor
 import torch.nn.functional as F
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Optional, Triangles
+from ..types import typecheck, Points, Optional, Triangles, Number
+
+
+def point_frames(
+    self,
+    *,
+    scale: Optional[Number] = None,
+    **kwargs,
+):
+    pass
 
 
 @typecheck
