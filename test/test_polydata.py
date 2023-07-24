@@ -230,7 +230,7 @@ def test_point_data():
         )
 
 
-def test_point_data():
+def test_point_data2():
     # Load a pyvista.PolyData and add an attribute
     pv_mesh = pyvista.Sphere()
     pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 3)
@@ -256,7 +256,7 @@ def test_point_data():
     assert sks_mesh_cuda.device.type == "cuda"
     assert sks_mesh_cuda.point_data.device.type == "cuda"
 
-    # If you assign a new point_data to the mesh, it is automatically moved to the same device as the mesh
+    # If a new attribute is added  to the mesh, it is automatically moved to the same device as the mesh
     sks_mesh_cuda.point_data["color"] = torch.rand(sks_mesh_cuda.n_points, 3).cpu()
     # It is also possible to assign a numpy array, it will be automatically converted to a torch.Tensor
     sks_mesh_cuda.point_data["normals"] = np.random.rand(sks_mesh_cuda.n_points, 3)
