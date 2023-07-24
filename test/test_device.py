@@ -3,7 +3,7 @@ import pyvista.examples
 from typing import get_args
 
 shape1 = sks.PolyData(pyvista.Sphere())
-shape2 = sks.PolyData(pyvista.Sphere()).decimate(0.5)
+shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.5)
 
 
 def test_registration_device():

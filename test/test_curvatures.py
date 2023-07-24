@@ -22,8 +22,9 @@ def display_curvatures(*, function: callable, scale=1):
     curvatures = sks.smooth_curvatures_2(points=points, normals=normals, scale=scale)
 
     # Our surface points:
-    spheres = vd.Points(points, r=40).cmap("RdBu_r", curvatures["mean"])
-    spheres = spheres.add_scalarbar3d()
+    r = 500 / np.sqrt(len(points))
+    spheres = vd.Points(points, r=r).cmap("RdBu_r", curvatures["mean"])
+    spheres = spheres.add_scalarbar()
 
     quiver = vd.Arrows(points, points + 0.2 * normals, c="green", alpha=0.9)
 

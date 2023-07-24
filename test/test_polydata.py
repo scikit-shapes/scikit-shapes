@@ -137,7 +137,9 @@ def test_interaction_with_pyvista():
 
 def test_decimation():
     mesh = pyvista.Sphere().decimate(0.5)  # use pyvista to decimate
-    polydata = sks.PolyData(pyvista.Sphere()).decimate(0.5)  # use skshapes to decimate
+    polydata = sks.PolyData(pyvista.Sphere()).decimate(
+        target_reduction=0.5
+    )  # use skshapes to decimate
 
     # Check that the points are the same
     assert np.allclose(polydata.points.numpy(), mesh.points)
