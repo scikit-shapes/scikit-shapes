@@ -1,1 +1,2 @@
-from .decimation import decimation
+from .decimation import QuadricDecimation
+from .utils import decimation
