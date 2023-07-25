@@ -1,5 +1,6 @@
 import skshapes as sks
 import pyvista
+import torch
 
 
 def test_registration():
@@ -41,6 +42,9 @@ shape1 = sks.PolyData(pyvista.Sphere())
 shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.5)
 
 
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Cuda is required for this test"
+)
 def test_registration_device():
     """This test ensure the behavior of the registration task with respect to the devices of the source, target and the gpu argument.
     Expected behavior:
