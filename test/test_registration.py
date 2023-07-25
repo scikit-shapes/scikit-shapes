@@ -1,6 +1,7 @@
 import skshapes as sks
 import pyvista
 import torch
+import pytest
 
 
 def test_registration():
