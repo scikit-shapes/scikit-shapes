@@ -1,12 +1,13 @@
 import skshapes as sks
+import pyvista
+import torch
+import pytest
 
 
 def test_registration():
     # Load two meshes
-    datafolder = "data/SCAPE_low_resolution"
-    print(datafolder + "/" + "mesh001.ply")
-    source = sks.PolyData(datafolder + "/" + "mesh001.ply")
-    target = sks.PolyData(datafolder + "/" + "mesh041.ply")
+    source = sks.PolyData(pyvista.Sphere())
+    target = sks.PolyData(pyvista.Sphere())
 
     # Few type checks
     assert isinstance(source, sks.data.baseshape.BaseShape)
@@ -42,6 +43,9 @@ shape1 = sks.PolyData(pyvista.Sphere())
 shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.5)
 
 
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Cuda is required for this test"
+)
 def test_registration_device():
     """This test ensure the behavior of the registration task with respect to the devices of the source, target and the gpu argument.
     Expected behavior:
