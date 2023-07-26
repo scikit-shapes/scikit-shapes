@@ -300,8 +300,7 @@ def _decimate(points, alphas, collapses_history):
     Args:
         points (np.ndarray): the points of the mesh to decimate.
         alphas (np.ndarray): the list of alpha coefficients such that when (e0, e1) collapses : e0 <- alpha * e0 + (1-alpha) * e1
-        collapses_history (np.ndarray): the history of collapses, a list of edges (e0, e1) that have been collapsed. The convention is that e0 is
-        the point that remains and e1 is the point that is removed.
+        collapses_history (np.ndarray): the history of collapses, a list of edges (e0, e1) that have been collapsed. The convention is that e0 is the point that remains and e1 is the point that is removed.
 
     Returns:
         points (np.ndarray): the decimated points.
@@ -317,7 +316,14 @@ def _decimate(points, alphas, collapses_history):
 
 @nb.jit(nopython=True, fastmath=True, cache=True)
 def _compute_alphas(points, collapses_history, newpoints_history):
-    """ """
+    """
+    This function computes the alpha coefficients such that when (e0, e1) collapses to the point x, the projection of x on the line (e0, e1) is alpha * e0 + (1-alpha) * e1
+
+    Args:
+        points (np.ndarray): the points of the mesh to decimate.
+        collapses_history (np.ndarray): the history of collapses, a list of edges (e0, e1) that have been collapsed. The convention is that e0 is the point that remains and e1 is the point that is removed.
+        newpoints_history (np.ndarray): the list of new points that have been computed during the collapses.
+    """
 
     alphas = np.zeros(len(collapses_history))
 
@@ -344,6 +350,17 @@ from typing import Tuple
 def _do_decimation(
     points, triangles, target_reduction: float = 0.5, print_compute_time: bool = False
 ):
+    """Apply the quadric decimation algorithm to a mesh.
+
+    Args:
+        points (_type_): _description_
+        triangles (_type_): _description_
+        target_reduction (float, optional): _description_. Defaults to 0.5.
+        print_compute_time (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        _type_: _description_
+    """
     assert target_reduction > 0.0 and target_reduction < 1.0
 
     # points = shape.points.clone().numpy()
