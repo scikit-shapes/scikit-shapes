@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     if True:
         for f in functions:
-            display_moments(function=f, scale=0.5, n_points=15)
+            display_moments(function=f, scale=0.5, n_points=15, noise = .05)
 
     if False:
         for f in fnames:

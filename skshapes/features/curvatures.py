@@ -1,8 +1,9 @@
+import numpy as np
 import torch
 from pykeops.torch import LazyTensor
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Optional, Triangles, Number
+from ..types import typecheck, Points, Optional, Triangles, Number, Float1dTensor, Tuple
 
 from .normals import smooth_normals, tangent_vectors
 from .structure_tensors import structure_tensors
@@ -240,3 +241,43 @@ def smooth_curvatures_2(
         "mean": mean_curvature,
         "gauss": gauss_curvature,
     }
+
+
+@typecheck
+def point_principal_curvatures(
+    self,
+    *,
+    scale: Optional[Number] = None,
+    **kwargs,
+) -> Tuple[Float1dTensor, Float1dTensor]:
+    """Returns the point-wise principal curvatures."""
+
+    # nuv are arranged row-wise!
+    nuv = self.point_frames(scale=scale, **kwargs)
+    assert nuv.shape == (self.n_points, 3, 3)
+
+    n = nuv[:, 0, :].contiguous()  # (N, 3)
+    uv = nuv[:, 1:, :].contiguous()  # (N, 2, 3)
+    assert n.shape == (self.n_points, 3)
+    assert uv.shape == (self.n_points, 2, 3)
+
+
+@typecheck
+def point_shape_indices(self, **kwargs) -> Float1dTensor:
+    """Returns the point-wise shape index, estimated at a given scale.
+    
+    For reference, see:
+    "Surface shape and curvature scales", Koenderink and van Doorn, 1992.
+    """
+    kmax, kmin = self.point_principal_curvatures(**kwargs)
+    return (2 / np.pi) * torch.atan((kmax + kmin) / (kmax - kmin))
+
+@typecheck
+def point_shape_indices(self, **kwargs) -> Float1dTensor:
+    """Returns the point-wise curvedness, estimated at a given scale.
+    
+    For reference, see:
+    "Surface shape and curvature scales", Koenderink and van Doorn, 1992.
+    """
+    kmax, kmin = self.point_principal_curvatures(**kwargs)
+    return ((kmax ** 2 + kmin ** 2) / 2).sqrt()
