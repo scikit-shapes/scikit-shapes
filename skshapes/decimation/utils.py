@@ -1,9 +1,6 @@
 import numpy as np
 import numba as nb
 
-# TODO : implement quadric computation for boundary edges -> Done
-# TODO : implement singular matrix case -> Done
-
 
 def compute_edges(triangles, repeated=False):
     repeated_edges = np.concatenate(
@@ -247,10 +244,6 @@ def collapse(edges, costs, targetPoints, quadrics, points, n_points_to_remove=50
         indice = np.argmin(costs)
         e0, e1 = edges[indice]
 
-        # Put the smallest index first
-        # if e1 < e0:
-        #     e0, e1 = e1, e0
-
         if e0 == e1:
             costs[indice] = np.inf
 
@@ -299,25 +292,35 @@ def collapse(edges, costs, targetPoints, quadrics, points, n_points_to_remove=50
     return new_vertices, collapses, newpoints_history
 
 
+from time import time
+
+
 def _do_decimation(mesh, target_rate=0.5):
     assert target_rate > 0.0 and target_rate < 1.0
 
     points = mesh.points
     triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
+    start = time()
     quadrics = initialize_quadrics_numba(points, triangles)
+    print("Initialize Quadrics took: ", time() - start)
 
     # Are there boundary edges?
+    start = time()
     repeated_edges = compute_edges(triangles, repeated=True)
     boundary_quadrics = check_boundary_constraints_numba(
         points, repeated_edges, triangles
     )
+    print("Boundary quadrics took: ", time() - start)
     quadrics += boundary_quadrics
     # Compute the cost for each edge
+    start = time()
     edges = compute_edges(triangles)
     costs, target_points = intialize_costs(edges, quadrics, points)
 
     n_points_to_remove = int(target_rate * points.shape[0])
+    print("Initialize costs took: ", time() - start)
 
+    start = time()
     output_points, collapses, newpoints = collapse(
         edges=edges.T,
         costs=costs,
@@ -326,6 +329,7 @@ def _do_decimation(mesh, target_rate=0.5):
         points=points,
         n_points_to_remove=n_points_to_remove,
     )
+    print("Collapse took: ", time() - start)
 
     return output_points, collapses, newpoints
 

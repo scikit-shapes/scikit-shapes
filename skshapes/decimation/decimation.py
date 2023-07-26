@@ -118,22 +118,61 @@ class QuadricDecimation:
             mesh (pyvista.PolyData): the reference mesh.
         """
 
-        # decimated_mesh = mesh.decimate(
-        #     target_reduction=self.target_reduction,
-        #     volume_preservation=True,
-        #     attribute_error=True,
-        # )
-
         decimated_points, collapses_history, newpoints_history = decimation(
             shape=mesh, target_reduction=self.target_reduction
         )
+        keep = np.setdiff1d(np.arange(mesh.n_points), collapses_history[:, 1])
+
+        print("ok1")
 
         alphas = _compute_alphas(
             np.array(mesh.points), collapses_history, newpoints_history
         )
 
+        print("ok")
+
+        # Compute the mapping from original indices to new indices
+
+        # start with identity mapping
+        indice_mapping = np.arange(mesh.n_points, dtype=int)
+        # First round of mapping
+        origin_indices = collapses_history[:, 1]
+        indice_mapping[origin_indices] = collapses_history[:, 0]
+
+        previous = np.zeros(len(indice_mapping))
+        while not np.array_equal(previous, indice_mapping):
+            previous = indice_mapping.copy()
+            indice_mapping[origin_indices] = indice_mapping[
+                indice_mapping[origin_indices]
+            ]
+
+        application = dict([keep[i], i] for i in range(len(keep)))
+        indice_mapping = np.array([application[i] for i in indice_mapping])
+
+        if hasattr(mesh, "triangles"):
+            triangles_copy = mesh.triangles.clone()
+
+            triangles_copy = indice_mapping[triangles_copy]
+
+            # for c in collapses_history:
+            #     origin = c[1]
+            #     destination = c[0]
+            #     triangles_copy[triangles_copy == origin] = destination
+
+            keep_triangle = (
+                (triangles_copy[0] != triangles_copy[1])
+                * (triangles_copy[1] != triangles_copy[2])
+                * (triangles_copy[0] != triangles_copy[2])
+            )
+            new_triangles = torch.from_numpy(triangles_copy[:, keep_triangle])
+            # new_triangles = torch.from_numpy(indice_mapping[new_triangles])
+
+            self.new_triangles = new_triangles
+
+        self.indice_mapping = indice_mapping
         self.alphas = alphas
         self.collapses_history = collapses_history
+        self.ref_mesh = mesh
 
     def transform(self, mesh):
         """
@@ -146,51 +185,22 @@ class QuadricDecimation:
             pyvista.PolyData: the decimated mesh.
         """
 
+        assert mesh.n_points == self.ref_mesh.n_points
+        if hasattr(self.ref_mesh, "triangles"):
+            assert torch.allclose(mesh.triangles, self.ref_mesh.triangles)
+
         points = np.array(mesh.points.clone())
         points = _decimate(
             points, collapses_history=self.collapses_history, alphas=self.alphas
         )
 
         keep = np.setdiff1d(np.arange(len(points)), self.collapses_history[:, 1])
-
-        # Compute the mapping from original indices to new indices
-
-        # start with identity mapping
-        indice_mapping = np.arange(len(points), dtype=int)
-        # First round of mapping
-        origin_indices = self.collapses_history[:, 1]
-        indice_mapping[origin_indices] = self.collapses_history[:, 0]
-
-        previous = np.zeros(len(indice_mapping))
-        while not np.array_equal(previous, indice_mapping):
-            previous = indice_mapping.copy()
-            indice_mapping[origin_indices] = indice_mapping[
-                indice_mapping[origin_indices]
-            ]
-
         points = points[keep]
 
-        application = dict([keep[i], i] for i in range(len(keep)))
-        indice_mapping = np.array([application[i] for i in indice_mapping])
-
-        # Ugly way to compute new triangles
-        if hasattr(mesh, "triangles"):
-            triangles_copy = mesh.triangles.clone()
-
-            for c in self.collapses_history:
-                origin = c[1]
-                destination = c[0]
-                triangles_copy[triangles_copy == origin] = destination
-
-            keep_triangle = (
-                (triangles_copy[0] != triangles_copy[1])
-                * (triangles_copy[1] != triangles_copy[2])
-                * (triangles_copy[0] != triangles_copy[2])
-            )
-            new_triangles = triangles_copy[:, keep_triangle]
-            new_triangles = torch.from_numpy(indice_mapping[new_triangles])
-
-        return PolyData(torch.from_numpy(points), triangles=new_triangles)
+        if hasattr(self.ref_mesh, "triangles"):
+            return PolyData(torch.from_numpy(points), triangles=self.new_triangles)
+        else:
+            return PolyData(torch.from_numpy(points))
 
     # def partial_transform(self, mesh, n_collapses):
     #     """
