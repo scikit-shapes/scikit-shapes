@@ -25,7 +25,7 @@ from ..types import (
     IntTensor,
 )
 
-
+from typing import Literal
 from .baseshape import BaseShape
 from .utils import DataAttributes
 
@@ -170,6 +170,7 @@ class PolyData(BaseShape):
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[Number] = None,
+        implementation: Literal["vtk", "sks"] = "vtk",
     ) -> PolyData:
         """Decimate the shape using the Quadric Decimation algorithm.
 

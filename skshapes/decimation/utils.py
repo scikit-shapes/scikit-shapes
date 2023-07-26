@@ -140,7 +140,7 @@ def check_boundary_constraints_numba(vertices, repeated_edges, triangles):
     return boundary_quadrics
 
 
-@nb.jit(nopython=True, fastmath=True)
+@nb.jit(nopython=True, fastmath=True, cache=True)
 def compute_cost(edge, Quadrics, vertices):
     pt0, pt1 = edge
     tmpQuad = Quadrics[pt0] + Quadrics[pt1]
@@ -292,17 +292,67 @@ def collapse(edges, costs, targetPoints, quadrics, points, n_points_to_remove=50
     return new_vertices, collapses, newpoints_history
 
 
+@nb.jit(nopython=True, fastmath=True, cache=True)
+def _decimate(points, alphas, collapses_history):
+    """
+    This function applies the decimation to a mesh that is in correspondence with the reference mesh given the information about successive collapses.
+
+    Args:
+        points (np.ndarray): the points of the mesh to decimate.
+        alphas (np.ndarray): the list of alpha coefficients such that when (e0, e1) collapses : e0 <- alpha * e0 + (1-alpha) * e1
+        collapses_history (np.ndarray): the history of collapses, a list of edges (e0, e1) that have been collapsed. The convention is that e0 is
+        the point that remains and e1 is the point that is removed.
+
+    Returns:
+        points (np.ndarray): the decimated points.
+
+    """
+
+    for i in range(len(collapses_history)):
+        e0, e1 = collapses_history[i]
+        points[e0] = alphas[i] * points[e0] + (1 - alphas[i]) * points[e1]
+
+    return points
+
+
+@nb.jit(nopython=True, fastmath=True, cache=True)
+def _compute_alphas(points, collapses_history, newpoints_history):
+    """ """
+
+    alphas = np.zeros(len(collapses_history))
+
+    for i in range(len(collapses_history)):
+        e0, e1 = collapses_history[i]
+
+        alpha = np.linalg.norm(newpoints_history[i] - points[e1]) / np.linalg.norm(
+            points[e0] - points[e1]
+        )
+        points[e0] = alpha * points[e0] + (1 - alpha) * points[e1]
+        alphas[i] = alpha
+
+    return alphas
+
+
 from time import time
 
+############# Sks interface
+from ..types import typecheck, FloatArray, IntArray
+from typing import Tuple
 
-def _do_decimation(mesh, target_rate=0.5):
-    assert target_rate > 0.0 and target_rate < 1.0
 
-    points = mesh.points
-    triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
+@typecheck
+def _do_decimation(
+    points, triangles, target_reduction: float = 0.5, print_compute_time: bool = False
+):
+    assert target_reduction > 0.0 and target_reduction < 1.0
+
+    # points = shape.points.clone().numpy()
+    # triangles = shape.triangles.clone().numpy()
+
     start = time()
     quadrics = initialize_quadrics_numba(points, triangles)
-    print("Initialize Quadrics took: ", time() - start)
+    if print_compute_time:
+        print("Initialize Quadrics took: ", time() - start)
 
     # Are there boundary edges?
     start = time()
@@ -310,15 +360,17 @@ def _do_decimation(mesh, target_rate=0.5):
     boundary_quadrics = check_boundary_constraints_numba(
         points, repeated_edges, triangles
     )
-    print("Boundary quadrics took: ", time() - start)
+    if print_compute_time:
+        print("Boundary quadrics took: ", time() - start)
     quadrics += boundary_quadrics
     # Compute the cost for each edge
     start = time()
     edges = compute_edges(triangles)
     costs, target_points = intialize_costs(edges, quadrics, points)
 
-    n_points_to_remove = int(target_rate * points.shape[0])
-    print("Initialize costs took: ", time() - start)
+    n_points_to_remove = int(target_reduction * points.shape[0])
+    if print_compute_time:
+        print("Initialize costs took: ", time() - start)
 
     start = time()
     output_points, collapses, newpoints = collapse(
@@ -329,32 +381,7 @@ def _do_decimation(mesh, target_rate=0.5):
         points=points,
         n_points_to_remove=n_points_to_remove,
     )
-    print("Collapse took: ", time() - start)
+    if print_compute_time:
+        print("Collapse took: ", time() - start)
 
     return output_points, collapses, newpoints
-
-
-############# Sks interface
-from ..data import PolyData
-from ..types import typecheck, FloatArray, IntArray
-
-from typing import Tuple
-
-
-def decimation(
-    shape: PolyData, target_reduction: float
-) -> Tuple[PolyData, IntArray, FloatArray]:
-    """decimation takes as input a PolyData
-
-    Args:
-        shape (PolyData): the mesh to decimate
-        target_reduction (float between 0 and 1): the desired target rate
-
-    Returns:
-        Tuple[FloatArray, IntArray, FloatArray]: the decimated points, the successive edge collapses and the newpoints (numpy arrays)
-    """
-
-    assert target_reduction > 0.0 and target_reduction < 1.0
-
-    mesh = shape.to_pyvista()
-    return _do_decimation(mesh=mesh, target_rate=target_reduction)
