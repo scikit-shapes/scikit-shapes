@@ -5,6 +5,7 @@ import pyvista
 import vedo
 import skshapes as sks
 import pytest
+import os
 
 
 def _cube():
@@ -277,6 +278,41 @@ def test_point_data2():
     assert np.allclose(
         sks_again.point_data["curvature"].numpy(), pv_mesh.point_data["curvature"]
     )
+
+
+def test_landmarks_conservation():
+    # Create a mesh and add landmarks
+    mesh = sks.PolyData(pyvista.Sphere())
+
+    values = [1, 1, 0.3, 0.4, 0.3, 1]
+    indices = [
+        [0, 1, 2, 2, 2, 3],
+        [4, 1, 2, 30, 0, 27],
+    ]
+    n_landmarks = 4
+    n_points = mesh.n_points
+    landmarks = torch.sparse_coo_tensor(
+        indices=indices, values=values, size=(n_landmarks, n_points), device="cpu"
+    )
+    mesh.landmarks = landmarks
+
+    # Check that the landmarks are preserved sks -> pyvista -> sks
+    mesh_pv = mesh.to_pyvista()
+    assert np.allclose(mesh_pv.field_data["landmarks"], mesh.landmarks_3d.numpy())
+    mesh_back = sks.PolyData(mesh_pv)
+    assert torch.allclose(mesh_back.landmarks_3d, mesh.landmarks_3d)
+
+    # Check that the landmarks are preserved sks -> vedo -> sks
+    mesh_vedo = mesh.to_vedo()
+    assert np.allclose(mesh_vedo.metadata["landmarks"], mesh.landmarks_3d.numpy())
+    mesh_back = sks.PolyData(mesh_vedo)
+    assert torch.allclose(mesh_back.landmarks_3d, mesh.landmarks_3d)
+
+    # Check that the landmarks are preserved after saving
+    mesh.save("test.vtk")
+    mesh_back = sks.PolyData("test.vtk")
+    assert torch.allclose(mesh_back.landmarks_3d, mesh.landmarks_3d)
+    os.remove("test.vtk")
 
 
 @pytest.mark.skipif(
