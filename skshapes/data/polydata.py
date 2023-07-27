@@ -403,7 +403,6 @@ class PolyData(BaseShape):
     @points.setter
     @typecheck
     def points(self, points: Points) -> None:
-        print("set points")
         if points.shape[0] != self.n_points:
             raise ValueError("The number of points cannot be changed.")
 
@@ -586,6 +585,7 @@ class PolyData(BaseShape):
         B = self.points[self.triangles[1]]
         C = self.points[self.triangles[2]]
 
+        # TODO: Normalize?
         return torch.cross(B - A, C - A)
 
     @property
@@ -613,4 +613,12 @@ class PolyData(BaseShape):
         return torch.ones(self.n_points, dtype=float_dtype, device=self.device)
 
     from ..convolutions import point_convolution
-    from ..features import point_moments
+    from ..features import (
+        point_normals,
+        point_moments,
+        point_quadratic_coefficients,
+        point_principal_curvatures,
+        point_shape_indices,
+        point_curvedness,
+        point_frames,
+    )

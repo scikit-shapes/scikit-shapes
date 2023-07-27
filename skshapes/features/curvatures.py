@@ -3,7 +3,16 @@ import torch
 from pykeops.torch import LazyTensor
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Optional, Triangles, Number, Float1dTensor, Tuple
+from ..types import (
+    typecheck,
+    Points,
+    Optional,
+    Triangles,
+    Number,
+    Float1dTensor,
+    Float2dTensor,
+    Tuple,
+)
 
 from .normals import smooth_normals, tangent_vectors
 from .structure_tensors import structure_tensors
@@ -231,7 +240,7 @@ def smooth_curvatures_2(
     # (RRt^-1 @ RNt) : simple estimation through linear regression
     acbo = torch.linalg.solve(RRt, RNt)
     assert acbo.shape == (N, 4)
-    a, c, b = acbo[:, 0], acbo[:, 1], acbo[:, 2]  # (N,)
+    a, c, b = acbo[:, 0], acbo[:, 1], acbo[:, 2] / 2  # (N,)
 
     # Normalization
     mean_curvature = a + c
@@ -244,6 +253,95 @@ def smooth_curvatures_2(
 
 
 @typecheck
+def point_quadratic_coefficients(
+    self,
+    *,
+    scale: Optional[Number] = None,
+    **kwargs,
+) -> Float2dTensor:
+    """Returns the point-wise principal curvatures."""
+
+    # nuv are arranged row-wise!
+    N = self.n_points
+    nuv = self.point_frames(scale=scale, **kwargs)
+    assert nuv.shape == (N, 3, 3)
+
+    nuv = dict(
+        n=nuv[:, 0, :].contiguous(),  # (N, 3)
+        u=nuv[:, 1, :].contiguous(),  # (N, 3)
+        v=nuv[:, 2, :].contiguous(),  # (N, 3)
+    )
+    for key, value in nuv.items():
+        assert value.shape == (N, 3)
+
+    # Recover the local moments of order 1, 2, 3, 4:
+    def central_moments(*, order):
+        return self.point_moments(
+            order=order, scale=scale, central=True, dtype="double", **kwargs
+        ).float()
+
+    moms = [None] + [central_moments(order=k) for k in [1, 2, 3, 4]]
+
+    def str_to_moment(s):
+        if s == "":
+            r = torch.ones_like(moms[1][:, 0])
+            assert r.shape == (N,)
+            return r
+
+        if len(s) == 1:
+            r = nuv[s]
+            assert r.shape == (N, 3)
+
+        elif len(s) == 2:
+            a = nuv[s[0]]
+            b = nuv[s[1]]
+            r = a.view(N, 3, 1) * b.view(N, 1, 3)
+            assert r.shape == (N, 3, 3)
+
+        elif len(s) == 3:
+            a = nuv[s[0]]
+            b = nuv[s[1]]
+            c = nuv[s[2]]
+            r = a.view(N, 3, 1, 1) * b.view(N, 1, 3, 1) * c.view(N, 1, 1, 3)
+            assert r.shape == (N, 3, 3, 3)
+
+        elif len(s) == 4:
+            a = nuv[s[0]]
+            b = nuv[s[1]]
+            c = nuv[s[2]]
+            d = nuv[s[3]]
+            r = (
+                a.view(N, 3, 1, 1, 1)
+                * b.view(N, 1, 3, 1, 1)
+                * c.view(N, 1, 1, 3, 1)
+                * d.view(N, 1, 1, 1, 3)
+            )
+            assert r.shape == (N, 3, 3, 3, 3)
+
+        mom = moms[len(s)]
+        assert r.shape == mom.shape
+        res = (r.view(N, -1) * mom.view(N, -1)).sum(-1)
+        assert res.shape == (N,)
+        return res
+
+    T = ["uu", "uv", "vv", "u", "v", ""]
+
+    TT = [str_to_moment(pref + suf) for pref in T for suf in T]
+    TN = [str_to_moment(pref + "n") for pref in T]
+
+    TT = torch.stack(TT, dim=-1).view(N, len(T), len(T))  # (N, 6, 6)
+    TN = torch.stack(TN, dim=-1).view(N, len(T))  # (N, 6)
+
+    for i in range(len(T)):
+        TT[:, i, i] += 1e-6
+
+    # (TT^-1 @ TN) : simple estimation through linear regression
+    coefs = torch.linalg.solve(TT, TN)
+    assert coefs.shape == (N, len(T))
+    return coefs
+
+
+@typecheck
 def point_principal_curvatures(
     self,
     *,
@@ -251,15 +349,20 @@ def point_principal_curvatures(
     **kwargs,
 ) -> Tuple[Float1dTensor, Float1dTensor]:
     """Returns the point-wise principal curvatures."""
+    coefs = self.point_quadratic_coefficients(scale=scale, **kwargs)
+    assert coefs.shape == (self.n_points, 6)
 
-    # nuv are arranged row-wise!
-    nuv = self.point_frames(scale=scale, **kwargs)
-    assert nuv.shape == (self.n_points, 3, 3)
+    a, b, c = coefs[:, 0], coefs[:, 1] / 2, coefs[:, 2]
+    trace = a + c
+    # det = a * c - b * b
+    # delta = (trace ** 2 - 4 * det).relu().sqrt()
+    delta = ((a - c) ** 2 + b**2).sqrt()
+    kmax = (trace + delta) / 2
+    kmin = (trace - delta) / 2
 
-    n = nuv[:, 0, :].contiguous()  # (N, 3)
-    uv = nuv[:, 1:, :].contiguous()  # (N, 2, 3)
-    assert n.shape == (self.n_points, 3)
-    assert uv.shape == (self.n_points, 2, 3)
+    assert kmax.shape == (self.n_points,)
+    assert kmin.shape == (self.n_points,)
+    return kmax, kmin
 
 
 @typecheck
@@ -270,11 +373,17 @@ def point_shape_indices(self, **kwargs) -> Float1dTensor:
     "Surface shape and curvature scales", Koenderink and van Doorn, 1992.
     """
     kmax, kmin = self.point_principal_curvatures(**kwargs)
-    return (2 / np.pi) * torch.atan((kmax + kmin) / (kmax - kmin))
+    si = (2 / np.pi) * torch.atan((kmax + kmin) / (kmax - kmin))
+
+    if self.triangles is None:
+        # If we cannot orient the surface, the shape index is only defined up to a sign:
+        si = si.abs()
+    
+    return si
 
 
 @typecheck
-def point_shape_indices(self, **kwargs) -> Float1dTensor:
+def point_curvedness(self, **kwargs) -> Float1dTensor:
     """Returns the point-wise curvedness, estimated at a given scale.
 
     For reference, see:

@@ -90,7 +90,11 @@ def display_moments(
     assert density.shape == (len(shape.points),)
 
     # Let's also use the ratio of eigenvalues (as a proxy for curvature):
-    curvature = local_QL.eigenvalues[:, 0] / local_QL.eigenvalues.sum(-1)
+    anisotropy = local_QL.eigenvalues[:, 0] / local_QL.eigenvalues.sum(-1)
+
+    point_frame = shape.point_frames(scale=scale).transpose(1, 2)
+    curvedness = shape.point_curvedness(scale=scale)
+    shape_index = shape.point_shape_indices(scale=scale)
 
     # Our surface points:
     if shape.triangles is None:
@@ -105,20 +109,39 @@ def display_moments(
     )
     spheres_2 = (
         spheres.clone()
-        .cmap("viridis", (3 * curvature) ** (1 / 3), vmin=0)
+        .cmap("viridis", (3 * anisotropy) ** (1 / 3), vmin=0)
         .add_scalarbar()
     )
+    spheres_3 = spheres.clone().cmap("viridis", curvedness, vmin=0, vmax=1/shape.standard_deviation[0]).add_scalarbar()
+    spheres_4 = spheres.clone().cmap("RdBu_r", shape_index, vmin=-1, vmax=1).add_scalarbar()
 
     # Vectors to the local average:
     quiver = vd.Arrows(shape.points[mask], local_average[mask], c="green", alpha=0.9)
 
     # Local tangent frames:
-    s = 2 / len(shape.points) ** (1 / 2)
+    s = 1.5 * shape.standard_deviation[0] / len(mask) ** (1 / 2)
 
-    plt = vd.Plotter(shape=(1, 3), axes=axes)
-    plt.at(0).show(spheres_1, quiver)
-    plt.at(1).show(spheres_2, *vedo_frames(shape.points[mask], s * local_nuv[mask]))
-    plt.at(2).show(spheres_2, *vedo_frames(shape.points[mask], s * local_frame[mask]))
+    plt = vd.Plotter(shape=(2, 2), axes=axes)
+    plt.at(0).show(
+        spheres_1,
+        quiver,
+        vd.Text2D("Density around point 0", pos="top-middle"),
+    )
+    plt.at(1).show(
+        spheres_2,
+        *vedo_frames(shape.points[mask], s * local_nuv[mask]),
+        vd.Text2D("Anisotropy", pos="top-middle"),
+    )
+    plt.at(2).show(
+        spheres_3,
+        *vedo_frames(shape.points[mask], s * local_frame[mask]),
+        vd.Text2D("Curvedness", pos="top-middle"),
+    )
+    plt.at(3).show(
+        spheres_4,
+        *vedo_frames(shape.points[mask], s * point_frame[mask]),
+        vd.Text2D("Shape index", pos="top-middle"),
+    )
     plt.interactive()
 
 
@@ -132,10 +155,9 @@ if __name__ == "__main__":
         "~/data/PN1.stl",
     ]
 
-    if False:
-        for f in functions:
-            display_moments(function=f, scale=0.5, n_points=15, noise=0.05)
-
     if True:
+        for f in functions:
+            display_moments(function=f, scale=0.3, n_points=15, noise=0.01)
+    else:
         for f in fnames:
-            display_moments(file_name=f, scale=5.0, n_points=1e4)
+            display_moments(file_name=f, scale=10.0, n_points=1e4)
