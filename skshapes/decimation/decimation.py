@@ -25,8 +25,10 @@ class QuadricDecimation:
 
     A drawback of the vtk implementation appears when the decimation is applied to several meshes with the same connectivity (eg the dataset SCAPE consisting of human poses where points and triangles are in correspondence accross poses).
     Indeed, applying the vtk decimation to each mesh independently will result in a loss of correspondence between points and triangles. To avoid this, the implementation="sks" argument can be used.
+    Another drawback is that if landmarks are present in the mesh, there is no way to keep them after the decimation.
 
     The implementation="sks" argument uses a custom implementation of the algorithm that allows to run the same decimation on several meshes with the same connectivity in order to keep the correspondence between points and triangles in low-resolution meshes.
+    It also allows to keep landmarks after the decimation when landmarks are stored in barycentric coordinates on the mesh.
     It is an implementation based on the C++ implementation in vtk but written in python using numba's JIT engine to speed up the computations. In this implementation, we keep track of the collapses that are performed during the decimation in order to be able to apply the same collapses to other meshes with the same connectivity.
 
 
@@ -41,6 +43,11 @@ class QuadricDecimation:
     pose2_decimated = decimator.transform(cat2)
     assert torch.allclose(pose1_decimated.triangles, pose2_decimated.triangles) # pose1_decimated and pose2_decimated have the same connectivity
 
+    # if landmarks are present in the meshes, they are kept after the decimation
+    if pose1.landmarks is not None:
+        assert pose1_decimated.landmarks is not None
+    if pose2.landmarks is not None:
+        assert pose2_decimated.landmarks is not None
     """
 
     @typecheck
@@ -180,12 +187,31 @@ class QuadricDecimation:
         points = _decimate(
             points, collapses_history=self.collapses_history, alphas=self.alphas
         )
-
         # keep can be saved in the fit method
         points = points[self.keep]
 
+        # Landmarks
+        if mesh.landmarks is not None:
+            coalesced_landmarks = mesh.landmarks.coalesce()
+            l_values = coalesced_landmarks.values()
+            l_indices = coalesced_landmarks.indices()
+            l_size = coalesced_landmarks.size()
+            n_landmarks = l_size[0]
+
+            new_indices = l_indices.clone()
+            new_indices[1] = torch.from_numpy(self.indice_mapping[new_indices[1]])
+
+            landmarks = torch.sparse_coo_tensor(
+                values=l_values, indices=new_indices, size=(n_landmarks, len(points))
+            )
+        else:
+            landmarks = None
+
         return PolyData(
-            torch.from_numpy(points), triangles=self.new_triangles, device=device
+            torch.from_numpy(points),
+            triangles=self.new_triangles,
+            landmarks=landmarks,
+            device=device,
         )
 
     @typecheck
