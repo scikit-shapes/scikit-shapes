@@ -92,7 +92,7 @@ def point_convolution(
 
     if scale is None:
         # scale = +infinity, the kernel is always equal to 1
-        K_ij = 1.0 * (D_ij >= -1.0)
+        K_ij = 1.0 * (D_ij + 1).step()
 
     else:
         if kernel == "gaussian":

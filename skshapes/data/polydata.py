@@ -398,7 +398,6 @@ class PolyData(BaseShape):
     @property
     @typecheck
     def points(self) -> Points:
-        print("get points")
         return self._points
 
     @points.setter

@@ -14,6 +14,40 @@ import vedo as vd
 from .utils import create_point_cloud, vedo_frames
 
 
+def moments(X):
+    N, D = X.shape
+    XX = X.view(N, D, 1) * X.view(N, 1, D)  # (N, D, D)
+    XXX = X.view(N, D, 1, 1) * X.view(N, 1, D, 1) * X.view(N, 1, 1, D)
+    XXXX = (
+        X.view(N, D, 1, 1, 1)
+        * X.view(N, 1, D, 1, 1)
+        * X.view(N, 1, 1, D, 1)
+        * X.view(N, 1, 1, 1, D)
+    )
+    return X.mean(0), XX.mean(0), XXX.mean(0), XXXX.mean(0)
+
+
+@given(n_points=st.integers(min_value=5, max_value=10))
+def test_moments_1(*, n_points: int):
+    points = torch.randn(n_points, 3) + torch.randn(1)
+    shape = sks.PolyData(points=points)
+
+    for central in [False, True]:
+        print(f"Central: {central}")
+        if central:
+            gt = moments(points - points.mean(0))
+        else:
+            gt = moments(points)
+
+        for order in [1, 2, 3, 4]:
+            print(f"order: {order}")
+            print(f"gt: {gt[order - 1]}")
+            mom = shape.point_moments(order=order, scale=None, central=central)
+            mom = mom[0]
+            print(f"mom: {mom}")
+            assert torch.allclose(mom, gt[order - 1], atol=1e-3, rtol=1e-2)
+
+
 def display_moments(
     *, file_name: str = None, function: callable = None, scale=1, n_points=20, noise=0
 ):
@@ -94,7 +128,7 @@ if __name__ == "__main__":
 
     if True:
         for f in functions:
-            display_moments(function=f, scale=0.5, n_points=15, noise = .05)
+            display_moments(function=f, scale=0.5, n_points=15, noise=0.05)
 
     if False:
         for f in fnames:

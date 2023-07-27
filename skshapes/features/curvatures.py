@@ -17,7 +17,7 @@ def smooth_curvatures(
     scales=[1.0],
     batch=None,
     normals: Optional[Points] = None,
-    reg: Number = 0.01
+    reg: Number = 0.01,
 ):
     """Returns a collection of mean (H) and Gauss (K) curvatures at different scales.
 
@@ -143,7 +143,7 @@ def smooth_curvatures_2(
     scale=1.0,
     batch=None,
     normals: Optional[Points] = None,
-    reg: Number = 0.01
+    reg: Number = 0.01,
 ):
     # Number of points:
     N = points.shape[0]
@@ -265,19 +265,20 @@ def point_principal_curvatures(
 @typecheck
 def point_shape_indices(self, **kwargs) -> Float1dTensor:
     """Returns the point-wise shape index, estimated at a given scale.
-    
+
     For reference, see:
     "Surface shape and curvature scales", Koenderink and van Doorn, 1992.
     """
     kmax, kmin = self.point_principal_curvatures(**kwargs)
     return (2 / np.pi) * torch.atan((kmax + kmin) / (kmax - kmin))
 
+
 @typecheck
 def point_shape_indices(self, **kwargs) -> Float1dTensor:
     """Returns the point-wise curvedness, estimated at a given scale.
-    
+
     For reference, see:
     "Surface shape and curvature scales", Koenderink and van Doorn, 1992.
     """
     kmax, kmin = self.point_principal_curvatures(**kwargs)
-    return ((kmax ** 2 + kmin ** 2) / 2).sqrt()
+    return ((kmax**2 + kmin**2) / 2).sqrt()
