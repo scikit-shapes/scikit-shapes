@@ -1,15 +1,18 @@
+import torch
 from ..types import (
     typecheck,
     FloatTensor,
-    Optional,
+    DoubleTensor,
     Float2dTensor,
+    Double2dTensor,
     Number,
     Literal,
+    Union,
+    Optional,
 )
 
 
-@typecheck
-def symmetric_sum(a: FloatTensor, b: FloatTensor) -> FloatTensor:
+def symmetric_sum(a, b):
     """Implements the symmetric terms that appear in the tensor expansion of (a+b)^n."""
     N = a.shape[0]
     D = a.shape[1]
@@ -54,21 +57,39 @@ def point_moments(
     self,
     *,
     order: int = 2,
-    features: Optional[Float2dTensor] = None,
+    features: Optional[Union[Float2dTensor, Double2dTensor]] = None,
     central: bool = False,
     rescale: bool = False,
     scale: Optional[Number] = None,
+    dtype: Optional[Literal["float", "double"]] = None,
     **kwargs,
-) -> FloatTensor:
+) -> Union[FloatTensor, DoubleTensor]:
     """Compute the local moments of a point cloud."""
     X = self.points if features is None else features
+
+    if dtype == "float":
+        X = X.float()
+    elif dtype == "double":
+        X = X.double()
 
     N = self.n_points
     D = X.shape[1]
     assert X.shape == (N, D)
 
-    Conv = self.point_convolution(scale=scale, normalize=True, **kwargs)
+    Conv = self.point_convolution(scale=scale, normalize=True, dtype=dtype, **kwargs)
     assert Conv.shape == (N, N)
+
+    def recursion(*, k: int):
+        assert k < order
+        return self.point_moments(
+            order=k,
+            features=features,
+            central=False,
+            rescale=False,
+            scale=scale,
+            dtype=dtype,
+            **kwargs,
+        )
 
     if order == 1:
         moments = Conv @ X  # (N, D)
@@ -85,7 +106,7 @@ def point_moments(
 
         if central:
             # (N, D)
-            Xm = self.point_moments(order=1, features=features, scale=scale, **kwargs)
+            Xm = recursion(k=1)
             moments = moments - (Xm.view(N, D, 1) * Xm.view(N, 1, D))  # (N, D, D)
 
         assert moments.shape == (N, D, D)
@@ -96,13 +117,10 @@ def point_moments(
         moments = (Conv @ XXX.view(N, D * D * D)).view(N, D, D, D)  # (N, D, D, D)
 
         if central:
-            Xm = self.point_moments(order=1, features=features, scale=scale, **kwargs)
-            XmXmXm = Xm.view(N, D, 1, 1) * Xm.view(N, 1, D, 1) * Xm.view(N, 1, 1, D)
+            Xm = recursion(k=1)  # (N, D)
+            mom_2 = recursion(k=2)  # (N, D, D)
 
-            # (N, D, D)
-            mom_2 = self.point_moments(
-                order=2, features=features, scale=scale, **kwargs
-            )
+            XmXmXm = Xm.view(N, D, 1, 1) * Xm.view(N, 1, D, 1) * Xm.view(N, 1, 1, D)
 
             moments = moments - symmetric_sum(Xm, mom_2) + 2 * XmXmXm
 
@@ -119,20 +137,16 @@ def point_moments(
         moments = (Conv @ XXXX.view(N, D * D * D * D)).view(N, D, D, D, D)
 
         if central:
-            Xm = self.point_moments(order=1, features=features, scale=scale, **kwargs)
+            Xm = recursion(k=1)
+            mom_2 = recursion(k=2)
+            mom_3 = recursion(k=3)
+
             XmXm = Xm.view(N, D, 1) * Xm.view(N, 1, D)
             XmXmXmXm = (
                 Xm.view(N, D, 1, 1, 1)
                 * Xm.view(N, 1, D, 1, 1)
                 * Xm.view(N, 1, 1, D, 1)
                 * Xm.view(N, 1, 1, 1, D)
-            )
-
-            mom_2 = self.point_moments(
-                order=2, features=features, scale=scale, **kwargs
-            )
-            mom_3 = self.point_moments(
-                order=3, features=features, scale=scale, **kwargs
             )
 
             moments = (
@@ -154,5 +168,10 @@ def point_moments(
             raise ValueError("A finite scale must be provided if rescale is True")
 
         moments = moments / scale**order
+
+    if dtype == "float":
+        assert moments.dtype == torch.float32
+    elif dtype == "double":
+        assert moments.dtype == torch.float64
 
     return moments

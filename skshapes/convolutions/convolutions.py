@@ -47,7 +47,7 @@ class LinearOperator:
 @typecheck
 def squared_distances(
     *,
-    points: Points,
+    points,
     window: Literal[None, "ball", "knn", "spectral"] = None,
     cutoff: Optional[Number] = None,
     geodesic: bool = False,
@@ -80,15 +80,23 @@ def point_convolution(
     cutoff: Optional[Number] = None,
     geodesic: bool = False,
     normalize: bool = False,
+    dtype: Optional[Literal["float", "double"]] = None,
 ) -> LinearOperator:
     """Creates a convolution kernel on a PolyData as a (N, N) linear operator."""
     N = self.n_points
     weights_j = self.point_weights
     assert weights_j.shape == (N,)
 
-    D_ij = squared_distances(
-        points=self.points, window=window, cutoff=cutoff, geodesic=geodesic
-    )
+    X = self.points
+
+    if dtype == "float":
+        X = X.float()
+        weights_j = weights_j.float()
+    elif dtype == "double":
+        X = X.double()
+        weights_j = weights_j.double()
+
+    D_ij = squared_distances(points=X, window=window, cutoff=cutoff, geodesic=geodesic)
 
     if scale is None:
         # scale = +infinity, the kernel is always equal to 1

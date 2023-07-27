@@ -15,6 +15,8 @@ from .utils import create_point_cloud, vedo_frames
 
 
 def moments(X):
+    # Switch to Float64 precision for better accuracy
+    X = X.double()
     N, D = X.shape
     XX = X.view(N, D, 1) * X.view(N, 1, D)  # (N, D, D)
     XXX = X.view(N, D, 1, 1) * X.view(N, 1, D, 1) * X.view(N, 1, 1, D)
@@ -28,8 +30,9 @@ def moments(X):
 
 
 @given(n_points=st.integers(min_value=5, max_value=10))
+@settings(max_examples=1000, deadline=None)
 def test_moments_1(*, n_points: int):
-    points = torch.randn(n_points, 3) + torch.randn(1)
+    points = 0.1 * torch.randn(n_points, 3) + 5 * torch.randn(1)
     shape = sks.PolyData(points=points)
 
     for central in [False, True]:
@@ -42,10 +45,12 @@ def test_moments_1(*, n_points: int):
         for order in [1, 2, 3, 4]:
             print(f"order: {order}")
             print(f"gt: {gt[order - 1]}")
-            mom = shape.point_moments(order=order, scale=None, central=central)
+            mom = shape.point_moments(
+                order=order, scale=None, central=central, dtype="double"
+            )
             mom = mom[0]
             print(f"mom: {mom}")
-            assert torch.allclose(mom, gt[order - 1], atol=1e-3, rtol=1e-2)
+            assert torch.allclose(mom.double(), gt[order - 1], atol=1e-3, rtol=1e-3)
 
 
 def display_moments(
@@ -57,6 +62,7 @@ def display_moments(
         axes = 2
     else:
         shape = sks.PolyData(file_name).decimate(n_points=n_points)
+        print("Loaded shape with {:,} points".format(shape.n_points))
         axes = 1
 
     shape.points = shape.points + noise * torch.randn(shape.n_points, 3)
@@ -126,10 +132,10 @@ if __name__ == "__main__":
         "~/data/PN1.stl",
     ]
 
-    if True:
+    if False:
         for f in functions:
             display_moments(function=f, scale=0.5, n_points=15, noise=0.05)
 
-    if False:
+    if True:
         for f in fnames:
             display_moments(file_name=f, scale=5.0, n_points=1e4)

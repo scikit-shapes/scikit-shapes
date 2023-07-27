@@ -6,7 +6,7 @@ Ex: the generic type Shape is defned in skshapes.data, the generic type Loss is 
 """
 
 from beartype import beartype
-from jaxtyping import jaxtyped, Float32, Int64, Float, Int
+from jaxtyping import jaxtyped, Float32, Float64, Int64, Float, Int
 from typing import (
     Any,
     Optional,
@@ -33,6 +33,7 @@ Number = Union[int, float]
 float_dtype = torch.float32
 int_dtype = torch.int64
 JaxFloat = Float32
+JaxDouble = Float64
 JaxInt = Int64
 
 # Numpy array types
@@ -50,6 +51,9 @@ Float1dTensor = JaxFloat[torch.Tensor, "_"]
 Float2dTensor = JaxFloat[torch.Tensor, "_ _"]
 Float3dTensor = JaxFloat[torch.Tensor, "_ _ _"]
 FloatScalar = JaxFloat[torch.Tensor, ""]
+
+DoubleTensor = JaxDouble[torch.Tensor, "..."]
+Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 
 # Specific numerical types
 Points = JaxFloat[torch.Tensor, "_ 3"]
