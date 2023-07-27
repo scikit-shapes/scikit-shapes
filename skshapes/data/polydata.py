@@ -119,6 +119,18 @@ class PolyData(BaseShape):
                     mesh.point_data
                 )
 
+            if (
+                ("landmarks_values" in mesh.field_data)
+                and ("landmarks_indices" in mesh.field_data)
+                and ("landmarks_size" in mesh.field_data)
+            ):
+                landmarks_from_pv = torch.sparse_coo_tensor(
+                    values=mesh.field_data["landmarks_values"],
+                    indices=mesh.field_data["landmarks_indices"],
+                    size=tuple(mesh.field_data["landmarks_size"]),
+                    dtype=float_dtype,
+                )
+
         if device is None:
             device = points.device
 
@@ -144,11 +156,12 @@ class PolyData(BaseShape):
         if landmarks is not None:
             # Call the setter that will clone and check the validity of the landmarks
             self.landmarks = landmarks
-
+        elif "landmarks_from_pv" in locals():
+            self.landmarks = landmarks_from_pv.to(self.device)
         else:
             self._landmarks = None
 
-        # Initialize the point_data
+        # Initialize the point_data if it was not done before
         if point_data is None:
             self._point_data = DataAttributes(n=self.n_points, device=self.device)
         else:
@@ -269,6 +282,14 @@ class PolyData(BaseShape):
             for key in point_data_dict:
                 mesh.pointdata[key] = point_data_dict[key]
 
+        # Add the landmarks if any
+        if hasattr(self, "_landmarks") and self.landmarks is not None:
+            coalesced_landmarks = self.landmarks.coalesce()
+            mesh.metadata["landmarks_values"] = coalesced_landmarks.values()
+            mesh.metadata["landmarks_indices"] = coalesced_landmarks.indices()
+            mesh.metadata["landmarks_size"] = coalesced_landmarks.size()
+            mesh.metadata["landmarks"] = self.landmarks_3d
+
         return mesh
 
     ###########################
@@ -305,6 +326,14 @@ class PolyData(BaseShape):
             point_data_dict = self.point_data.to_numpy_dict()
             for key in point_data_dict:
                 polydata.point_data[key] = point_data_dict[key]
+
+        # Add the landmarks if any
+        if hasattr(self, "_landmarks") and self.landmarks is not None:
+            coalesced_landmarks = self.landmarks.coalesce()
+            polydata.field_data["landmarks_values"] = coalesced_landmarks.values()
+            polydata.field_data["landmarks_indices"] = coalesced_landmarks.indices()
+            polydata.field_data["landmarks_size"] = coalesced_landmarks.size()
+            polydata.field_data["landmarks"] = self.landmarks_3d
 
         return polydata
 
