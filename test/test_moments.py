@@ -150,7 +150,7 @@ if __name__ == "__main__":
         "~/data/PN1.stl",
     ]
 
-    if True:
+    if False:
         for f in functions:
             display_moments(function=f, scale=0.3, n_points=15, noise=0.01)
     else:

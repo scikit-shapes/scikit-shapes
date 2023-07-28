@@ -2,9 +2,11 @@ import sys
 
 sys.path.append(sys.path[0][:-4])
 
+import numpy as np
 import torch
 import skshapes as sks
 
+from pytest import approx
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -12,6 +14,73 @@ import numpy as np
 import vedo as vd
 
 from .utils import create_point_cloud, create_shape
+
+
+@given(
+    n_points=st.integers(min_value=500, max_value=1000),
+    a=st.floats(min_value=-3, max_value=3),
+    b=st.floats(min_value=-3, max_value=3),
+    c=st.floats(min_value=-3, max_value=3),
+    d=st.floats(min_value=-3, max_value=3),
+    e=st.floats(min_value=-3, max_value=3),
+    f=st.floats(min_value=-3, max_value=3),
+)
+def test_curvatures_quadratic(
+    *, n_points: int, a: float, b: float, c: float, d: float, e: float, f: float
+):
+    def poly(x, y):
+        return 0.5 * a * x**2 + b * x * y + 0.5 * c * y**2 + d * x + e * y + f
+
+    # See Example 4.2 in Curvature formulas for implicit curves and surfaces,
+    # Goldman, 2005, for reference on those formulas, keeping in mind that
+    # Grad(f) = (d, e) and H(f) = [[a, b], [b, c]].
+    denom = 1 + d**2 + e**2  # 1 + ||Grad(f)||^2
+    gauss = a * c - b * b  # det(H(f))
+    gauss = gauss / denom**2
+
+    # Term 1: Grad(f)^T . H(f) . Grad(f)
+    mean = d * d * a + 2 * d * e * b + e * e * c
+    # Term 2: - (1 + ||Grad(f)||^2) * trace(H(f))
+    mean = mean - denom * (a + c)
+    mean = mean / denom ** (1.5)
+    # Our convention for unoriented point clouds is that the mean curvature is >= 0:
+    mean = np.abs(mean)
+
+    # Create a sphere with the correct radius and an arbitrary center:
+    shape = create_shape(shape="unit patch", n_points=n_points, function=poly)
+
+    scales = [0.5, 1]
+
+    for scale in scales:
+        print(f"Scale: {scale}")
+        kmax, kmin = shape.point_principal_curvatures(scale=scale)
+        kmax = kmax[0].item()
+        kmin = kmin[0].item()
+        assert kmax * kmin == approx(gauss, abs=1e-2, rel=2e-2)
+        assert kmax + kmin == approx(mean, abs=1e-2, rel=2e-2)
+
+
+@given(
+    n_points=st.integers(min_value=1000, max_value=5000),
+    radius=st.floats(min_value=0.1, max_value=10),
+)
+def test_curvatures_sphere(*, n_points: int, radius: float):
+    # Create a sphere with the correct radius and an arbitrary center:
+    shape = create_shape(shape="sphere", n_points=n_points, radius=radius)
+
+    ones = torch.ones_like(shape.points[:, 0])
+
+    scales = [0.2 * radius, 0.5 * radius, radius]
+
+    for scale in scales:
+        print(f"Radius: {radius}, scale: {scale}")
+        kmax, kmin = shape.point_principal_curvatures(scale=scale)
+        assert torch.allclose(
+            kmax, ones / radius**2, atol=1e-3, rtol=1e-3
+        ), f"Radius: {radius}, scale: {scale}"
+        assert torch.allclose(
+            kmin, ones / radius**2, atol=1e-3, rtol=1e-3
+        ), f"Radius: {radius}, scale: {scale}"
 
 
 def display_curvatures_old(*, function: callable, scale=1):
@@ -41,6 +110,8 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
 
     for i, s in enumerate(scales):
         curvedness = shape.point_curvedness(scale=s)
+        kmax, kmin = shape.point_principal_curvatures(scale=s)
+        print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
         quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
         assert quadratic_fit.shape == (3, 3, 3)
 
@@ -82,21 +153,45 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
 
 
 if __name__ == "__main__":
-    functions = [
-        lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
-        lambda x, y: x**2 - y**2,
+    shapes = [
+        dict(
+            shape="sphere",
+            radius=1,
+            scale=0.05,
+            n_points=1000,
+        ),
+        dict(
+            function=lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
+            scale=0.05,
+            n_points=15,
+            noise=0.01,
+        ),
+        dict(
+            function=lambda x, y: 0.5 * x**2 - 0.5 * y**2,
+            scale=0.05,
+            n_points=31,
+            noise=0.0001,
+            highlight=0 if False else int(31**2 / 2),
+        ),
+        dict(
+            function=lambda x, y: x * y,
+            scale=0.05,
+            n_points=31,
+            noise=0.0001,
+            highlight=0 if False else int(31**2 / 2),
+        ),
+        dict(
+            file_name="~/data/PN1.stl",
+            scale=2.0,
+            n_points=1e4,
+            highlight=0,
+        ),
     ]
-
-    fnames = [
-        "~/data/PN1.stl",
-    ]
+    # shapes = shapes[3:4]
 
     if True:
-        for f in functions:
-            display_curvatures(function=f, scale=0.05, n_points=15, noise=0.01)
-    elif True:
-        for f in fnames:
-            display_curvatures(file_name=f, scale=2.0, n_points=1e4, highlight=0)
+        for s in shapes:
+            display_curvatures(**s)
 
     else:
         from torch.profiler import profile, ProfilerActivity

@@ -429,17 +429,37 @@ def point_principal_curvatures(
     scale: Optional[Number] = None,
     **kwargs,
 ) -> Tuple[Float1dTensor, Float1dTensor]:
-    """Returns the point-wise principal curvatures."""
+    """Returns the point-wise principal curvatures.
+
+    We rely on the formulas detailed in Example 4.2 of
+    Curvature formulas for implicit curves and surfaces, Goldman, 2005.
+    """
     coefs = self.point_quadratic_coefficients(scale=scale, **kwargs)
     assert coefs.shape == (self.n_points, 6)
 
-    a, b, c = coefs[:, 0], coefs[:, 1] / 2, coefs[:, 2]
-    trace = a + c
-    # det = a * c - b * b
+    a, b, c = 2 * coefs[:, 0], coefs[:, 1], 2 * coefs[:, 2]
+    d, e = coefs[:, 3], coefs[:, 4]
+
+    # Grad(f) = (d, e) and H(f) = [[a, b], [b, c]].
+    denom = 1 + d**2 + e**2  # 1 + ||Grad(f)||^2
+    gauss = a * c - b * b  # det(H(f))
+    gauss = gauss / denom**2
+
+    # Term 1: Grad(f)^T . H(f) . Grad(f)
+    mean = d * d * a + 2 * d * e * b + e * e * c
+    # Term 2: - (1 + ||Grad(f)||^2) * trace(H(f))
+    mean = mean - denom * (a + c)
+    mean = mean / denom ** (1.5)
+
+    if self.triangles is None:
+        # If we cannot orient the surface,
+        # our convention is that the mean curvature is positive:
+        mean = mean.abs()
+
     # delta = (trace ** 2 - 4 * det).relu().sqrt()
-    delta = ((a - c) ** 2 + b**2).sqrt()
-    kmax = (trace + delta) / 2
-    kmin = (trace - delta) / 2
+    delta = (mean**2 - 4 * gauss).relu().sqrt()
+    kmax = (mean + delta) / 2
+    kmin = (mean - delta) / 2
 
     assert kmax.shape == (self.n_points,)
     assert kmin.shape == (self.n_points,)
