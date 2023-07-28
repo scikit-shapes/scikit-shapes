@@ -11,7 +11,7 @@ from hypothesis import strategies as st
 import numpy as np
 import vedo as vd
 
-from .utils import create_point_cloud, vedo_frames
+from .utils import create_shape, vedo_frames
 
 
 def moments(X):
@@ -53,19 +53,8 @@ def test_moments_1(*, n_points: int):
             assert torch.allclose(mom.double(), gt[order - 1], atol=1e-3, rtol=1e-3)
 
 
-def display_moments(
-    *, file_name: str = None, function: callable = None, scale=1, n_points=20, noise=0
-):
-    if function is not None:
-        points = create_point_cloud(n_points=n_points, f=function)
-        shape = sks.PolyData(points=points)
-        axes = 2
-    else:
-        shape = sks.PolyData(file_name).decimate(n_points=n_points)
-        print("Loaded shape with {:,} points".format(shape.n_points))
-        axes = 1
-
-    shape.points = shape.points + noise * torch.randn(shape.n_points, 3)
+def display_moments(*, scale=1, **kwargs):
+    shape = create_shape(**kwargs)
 
     local_average = shape.point_moments(order=1, scale=scale)
     local_cov = shape.point_moments(order=2, scale=scale, central=True)
@@ -112,8 +101,14 @@ def display_moments(
         .cmap("viridis", (3 * anisotropy) ** (1 / 3), vmin=0)
         .add_scalarbar()
     )
-    spheres_3 = spheres.clone().cmap("viridis", curvedness, vmin=0, vmax=1/shape.standard_deviation[0]).add_scalarbar()
-    spheres_4 = spheres.clone().cmap("RdBu_r", shape_index, vmin=-1, vmax=1).add_scalarbar()
+    spheres_3 = (
+        spheres.clone()
+        .cmap("viridis", curvedness, vmin=0, vmax=1 / shape.standard_deviation[0])
+        .add_scalarbar()
+    )
+    spheres_4 = (
+        spheres.clone().cmap("RdBu_r", shape_index, vmin=-1, vmax=1).add_scalarbar()
+    )
 
     # Vectors to the local average:
     quiver = vd.Arrows(shape.points[mask], local_average[mask], c="green", alpha=0.9)
@@ -121,7 +116,7 @@ def display_moments(
     # Local tangent frames:
     s = 1.5 * shape.standard_deviation[0] / len(mask) ** (1 / 2)
 
-    plt = vd.Plotter(shape=(2, 2), axes=axes)
+    plt = vd.Plotter(shape=(2, 2), axes=1)
     plt.at(0).show(
         spheres_1,
         quiver,

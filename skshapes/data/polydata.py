@@ -617,6 +617,7 @@ class PolyData(BaseShape):
         point_normals,
         point_moments,
         point_quadratic_coefficients,
+        point_quadratic_fits,
         point_principal_curvatures,
         point_shape_indices,
         point_curvedness,

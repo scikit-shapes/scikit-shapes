@@ -37,11 +37,11 @@ def point_normals(
         if self.triangles is not None:
             n_0 = self.point_normals(scale=None, **kwargs)
             assert n_0.shape == (self.n_points, 3)
-        
+
         else:
             n_0 = n.mean(dim=0, keepdim=True)
             assert n_0.shape == (1, 3)
-        
+
         n = (n_0 * n).sum(-1).sign().view(-1, 1) * n
 
     n = F.normalize(n, p=2, dim=-1)

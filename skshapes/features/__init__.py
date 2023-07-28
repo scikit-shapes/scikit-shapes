@@ -4,6 +4,7 @@ from .curvatures import (
     smooth_curvatures,
     smooth_curvatures_2,
     point_quadratic_coefficients,
+    point_quadratic_fits,
     point_principal_curvatures,
     point_shape_indices,
     point_curvedness,

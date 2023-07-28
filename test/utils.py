@@ -1,5 +1,10 @@
+import sys
+
+sys.path.append(sys.path[0][:-4])
+
 import torch
 import vedo as vd
+import skshapes as sks
 
 
 def create_point_cloud(n_points: int, f: callable, normals=False):
@@ -32,6 +37,23 @@ def create_point_cloud(n_points: int, f: callable, normals=False):
     n = torch.nn.functional.normalize(n, p=2, dim=-1)
 
     return points.detach(), n.detach()
+
+
+def create_shape(
+    file_name: str = None,
+    function: callable = None,
+    n_points=20,
+    noise=0,
+):
+    if function is not None:
+        points = create_point_cloud(n_points=n_points, f=function)
+        shape = sks.PolyData(points=points)
+    else:
+        shape = sks.PolyData(file_name).decimate(n_points=n_points)
+        print("Loaded shape with {:,} points".format(shape.n_points))
+
+    shape.points = shape.points + noise * torch.randn(shape.n_points, 3)
+    return shape
 
 
 def dim4(*, points, offset=0, scale=1):
