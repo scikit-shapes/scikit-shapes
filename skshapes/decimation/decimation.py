@@ -192,7 +192,6 @@ class Decimation:
 
         # If there are landmarks on the mesh, we compute the coordinates of the landmarks in the decimated mesh
         if mesh.landmarks is not None:
-
             coalesced_landmarks = mesh.landmarks.coalesce()
             l_values = coalesced_landmarks.values()
             l_indices = coalesced_landmarks.indices()
@@ -206,16 +205,16 @@ class Decimation:
             # If there are landmarks in the decimated mesh, we create a sparse tensor with the landmarks
 
             landmarks = torch.sparse_coo_tensor(
-                values=l_values,
-                indices=new_indices,
-                size=(n_landmarks, len(points))
+                values=l_values, indices=new_indices, size=(n_landmarks, len(points))
             )
         else:
             landmarks = None
 
-
         return PolyData(
-            torch.from_numpy(points), triangles=self.new_triangles, landmarks=landmarks, device=device
+            torch.from_numpy(points),
+            triangles=self.new_triangles,
+            landmarks=landmarks,
+            device=device,
         )
 
     @typecheck

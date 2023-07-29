@@ -298,13 +298,17 @@ def test_landmarks_conservation():
 
     # Check that the landmarks are preserved sks -> pyvista -> sks
     mesh_pv = mesh.to_pyvista()
-    assert np.allclose(mesh_pv.field_data["landmark_points"], mesh.landmark_points.numpy())
+    assert np.allclose(
+        mesh_pv.field_data["landmark_points"], mesh.landmark_points.numpy()
+    )
     mesh_back = sks.PolyData(mesh_pv)
     assert torch.allclose(mesh_back.landmark_points, mesh.landmark_points)
 
     # Check that the landmarks are preserved sks -> vedo -> sks
     mesh_vedo = mesh.to_vedo()
-    assert np.allclose(mesh_vedo.metadata["landmark_points"], mesh.landmark_points.numpy())
+    assert np.allclose(
+        mesh_vedo.metadata["landmark_points"], mesh.landmark_points.numpy()
+    )
     mesh_back = sks.PolyData(mesh_vedo)
     assert torch.allclose(mesh_back.landmark_points, mesh.landmark_points)
 
