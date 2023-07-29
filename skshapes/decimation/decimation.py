@@ -56,7 +56,8 @@ class Decimation:
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[int] = None,
-        method: Literal["vtk", "sks"] = "sks"
+        method: Literal["vtk", "sks"] = "sks",
+        running_time: bool = False,
     ) -> None:
         """
         Initialize the quadric decimation algorithm with a target reduction or the desired number of points in lox-resulution mesh and choose between vtk and sks implementations.
@@ -87,6 +88,7 @@ class Decimation:
             self.n_points = n_points
 
         self.method = method
+        self.running_time = running_time
 
     @typecheck
     def fit(self, mesh: PolyData) -> None:
@@ -114,9 +116,25 @@ class Decimation:
         triangles = mesh.triangles.clone().cpu().numpy()
 
         # Run the quadric decimation algorithm
-        decimated_points, collapses_history, newpoints_history = _do_decimation(
-            points=points, triangles=triangles, target_reduction=self.target_reduction
-        )
+        if not self.running_time:
+            decimated_points, collapses_history, newpoints_history = _do_decimation(
+                points=points,
+                triangles=triangles,
+                target_reduction=self.target_reduction,
+            )
+        else:
+            (
+                decimated_points,
+                collapses_history,
+                newpoints_history,
+                times,
+            ) = _do_decimation(
+                points=points,
+                triangles=triangles,
+                target_reduction=self.target_reduction,
+                running_time=True,
+            )
+            self.times = times
         keep = np.setdiff1d(
             np.arange(mesh.n_points), collapses_history[:, 1]
         )  # Indices of the points that must be kept after decimation

@@ -1,5 +1,6 @@
 import numpy as np
 import numba as nb
+from time import time
 
 
 def compute_edges(triangles, repeated=False):
@@ -134,9 +135,6 @@ def check_boundary_constraints_numba(vertices, repeated_edges, triangles):
             e0, e1 = repeated_edges[:, i]
             boundary = True
 
-    # if n_boundary_edges == 0:s
-    #     print("No boundary edges found")
-
     return boundary_quadrics
 
 
@@ -168,9 +166,6 @@ def compute_cost(edge, Quadrics, vertices):
         x = np.linalg.solve(A, b)
 
     else:
-        # print("Singular matrix")
-        # raise NotImplementedError("Singular matrix")
-
         pt0 = vertices[pt0]
         pt1 = vertices[pt1]
 
@@ -222,18 +217,7 @@ def intialize_costs(edges, Quadrics, vertices):
 
 
 @nb.njit(fastmath=True, cache=True)
-def collapse(edges, costs, targetPoints, quadrics, points, n_points_to_remove=5000):
-    edges = edges.copy()
-    costs = costs.copy()
-    targetPoints = targetPoints.copy()
-    Quadrics = quadrics.copy()
-    vertices = points.copy()
-
-    ordering = np.argsort(costs)
-    edges = edges[ordering]
-    costs = costs[ordering]
-    newpoints = targetPoints[ordering]
-
+def collapse(edges, costs, newpoints, quadrics, points, n_points_to_remove=5000):
     indices_toremove = np.zeros(n_points_to_remove, dtype=np.int64)
     collapses = np.zeros((n_points_to_remove, 2), dtype=np.int64)
     newpoints_history = np.zeros((n_points_to_remove, 3), dtype=np.float32)
@@ -249,9 +233,9 @@ def collapse(edges, costs, targetPoints, quadrics, points, n_points_to_remove=50
 
         else:
             # Update the quadrics
-            Quadrics[e0] += Quadrics[e1]
+            quadrics[e0] += quadrics[e1]
             newpoint = newpoints[indice]
-            vertices[e0] = newpoint
+            points[e0] = newpoint
 
             collapses[n_points_removed][0] = e0
             collapses[n_points_removed][1] = e1
@@ -261,32 +245,27 @@ def collapse(edges, costs, targetPoints, quadrics, points, n_points_to_remove=50
 
             costs[indice] = np.inf
 
-            # Update the edges
+            # Update the impacted edges
             for i in range(1, len(edges)):
+                # Update the connectivity e0 <- e1
                 if edges[i][0] == e1:
                     edges[i][0] = e0
                 if edges[i][1] == e1:
                     edges[i][1] = e0
 
+                # Update the cost of the impacted edges (the one that share a vertex with e0)
                 if (
-                    (i != indice)
-                    and (
-                        edges[i][0] == e0
-                        or edges[i][1] == e0
-                        or edges[i][0] == e1
-                        or edges[i][1] == e1
-                    )
+                    (edges[i][1] == e0 or edges[i][0] == e0)
                     and (edges[i][0] != edges[i][1])
+                    and (i != indice)
                 ):
-                    costs[i], newpoints[i] = compute_cost(edges[i], Quadrics, points)
+                    costs[i], newpoints[i] = compute_cost(edges[i], quadrics, points)
 
-    new_vertices = np.zeros(
-        (vertices.shape[0] - n_points_to_remove, 3), dtype=np.float32
-    )
+    new_vertices = np.zeros((points.shape[0] - n_points_to_remove, 3), dtype=np.float32)
     counter = 0
-    for i in range(vertices.shape[0]):
+    for i in range(points.shape[0]):
         if i not in indices_toremove:
-            new_vertices[counter] = vertices[i]
+            new_vertices[counter] = points[i]
             counter += 1
 
     return new_vertices, collapses, newpoints_history
@@ -339,8 +318,6 @@ def _compute_alphas(points, collapses_history, newpoints_history):
     return alphas
 
 
-from time import time
-
 ############# Sks interface
 from ..types import typecheck, FloatArray, IntArray
 from typing import Tuple
@@ -348,7 +325,7 @@ from typing import Tuple
 
 @typecheck
 def _do_decimation(
-    points, triangles, target_reduction: float = 0.5, print_compute_time: bool = False
+    points, triangles, target_reduction: float = 0.5, running_time: bool = False
 ):
     """Apply the quadric decimation algorithm to a mesh.
 
@@ -365,11 +342,13 @@ def _do_decimation(
 
     # points = shape.points.clone().numpy()
     # triangles = shape.triangles.clone().numpy()
+    if running_time:
+        times = dict()
 
     start = time()
     quadrics = initialize_quadrics_numba(points, triangles)
-    if print_compute_time:
-        print("Initialize Quadrics took: ", time() - start)
+    if running_time:
+        times["initialize_quadrics"] = time() - start
 
     # Are there boundary edges?
     start = time()
@@ -377,8 +356,9 @@ def _do_decimation(
     boundary_quadrics = check_boundary_constraints_numba(
         points, repeated_edges, triangles
     )
-    if print_compute_time:
-        print("Boundary quadrics took: ", time() - start)
+    if running_time:
+        times["check_boundary_constraints"] = time() - start
+
     quadrics += boundary_quadrics
     # Compute the cost for each edge
     start = time()
@@ -386,19 +366,23 @@ def _do_decimation(
     costs, target_points = intialize_costs(edges, quadrics, points)
 
     n_points_to_remove = int(target_reduction * points.shape[0])
-    if print_compute_time:
-        print("Initialize costs took: ", time() - start)
+    if running_time:
+        times["initialize_costs"] = time() - start
 
     start = time()
     output_points, collapses, newpoints = collapse(
         edges=edges.T,
         costs=costs,
-        targetPoints=target_points,
+        newpoints=target_points,
         quadrics=quadrics,
         points=points,
         n_points_to_remove=n_points_to_remove,
     )
-    if print_compute_time:
-        print("Collapse took: ", time() - start)
+    if running_time:
+        times["collapse"] = time() - start
+        times["total"] = sum(times.values())
 
-    return output_points, collapses, newpoints
+    if not running_time:
+        return output_points, collapses, newpoints
+    else:
+        return output_points, collapses, newpoints, times
