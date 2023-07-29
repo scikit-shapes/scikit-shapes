@@ -288,7 +288,7 @@ class PolyData(BaseShape):
             mesh.metadata["landmarks_values"] = coalesced_landmarks.values()
             mesh.metadata["landmarks_indices"] = coalesced_landmarks.indices()
             mesh.metadata["landmarks_size"] = coalesced_landmarks.size()
-            mesh.metadata["landmarks"] = self.landmarks_3d
+            mesh.metadata["landmark_points"] = self.landmark_points
 
         return mesh
 
@@ -333,7 +333,7 @@ class PolyData(BaseShape):
             polydata.field_data["landmarks_values"] = coalesced_landmarks.values()
             polydata.field_data["landmarks_indices"] = coalesced_landmarks.indices()
             polydata.field_data["landmarks_size"] = coalesced_landmarks.size()
-            polydata.field_data["landmarks"] = self.landmarks_3d
+            polydata.field_data["landmark_points"] = self.landmark_points
 
         return polydata
 
@@ -496,7 +496,7 @@ class PolyData(BaseShape):
 
     @property
     @typecheck
-    def landmarks_3d(self) -> Optional[Points]:
+    def landmark_points(self) -> Optional[Points]:
         """Return the landmarks in 3D."""
         if self.landmarks is None:
             return None

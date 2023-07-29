@@ -1,1 +1,1 @@
-from .decimation import QuadricDecimation
+from .decimation import Decimation
