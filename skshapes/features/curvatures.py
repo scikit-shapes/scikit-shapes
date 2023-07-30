@@ -434,22 +434,51 @@ def point_principal_curvatures(
     We rely on the formulas detailed in Example 4.2 of
     Curvature formulas for implicit curves and surfaces, Goldman, 2005.
     """
-    coefs = self.point_quadratic_coefficients(scale=scale, **kwargs)
-    assert coefs.shape == (self.n_points, 6)
+    N = self.n_points
 
+    # Local average:
+    Xm = self.point_moments(order=1, scale=scale, central=False, **kwargs)
+    assert Xm.shape == (N, 3)
+
+    # Local quadratic coefficients in tangent space:
+    coefs, nuv = self.point_quadratic_coefficients(
+        scale=scale, return_nuv=True, **kwargs
+    )
+    assert coefs.shape == (N, 6)
+    for key in ["n", "u", "v"]:
+        assert nuv[key].shape == (N, 3)
+
+    # Compute the coordinates of the current point in the local tangent frame,
+    # centered around the local average:
+    x = self.points - Xm
+    assert x.shape == (N, 3)
+    U = (nuv["u"] * x).sum(-1)
+    V = (nuv["v"] * x).sum(-1)
+    assert U.shape == (N,)
+    assert V.shape == (N,)
+
+    # In the local tangent frame centered on the local average Xm,
+    # our quadratic approximation reads:
+    # n = f(u, v) = .5 * (a * u**2 + 2 * b * u * v +  c * v**2) +  d * u +  e * v + f
+    #             =      c0 * u**2 +    c1 * u * v + c2 * v**2  + c3 * u + c4 * v + c5
     a, b, c = 2 * coefs[:, 0], coefs[:, 1], 2 * coefs[:, 2]
     d, e = coefs[:, 3], coefs[:, 4]
 
-    # Grad(f) = (d, e) and H(f) = [[a, b], [b, c]].
-    denom = 1 + d**2 + e**2  # 1 + ||Grad(f)||^2
+    # The gradient of f is:
+    # Grad(f) = [a * u + b * v + d, b * u + c * v + e]
+    gu = a * U + b * V + d
+    gv = b * U + c * V + e
+    denom = 1 + gu**2 + gv**2  # 1 + ||Grad(f)||^2
+
+    # The Hessian of f is H(f) = [[a, b], [b, c]].
     gauss = a * c - b * b  # det(H(f))
     gauss = gauss / denom**2
 
     # Term 1: Grad(f)^T . H(f) . Grad(f)
-    mean = d * d * a + 2 * d * e * b + e * e * c
+    mean = gu * gu * a + 2 * gu * gv * b + gv * gv * c
     # Term 2: - (1 + ||Grad(f)||^2) * trace(H(f))
     mean = mean - denom * (a + c)
-    mean = mean / denom ** (1.5)
+    mean = 0.5 * mean / denom ** (1.5)
 
     if self.triangles is None:
         # If we cannot orient the surface,
@@ -457,12 +486,12 @@ def point_principal_curvatures(
         mean = mean.abs()
 
     # delta = (trace ** 2 - 4 * det).relu().sqrt()
-    delta = (mean**2 - 4 * gauss).relu().sqrt()
-    kmax = (mean + delta) / 2
-    kmin = (mean - delta) / 2
+    delta = (mean**2 - gauss).relu().sqrt()
+    kmax = mean + delta
+    kmin = mean - delta
 
-    assert kmax.shape == (self.n_points,)
-    assert kmin.shape == (self.n_points,)
+    assert kmax.shape == (N,)
+    assert kmin.shape == (N,)
     return kmax, kmin
 
 
