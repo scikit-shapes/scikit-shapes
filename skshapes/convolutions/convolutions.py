@@ -71,7 +71,7 @@ def squared_distances(
 
 
 @typecheck
-def point_convolution(
+def _point_convolution(
     self,
     *,
     kernel: Literal["uniform", "gaussian"] = "gaussian",

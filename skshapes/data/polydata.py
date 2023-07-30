@@ -171,6 +171,7 @@ class PolyData(BaseShape):
         # https://www.youtube.com/watch?v=sVjtp6tGo0g
 
         self.cached_methods = [
+            "point_convolution",
             "point_normals",
             "point_frames",
             "point_moments",
@@ -190,7 +191,7 @@ class PolyData(BaseShape):
             )
 
     from .utils import cache_clear
-    from ..convolutions import point_convolution
+    from ..convolutions import _point_convolution
     from ..features import (
         _point_normals,
         _point_frames,
@@ -435,7 +436,6 @@ class PolyData(BaseShape):
         self._triangles = triangles.clone().to(self.device)
         self._edges = None
         self.cache_clear()
-        
 
     ##############################
     #### Points getter/setter ####

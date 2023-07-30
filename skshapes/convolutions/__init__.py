@@ -1,1 +1,1 @@
-from .convolutions import point_convolution
+from .convolutions import _point_convolution
