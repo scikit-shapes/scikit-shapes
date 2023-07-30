@@ -103,3 +103,21 @@ def vedo_frames(points, frames):
     u = vd.Arrows(points, points + frames[:, :, 1], c="blue", alpha=0.9)
     v = vd.Arrows(points, points + frames[:, :, 2], c="green", alpha=0.9)
     return [n, u, v]
+
+
+from torch.profiler import profile, ProfilerActivity
+
+
+def profiler():
+    activities = [ProfilerActivity.CPU]
+    if torch.cuda.is_available():
+        activities.append(ProfilerActivity.CUDA)
+
+    myprof = profile(
+        activities=activities,
+        record_shapes=True,
+        profile_memory=True,
+        with_stack=True,
+        experimental_config=torch._C._profiler._ExperimentalConfig(verbose=True),
+    )
+    return myprof

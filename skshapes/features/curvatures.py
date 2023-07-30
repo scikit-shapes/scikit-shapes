@@ -255,13 +255,12 @@ def smooth_curvatures_2(
 
 
 @typecheck
-def point_quadratic_coefficients(
+def _point_quadratic_coefficients(
     self,
     *,
     scale: Optional[Number] = None,
-    return_nuv: bool = False,
     **kwargs,
-) -> Union[Float2dTensor, Tuple[Float2dTensor, dict]]:
+) -> Tuple[Float2dTensor, dict]:
     """Returns the point-wise principal curvatures."""
 
     # nuv are arranged row-wise!
@@ -344,14 +343,11 @@ def point_quadratic_coefficients(
     coefs = torch.linalg.solve(TT, TN)
     assert coefs.shape == (N, len(T))
 
-    if return_nuv:
-        return coefs, nuv
-    else:
-        return coefs
+    return coefs, nuv
 
 
 @typecheck
-def point_quadratic_fits(
+def _point_quadratic_fits(
     self,
     *,
     scale: Optional[Number] = None,
@@ -364,9 +360,7 @@ def point_quadratic_fits(
     assert Xm.shape == (N, 3)
 
     # Local quadratic coefficients in tangent space:
-    coefs, nuv = self.point_quadratic_coefficients(
-        scale=scale, return_nuv=True, **kwargs
-    )
+    coefs, nuv = self.point_quadratic_coefficients(scale=scale, **kwargs)
     assert coefs.shape == (N, 6)
     for key in ["n", "u", "v"]:
         assert nuv[key].shape == (N, 3)
@@ -425,7 +419,7 @@ def point_quadratic_fits(
 
 
 @typecheck
-def point_principal_curvatures(
+def _point_principal_curvatures(
     self,
     *,
     scale: Optional[Number] = None,
@@ -443,9 +437,7 @@ def point_principal_curvatures(
     assert Xm.shape == (N, 3)
 
     # Local quadratic coefficients in tangent space:
-    coefs, nuv = self.point_quadratic_coefficients(
-        scale=scale, return_nuv=True, **kwargs
-    )
+    coefs, nuv = self.point_quadratic_coefficients(scale=scale, **kwargs)
     assert coefs.shape == (N, 6)
     for key in ["n", "u", "v"]:
         assert nuv[key].shape == (N, 3)
@@ -498,7 +490,7 @@ def point_principal_curvatures(
 
 
 @typecheck
-def point_shape_indices(self, **kwargs) -> Float1dTensor:
+def _point_shape_indices(self, **kwargs) -> Float1dTensor:
     """Returns the point-wise shape index, estimated at a given scale.
 
     For reference, see:
@@ -515,7 +507,7 @@ def point_shape_indices(self, **kwargs) -> Float1dTensor:
 
 
 @typecheck
-def point_curvedness(self, **kwargs) -> Float1dTensor:
+def _point_curvedness(self, **kwargs) -> Float1dTensor:
     """Returns the point-wise curvedness, estimated at a given scale.
 
     For reference, see:

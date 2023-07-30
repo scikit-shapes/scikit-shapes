@@ -7,7 +7,7 @@ import torch
 import skshapes as sks
 
 from pytest import approx
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis import strategies as st
 
 import numpy as np
@@ -225,33 +225,28 @@ if __name__ == "__main__":
         ),
     ]
     shapes = shapes[:-1]
+    mode = ["display", "profile"][1]
 
-    if True:
+    if mode == "display":
         for s in shapes:
             display_curvatures(**s)
             print("")
 
-    else:
-        from torch.profiler import profile, ProfilerActivity
+    elif mode == "profile":
+        from .utils import profiler
 
-        activities = [ProfilerActivity.CPU]
-        if torch.cuda.is_available():
-            activities.append(ProfilerActivity.CUDA)
+        myprof = profiler()
 
-        myprof = profile(
-            activities=activities,
-            record_shapes=True,
-            profile_memory=True,
-            with_stack=True,
-            experimental_config=torch._C._profiler._ExperimentalConfig(verbose=True),
-        )
-
+        descr = shapes[0]
         with myprof as prof:
-            points = create_point_cloud(
-                n_points=3,
-                f=functions[0],
-            )
-            quadrics, mean_point, sigma = sks.implicit_quadrics(points=points, scale=1)
+            scale = descr.pop("scale")
+            highlight = descr.pop("highlight", 0)
+
+            shape = create_shape(**descr)
+            kmax, kmin = shape.point_principal_curvatures(scale=scale)
+            print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
+
+        print(shape.point_moments.cache_info())
 
         # Create an "output/" foler if it doesn't exist
         import os
@@ -260,8 +255,8 @@ if __name__ == "__main__":
             os.makedirs("output")
 
         # Export to chrome://tracing
-        prof.export_chrome_trace(f"output/trace_implicit_quadrics.json")
+        prof.export_chrome_trace(f"output/trace_curvatures.json")
         prof.export_stacks(
-            f"output/stacks_implicit_quadrics.txt",
+            f"output/stacks_curvatures.txt",
             "self_cpu_time_total",  # "self_cuda_time_total",
         )

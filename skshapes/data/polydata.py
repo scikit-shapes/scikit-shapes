@@ -4,6 +4,7 @@ import pyvista
 import vedo
 import torch
 import numpy as np
+import functools
 
 from ..types import (
     typecheck,
@@ -53,6 +54,7 @@ class PolyData(BaseShape):
         device: Union[str, torch.device] = "cpu",
         landmarks: Optional[Landmarks] = None,
         point_data: Optional[DataAttributes] = None,
+        cache_size: Optional[int] = None,
     ) -> None:
         """Initialize a PolyData object.
 
@@ -63,6 +65,10 @@ class PolyData(BaseShape):
             device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to "cpu".
             landmarks (Optional[Landmarks], optional): _description_. Defaults to None.
             point_data (Optional[DataAttributes], optional): _description_. Defaults to None.
+            cache_size (Optional[int], optional): Size of the cache for memoized properties.
+                Defaults to None (= no cache limit).
+                Use a smaller value if you intend to e.g. compute point curvatures
+                at many different scales.
         """
 
         # If the user provides a pyvista mesh, we extract the points, edges and triangles from it
@@ -159,6 +165,42 @@ class PolyData(BaseShape):
                 point_data = point_data.to(self.device)
 
             self._point_data = point_data
+
+        # Cached methods: for reference on the Python syntax,
+        # see "don't lru_cache methods! (intermediate) anthony explains #382",
+        # https://www.youtube.com/watch?v=sVjtp6tGo0g
+
+        self.cached_methods = [
+            "point_normals",
+            "point_frames",
+            "point_moments",
+            "point_quadratic_coefficients",
+            "point_quadratic_fits",
+            "point_principal_curvatures",
+            "point_shape_indices",
+            "point_curvedness",
+        ]
+        for method_name in self.cached_methods:
+            setattr(
+                self,
+                method_name,
+                functools.lru_cache(maxsize=cache_size)(
+                    getattr(self, "_" + method_name)
+                ),
+            )
+
+    from .utils import cache_clear
+    from ..convolutions import point_convolution
+    from ..features import (
+        _point_normals,
+        _point_frames,
+        _point_moments,
+        _point_quadratic_coefficients,
+        _point_quadratic_fits,
+        _point_principal_curvatures,
+        _point_shape_indices,
+        _point_curvedness,
+    )
 
     @typecheck
     def _init_from_pyvista(self, mesh: pyvista.PolyData) -> None:
@@ -371,6 +413,7 @@ class PolyData(BaseShape):
         """Set the edges of the shape. This will also set the triangles to None."""
         self._edges = edges.clone().to(self.device)
         self._triangles = None
+        self.cache_clear()
 
     #################################
     #### Triangles getter/setter ####
@@ -391,6 +434,8 @@ class PolyData(BaseShape):
 
         self._triangles = triangles.clone().to(self.device)
         self._edges = None
+        self.cache_clear()
+        
 
     ##############################
     #### Points getter/setter ####
@@ -407,6 +452,7 @@ class PolyData(BaseShape):
             raise ValueError("The number of points cannot be changed.")
 
         self._points = points.clone().to(self.device)
+        self.cache_clear()
 
     ##############################
     #### Device getter/setter ####
@@ -611,15 +657,3 @@ class PolyData(BaseShape):
             )
 
         return torch.ones(self.n_points, dtype=float_dtype, device=self.device)
-
-    from ..convolutions import point_convolution
-    from ..features import (
-        point_normals,
-        point_moments,
-        point_quadratic_coefficients,
-        point_quadratic_fits,
-        point_principal_curvatures,
-        point_shape_indices,
-        point_curvedness,
-        point_frames,
-    )

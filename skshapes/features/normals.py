@@ -7,7 +7,7 @@ from ..types import typecheck, Points, Optional, FloatTensor, Triangles, Number
 
 
 @typecheck
-def point_normals(
+def _point_normals(
     self,
     *,
     scale: Optional[Number] = None,
@@ -50,7 +50,7 @@ def point_normals(
 
 
 @typecheck
-def point_frames(
+def _point_frames(
     self,
     *,
     scale: Optional[Number] = None,
