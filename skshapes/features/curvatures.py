@@ -335,8 +335,10 @@ def point_quadratic_coefficients(
     TT = torch.stack(TT, dim=-1).view(N, len(T), len(T))  # (N, 6, 6)
     TN = torch.stack(TN, dim=-1).view(N, len(T))  # (N, 6)
 
-    for i in range(len(T)):
-        TT[:, i, i] += 1e-6
+    if True:
+        reg = 1e-5 * scale**4
+        for i in range(len(T)):
+            TT[:, i, i] += reg
 
     # (TT^-1 @ TN) : simple estimation through linear regression
     coefs = torch.linalg.solve(TT, TN)

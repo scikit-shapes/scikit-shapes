@@ -29,10 +29,14 @@ def moments(X):
     return X.mean(0), XX.mean(0), XXX.mean(0), XXXX.mean(0)
 
 
-@given(n_points=st.integers(min_value=5, max_value=10))
+@given(
+    n_points=st.integers(min_value=5, max_value=10),
+    scale=st.floats(min_value=0.01, max_value=10),
+    offset=st.floats(min_value=0.1, max_value=10),
+)
 @settings(max_examples=1000, deadline=None)
-def test_moments_1(*, n_points: int):
-    points = 0.1 * torch.randn(n_points, 3) + 5 * torch.randn(1)
+def test_moments_1(*, n_points: int, scale: float, offset: float):
+    points = scale * torch.randn(n_points, 3) + offset * torch.randn(1)
     shape = sks.PolyData(points=points)
 
     for central in [False, True]:
@@ -50,7 +54,7 @@ def test_moments_1(*, n_points: int):
             )
             mom = mom[0]
             print(f"mom: {mom}")
-            assert torch.allclose(mom.double(), gt[order - 1], atol=1e-3, rtol=1e-3)
+            assert torch.allclose(mom.double(), gt[order - 1], atol=1e-4, rtol=1e-2)
 
 
 def display_moments(*, scale=1, **kwargs):

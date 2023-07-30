@@ -81,7 +81,7 @@ def point_moments(
 
     def recursion(*, k: int):
         assert k < order
-        return self.point_moments(
+        mom = self.point_moments(
             order=k,
             features=features,
             central=False,
@@ -90,6 +90,7 @@ def point_moments(
             dtype=dtype,
             **kwargs,
         )
+        return mom
 
     if order == 1:
         moments = Conv @ X  # (N, D)

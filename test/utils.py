@@ -48,11 +48,11 @@ def create_shape(
     n_points=20,
     noise=0,
     radius=1,
+    offset=0,
 ):
     if shape == "sphere":
         points = torch.randn(n_points, 3)
         points = radius * torch.nn.functional.normalize(points, p=2, dim=1)
-        points = points + 10 * torch.randn(1, 3)
         shape = sks.PolyData(points=points)
 
     elif shape == "unit patch":
@@ -69,6 +69,7 @@ def create_shape(
         shape = sks.PolyData(file_name).decimate(n_points=n_points)
         print("Loaded shape with {:,} points".format(shape.n_points))
 
+    shape.points = shape.points + offset * torch.randn(1, 3)
     shape.points = shape.points + noise * torch.randn(shape.n_points, 3)
     return shape
 

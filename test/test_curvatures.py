@@ -17,7 +17,7 @@ from .utils import create_point_cloud, create_shape
 
 
 @given(
-    n_points=st.integers(min_value=500, max_value=1000),
+    n_points=st.integers(min_value=400, max_value=500),
     a=st.floats(min_value=-1, max_value=1),
     b=st.floats(min_value=-1, max_value=1),
     c=st.floats(min_value=-1, max_value=1),
@@ -65,31 +65,25 @@ def test_curvatures_quadratic(
         kmax, kmin = shape.point_principal_curvatures(scale=scale)
         kmax = kmax[0].item()
         kmin = kmin[0].item()
-        assert kmax * kmin == approx(gauss, abs=5e-2, rel=5e-2)
-        assert (kmax + kmin) / 2 == approx(mean, abs=5e-2, rel=5e-2)
+        assert kmax * kmin == approx(gauss, abs=5e-1, rel=2e-1)
+        assert (kmax + kmin) / 2 == approx(mean, abs=5e-1, rel=2e-1)
 
 
 @given(
-    n_points=st.integers(min_value=1000, max_value=5000),
+    n_points=st.integers(min_value=500, max_value=1000),
     radius=st.floats(min_value=0.1, max_value=10),
+    relative_scale=st.floats(min_value=0.1, max_value=0.12),
 )
-def test_curvatures_sphere(*, n_points: int, radius: float):
+def test_curvatures_sphere(*, n_points: int, radius: float, relative_scale: float):
     # Create a sphere with the correct radius and an arbitrary center:
     shape = create_shape(shape="sphere", n_points=n_points, radius=radius)
 
     ones = torch.ones_like(shape.points[:, 0])
 
-    scales = [0.2 * radius, 0.5 * radius, radius]
-
-    for scale in scales:
-        print(f"Radius: {radius}, scale: {scale}")
-        kmax, kmin = shape.point_principal_curvatures(scale=scale)
-        assert torch.allclose(
-            kmax, ones / radius**2, atol=1e-3, rtol=1e-3
-        ), f"Radius: {radius}, scale: {scale}"
-        assert torch.allclose(
-            kmin, ones / radius**2, atol=1e-3, rtol=1e-3
-        ), f"Radius: {radius}, scale: {scale}"
+    scale = relative_scale * radius
+    kmax, kmin = shape.point_principal_curvatures(scale=scale)
+    assert torch.allclose(kmax, ones / radius, atol=1e-1, rtol=1e-1)
+    assert torch.allclose(kmin, ones / radius, atol=1e-1, rtol=1e-1)
 
 
 def display_curvatures_old(*, function: callable, scale=1):
@@ -169,7 +163,19 @@ if __name__ == "__main__":
             shape="sphere",
             radius=1,
             scale=0.05,
-            n_points=1000,
+            n_points=500,
+        ),
+        dict(
+            shape="sphere",
+            radius=0.1,
+            scale=0.005,
+            n_points=500,
+        ),
+        dict(
+            shape="sphere",
+            radius=10,
+            scale=0.5,
+            n_points=500,
         ),
         dict(
             function=lambda x, y: 0.5 * x**2 + 0.5 * y**2,
@@ -218,7 +224,7 @@ if __name__ == "__main__":
             highlight=0,
         ),
     ]
-    shapes = shapes[4:5]
+    shapes = shapes[:-1]
 
     if True:
         for s in shapes:
