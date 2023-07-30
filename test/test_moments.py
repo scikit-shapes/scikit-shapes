@@ -87,7 +87,7 @@ def display_moments(*, scale=1, **kwargs):
 
     point_frame = shape.point_frames(scale=scale).transpose(1, 2)
     curvedness = shape.point_curvedness(scale=scale)
-    shape_index = shape.point_shape_indices(scale=scale)
+    shape_index = shape.point_shape_indices(scale=scale).abs()
 
     # Our surface points:
     if shape.triangles is None:
@@ -105,11 +105,7 @@ def display_moments(*, scale=1, **kwargs):
         .cmap("viridis", (3 * anisotropy) ** (1 / 3), vmin=0)
         .add_scalarbar()
     )
-    spheres_3 = (
-        spheres.clone()
-        .cmap("viridis", curvedness, vmin=0, vmax=1 / shape.standard_deviation[0])
-        .add_scalarbar()
-    )
+    spheres_3 = spheres.clone().cmap("viridis", curvedness, vmin=0).add_scalarbar()
     spheres_4 = (
         spheres.clone().cmap("RdBu_r", shape_index, vmin=-1, vmax=1).add_scalarbar()
     )

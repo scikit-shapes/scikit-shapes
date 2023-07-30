@@ -180,6 +180,7 @@ class PolyData(BaseShape):
             "point_principal_curvatures",
             "point_shape_indices",
             "point_curvedness",
+            "point_curvature_colors",
         ]
         for method_name in self.cached_methods:
             setattr(
@@ -201,6 +202,7 @@ class PolyData(BaseShape):
         _point_principal_curvatures,
         _point_shape_indices,
         _point_curvedness,
+        _point_curvature_colors,
     )
 
     @typecheck

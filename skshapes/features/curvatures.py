@@ -515,3 +515,29 @@ def _point_curvedness(self, **kwargs) -> Float1dTensor:
     """
     kmax, kmin = self.point_principal_curvatures(**kwargs)
     return ((kmax**2 + kmin**2) / 2).sqrt()
+
+
+import colorsys
+
+
+@typecheck
+def _point_curvature_colors(
+    self,
+    scale: Optional[Number] = None,
+):
+    kmax, kmin = self.point_principal_curvatures(scale=scale)
+    s = self.point_curvedness(scale=scale)
+    s = s / s.max()
+    s = (1e-5 + s).log().abs()
+    s = s / s.max()
+    s = 1 - s
+    i = -self.point_shape_indices(scale=scale)
+    i = (1 + i) / 4
+    ones = torch.ones_like(s)
+
+    HLS = torch.stack([i, 1 - 0.5 * s, 0.75 * ones], dim=-1)
+    colors = [colorsys.hls_to_rgb(*hls) for hls in HLS.cpu().numpy()]
+
+    # Output the colors as expected by Vedo:
+    colors = [(255 * a, 255 * b, 255 * c, 255) for a, b, c in colors]
+    return colors

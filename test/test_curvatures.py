@@ -141,11 +141,18 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
         else:
             shape_ = shape.to_vedo()
 
+        if True:
+            shape_.pointcolors = shape.point_curvature_colors(scale=s)
+        else:
+            shape_ = (
+                shape_.clone()
+                .alpha(0.5)
+                .cmap("viridis", curvedness, vmin=0)
+                .add_scalarbar()
+            )
+
         plt.at(i).show(
-            shape_.clone()
-            .alpha(0.5)
-            .cmap("viridis", curvedness, vmin=0)
-            .add_scalarbar(),
+            shape_,
             reference_point,
             local_average,
             local_fit.clone().alpha(0.5),
@@ -153,6 +160,7 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
                 f"Scale {s:.2f}\ncurvedness and local fit around point 0",
                 pos="top-middle",
             ),
+            bg=(0.5, 0.5, 0.5),
         )
     plt.interactive()
 
@@ -224,7 +232,7 @@ if __name__ == "__main__":
             highlight=0,
         ),
     ]
-    shapes = shapes[:-1]
+    shapes = shapes[-1:]
     mode = ["display", "profile"][0]
 
     if mode == "display":

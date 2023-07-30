@@ -8,5 +8,6 @@ from .curvatures import (
     _point_principal_curvatures,
     _point_shape_indices,
     _point_curvedness,
+    _point_curvature_colors,
 )
 from .implicit_quadrics import implicit_quadrics
