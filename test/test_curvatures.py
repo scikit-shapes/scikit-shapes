@@ -225,7 +225,7 @@ if __name__ == "__main__":
         ),
     ]
     shapes = shapes[:-1]
-    mode = ["display", "profile"][1]
+    mode = ["display", "profile"][0]
 
     if mode == "display":
         for s in shapes:

@@ -65,10 +65,6 @@ def _point_moments(
     **kwargs,
 ) -> Union[FloatTensor, DoubleTensor]:
     """Compute the local moments of a point cloud."""
-    print(
-        f"Computing moments of order {order}, features = {features}, central = {central}, rescale = {rescale}, scale = {scale}, dtype = {dtype}, kwargs={kwargs}..."
-    )
-
     X = self.points if features is None else features
 
     if dtype == "float":
