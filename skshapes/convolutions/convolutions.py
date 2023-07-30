@@ -96,6 +96,15 @@ def _point_convolution(
         X = X.double()
         weights_j = weights_j.double()
 
+    # Divisions are expensive: whenever possible, it's best to scale the points
+    # ahead of time instead of scaling the distances for every pair of points.
+    if scale is not None:
+        if kernel == "gaussian":
+            sqrt_2 = 1.41421356237
+            X = X / (sqrt_2 * scale)
+        elif kernel == "uniform":
+            X = X / scale
+
     D_ij = squared_distances(points=X, window=window, cutoff=cutoff, geodesic=geodesic)
 
     if scale is None:
@@ -104,9 +113,9 @@ def _point_convolution(
 
     else:
         if kernel == "gaussian":
-            K_ij = (-D_ij / (2 * scale**2)).exp()
+            K_ij = (-D_ij).exp()
         elif kernel == "uniform":
-            K_ij = 1.0 * (D_ij <= scale**2)
+            K_ij = 1.0 * (D_ij <= 1)
 
     if normalize:
         total_weights_i = K_ij @ weights_j
