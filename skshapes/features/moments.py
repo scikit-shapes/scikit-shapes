@@ -80,11 +80,9 @@ def _point_moments(
     D = X.shape[1]
     assert X.shape == (N, D)
 
-    Conv = self.point_convolution(scale=scale, normalize=True, dtype=dtype, **kwargs)
-    assert Conv.shape == (N, N)
-
+    # We use a recursive formulation to best leverage our cache!
     def recursion(*, k: int):
-        assert k < order
+        assert (k < order) or (central and k == order)
         mom = self.point_moments(
             order=k,
             features=features,
@@ -96,34 +94,46 @@ def _point_moments(
         )
         return mom
 
-    if order == 1:
-        moments = Conv @ X  # (N, D)
+    # Thanks to caching, Conv will only be used if central=False
+    if not central:
+        Conv = self.point_convolution(scale=scale, normalize=True, dtype=dtype, **kwargs)
+        assert Conv.shape == (N, N)
+    else:
+        Conv = None
 
-        if central:
+    if order == 1:
+        if not central:
+            moments = Conv @ X  # (N, D)
+        else:
+            # Use recursion (-> cache) to compute Conv @ X
+            moments = recursion(k=1)
             # Centering an order 1 moment -> 0
             moments = moments - moments
 
         assert moments.shape == (N, D)
 
     elif order == 2:
-        XX = X.view(N, D, 1) * X.view(N, 1, D)  # (N, D, D)
-        moments = (Conv @ XX.view(N, D * D)).view(N, D, D)  # (N, D, D)
-
-        if central:
-            # (N, D)
-            Xm = recursion(k=1)
+        if not central:
+            XX = X.view(N, D, 1) * X.view(N, 1, D)  # (N, D, D)
+            moments = (Conv @ XX.view(N, D * D)).view(N, D, D)  # (N, D, D)
+        else:
+            # Use recursion (-> cache) to compute Conv @ X and Conv @ XX
+            Xm = recursion(k=1)  # (N, D)
+            moments = recursion(k=2)  # (N, D, D)
             moments = moments - (Xm.view(N, D, 1) * Xm.view(N, 1, D))  # (N, D, D)
 
         assert moments.shape == (N, D, D)
 
     elif order == 3:
-        # X^3 as a (N, D, D, D) tensor
-        XXX = X.view(N, D, 1, 1) * X.view(N, 1, D, 1) * X.view(N, 1, 1, D)
-        moments = (Conv @ XXX.view(N, D * D * D)).view(N, D, D, D)  # (N, D, D, D)
-
-        if central:
+        if not central:
+            # X^3 as a (N, D, D, D) tensor
+            XXX = X.view(N, D, 1, 1) * X.view(N, 1, D, 1) * X.view(N, 1, 1, D)
+            moments = (Conv @ XXX.view(N, D * D * D)).view(N, D, D, D)  # (N, D, D, D)
+        else:
+            # Use recursion (-> cache) to compute Conv @ X, Conv @ XX, Conv @ X^3
             Xm = recursion(k=1)  # (N, D)
             mom_2 = recursion(k=2)  # (N, D, D)
+            moments = recursion(k=3)  # (N, D, D, D)
 
             XmXmXm = Xm.view(N, D, 1, 1) * Xm.view(N, 1, D, 1) * Xm.view(N, 1, 1, D)
 
@@ -132,19 +142,21 @@ def _point_moments(
         assert moments.shape == (N, D, D, D)
 
     elif order == 4:
-        # X^4 as a (N, D, D, D, D) tensor
-        XXXX = (
-            X.view(N, D, 1, 1, 1)
-            * X.view(N, 1, D, 1, 1)
-            * X.view(N, 1, 1, D, 1)
-            * X.view(N, 1, 1, 1, D)
-        )
-        moments = (Conv @ XXXX.view(N, D * D * D * D)).view(N, D, D, D, D)
-
-        if central:
+        if not central:
+            # X^4 as a (N, D, D, D, D) tensor
+            XXXX = (
+                X.view(N, D, 1, 1, 1)
+                * X.view(N, 1, D, 1, 1)
+                * X.view(N, 1, 1, D, 1)
+                * X.view(N, 1, 1, 1, D)
+            )
+            moments = (Conv @ XXXX.view(N, D * D * D * D)).view(N, D, D, D, D)
+        else:
+            # Use recursion (-> cache) for Conv @ X, Conv @ XX, Conv @ X^3, Conv @ X^4
             Xm = recursion(k=1)
             mom_2 = recursion(k=2)
             mom_3 = recursion(k=3)
+            moments = recursion(k=4)
 
             XmXm = Xm.view(N, D, 1) * Xm.view(N, 1, D)
             XmXmXmXm = (

@@ -241,6 +241,7 @@ if __name__ == "__main__":
         with myprof as prof:
             scale = descr.pop("scale")
             highlight = descr.pop("highlight", 0)
+            descr["n_points"] = 2000
 
             shape = create_shape(**descr)
             kmax, kmin = shape.point_principal_curvatures(scale=scale)
