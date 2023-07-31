@@ -93,7 +93,11 @@ def _point_moments(
     # Thanks to caching, Conv will only be used if central=False
     if not central:
         Conv = self.point_convolution(
-            scale=scale, normalize=True, dtype=dtype, **kwargs
+            scale=scale,
+            normalize=True,
+            dtype=dtype,
+            cutoff=1e-4,
+            **kwargs,
         )
         assert Conv.shape == (N, N)
     else:

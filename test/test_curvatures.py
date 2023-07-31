@@ -2,6 +2,7 @@ import sys
 
 sys.path.append(sys.path[0][:-4])
 
+import time
 import numpy as np
 import torch
 import skshapes as sks
@@ -247,12 +248,19 @@ if __name__ == "__main__":
         myprof = profiler()
 
         descr = shapes[0]
-        with myprof as prof:
-            scale = descr.pop("scale")
-            highlight = descr.pop("highlight", 0)
-            descr["n_points"] = 5000
+        scale = descr.pop("scale")
+        highlight = descr.pop("highlight", 0)
+        descr["n_points"] = 5000
 
-            shape = create_shape(**descr)
+        shape = create_shape(**descr)
+
+        start = time.time()
+        kmax, kmin = shape.point_principal_curvatures(scale=scale)
+        print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
+        stop = time.time()
+        print(f"First run, elapsed time = {stop - start:.3f}s")
+
+        with myprof as prof:
             kmax, kmin = shape.point_principal_curvatures(scale=scale)
             print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
 

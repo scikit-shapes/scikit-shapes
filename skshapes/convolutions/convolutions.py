@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 
 from ..types import typecheck, Points, Optional, Triangles, Number, Literal
@@ -88,7 +89,7 @@ def _point_convolution(
             # exp(-x^2) <= cutoff <=> x^2 >= -log(cutoff)
             if window is None and cutoff is not None and cutoff < 1:
                 assert cutoff > 0
-                backend_args["cutoff"] = -torch.log(cutoff)
+                backend_args["cutoff"] = -np.log(cutoff)
 
             K_ij = squared_distances(
                 points=X,
