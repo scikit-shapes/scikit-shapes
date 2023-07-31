@@ -114,8 +114,9 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
     for i, s in enumerate(scales):
         Xm = shape.point_moments(order=1, scale=s)
         curvedness = shape.point_curvedness(scale=s)
+        r2 = shape.point_quadratic_coefficients(scale=s).r2
         kmax, kmin = shape.point_principal_curvatures(scale=s)
-        print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
+        print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}, R2: {r2[highlight]}")
         quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
         assert quadratic_fit.shape == (3, 3, 3)
 
@@ -228,11 +229,11 @@ if __name__ == "__main__":
         dict(
             file_name="~/data/PN1.stl",
             scale=2.0,
-            n_points=1e4,
+            n_points=5e3,
             highlight=0,
         ),
     ]
-    shapes = shapes[-1:]
+    shapes = shapes[:-1]
     mode = ["display", "profile"][0]
 
     if mode == "display":

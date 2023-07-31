@@ -2,6 +2,8 @@ import numpy as np
 import torch
 from pykeops.torch import LazyTensor
 
+from typing import NamedTuple
+
 from ..utils import diagonal_ranges
 from ..types import (
     typecheck,
@@ -254,13 +256,19 @@ def smooth_curvatures_2(
     }
 
 
+class QuadraticCoefficients(NamedTuple):
+    coefficients: Float2dTensor
+    nuv: dict
+    r2: Float1dTensor
+
+
 @typecheck
 def _point_quadratic_coefficients(
     self,
     *,
     scale: Optional[Number] = None,
     **kwargs,
-) -> Tuple[Float2dTensor, dict]:
+) -> QuadraticCoefficients:
     """Returns the point-wise principal curvatures."""
 
     # nuv are arranged row-wise!
@@ -343,7 +351,16 @@ def _point_quadratic_coefficients(
     coefs = torch.linalg.solve(TT, TN)
     assert coefs.shape == (N, len(T))
 
-    return coefs, nuv
+    # Compute the R2 score:
+    ss_tot = str_to_moment("nn")
+    assert ss_tot.shape == (N,)
+    ss_fit = (TN * coefs).sum(-1)
+    assert ss_fit.shape == (N,)
+    r2 = ss_fit / ss_tot
+    r2[ss_tot <= 0] = 0
+    r2 = r2.clamp(0, 1)
+
+    return QuadraticCoefficients(coefficients=coefs, nuv=nuv, r2=r2)
 
 
 @typecheck
@@ -360,7 +377,7 @@ def _point_quadratic_fits(
     assert Xm.shape == (N, 3)
 
     # Local quadratic coefficients in tangent space:
-    coefs, nuv = self.point_quadratic_coefficients(scale=scale, **kwargs)
+    coefs, nuv, r2 = self.point_quadratic_coefficients(scale=scale, **kwargs)
     assert coefs.shape == (N, 6)
     for key in ["n", "u", "v"]:
         assert nuv[key].shape == (N, 3)
@@ -418,13 +435,18 @@ def _point_quadratic_fits(
     return fit
 
 
+class PrincipalCurvatures(NamedTuple):
+    kmax: Float1dTensor
+    kmin: Float1dTensor
+
+
 @typecheck
 def _point_principal_curvatures(
     self,
     *,
     scale: Optional[Number] = None,
     **kwargs,
-) -> Tuple[Float1dTensor, Float1dTensor]:
+) -> PrincipalCurvatures:
     """Returns the point-wise principal curvatures.
 
     We rely on the formulas detailed in Example 4.2 of
@@ -437,7 +459,7 @@ def _point_principal_curvatures(
     assert Xm.shape == (N, 3)
 
     # Local quadratic coefficients in tangent space:
-    coefs, nuv = self.point_quadratic_coefficients(scale=scale, **kwargs)
+    coefs, nuv, r2 = self.point_quadratic_coefficients(scale=scale, **kwargs)
     assert coefs.shape == (N, 6)
     for key in ["n", "u", "v"]:
         assert nuv[key].shape == (N, 3)
@@ -486,7 +508,7 @@ def _point_principal_curvatures(
 
     assert kmax.shape == (N,)
     assert kmin.shape == (N,)
-    return kmax, kmin
+    return PrincipalCurvatures(kmax=kmax, kmin=kmin)
 
 
 @typecheck
@@ -525,18 +547,22 @@ def _point_curvature_colors(
     self,
     scale: Optional[Number] = None,
 ):
-    kmax, kmin = self.point_principal_curvatures(scale=scale)
+    r2 = self.point_quadratic_coefficients(scale=scale).r2
+
     s = self.point_curvedness(scale=scale)
     s = s / s.max()
     s = (1e-5 + s).log().abs()
     s = s / s.max()
     s = 1 - s
-    i = -self.point_shape_indices(scale=scale)
+    i = -self.point_shape_indices(scale=scale).abs()
     i = (1 + i) / 4
-    ones = torch.ones_like(s)
 
-    HLS = torch.stack([i, 1 - 0.5 * s, 0.75 * ones], dim=-1)
-    colors = [colorsys.hls_to_rgb(*hls) for hls in HLS.cpu().numpy()]
+    if False:
+        HLS = torch.stack([i, 1 - 0.5 * s, r2], dim=-1)
+        colors = [colorsys.hls_to_rgb(*hls) for hls in HLS.cpu().numpy()]
+    else:
+        HSV = torch.stack([i, s, r2**0.5], dim=-1)
+        colors = [colorsys.hsv_to_rgb(*hsv) for hsv in HSV.cpu().numpy()]
 
     # Output the colors as expected by Vedo:
     colors = [(255 * a, 255 * b, 255 * c, 255) for a, b, c in colors]

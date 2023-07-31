@@ -22,6 +22,7 @@ def _point_normals(
         # TODO: instead of distributing to the vertices equally, we should
         #       distribute according to the angles of the triangles.
         for k in range(3):
+            # n[self.triangles[k, i]] += tri_n[i]
             n.scatter_reduce_(
                 dim=0, index=self.triangles[k].view(-1, 1), src=tri_n, reduce="sum"
             )
@@ -43,6 +44,30 @@ def _point_normals(
             assert n_0.shape == (1, 3)
 
         n = (n_0 * n).sum(-1).sign().view(-1, 1) * n
+
+    # Try to enforce some consistency...
+    if False and self.edges is not None:
+        print("Hi")
+        n = F.normalize(n, p=2, dim=-1)
+        # n_e = n[self.edges[0]] + n[self.edges[1]]
+        # The backward of torch.index_select is much faster than that of indexing:
+        n_e = torch.index_select(n, 0, self.edges[0]) + torch.index_select(
+            n, 0, self.edges[1]
+        )
+        assert n_e.shape == (len(self.edges[0]), 3)
+
+        n_v = torch.zeros_like(n)
+        n_v.scatter_reduce_(
+            dim=0,
+            index=self.edges.reshape(-1, 1),
+            src=n_e.tile(2, 1),
+            reduce="mean",
+            include_self=False,
+        )
+
+        assert n_v.shape == (self.n_points, 3)
+        # n_v = n_v - n
+        n = (n_v * n).sum(-1).sign().view(-1, 1) * n
 
     n = F.normalize(n, p=2, dim=-1)
     assert n.shape == (self.n_points, 3)
