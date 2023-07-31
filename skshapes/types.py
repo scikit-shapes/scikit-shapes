@@ -19,6 +19,7 @@ from typing import (
     Dict,
     TypeVar,
     Literal,
+    Callable,
 )
 import torch
 import numpy as np

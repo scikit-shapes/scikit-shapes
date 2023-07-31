@@ -90,8 +90,11 @@ def _point_convolution(
                 assert cutoff > 0
                 backend_args["cutoff"] = -torch.log(cutoff)
 
-            D_ij = squared_distances(points=X, **backend_args)
-            K_ij = (-D_ij).exp()
+            K_ij = squared_distances(
+                points=X,
+                kernel=lambda d2: (-d2).exp(),
+                **backend_args,
+            )
 
         elif kernel == "uniform":
             X = X / scale
@@ -102,8 +105,11 @@ def _point_convolution(
             if window is None and cutoff is not None:
                 backend_args["cutoff"] = 1.01  # To be on the safe side...
 
-            D_ij = squared_distances(points=X, **backend_args)
-            K_ij = 1.0 * (D_ij <= 1)
+            K_ij = squared_distances(
+                points=X,
+                kernel=lambda d2: 1.0 * (d2 <= 1),
+                **backend_args,
+            )
 
     if normalize:
         total_weights_i = K_ij @ weights_j
