@@ -189,8 +189,6 @@ def compute_cost(edge, Quadrics, vertices):
         else:
             x = 0.5 * (pt0 + pt1)
 
-    # Ignoring for the moment the case where this is degenerate
-
     cost = 0.0
     newpoint = np.concatenate((x, np.array([1.0])))
     counter = 0
@@ -246,25 +244,44 @@ def collapse(edges, costs, newpoints, quadrics, points, n_points_to_remove=5000)
             costs[indice] = np.inf
 
             # Update the impacted edges
-            for i in range(1, len(edges)):
-                # Update the connectivity e0 <- e1
-                if edges[i][0] == e1:
-                    edges[i][0] = e0
-                if edges[i][1] == e1:
-                    edges[i][1] = e0
-
-                # Update the cost of the impacted edges (the one that share a vertex with e0)
+            i = 0
+            while i < len(edges):
                 if (
-                    (edges[i][1] == e0 or edges[i][0] == e0)
-                    and (edges[i][0] != edges[i][1])
-                    and (i != indice)
+                    edges[i][0] != e0
+                    and edges[i][1] != e0
+                    and edges[i][0] != e1
+                    and edges[i][1] != e1
                 ):
-                    costs[i], newpoints[i] = compute_cost(edges[i], quadrics, points)
+                    i += 1
+
+                else:
+                    # Update the connectivity e0 <- e1
+                    if edges[i][0] == e1:
+                        edges[i][0] = e0
+                    if edges[i][1] == e1:
+                        edges[i][1] = e0
+
+                    # Update the cost of the impacted edges (the one that share a vertex with e0)
+                    if (
+                        (edges[i][1] == e0 or edges[i][0] == e0)
+                        and (edges[i][0] != edges[i][1])
+                        and (i != indice)
+                    ):
+                        costs[i], newpoints[i] = compute_cost(
+                            edges[i], quadrics, points
+                        )
+
+                    i += 1
 
     new_vertices = np.zeros((points.shape[0] - n_points_to_remove, 3), dtype=np.float32)
     counter = 0
+
+    indices_to_remove = np.sort(indices_toremove)
+    j = 0
     for i in range(points.shape[0]):
-        if i not in indices_toremove:
+        if i == indices_to_remove[j]:
+            j += 1
+        else:
             new_vertices[counter] = points[i]
             counter += 1
 
