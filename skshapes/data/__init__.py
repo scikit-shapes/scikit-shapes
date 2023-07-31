@@ -7,3 +7,11 @@ from .utils import DataAttributes
 from typing import Union
 
 Shape = Union[PolyData, Image]
+
+
+import pyvista
+
+
+def Sphere():
+    """Create a sphere."""
+    return PolyData(pyvista.Sphere())

@@ -214,20 +214,32 @@ def intialize_costs(edges, Quadrics, vertices):
     return costs, newpoints
 
 
-@nb.njit(fastmath=True, cache=True)
-def collapse(edges, costs, newpoints, quadrics, points, n_points_to_remove=5000):
+@nb.jit(nopython=True, fastmath=True, cache=True)
+def collapse(
+    edges,
+    costs,
+    newpoints,
+    quadrics,
+    points,
+    n_points_to_remove=5000,
+    freq_cleaning=1000,
+):
     indices_toremove = np.zeros(n_points_to_remove, dtype=np.int64)
     collapses = np.zeros((n_points_to_remove, 2), dtype=np.int64)
     newpoints_history = np.zeros((n_points_to_remove, 3), dtype=np.float32)
 
     n_points_removed = 0
 
+    n_inf = 0
+    noninf_limit = len(edges)
+
     while n_points_removed < n_points_to_remove:
-        indice = np.argmin(costs)
+        indice = np.argmin(costs[0:noninf_limit])
         e0, e1 = edges[indice]
 
         if e0 == e1:
             costs[indice] = np.inf
+            n_inf += 1
 
         else:
             # Update the quadrics
@@ -242,6 +254,9 @@ def collapse(edges, costs, newpoints, quadrics, points, n_points_to_remove=5000)
             n_points_removed += 1
 
             costs[indice] = np.inf
+            edges[indice][0] = e1
+            edges[indice][1] = e1
+            n_inf += 1
 
             # Update the impacted edges
             i = 0
@@ -272,6 +287,13 @@ def collapse(edges, costs, newpoints, quadrics, points, n_points_to_remove=5000)
                         )
 
                     i += 1
+
+        if n_inf % freq_cleaning == 0:
+            ordering = np.argsort(costs)
+            n_keep = len(ordering) - freq_cleaning + 1
+            costs = costs[ordering][0:n_keep]
+            edges = edges[ordering][0:n_keep]
+            newpoints = newpoints[ordering][0:n_keep]
 
     new_vertices = np.zeros((points.shape[0] - n_points_to_remove, 3), dtype=np.float32)
     counter = 0
@@ -342,7 +364,11 @@ from typing import Tuple
 
 @typecheck
 def _do_decimation(
-    points, triangles, target_reduction: float = 0.5, running_time: bool = False
+    points,
+    triangles,
+    target_reduction: float = 0.5,
+    running_time: bool = False,
+    freq_cleaning: int = 500,
 ):
     """Apply the quadric decimation algorithm to a mesh.
 
@@ -394,6 +420,7 @@ def _do_decimation(
         quadrics=quadrics,
         points=points,
         n_points_to_remove=n_points_to_remove,
+        freq_cleaning=freq_cleaning,
     )
     if running_time:
         times["collapse"] = time() - start

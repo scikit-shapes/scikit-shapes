@@ -58,6 +58,7 @@ class Decimation:
         n_points: Optional[int] = None,
         method: Literal["vtk", "sks"] = "sks",
         running_time: bool = False,
+        freq_cleaning: int = 1000,
     ) -> None:
         """
         Initialize the quadric decimation algorithm with a target reduction or the desired number of points in lox-resulution mesh and choose between vtk and sks implementations.
@@ -89,6 +90,7 @@ class Decimation:
 
         self.method = method
         self.running_time = running_time
+        self.freq_cleaning = freq_cleaning
 
     @typecheck
     def fit(self, mesh: PolyData) -> None:
@@ -121,6 +123,7 @@ class Decimation:
                 points=points,
                 triangles=triangles,
                 target_reduction=self.target_reduction,
+                freq_cleaning=self.freq_cleaning,
             )
         else:
             (
@@ -133,6 +136,7 @@ class Decimation:
                 triangles=triangles,
                 target_reduction=self.target_reduction,
                 running_time=True,
+                freq_cleaning=self.freq_cleaning,
             )
             self.times = times
         keep = np.setdiff1d(
