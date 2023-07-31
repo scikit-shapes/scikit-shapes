@@ -1,8 +1,8 @@
 import torch
-from pykeops.torch import LazyTensor
 
-from ..utils import diagonal_ranges
 from ..types import typecheck, Points, Optional, Triangles, Number, Literal
+from .squared_distances import squared_distances
+from .constant_kernel import constant_1_kernel
 
 
 class LinearOperator:
@@ -45,32 +45,6 @@ class LinearOperator:
 
 
 @typecheck
-def squared_distances(
-    *,
-    points,
-    window: Literal[None, "ball", "knn", "spectral"] = None,
-    cutoff: Optional[Number] = None,
-    geodesic: bool = False,
-):
-    """Returns the (N, N) matrix of squared distances between points."""
-    # TODO: add support for batches!
-    N = points.shape[0]
-    D = points.shape[1]
-    assert points.shape == (N, D)
-
-    if geodesic:
-        raise NotImplementedError("Geodesic distances not implemented yet.")
-
-    if window is None:
-        x_i = LazyTensor(points.view(N, 1, D))
-        x_j = LazyTensor(points.view(1, N, D))
-        D_ij = ((x_j - x_i) ** 2).sum(-1)
-        return D_ij
-
-    raise NotImplementedError()
-
-
-@typecheck
 def _point_convolution(
     self,
     *,
@@ -96,25 +70,39 @@ def _point_convolution(
         X = X.double()
         weights_j = weights_j.double()
 
-    # Divisions are expensive: whenever possible, it's best to scale the points
-    # ahead of time instead of scaling the distances for every pair of points.
-    if scale is not None:
-        if kernel == "gaussian":
-            sqrt_2 = 1.41421356237
-            X = X / (sqrt_2 * scale)
-        elif kernel == "uniform":
-            X = X / scale
-
-    D_ij = squared_distances(points=X, window=window, cutoff=cutoff, geodesic=geodesic)
+    backend_args = dict(window=window, cutoff=cutoff, geodesic=geodesic)
 
     if scale is None:
         # scale = +infinity, the kernel is always equal to 1
-        K_ij = 1.0 * (D_ij + 1).step()
+        K_ij = constant_1_kernel(points=X, **backend_args)
 
     else:
         if kernel == "gaussian":
+            # Divisions are expensive: whenever possible, it's best to scale the points
+            # ahead of time instead of scaling the distances for every pair of points.
+            sqrt_2 = 1.41421356237
+            X = X / (sqrt_2 * scale)
+
+            # For dense computations, users may specify a cutoff as a kernel
+            # value below which the kernel is assumed to be zero.
+            # exp(-x^2) <= cutoff <=> x^2 >= -log(cutoff)
+            if window is None and cutoff is not None and cutoff < 1:
+                assert cutoff > 0
+                backend_args["cutoff"] = -torch.log(cutoff)
+
+            D_ij = squared_distances(points=X, **backend_args)
             K_ij = (-D_ij).exp()
+
         elif kernel == "uniform":
+            X = X / scale
+            # For dense computations, users may specify a cutoff as a kernel
+            # value below which the kernel is assumed to be zero.
+            # For the uniform kernel, this just means discarding pairs of points
+            # which are at distance > 1 (after rescaling).
+            if window is None and cutoff is not None:
+                backend_args["cutoff"] = 1.01  # To be on the safe side...
+
+            D_ij = squared_distances(points=X, **backend_args)
             K_ij = 1.0 * (D_ij <= 1)
 
     if normalize:
