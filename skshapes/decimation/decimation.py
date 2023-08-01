@@ -1,7 +1,7 @@
 import numpy as np
 import pyvista
 
-from .utils import _do_decimation, _decimate, _compute_alphas
+from .utils import decimate, replay_decimation
 from ..data import PolyData
 import torch
 
@@ -58,7 +58,6 @@ class Decimation:
         n_points: Optional[int] = None,
         method: Literal["vtk", "sks"] = "sks",
         running_time: bool = False,
-        freq_cleaning: int = 1000,
     ) -> None:
         """
         Initialize the quadric decimation algorithm with a target reduction or the desired number of points in lox-resulution mesh and choose between vtk and sks implementations.
@@ -90,7 +89,6 @@ class Decimation:
 
         self.method = method
         self.running_time = running_time
-        self.freq_cleaning = freq_cleaning
 
     @typecheck
     def fit(self, mesh: PolyData) -> None:
@@ -119,11 +117,10 @@ class Decimation:
 
         # Run the quadric decimation algorithm
         if not self.running_time:
-            decimated_points, collapses_history, newpoints_history = _do_decimation(
+            decimated_points, collapses_history, newpoints_history = decimate(
                 points=points,
                 triangles=triangles,
                 target_reduction=self.target_reduction,
-                freq_cleaning=self.freq_cleaning,
             )
         else:
             (
@@ -131,22 +128,18 @@ class Decimation:
                 collapses_history,
                 newpoints_history,
                 times,
-            ) = _do_decimation(
+            ) = decimate(
                 points=points,
                 triangles=triangles,
                 target_reduction=self.target_reduction,
                 running_time=True,
-                freq_cleaning=self.freq_cleaning,
             )
             self.times = times
+
+        # Compute the mapping from original indices to new indices
         keep = np.setdiff1d(
             np.arange(mesh.n_points), collapses_history[:, 1]
         )  # Indices of the points that must be kept after decimation
-
-        # Compute the alphas
-        alphas = _compute_alphas(points, collapses_history, newpoints_history)
-
-        # Compute the mapping from original indices to new indices
         # start with identity mapping
         indice_mapping = np.arange(mesh.n_points, dtype=int)
         # First round of mapping
@@ -174,9 +167,7 @@ class Decimation:
         self.new_triangles = new_triangles
 
         # Save the results
-        self.keep = keep
         self.indice_mapping = indice_mapping
-        self.alphas = alphas
         self.collapses_history = collapses_history
         self.ref_mesh = mesh
 
@@ -205,12 +196,12 @@ class Decimation:
 
         device = mesh.device
 
+        # Replay the decimation process on the mesh
         points = mesh.points.clone().cpu().numpy()
-        points = _decimate(
-            points, collapses_history=self.collapses_history, alphas=self.alphas
+        triangles = mesh.triangles.clone().cpu().numpy()
+        points = replay_decimation(
+            points=points, triangles=triangles, collapses_history=self.collapses_history
         )
-        # keep can be saved in the fit method
-        points = points[self.keep]
 
         # If there are landmarks on the mesh, we compute the coordinates of the landmarks in the decimated mesh
         if mesh.landmarks is not None:
@@ -221,11 +212,10 @@ class Decimation:
             n_landmarks = l_size[0]
 
             new_indices = l_indices.clone()
-            # the second line of nex_indices corresponds to the indices of the points, we need to apply the mapping
+            # the second line of new_indices corresponds to the indices of the points, we need to apply the mapping
             new_indices[1] = torch.from_numpy(self.indice_mapping[new_indices[1]])
 
             # If there are landmarks in the decimated mesh, we create a sparse tensor with the landmarks
-
             landmarks = torch.sparse_coo_tensor(
                 values=l_values, indices=new_indices, size=(n_landmarks, len(points))
             )

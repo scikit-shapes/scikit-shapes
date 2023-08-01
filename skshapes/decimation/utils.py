@@ -1,6 +1,10 @@
 import numpy as np
 import numba as nb
+
+
 from time import time
+from ..types import typecheck, FloatArray, IntArray
+from typing import Tuple
 
 
 def compute_edges(triangles, repeated=False):
@@ -26,16 +30,14 @@ def compute_edges(triangles, repeated=False):
 
 
 @nb.jit(nopython=True, fastmath=True, cache=True)
-def initialize_quadrics_numba(vertices, triangles):
-    quadrics = np.zeros((vertices.shape[0], 11))
+def initialize_quadrics(points, triangles):
+    quadrics = np.zeros((points.shape[0], 11))
 
     for i in range(triangles.shape[1]):
-        p0, p1, p2 = vertices[triangles[:, i], :]
+        p0, p1, p2 = points[triangles[:, i], :]
         n = np.cross(p1 - p0, p2 - p0)
         area2 = np.sqrt((np.sum(n * n))) / 2
-
         n /= 2 * area2
-        # assert np.isclose(np.sum(n * n), 1)
 
         d = -np.sum(n * p0)
 
@@ -66,8 +68,8 @@ def initialize_quadrics_numba(vertices, triangles):
 
 
 @nb.jit(nopython=True, fastmath=True, cache=True)
-def check_boundary_constraints_numba(vertices, repeated_edges, triangles):
-    boundary_quadrics = np.zeros((vertices.shape[0], 11))
+def compute_boundary_quadrics(points, repeated_edges, triangles):
+    boundary_quadrics = np.zeros((points.shape[0], 11))
 
     n_edges = repeated_edges.shape[1]
     n_boundary_edges = 0
@@ -81,7 +83,6 @@ def check_boundary_constraints_numba(vertices, repeated_edges, triangles):
         else:
             if boundary:
                 n_boundary_edges += 1
-                # print("Boundary edge: ", e0, e1)
 
                 for j in range(triangles.shape[1]):
                     t = triangles[:, j]
@@ -93,15 +94,11 @@ def check_boundary_constraints_numba(vertices, repeated_edges, triangles):
                         or (t[1] == e1 and t[2] == e0)
                         or (t[0] == e1 and t[2] == e0)
                     ):
-                        # print("Corresponding triangle: ", t)
-                        # assert e0 in t
-                        # assert e1 in t
-
                         for k in t:
                             if k != e0 and k != e1:
                                 t0 = k
-                        t1 = vertices[e0]
-                        t2 = vertices[e1]
+                        t1 = points[e0]
+                        t2 = points[e1]
 
                         u = t2 - t1
                         v = t1 - t0
@@ -139,9 +136,9 @@ def check_boundary_constraints_numba(vertices, repeated_edges, triangles):
 
 
 @nb.jit(nopython=True, fastmath=True, cache=True)
-def compute_cost(edge, Quadrics, vertices):
+def compute_cost(edge, quadrics, points):
     pt0, pt1 = edge
-    tmpQuad = Quadrics[pt0] + Quadrics[pt1]
+    tmpQuad = quadrics[pt0] + quadrics[pt1]
     A = np.zeros((3, 3))
     b = np.zeros(3)
 
@@ -166,8 +163,8 @@ def compute_cost(edge, Quadrics, vertices):
         x = np.linalg.solve(A, b)
 
     else:
-        pt0 = vertices[pt0]
-        pt1 = vertices[pt1]
+        pt0 = points[pt0]
+        pt1 = points[pt1]
 
         v = pt1 - pt0
 
@@ -203,13 +200,13 @@ def compute_cost(edge, Quadrics, vertices):
 
 
 @nb.jit(nopython=True, fastmath=True, cache=True)
-def intialize_costs(edges, Quadrics, vertices):
+def intialize_costs(edges, quadrics, points):
     n_edges = edges.shape[1]
     costs = np.zeros(n_edges)
     newpoints = np.zeros((n_edges, 3))
 
     for i in range(n_edges):
-        costs[i], newpoints[i] = compute_cost(edges[:, i], Quadrics, vertices)
+        costs[i], newpoints[i] = compute_cost(edges[:, i], quadrics, points)
 
     return costs, newpoints
 
@@ -222,153 +219,110 @@ def collapse(
     quadrics,
     points,
     n_points_to_remove=5000,
-    freq_cleaning=1000,
 ):
     indices_toremove = np.zeros(n_points_to_remove, dtype=np.int64)
     collapses = np.zeros((n_points_to_remove, 2), dtype=np.int64)
     newpoints_history = np.zeros((n_points_to_remove, 3), dtype=np.float32)
-
     n_points_removed = 0
 
-    n_inf = 0
+    # the edges with infinite cost will be at the end of the array
     noninf_limit = len(edges)
-
     while n_points_removed < n_points_to_remove:
+        ### FAST #####
         indice = np.argmin(costs[0:noninf_limit])
+        ##############
         e0, e1 = edges[indice]
+        ### FAST #####
+        quadrics[e0] += quadrics[e1]
+        newpoint = newpoints[indice]
+        points[e0] = newpoint
+        collapses[n_points_removed][0] = e0
+        collapses[n_points_removed][1] = e1
+        newpoints_history[n_points_removed] = newpoint
+        indices_toremove[n_points_removed] = e1
+        ##############
 
-        if e0 == e1:
-            costs[indice] = np.inf
-            n_inf += 1
+        n_points_removed += 1
 
-        else:
-            # Update the quadrics
-            quadrics[e0] += quadrics[e1]
-            newpoint = newpoints[indice]
-            points[e0] = newpoint
+        # Update the edges
+        i = 0
+        # the edges with indices > noninf_limit are the ones with infinite cost
+        # they are not considered
+        while i < noninf_limit:
+            # Update the connectivity e0 <- e1
+            if edges[i][0] == e1:
+                edges[i][0] = e0
+            if edges[i][1] == e1:
+                edges[i][1] = e0
 
-            collapses[n_points_removed][0] = e0
-            collapses[n_points_removed][1] = e1
-            newpoints_history[n_points_removed] = newpoint
-            indices_toremove[n_points_removed] = e1
-            n_points_removed += 1
+            # Update the cost of the impacted edges (they have e0 as vertex)
+            if (edges[i][0] == e0 or edges[i][1] == e0) and edges[i][0] != edges[i][1]:
+                costs[i], newpoints[i] = compute_cost(edges[i], quadrics, points)
 
-            costs[indice] = np.inf
-            edges[indice][0] = e1
-            edges[indice][1] = e1
-            n_inf += 1
+            # If the edge is degenerated, remove it
+            if edges[i][0] == edges[i][1]:
+                noninf_limit -= 1
+                ### FAST #####
+                costs[i] = costs[noninf_limit]
+                edges[i] = edges[noninf_limit]
+                newpoints[i] = newpoints[noninf_limit]
+                ##############
+                i -= 1
 
-            # Update the impacted edges
-            i = 0
-            while i < len(edges):
-                if (
-                    edges[i][0] != e0
-                    and edges[i][1] != e0
-                    and edges[i][0] != e1
-                    and edges[i][1] != e1
-                ):
-                    i += 1
-
-                else:
-                    # Update the connectivity e0 <- e1
-                    if edges[i][0] == e1:
-                        edges[i][0] = e0
-                    if edges[i][1] == e1:
-                        edges[i][1] = e0
-
-                    # Update the cost of the impacted edges (the one that share a vertex with e0)
-                    if (
-                        (edges[i][1] == e0 or edges[i][0] == e0)
-                        and (edges[i][0] != edges[i][1])
-                        and (i != indice)
-                    ):
-                        costs[i], newpoints[i] = compute_cost(
-                            edges[i], quadrics, points
-                        )
-
-                    i += 1
-
-        if n_inf % freq_cleaning == 0:
-            ordering = np.argsort(costs)
-            n_keep = len(ordering) - freq_cleaning + 1
-            costs = costs[ordering][0:n_keep]
-            edges = edges[ordering][0:n_keep]
-            newpoints = newpoints[ordering][0:n_keep]
+            i += 1
 
     new_vertices = np.zeros((points.shape[0] - n_points_to_remove, 3), dtype=np.float32)
-    counter = 0
-
+    ### FAST #####
     indices_to_remove = np.sort(indices_toremove)
     j = 0
+    counter = 0
     for i in range(points.shape[0]):
         if i == indices_to_remove[j]:
             j += 1
         else:
             new_vertices[counter] = points[i]
             counter += 1
+    ##############
 
     return new_vertices, collapses, newpoints_history
 
 
 @nb.jit(nopython=True, fastmath=True, cache=True)
-def _decimate(points, alphas, collapses_history):
-    """
-    This function applies the decimation to a mesh that is in correspondence with the reference mesh given the information about successive collapses.
-
-    Args:
-        points (np.ndarray): the points of the mesh to decimate.
-        alphas (np.ndarray): the list of alpha coefficients such that when (e0, e1) collapses : e0 <- alpha * e0 + (1-alpha) * e1
-        collapses_history (np.ndarray): the history of collapses, a list of edges (e0, e1) that have been collapsed. The convention is that e0 is the point that remains and e1 is the point that is removed.
-
-    Returns:
-        points (np.ndarray): the decimated points.
-
-    """
-
+def _replay_loop(points, quadrics, collapses_history):
     for i in range(len(collapses_history)):
         e0, e1 = collapses_history[i]
-        points[e0] = alphas[i] * points[e0] + (1 - alphas[i]) * points[e1]
+        quadrics[e0] += quadrics[e1]
+        newpoint = compute_cost([e0, e1], quadrics, points)[1]
+        points[e0] = newpoint
 
     return points
 
 
-@nb.jit(nopython=True, fastmath=True, cache=True)
-def _compute_alphas(points, collapses_history, newpoints_history):
-    """
-    This function computes the alpha coefficients such that when (e0, e1) collapses to the point x, the projection of x on the line (e0, e1) is alpha * e0 + (1-alpha) * e1
+@typecheck
+def replay_decimation(
+    points,
+    triangles,
+    collapses_history,
+):
+    quadrics = initialize_quadrics(points, triangles)
+    repeated_edges = compute_edges(triangles, repeated=True)
+    boundary_quadrics = compute_boundary_quadrics(points, repeated_edges, triangles)
+    quadrics += boundary_quadrics
 
-    Args:
-        points (np.ndarray): the points of the mesh to decimate.
-        collapses_history (np.ndarray): the history of collapses, a list of edges (e0, e1) that have been collapsed. The convention is that e0 is the point that remains and e1 is the point that is removed.
-        newpoints_history (np.ndarray): the list of new points that have been computed during the collapses.
-    """
+    newpoints = _replay_loop(points, quadrics, collapses_history)
+    keep = np.setdiff1d(
+        np.arange(len(points)), collapses_history[:, 1]
+    )  # Indices of the points that must be kept after decimation
 
-    alphas = np.zeros(len(collapses_history))
-
-    for i in range(len(collapses_history)):
-        e0, e1 = collapses_history[i]
-
-        alpha = np.linalg.norm(newpoints_history[i] - points[e1]) / np.linalg.norm(
-            points[e0] - points[e1]
-        )
-        points[e0] = alpha * points[e0] + (1 - alpha) * points[e1]
-        alphas[i] = alpha
-
-    return alphas
-
-
-############# Sks interface
-from ..types import typecheck, FloatArray, IntArray
-from typing import Tuple
+    return newpoints[keep]
 
 
 @typecheck
-def _do_decimation(
+def decimate(
     points,
     triangles,
     target_reduction: float = 0.5,
     running_time: bool = False,
-    freq_cleaning: int = 500,
 ):
     """Apply the quadric decimation algorithm to a mesh.
 
@@ -383,22 +337,18 @@ def _do_decimation(
     """
     assert target_reduction > 0.0 and target_reduction < 1.0
 
-    # points = shape.points.clone().numpy()
-    # triangles = shape.triangles.clone().numpy()
     if running_time:
         times = dict()
 
     start = time()
-    quadrics = initialize_quadrics_numba(points, triangles)
+    quadrics = initialize_quadrics(points, triangles)
     if running_time:
         times["initialize_quadrics"] = time() - start
 
     # Are there boundary edges?
     start = time()
     repeated_edges = compute_edges(triangles, repeated=True)
-    boundary_quadrics = check_boundary_constraints_numba(
-        points, repeated_edges, triangles
-    )
+    boundary_quadrics = compute_boundary_quadrics(points, repeated_edges, triangles)
     if running_time:
         times["check_boundary_constraints"] = time() - start
 
@@ -420,8 +370,8 @@ def _do_decimation(
         quadrics=quadrics,
         points=points,
         n_points_to_remove=n_points_to_remove,
-        freq_cleaning=freq_cleaning,
     )
+
     if running_time:
         times["collapse"] = time() - start
         times["total"] = sum(times.values())
@@ -430,3 +380,139 @@ def _do_decimation(
         return output_points, collapses, newpoints
     else:
         return output_points, collapses, newpoints, times
+
+
+# Old functions
+if False:
+
+    @nb.jit(nopython=True, fastmath=True, cache=True)
+    def det3x3(mat):
+        det = (
+            mat[0][0] * (mat[1][1] * mat[2][2] - mat[2][1] * mat[1][2])
+            - mat[0][1] * (mat[1][0] * mat[2][2] - mat[1][2] * mat[2][0])
+            + mat[0][2] * (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0])
+        )
+        return det
+
+    # This function finds the solution of system of
+    # linear equations using cramer's rule
+    @nb.jit(nopython=True, fastmath=True, cache=True)
+    def solve3x3(A, b):
+        # Matrix d using coeff as given in
+        # cramer's rule
+        D = det3x3(A)
+
+        D1 = det3x3(
+            [
+                [b[0], A[0][1], A[0][2]],
+                [b[1], A[1][1], A[1][2]],
+                [b[2], A[2][1], A[2][2]],
+            ]
+        )
+
+        D2 = det3x3(
+            [
+                [A[0][0], b[0], A[0][2]],
+                [A[1][0], b[1], A[1][2]],
+                [A[2][0], b[2], A[2][2]],
+            ]
+        )
+
+        D3 = det3x3(
+            [
+                [A[0][0], A[0][1], b[0]],
+                [A[1][0], A[1][1], b[1]],
+                [A[2][0], A[2][1], b[2]],
+            ]
+        )
+
+        x = D1 / D
+        y = D2 / D
+        z = D3 / D
+
+        return np.array([x, y, z])
+
+    @nb.jit(nopython=True, fastmath=True, cache=True)
+    def solve2(tmpQuad):
+        D = det3x3(
+            [
+                [tmpQuad[0], tmpQuad[1], tmpQuad[2]],
+                [tmpQuad[1], tmpQuad[4], tmpQuad[5]],
+                [tmpQuad[2], tmpQuad[5], tmpQuad[7]],
+            ]
+        )
+
+        D1 = det3x3(
+            [
+                [-tmpQuad[3], tmpQuad[1], tmpQuad[2]],
+                [-tmpQuad[6], tmpQuad[4], tmpQuad[5]],
+                [-tmpQuad[8], tmpQuad[5], tmpQuad[7]],
+            ]
+        )
+
+        D2 = det3x3(
+            [
+                [tmpQuad[0], -tmpQuad[3], tmpQuad[2]],
+                [tmpQuad[1], -tmpQuad[6], tmpQuad[5]],
+                [tmpQuad[2], -tmpQuad[8], tmpQuad[7]],
+            ]
+        )
+
+        D3 = det3x3(
+            [
+                [tmpQuad[0], tmpQuad[1], -tmpQuad[3]],
+                [tmpQuad[1], tmpQuad[4], -tmpQuad[6]],
+                [tmpQuad[2], tmpQuad[5], -tmpQuad[8]],
+            ]
+        )
+
+        x = D1 / D
+        y = D2 / D
+        z = D3 / D
+
+        return np.array([x, y, z])
+
+    @nb.jit(nopython=True, fastmath=True, cache=True)
+    def _decimate(points, alphas, collapses_history):
+        """
+        This function applies the decimation to a mesh that is in correspondence with the reference mesh given the information about successive collapses.
+
+        Args:
+            points (np.ndarray): the points of the mesh to decimate.
+            alphas (np.ndarray): the list of alpha coefficients such that when (e0, e1) collapses : e0 <- alpha * e0 + (1-alpha) * e1
+            collapses_history (np.ndarray): the history of collapses, a list of edges (e0, e1) that have been collapsed. The convention is that e0 is the point that remains and e1 is the point that is removed.
+
+        Returns:
+            points (np.ndarray): the decimated points.
+
+        """
+
+        for i in range(len(collapses_history)):
+            e0, e1 = collapses_history[i]
+            points[e0] = alphas[i] * points[e0] + (1 - alphas[i]) * points[e1]
+
+        return points
+
+    @nb.jit(nopython=True, fastmath=True, cache=True)
+    def _compute_alphas(points, collapses_history, newpoints_history):
+        """
+        This function computes the alpha coefficients such that when (e0, e1) collapses to the point x, the projection of x on the line (e0, e1) is alpha * e0 + (1-alpha) * e1
+
+        Args:
+            points (np.ndarray): the points of the mesh to decimate.
+            collapses_history (np.ndarray): the history of collapses, a list of edges (e0, e1) that have been collapsed. The convention is that e0 is the point that remains and e1 is the point that is removed.
+            newpoints_history (np.ndarray): the list of new points that have been computed during the collapses.
+        """
+
+        alphas = np.zeros(len(collapses_history))
+
+        for i in range(len(collapses_history)):
+            e0, e1 = collapses_history[i]
+
+            alpha = np.linalg.norm(newpoints_history[i] - points[e1]) / np.linalg.norm(
+                points[e0] - points[e1]
+            )
+            points[e0] = alpha * points[e0] + (1 - alpha) * points[e1]
+            alphas[i] = alpha
+
+        return alphas

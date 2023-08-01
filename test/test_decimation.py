@@ -56,8 +56,8 @@ def test_decimation_landmarks():
 
     assert mesh.landmarks is not None
     assert decimated_mesh.landmarks is not None
-    assert len(decimated_mesh.landmarks_3d) == len(
-        mesh.landmarks_3d
+    assert len(decimated_mesh.landmark_points) == len(
+        mesh.landmark_points
     )  # assert that the number of landmarks is the same
 
 
