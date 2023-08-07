@@ -96,7 +96,7 @@ def compute_boundary_quadrics(points, repeated_edges, triangles):
                     ):
                         for k in t:
                             if k != e0 and k != e1:
-                                t0 = k
+                                t0 = points[k]
                         t1 = points[e0]
                         t2 = points[e1]
 
@@ -257,7 +257,9 @@ def collapse(
 
             # Update the cost of the impacted edges (they have e0 as vertex)
             if (edges[i][0] == e0 or edges[i][1] == e0) and edges[i][0] != edges[i][1]:
-                costs[i], newpoints[i] = compute_cost(edges[i], quadrics, points)
+                costs[i], newpoints[i] = compute_cost(
+                    edge=edges[i], quadrics=quadrics, points=points
+                )
 
             # If the edge is degenerated, remove it
             if edges[i][0] == edges[i][1]:

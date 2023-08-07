@@ -1,11 +1,18 @@
 import numpy as np
 import pyvista
 
-from .utils import decimate, replay_decimation
+try:
+    from pymeshdecimation.cython import decimate, replay_decimation
+except ImportError:
+    from .utils import decimate, replay_decimation
+# else:
+#     print("Using cython implementation of decimation")
+
+
 from ..data import PolyData
 import torch
 
-from ..types import typecheck
+from ..types import typecheck, float_dtype
 from typing import Optional, Literal
 
 
@@ -57,7 +64,6 @@ class Decimation:
         target_reduction: Optional[float] = None,
         n_points: Optional[int] = None,
         method: Literal["vtk", "sks"] = "sks",
-        running_time: bool = False,
     ) -> None:
         """
         Initialize the quadric decimation algorithm with a target reduction or the desired number of points in lox-resulution mesh and choose between vtk and sks implementations.
@@ -88,7 +94,6 @@ class Decimation:
             self.n_points = n_points
 
         self.method = method
-        self.running_time = running_time
 
     @typecheck
     def fit(self, mesh: PolyData) -> None:
@@ -116,25 +121,13 @@ class Decimation:
         triangles = mesh.triangles.clone().cpu().numpy()
 
         # Run the quadric decimation algorithm
-        if not self.running_time:
-            decimated_points, collapses_history, newpoints_history = decimate(
-                points=points,
-                triangles=triangles,
-                target_reduction=self.target_reduction,
-            )
-        else:
-            (
-                decimated_points,
-                collapses_history,
-                newpoints_history,
-                times,
-            ) = decimate(
-                points=points,
-                triangles=triangles,
-                target_reduction=self.target_reduction,
-                running_time=True,
-            )
-            self.times = times
+        # import pyDecimation
+
+        decimated_points, collapses_history, newpoints_history = decimate(
+            points=np.array(points, dtype=np.float64),
+            triangles=triangles,
+            target_reduction=self.target_reduction,
+        )
 
         # Compute the mapping from original indices to new indices
         keep = np.setdiff1d(
@@ -200,7 +193,9 @@ class Decimation:
         points = mesh.points.clone().cpu().numpy()
         triangles = mesh.triangles.clone().cpu().numpy()
         points = replay_decimation(
-            points=points, triangles=triangles, collapses_history=self.collapses_history
+            points=np.array(points, dtype=np.float64),
+            triangles=triangles,
+            collapses_history=self.collapses_history,
         )
 
         # If there are landmarks on the mesh, we compute the coordinates of the landmarks in the decimated mesh
@@ -223,7 +218,7 @@ class Decimation:
             landmarks = None
 
         return PolyData(
-            torch.from_numpy(points),
+            torch.from_numpy(points).to(float_dtype),
             triangles=self.new_triangles,
             landmarks=landmarks,
             device=device,
