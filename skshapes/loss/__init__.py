@@ -12,7 +12,7 @@ from .nearest_neighbors import NearestNeighborsLoss
 from typing import Union
 
 # The skshapes.Loss type is a union of all the loss functions
-# Note that BaseLoss is not included in the union, as it is an abstract class
+# Note that BaseLoss is not included in the union, as it is an abstract class
 # Therefore, passing a BaseLoss object to a function expecting a Loss object
 # will raise an error
 Loss = Union[
