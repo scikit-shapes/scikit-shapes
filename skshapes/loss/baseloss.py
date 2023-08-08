@@ -31,7 +31,7 @@ class BaseLoss:
         raise NotImplementedError(
             "BaseLoss is an abstract class and should not be instantiated"
         )
-        
+
     @typecheck
     def __add__(self, other: BaseLoss) -> BaseLoss:
         """Addition of two losses
@@ -78,14 +78,12 @@ class EmptyLoss(BaseLoss):
 
     @typecheck
     def __init__(self) -> None:
-        """Constructor of the EmptyLoss class.
-        """
+        """Constructor of the EmptyLoss class."""
         pass
 
     @typecheck
     def __call__(self, source: Shape, target: Shape) -> FloatScalar:
-        """__call__ method of the EmptyLoss class. Always returns 0.
-        """
+        """__call__ method of the EmptyLoss class. Always returns 0."""
         assert source.device.type == target.device.type
         return torch.tensor(0.0, dtype=float_dtype)
 
@@ -140,11 +138,12 @@ class SumLoss(BaseLoss):
 
 class ProductLoss(BaseLoss):
     """Abstract class for losses which are the product of a loss and a scalar.
-    
+
     This class can be directly instantiated, but it is more convenient to use
     the * operator to multiply a loss by a scalar, which returns a ProductLoss
     object.
     """
+
     @typecheck
     def __init__(self, loss: BaseLoss = EmptyLoss(), scalar: Number = 1.0) -> None:
         """Constructor of the ProductLoss class.

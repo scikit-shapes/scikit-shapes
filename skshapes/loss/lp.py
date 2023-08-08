@@ -8,6 +8,7 @@ from ..types import typecheck, FloatScalar, Number
 
 from .baseloss import BaseLoss
 
+
 @typecheck
 def _norm(x: torch.Tensor, p: Number) -> FloatScalar:
     """Compute the Lp norm of a tensor.
@@ -21,6 +22,7 @@ def _norm(x: torch.Tensor, p: Number) -> FloatScalar:
     """
     return torch.norm(x, p=p)
 
+
 class LpLoss(BaseLoss):
     """Lp loss for PolyData.
 
@@ -33,8 +35,9 @@ class LpLoss(BaseLoss):
     If this is not the case, the loss will be meaningless, consider using
     a loss function based on Optimal Transport or Nearest Neighbors instead.
     """
+
     @typecheck
-    def __init__(self, p: Number =2) -> None:
+    def __init__(self, p: Number = 2) -> None:
         """Constructor of the LpLoss class.
 
         Args:
@@ -46,7 +49,7 @@ class LpLoss(BaseLoss):
     @typecheck
     def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
         return _norm(x=(source.points - target.points), p=self.p)
-    
+
 
 class L2Loss(BaseLoss):
     """L2 loss for PolyData.
@@ -56,16 +59,16 @@ class L2Loss(BaseLoss):
     """
 
     @typecheck
-    def __init__(self, p: Number =2) -> None:
-        """Constructor of the L2Loss class.
-        """
+    def __init__(self, p: Number = 2) -> None:
+        """Constructor of the L2Loss class."""
         assert p > 0, "p must be positive"
         self.p = p
 
     @typecheck
     def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
         return _norm(x=(source.points - target.points), p=2)
-    
+
+
 class LandmarkLoss(BaseLoss):
     """Landmark loss for PolyData.
 
@@ -80,6 +83,7 @@ class LandmarkLoss(BaseLoss):
     using a loss function based on Optimal Transport or Nearest Neighbors
     instead.
     """
+
     @typecheck
     def __init__(self, p: Number = 2) -> None:
         """Constructor of the LandmarkLoss class.
