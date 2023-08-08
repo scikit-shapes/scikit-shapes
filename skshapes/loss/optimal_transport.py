@@ -1,3 +1,5 @@
+"""Optimal transport loss for PolyData."""
+
 from geomloss import SamplesLoss
 import torch
 from ..data import PolyData
