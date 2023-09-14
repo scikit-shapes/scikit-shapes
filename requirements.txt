@@ -1,0 +1,12 @@
+torch
+numpy
+pykeops
+geomloss
+
+
+jaxtyping
+beartype
+
+pyvista
+vedo
+fast-simplification
