@@ -11,7 +11,7 @@ def test_decimation_basic():
     sphere = sks.PolyData(pyvista.Sphere())
     sphere_copy = sks.PolyData(pyvista.Sphere())
 
-    decimation = sks.Decimation(n_points=15, method="sks")
+    decimation = sks.Decimation(n_points=15)
 
     # fit the decimator on the mesh
     decimated_sphere = decimation.fit_transform(sphere)
@@ -21,19 +21,6 @@ def test_decimation_basic():
     # Assert that the result is the same
     assert torch.allclose(decimated_sphere.points, decimated_sphere_copy.points)
     assert torch.allclose(decimated_sphere.triangles, decimated_sphere_copy.triangles)
-
-    ## Assert that the decimator with method="vtk" gives the same result as pyvista
-
-    decimation = sks.Decimation(target_reduction=0.8, method="vtk")
-    decimated_sphere_sks = decimation.fit_transform(sphere)
-    decimated_sphere_vtk = sks.PolyData(
-        sphere.to_pyvista().decimate(target_reduction=0.8)
-    )
-
-    assert torch.allclose(decimated_sphere_sks.points, decimated_sphere_vtk.points)
-    assert torch.allclose(
-        decimated_sphere_sks.triangles, decimated_sphere_vtk.triangles
-    )
 
 
 def test_decimation_landmarks():
@@ -51,7 +38,7 @@ def test_decimation_landmarks():
     )
     mesh.landmarks = landmarks
 
-    decimator = sks.Decimation(target_reduction=0.9, method="sks")
+    decimator = sks.Decimation(target_reduction=0.9)
     decimated_mesh = decimator.fit_transform(mesh)
 
     assert mesh.landmarks is not None
@@ -89,7 +76,7 @@ def test_decimation_gpu():
     # Assert that the decimation works with PolyData on the gpu
     sphere = sks.PolyData(pyvista.Sphere(), device="cuda")
 
-    dec = sks.Decimation(n_points=15, method="sks")
+    dec = sks.Decimation(n_points=15)
     dec.fit(sphere)
     newsphere = dec.transform(sphere.to("cpu"))
     assert newsphere.points.device.type == "cpu"

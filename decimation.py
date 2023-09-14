@@ -1,0 +1,53 @@
+from pyvista import examples
+import pyvista
+import skshapes as sks
+import numpy as np
+import torch
+
+mesh = sks.PolyData(examples.download_louis_louvre())
+
+meshes = [mesh.copy() for _ in range(2)]
+
+# # Set landmarks
+# setter = sks.LandmarkSetter(meshes)
+# setter.start()
+
+# print(meshes[0].landmarks)
+
+
+values = [1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.]
+indices = [
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+    [151807,  21294,  23344,  25789, 131262,  33852, 171465,
+    191680, 172653, 130895,   9743,  19185, 143397, 200885]
+]
+n_landmarks = 14
+n_points = mesh.n_points
+landmarks = torch.sparse_coo_tensor(
+    indices=indices, values=values, size=(n_landmarks, n_points), device="cpu"
+)
+mesh.landmarks = landmarks
+
+
+# Decimate
+rates = [0.9, 0.95, 0.99, 0.995, 0.999, 0.9995]
+
+d = sks.Decimation(target_reduction=np.max(rates))
+d.fit(mesh)
+
+low_resolutions = dict()
+for rate in rates:
+    low_resolutions[rate] = d.transform(mesh, target_reduction=rate)
+
+
+from vedo.applications import Browser
+import vedo
+
+b = Browser(
+    [mesh.to_vedo() + vedo.pointcloud.Points(mesh.landmark_points.cpu().numpy()).c("red").ps(10).render_points_as_spheres()]
+    + [low_resolutions[rate].to_vedo()
+       + vedo.pointcloud.Points(low_resolutions[rate].landmark_points.cpu().numpy()).c("red").ps(10).render_points_as_spheres() for rate in rates]
+    
+)
+b.show()
+
