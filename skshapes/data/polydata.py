@@ -617,4 +617,8 @@ class PolyData(BaseShape):
 
         return torch.cross(B - A, C - A)
 
+    @typecheck
+    def is_triangle_mesh(self) -> bool:
+        return self._triangles is not None
+
     from ..convolutions import point_convolution

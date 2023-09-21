@@ -28,7 +28,7 @@ submodules = [
 ]
 
 setup(
-    name="Scikit-Shapes",
+    name="scikit-shapes",
     version="1.0",
     description="Shape Analysis in Python",
     author="Scikit-Shapes Developers",

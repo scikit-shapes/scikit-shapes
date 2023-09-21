@@ -6,6 +6,7 @@ from .features import *
 from .loss import *
 from .morphing import *
 from .optimization import *
+from .multiscaling import *
 
 from .decimation import *
 

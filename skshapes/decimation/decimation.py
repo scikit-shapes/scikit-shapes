@@ -1,12 +1,14 @@
 import numpy as np
 import pyvista
-import fast_simplification
 
 from ..data import PolyData
 import torch
 
 from ..types import typecheck, float_dtype, int_dtype
 from typing import Optional, Literal
+
+
+import fast_simplification
 
 
 class Decimation:
@@ -100,7 +102,6 @@ class Decimation:
             mesh, "triangles"
         ), "Quadric decimation only works for triangular meshes"
 
-
         points = mesh.points.clone().cpu().numpy()
         triangles = mesh.triangles.clone().cpu().numpy()
 
@@ -108,7 +109,10 @@ class Decimation:
         # import pyDecimation
 
         decimated_points, decimated_triangles, collapses = fast_simplification.simplify(
-            points=points, triangles=triangles.T, target_reduction=self.target_reduction, return_collapses=True
+            points=points,
+            triangles=triangles.T,
+            target_reduction=self.target_reduction,
+            return_collapses=True,
         )
 
         # Save the results
@@ -117,7 +121,9 @@ class Decimation:
         self.ref_mesh = mesh
 
     @typecheck
-    def transform(self, mesh: PolyData, target_reduction: Optional[float] = 1) -> PolyData:
+    def transform(
+        self, mesh: PolyData, target_reduction: Optional[float] = 1
+    ) -> PolyData:
         """
         Transform a mesh using the decimation algorithm.
         Args:
@@ -126,7 +132,9 @@ class Decimation:
                                                 If the target_reduction is greater than the target_reduction used to fit the decimation object, the decimation
                                                 will be applied with the target_reduction used to fit the decimation object. Defaults to 1.
         """
-        assert 0 <= target_reduction <= 1, "The target reduction must be between 0 and 1"
+        assert (
+            0 <= target_reduction <= 1
+        ), "The target reduction must be between 0 and 1"
         if target_reduction > self.target_reduction:
             target_reduction = self.target_reduction
 
@@ -143,17 +151,18 @@ class Decimation:
         points = mesh.points.clone().cpu().numpy()
         triangles = mesh.triangles.clone().cpu().numpy()
 
-
-        # Compute the number of collapses to apply
+        # Compute the number of collapses to apply
         rate = target_reduction / self.target_reduction
         n_collapses = int(rate * len(self.collapses))
-        
-        # Apply the collapses
+
+        # Apply the collapses
         points, triangles, indice_mapping = fast_simplification.replay_simplification(
             points=points,
             triangles=triangles.T,
             collapses=self.collapses[0:n_collapses],
         )
+
+        self._indice_mapping = torch.Tensor(indice_mapping).to(int_dtype)
 
         # If there are landmarks on the mesh, we compute the coordinates of the landmarks in the decimated mesh
         if mesh.landmarks is not None:

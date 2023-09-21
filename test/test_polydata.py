@@ -74,6 +74,7 @@ def test_polydata_creation():
     assert triangle.n_triangles == 1
     assert triangle.n_edges == 3  # Should be 3 or not ?
     assert triangle.n_points == 3
+    assert triangle.is_triangle_mesh()
 
     assert triangle.edge_centers is not None
     assert triangle.edge_lengths is not None
@@ -87,6 +88,7 @@ def test_polydata_creation():
     assert triangle.n_triangles == 0
     assert triangle.n_edges == 3
     assert triangle.n_points == 3
+    assert triangle.is_triangle_mesh() is False
 
     assert triangle.edge_centers is not None
     assert triangle.edge_lengths is not None
