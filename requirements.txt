@@ -1,12 +1,14 @@
-torch
+torch >= 1.11
 numpy
 pykeops
 geomloss
 
 
 jaxtyping
-beartype
+beartype >= 0.16.1
 
 pyvista
 vedo
+
+# git+https://github.com/Louis-Pujol/fast-simplification.git
 fast-simplification
