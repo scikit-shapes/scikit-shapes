@@ -67,12 +67,13 @@ def test_polydata_creation():
     triangles = torch.tensor([[0], [1], [2]], dtype=torch.int64)
     triangle = sks.PolyData(points=points, triangles=triangles)
 
-    # edges are computed on the fly when the getter is called, and _edges remains None
-    assert triangle.edges is not None
-    assert triangle._triangles is not None
+    # edges are computed on the fly when the getter is called
     assert triangle._edges is None
+    assert triangle.edges is not None
+    assert triangle._edges is not None
+    assert triangle._triangles is not None
     assert triangle.n_triangles == 1
-    assert triangle.n_edges == 3  # Should be 3 or not ?
+    assert triangle.n_edges == 3
     assert triangle.n_points == 3
     assert triangle.is_triangle_mesh()
 

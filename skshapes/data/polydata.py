@@ -144,10 +144,12 @@ class PolyData(BaseShape):
         if triangles is not None:
             # Call the setter that will clone and check the validity of the triangles
             self.triangles = triangles
+            self._edges = None
 
         elif edges is not None:
             # Call the setter that will clone and check the validity of the edges
             self.edges = edges
+            self._triangles = None
 
         else:
             self._triangles = None
@@ -391,14 +393,18 @@ class PolyData(BaseShape):
                 ],
                 dim=1,
             ).sort(dim=0)[0]
-
-            # Remove the duplicates and return
-            return torch.unique(repeated_edges, dim=1)
+            edges = torch.unique(repeated_edges, dim=1)
+            self._edges = edges
+            return edges
 
     @edges.setter
     @typecheck
     def edges(self, edges: Edges) -> None:
         """Set the edges of the shape. This will also set the triangles to None."""
+        if edges.max() >= self.n_points:
+            raise ValueError(
+                "The maximum vertex index in the triangles is larger than the number of points."
+            )
         self._edges = edges.clone().to(self.device)
         self._triangles = None
 
