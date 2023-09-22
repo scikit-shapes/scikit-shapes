@@ -1,7 +1,7 @@
 """This module contains the multiscale class."""
 # TODO : how to check the type of shapes avoiding circular import ?
-# TODO : add_points_data interface ? Deal with existing data ?
-# TODO : landmark interface ?
+# TODO : add_points_data interface ? Deal with existing data ?
+# TODO : landmark interface ?
 
 from ..types import (
     typecheck,
@@ -39,7 +39,7 @@ class Multiscale:
             scales (Sequence of floats): the scales at which the shape is multiscaled
             n_points (Sequence of ints): the (approximative) number of points at each scale
         """
-        
+
         if scales is None and n_points is None:
             raise ValueError("You must specify either scales or n_points")
 
@@ -144,7 +144,7 @@ class Multiscale:
             return self.mappings_from_origin[low_res][tmp]
 
     @typecheck
-    def signal_from_high_to_low(
+    def signal_from_high_to_low_res(
         self,
         signal: NumericalTensor,
         *,
@@ -179,7 +179,7 @@ class Multiscale:
         )
 
     @typecheck
-    def signal_from_low_to_high(
+    def signal_from_low_to_high_res(
         self,
         signal: NumericalTensor,
         *,
@@ -212,8 +212,63 @@ class Multiscale:
         else:
             raise NotImplementedError("Only constant smoothing is supported for now")
 
+    # @typecheck
+    # def signal_convolution(self, signal, signal_scale, target_scale, **kwargs):
+
+    #     assert signal.shape[0] == self.at(signal_scale).n_points, "signal must have the same number of points as the shape at signal scale"
+    #     from ..convolutions import point_convolution
+
+    #     # Store the kwargs to pass to the point convolution
+    #     point_convolution_args = point_convolution.__annotations__.keys()
+    #     convolutions_kwargs = dict()
+    #     for arg in kwargs:
+    #         if arg in point_convolution_args:
+    #             convolutions_kwargs[arg] = kwargs[arg]
+
+    #     self.at(signal_scale).point_weights = torch.ones_like(signal)
+
+    #     C = self.at(signal_scale).point_convolution(signal, **convolutions_kwargs)
+
+    #     return C @ signal
+
     @typecheck
     def add_point_data(
         self, signal, *, name, at=1, reduce="mean", smoothing="constant"
     ):
         pass
+
+
+def edge_smoothing(signal, shape, weight_by_length=False, gpu=True):
+    assert signal.shape[0] == shape.n_points
+
+    n_edges = shape.n_edges
+    n_points = shape.n_points
+    edges = shape.edges
+
+    # Edge smoothing
+    edges_revert = torch.zeros_like(edges)
+    edges_revert[0], edges_revert[1] = edges[1], edges[0]
+
+    indices = torch.cat((edges, edges_revert), dim=1)
+
+    if not weight_by_length:
+        values = torch.ones(2 * n_edges, dtype=torch.float32)
+    else:
+        values = shape.edge_lengths.repeat(2)
+
+    if torch.cuda.is_available() and gpu:
+        indices = indices.cuda()
+        values = values.cuda()
+        device = torch.device("cuda")
+    else:
+        device = torch.device("cpu")
+
+    S = torch.sparse_coo_tensor(
+        indices=indices, values=values, size=(n_points, n_points), device=device
+    )
+
+    degrees = S @ torch.ones(n_points, device=device)
+    output = (S @ signal.to(device)) / degrees
+    output = output.to(shape.device)
+
+    return output

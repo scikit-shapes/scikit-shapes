@@ -35,9 +35,9 @@ def test_scatter():
 
 def test_multiscale():
     """Test the multiscale class for triangle meshes.
-    
+
     This test is based on the bunny example from pyvista.examples (~34K points).)
-    
+
     We initialize a multiscale object with 10 random scales, pick two random scales
     and test the signal propagation from high to low resolution and back, specifically
     the composition of two propagations.
@@ -71,7 +71,9 @@ def test_multiscale():
     assert (im.max() + 1) == M.at(low_res_scale).n_points
 
     # Test composition of indice mapping
-    im_from_intermediate_scale_to_low_res_scale = M.indice_mapping(high_res=1, low_res=low_res_scale)
+    im_from_intermediate_scale_to_low_res_scale = M.indice_mapping(
+        high_res=1, low_res=low_res_scale
+    )
     im1 = M.indice_mapping(high_res=1, low_res=intermediate_scale)
     im2 = M.indice_mapping(high_res=intermediate_scale, low_res=low_res_scale)
     assert torch.allclose(im_from_intermediate_scale_to_low_res_scale, im2[im1])
@@ -83,32 +85,40 @@ def test_multiscale():
     i = torch.randint(0, len(reduce_options), (1,)).item()
     reduce = reduce_options[i]
     # Direct propagation from scale 1 to low_res_scale
-    low_resol_signal = M.signal_from_high_to_low(
+    low_resol_signal = M.signal_from_high_to_low_res(
         signal_intermediate_scale, high_res=1, low_res=low_res_scale, reduce=reduce
     )
     # Composition of two propagations
-    intermediate_signal = M.signal_from_high_to_low(
+    intermediate_signal = M.signal_from_high_to_low_res(
         signal_intermediate_scale, high_res=1, low_res=intermediate_scale, reduce=reduce
     )
-    b = M.signal_from_high_to_low(
-        intermediate_signal, high_res=intermediate_scale, low_res=low_res_scale, reduce=reduce
+    b = M.signal_from_high_to_low_res(
+        intermediate_signal,
+        high_res=intermediate_scale,
+        low_res=low_res_scale,
+        reduce=reduce,
     )
     # Check that the two signals are equal
     assert torch.allclose(low_resol_signal, b)
 
     # Test signal propagation from low to high resolution with constant smoothing
-    tmp = M.signal_from_low_to_high(
-        low_resol_signal, low_res=low_res_scale, high_res=intermediate_scale, smoothing="constant"
+    tmp = M.signal_from_low_to_high_res(
+        low_resol_signal,
+        low_res=low_res_scale,
+        high_res=intermediate_scale,
+        smoothing="constant",
     )
     assert tmp.shape[0] == M.at(intermediate_scale).n_points
 
     # Propagate again to low resolution and check that we recover the original signal
     # with reduce="min", "max" or "mean"
-    back = M.signal_from_high_to_low(tmp, high_res=intermediate_scale, low_res=low_res_scale, reduce="min")
-    back2 = M.signal_from_high_to_low(
+    back = M.signal_from_high_to_low_res(
+        tmp, high_res=intermediate_scale, low_res=low_res_scale, reduce="min"
+    )
+    back2 = M.signal_from_high_to_low_res(
         tmp, high_res=intermediate_scale, low_res=low_res_scale, reduce="max"
     )
-    back3 = M.signal_from_high_to_low(
+    back3 = M.signal_from_high_to_low_res(
         tmp, high_res=intermediate_scale, low_res=low_res_scale, reduce="mean"
     )
     assert torch.allclose(back, low_resol_signal)
