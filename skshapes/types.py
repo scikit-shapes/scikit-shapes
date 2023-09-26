@@ -41,6 +41,8 @@ JaxInt = Int64
 FloatArray = Float[np.ndarray, "..."]  # Any float format numpy array
 IntArray = Int[np.ndarray, "..."]  # Any int format numpy array
 NumericalArray = Union[FloatArray, IntArray]
+Float1dArray = Float[np.ndarray, "_"]
+Int1dArray = Int[np.ndarray, "_"]
 
 # Numerical types
 FloatTensor = JaxFloat[torch.Tensor, "..."]  # Only Float32 tensors are FloatTensors
@@ -52,6 +54,10 @@ Float1dTensor = JaxFloat[torch.Tensor, "_"]
 Float2dTensor = JaxFloat[torch.Tensor, "_ _"]
 Float3dTensor = JaxFloat[torch.Tensor, "_ _ _"]
 FloatScalar = JaxFloat[torch.Tensor, ""]
+Int1dTensor = JaxInt[torch.Tensor, "_"]
+
+FloatSequence = Union[Float1dTensor, Float1dArray, List[float]]
+IntSequence = Union[Int1dTensor, Int1dArray, List[int]]
 
 DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]

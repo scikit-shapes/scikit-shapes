@@ -1,3 +1,5 @@
+"""Nearest Neighbors loss for PolyData."""
+
 from pykeops.torch import Vi, Vj
 import torch
 from ..data import PolyData

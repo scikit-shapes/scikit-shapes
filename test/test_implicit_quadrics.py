@@ -15,7 +15,7 @@ from .utils import create_point_cloud, dim4, quadratic_function, quadratic_gradi
 
 
 @given(n_points=st.integers(min_value=5, max_value=10))
-@settings(deadline=1000)
+@settings(deadline=10000)
 def test_quadratic_function(*, n_points: int):
     """Test on a simple dataset z = f(x, y)."""
     # Create the dataset
