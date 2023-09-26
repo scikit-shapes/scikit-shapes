@@ -33,6 +33,8 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest hypothesis
-          pytest
+          cd ..
+          pytest skshapes
+          cd -
 
 #TODO : add linting
