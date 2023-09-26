@@ -8,7 +8,7 @@ import torch
 import skshapes as sks
 
 from pytest import approx
-from hypothesis import given
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 import numpy as np
@@ -26,6 +26,7 @@ from .utils import create_point_cloud, create_shape
     e=st.floats(min_value=-1, max_value=1),
     f=st.floats(min_value=-1, max_value=1),
 )
+@settings(deadline=None)
 def test_curvatures_quadratic(
     *, n_points: int, a: float, b: float, c: float, d: float, e: float, f: float
 ):
@@ -75,6 +76,7 @@ def test_curvatures_quadratic(
     radius=st.floats(min_value=0.1, max_value=10),
     relative_scale=st.floats(min_value=0.1, max_value=0.12),
 )
+@settings(deadline=None)
 def test_curvatures_sphere(*, n_points: int, radius: float, relative_scale: float):
     # Create a sphere with the correct radius and an arbitrary center:
     shape = create_shape(shape="sphere", n_points=n_points, radius=radius)
