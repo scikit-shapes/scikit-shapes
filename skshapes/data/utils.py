@@ -303,9 +303,13 @@ def instance_lru_cache(
     return decorator if method is None else decorator(method)
 
 
-def reload(self):
+def cache_clear(self):
     """Reload all cached properties."""
     cls = self.__class__
     attrs = [a for a in dir(self) if isinstance(getattr(cls, a, cls), cached_property)]
     for a in attrs:
         delattr(self, a)
+
+    if hasattr(self, "cached_methods"):
+        for a in self.cached_methods:
+            getattr(self, a).cache_clear()

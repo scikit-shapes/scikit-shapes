@@ -1,8 +1,9 @@
+import numpy as np
 import torch
-from pykeops.torch import LazyTensor
 
-from ..utils import diagonal_ranges
 from ..types import typecheck, Points, Optional, Triangles, Number, Literal
+from .squared_distances import squared_distances
+from .constant_kernel import constant_1_kernel
 
 
 class LinearOperator:
@@ -32,60 +33,84 @@ class LinearOperator:
         return o_s * (self.matrix @ (i_s * other))
 
     @property
+    def T(self):
+        return LinearOperator(
+            self.matrix.T,
+            input_scaling=self.output_scaling,
+            output_scaling=self.input_scaling,
+        )
+
+    @property
     def shape(self):
         return self.matrix.shape
 
 
 @typecheck
-def squared_distances(
-    *,
-    points: Points,
-    window: Literal[None, "ball", "knn", "spectral"] = None,
-    cutoff: Optional[Number] = None,
-    geodesic: bool = False,
-):
-    """Returns the (N, N) matrix of squared distances between points."""
-    # TODO: add support for batches!
-    N = points.shape[0]
-    D = points.shape[1]
-    assert points.shape == (N, D)
-
-    if geodesic:
-        raise NotImplementedError("Geodesic distances not implemented yet.")
-
-    if window is None:
-        x_i = LazyTensor(points.view(N, 1, D))
-        x_j = LazyTensor(points.view(1, N, D))
-        D_ij = ((x_j - x_i) ** 2).sum(-1)
-        return D_ij
-
-    raise NotImplementedError()
-
-
-@typecheck
-def point_convolution(
+def _point_convolution(
     self,
     *,
-    kernel: Literal["gaussian", "uniform"] = "gaussian",
-    scale: Number = 1.0,
+    kernel: Literal["uniform", "gaussian"] = "gaussian",
+    scale: Optional[Number] = None,
     window: Literal[None, "ball", "knn", "spectral"] = None,
     cutoff: Optional[Number] = None,
     geodesic: bool = False,
-    normalize: bool = True,
+    normalize: bool = False,
+    dtype: Optional[Literal["float", "double"]] = None,
 ) -> LinearOperator:
     """Creates a convolution kernel on a PolyData as a (N, N) linear operator."""
     N = self.n_points
     weights_j = self.point_weights
     assert weights_j.shape == (N,)
 
-    D_ij = squared_distances(
-        points=self.points, window=window, cutoff=cutoff, geodesic=geodesic
-    )
+    X = self.points
 
-    if kernel == "gaussian":
-        K_ij = (-D_ij / (2 * scale**2)).exp()
-    elif kernel == "uniform":
-        K_ij = 1.0 * (D_ij <= scale**2)
+    if dtype == "float":
+        X = X.float()
+        weights_j = weights_j.float()
+    elif dtype == "double":
+        X = X.double()
+        weights_j = weights_j.double()
+
+    backend_args = dict(window=window, cutoff=cutoff, geodesic=geodesic)
+
+    if scale is None:
+        # scale = +infinity, the kernel is always equal to 1
+        K_ij = constant_1_kernel(points=X, **backend_args)
+
+    else:
+        if kernel == "gaussian":
+            # Divisions are expensive: whenever possible, it's best to scale the points
+            # ahead of time instead of scaling the distances for every pair of points.
+            sqrt_2 = 1.41421356237
+            X = X / (sqrt_2 * scale)
+
+            # For dense computations, users may specify a cutoff as a kernel
+            # value below which the kernel is assumed to be zero.
+            # exp(-x^2) <= cutoff <=> x^2 >= -log(cutoff)
+            if window is None and cutoff is not None and cutoff < 1:
+                assert cutoff > 0
+                backend_args["cutoff"] = -np.log(cutoff)
+
+            K_ij = squared_distances(
+                points=X,
+                kernel=lambda d2: (-d2).exp(),
+                **backend_args,
+            )
+
+        elif kernel == "uniform":
+            X = X / scale
+            # For dense computations, users may specify a cutoff as a kernel
+            # value below which the kernel is assumed to be zero.
+            # For the uniform kernel, this just means discarding pairs of points
+            # which are at distance > 1 (after rescaling).
+            if window is None and cutoff is not None:
+                backend_args["cutoff"] = 1.01  # To be on the safe side...
+
+            K_ij = squared_distances(
+                points=X,
+                kernel=lambda d2: 1.0 * (d2 <= 1),
+                **backend_args,
+            )
 
     if normalize:
         total_weights_i = K_ij @ weights_j

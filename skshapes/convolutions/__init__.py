@@ -1,1 +1,1 @@
-from .point_convolution import point_convolution, LinearOperator
+from .point_convolution import _point_convolution, LinearOperator

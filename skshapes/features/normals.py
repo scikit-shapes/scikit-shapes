@@ -3,7 +3,93 @@ from pykeops.torch import LazyTensor
 import torch.nn.functional as F
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Optional, Triangles
+from ..types import typecheck, Points, Optional, FloatTensor, Triangles, Number
+
+
+@typecheck
+def _point_normals(
+    self,
+    *,
+    scale: Optional[Number] = None,
+    **kwargs,
+) -> Points:
+    if scale is None:
+        if self.triangles is None:
+            raise ValueError("If no triangles are provided, you must specify a scale.")
+
+        tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
+        n = torch.zeros_like(self.points)
+        # TODO: instead of distributing to the vertices equally, we should
+        #       distribute according to the angles of the triangles.
+        for k in range(3):
+            # n[self.triangles[k, i]] += tri_n[i]
+            n.scatter_reduce_(
+                dim=0, index=self.triangles[k].view(-1, 1), src=tri_n, reduce="sum"
+            )
+
+    else:
+        # Get a smooth field of normals via the Structure Tensor:
+        local_cov = self.point_moments(order=2, scale=scale, central=True, **kwargs)
+        local_QL = torch.linalg.eigh(local_cov)
+        local_nuv = local_QL.eigenvectors  # (N, 3, 3)
+        n = local_nuv[:, :, 0]
+
+        # Orient the normals according to the triangles, if any:
+        if self.triangles is not None:
+            n_0 = self.point_normals(scale=None, **kwargs)
+            assert n_0.shape == (self.n_points, 3)
+
+        else:
+            n_0 = n.mean(dim=0, keepdim=True)
+            assert n_0.shape == (1, 3)
+
+        n = (n_0 * n).sum(-1).sign().view(-1, 1) * n
+
+    # Try to enforce some consistency...
+    if False and self.edges is not None:
+        print("Hi")
+        n = F.normalize(n, p=2, dim=-1)
+        # n_e = n[self.edges[0]] + n[self.edges[1]]
+        # The backward of torch.index_select is much faster than that of indexing:
+        n_e = torch.index_select(n, 0, self.edges[0]) + torch.index_select(
+            n, 0, self.edges[1]
+        )
+        assert n_e.shape == (len(self.edges[0]), 3)
+
+        n_v = torch.zeros_like(n)
+        n_v.scatter_reduce_(
+            dim=0,
+            index=self.edges.reshape(-1, 1),
+            src=n_e.tile(2, 1),
+            reduce="mean",
+            include_self=False,
+        )
+
+        assert n_v.shape == (self.n_points, 3)
+        # n_v = n_v - n
+        n = (n_v * n).sum(-1).sign().view(-1, 1) * n
+
+    n = F.normalize(n, p=2, dim=-1)
+    assert n.shape == (self.n_points, 3)
+    return n
+
+
+@typecheck
+def _point_frames(
+    self,
+    *,
+    scale: Optional[Number] = None,
+    **kwargs,
+) -> FloatTensor:
+    N = self.n_points
+    n = self.point_normals(scale=scale, **kwargs)  # (N, 3)
+
+    # Complete the direct orthonormal basis [n,u,v]:
+    uv = tangent_vectors(n)
+    assert n.shape == (N, 3)
+    assert uv.shape == (N, 2, 3)
+
+    return torch.cat((n.view(N, 1, 3), uv), dim=1)
 
 
 @typecheck

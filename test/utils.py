@@ -1,4 +1,11 @@
+import sys
+
+sys.path.append(sys.path[0][:-4])
+
 import torch
+import vedo as vd
+import skshapes as sks
+from typing import Optional, Literal
 
 
 def create_point_cloud(n_points: int, f: callable, normals=False):
@@ -33,6 +40,40 @@ def create_point_cloud(n_points: int, f: callable, normals=False):
     return points.detach(), n.detach()
 
 
+def create_shape(
+    *,
+    shape: Optional[Literal["sphere"]] = None,
+    file_name: str = None,
+    function: callable = None,
+    n_points=20,
+    noise=0,
+    radius=1,
+    offset=0,
+):
+    if shape == "sphere":
+        points = torch.randn(n_points, 3)
+        points = radius * torch.nn.functional.normalize(points, p=2, dim=1)
+        shape = sks.PolyData(points=points)
+
+    elif shape == "unit patch":
+        points = torch.randn(n_points, 3)
+        points[0, :] = 0
+        points[:, 2] = function(points[:, 0], points[:, 1])
+        shape = sks.PolyData(points=points)
+
+    elif function is not None:
+        points = create_point_cloud(n_points=n_points, f=function)
+        shape = sks.PolyData(points=points)
+
+    else:
+        shape = sks.PolyData(file_name).decimate(n_points=n_points)
+        print("Loaded shape with {:,} points".format(shape.n_points))
+
+    shape.points = shape.points + offset * torch.randn(1, 3)
+    shape.points = shape.points + noise * torch.randn(shape.n_points, 3)
+    return shape
+
+
 def dim4(*, points, offset=0, scale=1):
     """Rescales and adds a fourth dimension to the point cloud."""
     assert points.shape == (len(points), 3)
@@ -55,3 +96,28 @@ def quadratic_gradient(*, points, quadric, offset=0, scale=1):
     X = dim4(points=points, offset=offset, scale=scale)
 
     return (2 / scale) * (X @ quadric)[:, :3]
+
+
+def vedo_frames(points, frames):
+    n = vd.Arrows(points, points + frames[:, :, 0], c="red", alpha=0.9)
+    u = vd.Arrows(points, points + frames[:, :, 1], c="blue", alpha=0.9)
+    v = vd.Arrows(points, points + frames[:, :, 2], c="green", alpha=0.9)
+    return [n, u, v]
+
+
+from torch.profiler import profile, ProfilerActivity
+
+
+def profiler():
+    activities = [ProfilerActivity.CPU]
+    if torch.cuda.is_available():
+        activities.append(ProfilerActivity.CUDA)
+
+    myprof = profile(
+        activities=activities,
+        record_shapes=True,
+        profile_memory=True,
+        with_stack=True,
+        experimental_config=torch._C._profiler._ExperimentalConfig(verbose=True),
+    )
+    return myprof
