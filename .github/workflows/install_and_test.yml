@@ -26,11 +26,15 @@ jobs:
 
       - name: Try to import
         run: |
+          cd ..
           python -c "import skshapes"
+          cd -
 
       - name: Test with pytest
         run: |
           pip install pytest hypothesis
-          pytest test/
+          cd ..
+          pytest scikit-shapes/
+          cd -
 
 #TODO : add linting
