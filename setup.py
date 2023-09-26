@@ -1,4 +1,15 @@
-from setuptools import setup
+from setuptools import setup, Extension
+import numpy as np
+from Cython.Build import cythonize
+
+extension = Extension(
+    name="skshapes.data.edges_extraction",
+    sources=[
+        "skshapes/data/edges_extraction.pyx",
+    ],
+    include_dirs=[np.get_include()],
+    define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
+)
 
 
 dependencies = [
@@ -36,4 +47,5 @@ setup(
     url="",
     install_requires=dependencies,
     packages=["skshapes"] + ["skshapes." + submodule for submodule in submodules],
+    ext_modules=cythonize(extension),
 )

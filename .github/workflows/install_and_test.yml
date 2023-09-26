@@ -26,7 +26,9 @@ jobs:
 
       - name: Try to import
         run: |
+          cd ..
           python -c "import skshapes"
+          cd -
 
       - name: Test with pytest
         run: |
