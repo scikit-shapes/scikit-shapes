@@ -24,6 +24,7 @@ from ..types import (
     Any,
     FloatTensor,
     IntTensor,
+    polydata_type
 )
 
 from typing import Literal
@@ -33,7 +34,7 @@ from .utils import DataAttributes
 from .edges_extraction import extract_edges
 
 
-class PolyData(BaseShape):
+class PolyData(BaseShape, polydata_type):
     """A polygonal data object. It is composed of points, edges and triangles.
 
 

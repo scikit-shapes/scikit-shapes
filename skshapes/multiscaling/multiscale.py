@@ -13,6 +13,7 @@ from ..types import (
     Int1dTensor,
     NumericalTensor,
     Number,
+    polydata_type,
 )
 from ..utils import scatter
 import torch
@@ -24,7 +25,7 @@ class Multiscale:
     @typecheck
     def __init__(
         self,
-        shape,
+        shape: polydata_type,
         *,
         ratios: Optional[FloatSequence] = None,
         n_points: Optional[IntSequence] = None
@@ -208,7 +209,10 @@ class Multiscale:
         assert low_res <= high_res, "high_res must be smaller than low_res"
 
         if smoothing == "constant":
-            return signal[self.indice_mapping(high_res=high_res, low_res=low_res)]
+            return torch.index_select(
+                signal, dim=0, index=self.indice_mapping(high_res=high_res, low_res=low_res)
+            )
+        
         else:
             raise NotImplementedError("Only constant smoothing is supported for now")
 
@@ -237,8 +241,8 @@ class Multiscale:
     ):
         pass
 
-
-def edge_smoothing(signal, shape, weight_by_length=False, gpu=False):
+@typecheck
+def edge_smoothing(signal: NumericalTensor, shape: polydata_type, weight_by_length: bool = False, gpu: bool =False) -> NumericalTensor:
     assert signal.shape[0] == shape.n_points
 
     n_edges = shape.n_edges

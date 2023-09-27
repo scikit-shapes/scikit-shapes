@@ -80,3 +80,13 @@ from beartype.vale import Is
 Landmarks = Annotated[
     torch.Tensor, Is[lambda tensor: tensor.dtype == float_dtype and tensor.is_sparse]
 ]
+
+
+# Types for shapes
+class polydata_type():
+    pass
+
+class image_type():
+    pass
+
+shape_type = Union[polydata_type, image_type]
