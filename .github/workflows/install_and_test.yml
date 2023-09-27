@@ -22,19 +22,15 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Install package
         run: |
-          pip install .
+          pip install -e .
 
       - name: Try to import
         run: |
-          cd ..
           python -c "import skshapes"
-          cd -
 
       - name: Test with pytest
         run: |
           pip install pytest hypothesis
-          cd ..
-          pytest scikit-shapes/test/
-          cd -
+          pytest .
 
 #TODO : add linting
