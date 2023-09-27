@@ -22,7 +22,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Install package
         run: |
-          pip install .
+          pip install -e .
 
       - name: Try to import
         run: |
@@ -31,6 +31,6 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest hypothesis
-          pytest
+          pytest .
 
 #TODO : add linting
