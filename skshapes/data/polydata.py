@@ -433,20 +433,10 @@ class PolyData(BaseShape):
         elif self._triangles is not None:
 
             points_numpy = self.points.detach().cpu().numpy().astype(np.float64)
-            triangles_numpy = self.triangles.detach().cpu().numpy().astype(np.int64).T
+            triangles_numpy = self.triangles.detach().cpu().numpy().astype(np.int64)
             edges = extract_edges(points_numpy, triangles_numpy)
             edges = torch.from_numpy(edges).to(int_dtype).to(self.device)
 
-            # # Compute the edges of the triangles and sort them
-            # repeated_edges = torch.concat(
-            #     [
-            #         self.triangles[[0, 1], :],
-            #         self.triangles[[1, 2], :],
-            #         self.triangles[[0, 2], :],
-            #     ],
-            #     dim=1,
-            # ).sort(dim=0)[0]
-            # edges = torch.unique(repeated_edges, dim=1)
             self._edges = edges
             return edges
 
