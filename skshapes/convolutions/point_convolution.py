@@ -123,13 +123,11 @@ def _point_convolution(
             K_ij = squared_distances(
                 points=X,
                 target_points=Y,
-                kernel=lambda d2: 1.0 * (d2 <= 1),
+                kernel=lambda d2: 1.0 * (1 - d2).step(),
                 **backend_args,
             )
 
     if normalize:
-        print(K_ij.shape)
-        print(weights_j.shape)
 
         total_weights_i = K_ij @ weights_j
         assert total_weights_i.shape == (M,)
