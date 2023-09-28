@@ -210,30 +210,33 @@ class Multiscale:
 
         if smoothing == "constant":
             return torch.index_select(
-                signal, dim=0, index=self.indice_mapping(high_res=high_res, low_res=low_res)
+                signal,
+                dim=0,
+                index=self.indice_mapping(high_res=high_res, low_res=low_res),
             )
-        
+
         else:
             raise NotImplementedError("Only constant smoothing is supported for now")
 
-    # @typecheck
-    # def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
+    @typecheck
+    def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
+        source = self.at(signal_ratio)
+        target = self.at(target_ratio)
 
-    #     assert signal.shape[0] == self.at(signal_ratio).n_points, "signal must have the same number of points as the shape at signal ratio"
-    #     from ..convolutions import point_convolution
+        assert (
+            signal.shape[0] == source.n_points
+        ), "signal must have the same number of points as the shape at signal ratio"
 
-    #     # Store the kwargs to pass to the point convolution
-    #     point_convolution_args = point_convolution.__annotations__.keys()
-    #     convolutions_kwargs = dict()
-    #     for arg in kwargs:
-    #         if arg in point_convolution_args:
-    #             convolutions_kwargs[arg] = kwargs[arg]
+        # Store the kwargs to pass to the point convolution
+        point_convolution_args = source._point_convolution.__annotations__.keys()
+        convolutions_kwargs = dict()
+        for arg in kwargs:
+            if arg in point_convolution_args:
+                convolutions_kwargs[arg] = kwargs[arg]
 
-    #     self.at(signal_ratio).point_weights = torch.ones_like(signal)
+        C = source.point_convolution(target=target, **convolutions_kwargs)
 
-    #     C = self.at(signal_ratio).point_convolution(signal, **convolutions_kwargs)
-
-    #     return C @ signal
+        return C @ signal
 
     @typecheck
     def add_point_data(
@@ -241,8 +244,14 @@ class Multiscale:
     ):
         pass
 
+
 @typecheck
-def edge_smoothing(signal: NumericalTensor, shape: polydata_type, weight_by_length: bool = False, gpu: bool =False) -> NumericalTensor:
+def edge_smoothing(
+    signal: NumericalTensor,
+    shape: polydata_type,
+    weight_by_length: bool = False,
+    gpu: bool = False,
+) -> NumericalTensor:
     assert signal.shape[0] == shape.n_points
 
     n_edges = shape.n_edges
