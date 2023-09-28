@@ -83,10 +83,12 @@ Landmarks = Annotated[
 
 
 # Types for shapes
-class polydata_type():
+class polydata_type:
     pass
 
-class image_type():
+
+class image_type:
     pass
+
 
 shape_type = Union[polydata_type, image_type]

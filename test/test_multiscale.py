@@ -123,3 +123,15 @@ def test_multiscale():
     )
     assert torch.allclose(back, low_resol_signal)
     assert torch.allclose(back2, low_resol_signal)
+
+    signal = torch.rand(M.at(1).n_points)
+    signal_out = M.signal_convolution(
+        signal,
+        signal_ratio=1,
+        target_ratio=low_res_ratio,
+        kernel="gaussian",
+        scale=0.01,
+        normalize=True,
+    )
+
+    assert signal_out.shape[0] == M.at(low_res_ratio).n_points

@@ -24,7 +24,7 @@ from ..types import (
     Any,
     FloatTensor,
     IntTensor,
-    polydata_type
+    polydata_type,
 )
 
 from typing import Literal
