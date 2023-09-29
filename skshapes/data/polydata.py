@@ -26,7 +26,7 @@ from ..types import (
     IntTensor,
 )
 
-
+from typing import Literal
 from .baseshape import BaseShape
 from .utils import DataAttributes
 
@@ -125,6 +125,18 @@ class PolyData(BaseShape):
                     mesh.point_data
                 )
 
+            if (
+                ("landmarks_values" in mesh.field_data)
+                and ("landmarks_indices" in mesh.field_data)
+                and ("landmarks_size" in mesh.field_data)
+            ):
+                landmarks_from_pv = torch.sparse_coo_tensor(
+                    values=mesh.field_data["landmarks_values"],
+                    indices=mesh.field_data["landmarks_indices"],
+                    size=tuple(mesh.field_data["landmarks_size"]),
+                    dtype=float_dtype,
+                )
+
         if device is None:
             device = points.device
 
@@ -138,10 +150,12 @@ class PolyData(BaseShape):
         if triangles is not None:
             # Call the setter that will clone and check the validity of the triangles
             self.triangles = triangles
+            self._edges = None
 
         elif edges is not None:
             # Call the setter that will clone and check the validity of the edges
             self.edges = edges
+            self._triangles = None
 
         else:
             self._triangles = None
@@ -150,11 +164,12 @@ class PolyData(BaseShape):
         if landmarks is not None:
             # Call the setter that will clone and check the validity of the landmarks
             self.landmarks = landmarks
-
+        elif "landmarks_from_pv" in locals():
+            self.landmarks = landmarks_from_pv.to(self.device)
         else:
             self._landmarks = None
 
-        # Initialize the point_data
+        # Initialize the point_data if it was not done before
         if point_data is None:
             self._point_data = DataAttributes(n=self.n_points, device=self.device)
         else:
@@ -215,6 +230,7 @@ class PolyData(BaseShape):
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[Number] = None,
+        implementation: Literal["vtk", "sks"] = "vtk",
     ) -> PolyData:
         """Decimate the shape using the Quadric Decimation algorithm.
 
@@ -313,6 +329,14 @@ class PolyData(BaseShape):
             for key in point_data_dict:
                 mesh.pointdata[key] = point_data_dict[key]
 
+        # Add the landmarks if any
+        if hasattr(self, "_landmarks") and self.landmarks is not None:
+            coalesced_landmarks = self.landmarks.coalesce()
+            mesh.metadata["landmarks_values"] = coalesced_landmarks.values()
+            mesh.metadata["landmarks_indices"] = coalesced_landmarks.indices()
+            mesh.metadata["landmarks_size"] = coalesced_landmarks.size()
+            mesh.metadata["landmark_points"] = self.landmark_points
+
         return mesh
 
     ###########################
@@ -349,6 +373,14 @@ class PolyData(BaseShape):
             point_data_dict = self.point_data.to_numpy_dict()
             for key in point_data_dict:
                 polydata.point_data[key] = point_data_dict[key]
+
+        # Add the landmarks if any
+        if hasattr(self, "_landmarks") and self.landmarks is not None:
+            coalesced_landmarks = self.landmarks.coalesce()
+            polydata.field_data["landmarks_values"] = coalesced_landmarks.values()
+            polydata.field_data["landmarks_indices"] = coalesced_landmarks.indices()
+            polydata.field_data["landmarks_size"] = coalesced_landmarks.size()
+            polydata.field_data["landmark_points"] = self.landmark_points
 
         return polydata
 
@@ -406,14 +438,18 @@ class PolyData(BaseShape):
                 ],
                 dim=1,
             ).sort(dim=0)[0]
-
-            # Remove the duplicates and return
-            return torch.unique(repeated_edges, dim=1)
+            edges = torch.unique(repeated_edges, dim=1)
+            self._edges = edges
+            return edges
 
     @edges.setter
     @typecheck
     def edges(self, edges: Edges) -> None:
         """Set the edges of the shape. This will also set the triangles to None."""
+        if edges.max() >= self.n_points:
+            raise ValueError(
+                "The maximum vertex index in the triangles is larger than the number of points."
+            )
         self._edges = edges.clone().to(self.device)
         self._triangles = None
         self.cache_clear()
@@ -514,7 +550,7 @@ class PolyData(BaseShape):
 
     @property
     @typecheck
-    def landmarks_3d(self) -> Optional[Points]:
+    def landmark_points(self) -> Optional[Points]:
         """Return the landmarks in 3D."""
         if self.landmarks is None:
             return None
@@ -635,6 +671,10 @@ class PolyData(BaseShape):
 
         # TODO: Normalize?
         return torch.cross(B - A, C - A)
+
+    @typecheck
+    def is_triangle_mesh(self) -> bool:
+        return self._triangles is not None
 
     @property
     @typecheck
