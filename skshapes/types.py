@@ -64,8 +64,8 @@ Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 
 # Specific numerical types
 Points = JaxFloat[torch.Tensor, "_ 3"]
-Edges = JaxInt[torch.Tensor, "2 _"]
-Triangles = JaxInt[torch.Tensor, "3 _"]
+Edges = JaxInt[torch.Tensor, "_ 2"]
+Triangles = JaxInt[torch.Tensor, "_ 3"]
 
 # Jaxtyping does not provide annotation for sparse tensors
 # Then we use the torch.Tensor type and checks are made at runtime
@@ -83,10 +83,12 @@ Landmarks = Annotated[
 
 
 # Types for shapes
-class polydata_type():
+class polydata_type:
     pass
 
-class image_type():
+
+class image_type:
     pass
+
 
 shape_type = Union[polydata_type, image_type]

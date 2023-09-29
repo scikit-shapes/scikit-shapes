@@ -64,7 +64,7 @@ def _cube():
 def test_polydata_creation():
     # Shape with points and triangles
     points = torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float32)
-    triangles = torch.tensor([[0], [1], [2]], dtype=torch.int64)
+    triangles = torch.tensor([[0, 1, 2]], dtype=torch.int64)
     triangle = sks.PolyData(points=points, triangles=triangles)
 
     # edges are computed on the fly when the getter is called

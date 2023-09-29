@@ -210,9 +210,11 @@ class Multiscale:
 
         if smoothing == "constant":
             return torch.index_select(
-                signal, dim=0, index=self.indice_mapping(high_res=high_res, low_res=low_res)
+                signal,
+                dim=0,
+                index=self.indice_mapping(high_res=high_res, low_res=low_res),
             )
-        
+
         else:
             raise NotImplementedError("Only constant smoothing is supported for now")
 
@@ -241,8 +243,14 @@ class Multiscale:
     ):
         pass
 
+
 @typecheck
-def edge_smoothing(signal: NumericalTensor, shape: polydata_type, weight_by_length: bool = False, gpu: bool =False) -> NumericalTensor:
+def edge_smoothing(
+    signal: NumericalTensor,
+    shape: polydata_type,
+    weight_by_length: bool = False,
+    gpu: bool = False,
+) -> NumericalTensor:
     assert signal.shape[0] == shape.n_points
 
     n_edges = shape.n_edges
