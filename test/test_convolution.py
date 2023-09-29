@@ -36,30 +36,16 @@ def test_squared_distance():
     Lo = sks.convolutions.LinearOperator(K_ij)
     assert Lo.shape == (M, N)
 
-    # Compute the linear operator from the PolyData objects
-    Lo2 = sks.convolutions.convolution(
-        source=polydata_x,
-        target=polydata_y,
+    Lo2 = polydata_x.point_convolution(
         kernel="gaussian",
         scale=scale,
         normalize=False,
+        target=polydata_y,
     )
 
+    assert Lo2.shape == (M, N)
     signal_out2 = Lo2 @ signal
-    assert signal_out2.shape == (M,)
-
     assert torch.allclose(signal_out1, signal_out2)
-
-    Lo3 = polydata_x.point_convolution(
-        kernel="gaussian",
-        scale=scale,
-        normalize=False,
-        target=polydata_y,
-    )
-
-    assert Lo3.shape == (M, N)
-    signal_out3 = Lo3 @ signal
-    assert torch.allclose(signal_out1, signal_out3)
 
 
 def test_convolution_trivial():
@@ -111,7 +97,7 @@ from .utils import create_point_cloud, create_shape
 @given(
     N=st.integers(min_value=2, max_value=500),
     M=st.integers(min_value=2, max_value=500),
-    scale=st.floats(min_value=0.01, max_value=100),
+    scale=st.one_of(st.floats(min_value=0.01, max_value=100), st.none()),
     kernel=st.sampled_from(["gaussian", "uniform"]),
     normalize=st.booleans(),
     dim=st.integers(min_value=1, max_value=2),
@@ -120,8 +106,6 @@ from .utils import create_point_cloud, create_shape
 def test_convolution_functional(
     N: int, M: int, scale: float, kernel: str, normalize: bool, dim: int
 ):
-    scale = scale
-
     X = torch.rand(N, 3).to(torch.float32)
     Y = torch.rand(M, 3).to(torch.float32)
 
@@ -134,10 +118,14 @@ def test_convolution_functional(
 
     squared_distances = ((yi - xj) ** 2).sum(-1)
 
-    if kernel == "gaussian":
-        kernel_torch = (-squared_distances / (2 * scale**2)).exp()
-    elif kernel == "uniform":
-        kernel_torch = 1.0 * ((squared_distances / (scale**2)) <= 1)
+    try:
+        if kernel == "gaussian":
+            kernel_torch = (-squared_distances / (2 * scale**2)).exp()
+        elif kernel == "uniform":
+            kernel_torch = 1.0 * ((squared_distances / (scale**2)) <= 1)
+    except:
+        scale = None
+        kernel_torch = torch.ones_like(squared_distances, dtype=torch.float32)
 
     if normalize:
         total_weights_i = (kernel_torch @ weights_j).clip(min=1e-6)
@@ -161,5 +149,4 @@ def test_convolution_functional(
     A = o_s * (kernel_torch @ (i_s * a))
     B = kernel_sks @ a
 
-    print(f"difference: {torch.norm(A - B).max()}")
     assert torch.allclose(o_s * (kernel_torch @ (i_s * a)), kernel_sks @ a, atol=1e-5)

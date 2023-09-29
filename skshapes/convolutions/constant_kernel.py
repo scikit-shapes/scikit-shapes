@@ -15,7 +15,7 @@ class Constant1Kernel:
         assert points.shape == (N, D)
         assert target_points.shape == (M, D)
 
-        self.shape = (N, M)
+        self.shape = (M, N)
 
     def __matmul__(self, other):
         assert len(other.shape) in (1, 2)
