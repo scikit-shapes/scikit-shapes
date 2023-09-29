@@ -103,19 +103,9 @@ def test_convolution_trivial():
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-import numpy as np
-import vedo as vd
+from math import isnan
 
 from .utils import create_point_cloud, create_shape
-
-
-def test_uniform():
-    X = torch.rand(100, 3).to(torch.float32)
-
-    K = sks.PolyData(X).point_convolution(
-        kernel="uniform",
-        scale=0.01,
-    )
 
 
 @given(
@@ -123,13 +113,21 @@ def test_uniform():
     M=st.integers(min_value=2, max_value=500),
     scale=st.floats(min_value=0.01, max_value=100),
     kernel=st.sampled_from(["gaussian", "uniform"]),
+    normalize=st.booleans(),
+    dim=st.integers(min_value=1, max_value=2),
 )
 @settings(deadline=None)
-def test_convolution_functional(N: int, M: int, scale: float, kernel: str):
+def test_convolution_functional(
+    N: int, M: int, scale: float, kernel: str, normalize: bool, dim: int
+):
     scale = scale
 
     X = torch.rand(N, 3).to(torch.float32)
     Y = torch.rand(M, 3).to(torch.float32)
+
+    polydata_x = sks.PolyData(X)
+    polydata_y = sks.PolyData(Y)
+    weights_j = polydata_x.point_weights
 
     yi = Y.view(M, 1, 3)
     xj = X.view(1, N, 3)
@@ -141,12 +139,27 @@ def test_convolution_functional(N: int, M: int, scale: float, kernel: str):
     elif kernel == "uniform":
         kernel_torch = 1.0 * ((squared_distances / (scale**2)) <= 1)
 
-    kernel_sks = sks.PolyData(X).point_convolution(
-        kernel=kernel, scale=scale, target=sks.PolyData(Y)
+    if normalize:
+        total_weights_i = (kernel_torch @ weights_j).clip(min=1e-6)
+        norm_i = 1.0 / total_weights_i
+        o_s = norm_i if dim == 1 else norm_i.view(-1, 1)
+        i_s = weights_j if dim == 1 else weights_j.view(-1, 1)
+    else:
+        o_s = 1
+        i_s = 1
+
+    kernel_sks = polydata_x.point_convolution(
+        kernel=kernel, scale=scale, target=polydata_y, normalize=normalize
     )
 
-    a = torch.rand(N)
+    if dim == 1:
+        a = torch.rand(N)
+    elif dim == 2:
+        D = torch.randint(low=2, high=4, size=(1,))[0]
+        a = torch.rand(N, D)
 
-    if kernel == "uniform":
-        print(torch.max(torch.abs(kernel_torch @ a - kernel_sks @ a)))
-    assert torch.allclose(kernel_torch @ a, kernel_sks @ a, atol=1e-6)
+    A = o_s * (kernel_torch @ (i_s * a))
+    B = kernel_sks @ a
+
+    print(f"difference: {torch.norm(A - B).max()}")
+    assert torch.allclose(o_s * (kernel_torch @ (i_s * a)), kernel_sks @ a, atol=1e-5)

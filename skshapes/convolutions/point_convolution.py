@@ -27,8 +27,10 @@ class LinearOperator:
         o_s = self.output_scaling if self.output_scaling is not None else 1
 
         if len(other.shape) == 2:
-            i_s = i_s.view(-1, 1) if i_s is not None else 1
-            o_s = o_s.view(-1, 1) if o_s is not None else 1
+            if self.input_scaling is not None:
+                i_s = i_s.view(-1, 1)
+            if self.output_scaling is not None:
+                o_s = o_s.view(-1, 1)
 
         return o_s * (self.matrix @ (i_s * other))
 
@@ -128,8 +130,7 @@ def _point_convolution(
             )
 
     if normalize:
-
-        total_weights_i = K_ij @ weights_j
+        total_weights_i = (K_ij @ weights_j).clip(min=1e-6)
         assert total_weights_i.shape == (M,)
         norm_i = 1.0 / total_weights_i
 
@@ -219,12 +220,11 @@ def convolution(
             )
 
     if normalize:
-        print(K_ij.shape)
-        print(weights_j.shape)
-
         total_weights_i = K_ij @ weights_j
         assert total_weights_i.shape == (M,)
         norm_i = 1.0 / total_weights_i
+        print(total_weights_i[0:5])
+        print("ok")
 
     else:
         norm_i = None
