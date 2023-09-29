@@ -18,7 +18,7 @@ def symmetric_sum(a, b):
     D = a.shape[1]
 
     if a.shape == (N, D) and b.shape == (N, D, D):
-        # Term 1-2 that appears in the tensor expansion of (a+b)^3
+        # Term a^1-b^2 that appears in the tensor expansion of (a+b)^3
         term_1 = a.view(N, D, 1, 1) * b.view(N, 1, D, D)
         term_2 = a.view(N, 1, D, 1) * b.view(N, D, 1, D)
         term_3 = a.view(N, 1, 1, D) * b.view(N, D, D, 1)
@@ -27,7 +27,7 @@ def symmetric_sum(a, b):
         return res
 
     elif a.shape == (N, D) and b.shape == (N, D, D, D):
-        # Term 1-4 that appears in the tensor expansion of (a+b)^4
+        # Term a^1-b^3 that appears in the tensor expansion of (a+b)^4
         term_1 = a.view(N, D, 1, 1, 1) * b.view(N, 1, D, D, D)
         term_2 = a.view(N, 1, D, 1, 1) * b.view(N, D, 1, D, D)
         term_3 = a.view(N, 1, 1, D, 1) * b.view(N, D, D, 1, D)
@@ -37,7 +37,7 @@ def symmetric_sum(a, b):
         return res
 
     elif a.shape == (N, D, D) and b.shape == (N, D, D):
-        # Term 2-2 that appears in the tensor expansion of (a+b)^4
+        # Term a^2-b^2 that appears in the tensor expansion of (a+b)^4
         term_1 = a.view(N, D, D, 1, 1) * b.view(N, 1, 1, D, D)
         term_2 = a.view(N, D, 1, D, 1) * b.view(N, 1, D, 1, D)
         term_3 = a.view(N, D, 1, 1, D) * b.view(N, 1, D, D, 1)
