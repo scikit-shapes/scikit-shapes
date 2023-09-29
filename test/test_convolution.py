@@ -104,7 +104,12 @@ from .utils import create_point_cloud, create_shape
 )
 @settings(deadline=None)
 def test_convolution_functional(
-    N: int, M: int, scale: float, kernel: str, normalize: bool, dim: int
+    N: int,
+    M: int,
+    scale: Optional[float],
+    kernel: str,
+    normalize: bool,
+    dim: int,
 ):
     X = torch.rand(N, 3).to(torch.float32)
     Y = torch.rand(M, 3).to(torch.float32)
@@ -120,7 +125,9 @@ def test_convolution_functional(
 
     try:
         if kernel == "gaussian":
-            kernel_torch = (-squared_distances / (2 * scale**2)).exp()
+            kernel_torch = (
+                (-squared_distances / (2 * scale**2)).exp().clip(min=cutoff)
+            )
         elif kernel == "uniform":
             kernel_torch = 1.0 * ((squared_distances / (scale**2)) <= 1)
     except:
@@ -137,7 +144,10 @@ def test_convolution_functional(
         i_s = 1
 
     kernel_sks = polydata_x.point_convolution(
-        kernel=kernel, scale=scale, target=polydata_y, normalize=normalize
+        kernel=kernel,
+        scale=scale,
+        normalize=normalize,
+        target=polydata_y,
     )
 
     if dim == 1:

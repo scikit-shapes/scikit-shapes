@@ -40,7 +40,9 @@ class KeOpsSquaredDistances:
 
         else:
             if M != N or not torch.allclose(points, target_points):
-                raise NotImplementedError("target_points + cutoff not implemented yet")
+                raise NotImplementedError(
+                    "Cutoff argument is not available yet when computing convolutions between different point clouds."
+                )
 
             bin_size = 1.5
             # Put points into bins of size 1
