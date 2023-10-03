@@ -15,6 +15,7 @@ from ..types import (
     Number,
     polydata_type,
 )
+from typing import List
 from ..utils import scatter
 import torch
 
