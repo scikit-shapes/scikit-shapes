@@ -240,7 +240,7 @@ class Multiscale:
 
     @property
     @typecheck
-    def ratios(self) -> list[Number]:
+    def ratios(self) -> List[Number]:
         """Return the (sorted) available ratios."""
         tmp = list(self.shapes.keys())
         tmp.sort()
