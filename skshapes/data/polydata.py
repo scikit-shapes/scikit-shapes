@@ -105,17 +105,17 @@ class PolyData(BaseShape, polydata_type):
             points = torch.from_numpy(mesh.points).to(float_dtype)
 
             if mesh.is_all_triangles:
-                triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
+                triangles = mesh.faces.reshape(-1, 4)[:, 1:]
                 triangles = torch.from_numpy(triangles.copy())
                 edges = None
 
             elif mesh.triangulate().is_all_triangles:
-                triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:].T
+                triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:]
                 triangles = torch.from_numpy(triangles.copy())
                 edges = None
 
             elif len(mesh.lines) > 0:
-                edges = mesh.lines.reshape(-1, 3)[:, 1:].T
+                edges = mesh.lines.reshape(-1, 3)[:, 1:]
                 edges = torch.from_numpy(edges.copy())
                 triangles = None
 
@@ -350,9 +350,9 @@ class PolyData(BaseShape, polydata_type):
         """Convert the shape to a PyVista PolyData."""
 
         if self._triangles is not None:
-            np_triangles = self._triangles.detach().cpu().numpy().T
+            np_triangles = self._triangles.detach().cpu().numpy()
             faces = np.concatenate(
-                [np.ones((np_triangles.shape[0], 1), dtype=np.int64) * 3, np_triangles],
+                [np.ones((self.n_triangles, 1), dtype=np.int64) * 3, np_triangles],
                 axis=1,
             )
             polydata = pyvista.PolyData(
@@ -360,9 +360,9 @@ class PolyData(BaseShape, polydata_type):
             )
 
         elif self._edges is not None:
-            np_edges = self._edges.detach().cpu().numpy().T
+            np_edges = self._edges.detach().cpu().numpy()
             lines = np.concatenate(
-                [np.ones((np_edges.shape[0], 1), dtype=np.int64) * 2, np_edges], axis=1
+                [np.ones((self.n_edges, 1), dtype=np.int64) * 2, np_edges], axis=1
             )
             polydata = pyvista.PolyData(
                 self._points.detach().cpu().numpy(), lines=lines
@@ -402,17 +402,17 @@ class PolyData(BaseShape, polydata_type):
         points = torch.from_numpy(mesh.points).to(float_dtype)
 
         if mesh.is_all_triangles:
-            triangles = mesh.faces.reshape(-1, 4)[:, 1:].T
+            triangles = mesh.faces.reshape(-1, 4)[:, 1:]
             triangles = torch.from_numpy(triangles.copy())
             edges = None
 
         elif mesh.triangulate().is_all_triangles:
-            triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:].T
+            triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:]
             triangles = torch.from_numpy(triangles.copy())
             edges = None
 
         elif len(mesh.lines) > 0:
-            edges = mesh.lines.reshape(-1, 3)[:, 1:].T
+            edges = mesh.lines.reshape(-1, 3)[:, 1:]
             edges = torch.from_numpy(edges.copy())
             triangles = None
 
@@ -434,8 +434,8 @@ class PolyData(BaseShape, polydata_type):
         elif self._triangles is not None:
             points_numpy = self.points.detach().cpu().numpy().astype(np.float64)
             triangles_numpy = self.triangles.detach().cpu().numpy().astype(np.int64)
-            edges = extract_edges(points_numpy, triangles_numpy)
-            edges = torch.from_numpy(edges).to(int_dtype).to(self.device)
+            edges = extract_edges(points_numpy, triangles_numpy.T)
+            edges = torch.from_numpy(edges.T).to(int_dtype).to(self.device)
 
             self._edges = edges
             return edges
@@ -568,7 +568,7 @@ class PolyData(BaseShape, polydata_type):
     def n_edges(self) -> int:
         edges = self.edges
         if edges is not None:
-            return edges.shape[1]
+            return edges.shape[0]
         else:
             return 0
 
@@ -576,7 +576,7 @@ class PolyData(BaseShape, polydata_type):
     @typecheck
     def n_triangles(self) -> int:
         if self._triangles is not None:
-            return self._triangles.shape[1]
+            return self._triangles.shape[0]
         else:
             return 0
 
@@ -611,7 +611,7 @@ class PolyData(BaseShape, polydata_type):
         if self.edges is None:
             raise ValueError("Edges cannot be computed")
 
-        return (self.points[self.edges[0]] + self.points[self.edges[1]]) / 2
+        return (self.points[self.edges[:, 0]] + self.points[self.edges[:, 1]]) / 2
 
     @property
     @typecheck
@@ -622,7 +622,9 @@ class PolyData(BaseShape, polydata_type):
         if self.edges is None:
             raise ValueError("Edges cannot be computed")
 
-        return (self.points[self.edges[0]] - self.points[self.edges[1]]).norm(dim=1)
+        return (self.points[self.edges[:, 0]] - self.points[self.edges[:, 1]]).norm(
+            dim=1
+        )
 
     @property
     @typecheck
@@ -633,9 +635,9 @@ class PolyData(BaseShape, polydata_type):
         if self.triangles is None:
             raise ValueError("Triangles are not defined")
 
-        A = self.points[self.triangles[0]]
-        B = self.points[self.triangles[1]]
-        C = self.points[self.triangles[2]]
+        A = self.points[self.triangles[:, 0]]
+        B = self.points[self.triangles[:, 1]]
+        C = self.points[self.triangles[:, 2]]
 
         return (A + B + C) / 3
 
@@ -648,9 +650,9 @@ class PolyData(BaseShape, polydata_type):
         if self.triangles is None:
             raise ValueError("Triangles are not defined")
 
-        A = self.points[self.triangles[0]]
-        B = self.points[self.triangles[1]]
-        C = self.points[self.triangles[2]]
+        A = self.points[self.triangles[:, 0]]
+        B = self.points[self.triangles[:, 1]]
+        C = self.points[self.triangles[:, 2]]
 
         return torch.cross(B - A, C - A).norm(dim=1) / 2
 
@@ -663,9 +665,9 @@ class PolyData(BaseShape, polydata_type):
         if self.triangles is None:
             raise ValueError("Triangles are not defined")
 
-        A = self.points[self.triangles[0]]
-        B = self.points[self.triangles[1]]
-        C = self.points[self.triangles[2]]
+        A = self.points[self.triangles[:, 0]]
+        B = self.points[self.triangles[:, 1]]
+        C = self.points[self.triangles[:, 2]]
 
         # TODO: Normalize?
         return torch.cross(B - A, C - A)
@@ -684,7 +686,7 @@ class PolyData(BaseShape, polydata_type):
             # so we must repeat the areas 3 times, without interleaving.
             areas = areas.repeat(3)
             return torch.bincount(
-                self.triangles.flatten(), weights=areas, minlength=self.n_points
+                self.triangles.T.flatten(), weights=areas, minlength=self.n_points
             )
 
         elif self.edges is not None:
@@ -693,7 +695,7 @@ class PolyData(BaseShape, polydata_type):
             # so we must repeat the lengths 2 times, without interleaving.
             lengths = lengths.repeat(2)
             return torch.bincount(
-                self.edges.flatten(), weights=lengths, minlength=self.n_points
+                self.edges.T.flatten(), weights=lengths, minlength=self.n_points
             )
 
         return torch.ones(self.n_points, dtype=float_dtype, device=self.device)

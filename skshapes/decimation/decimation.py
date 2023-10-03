@@ -110,7 +110,7 @@ class Decimation:
 
         decimated_points, decimated_triangles, collapses = fast_simplification.simplify(
             points=points,
-            triangles=triangles.T,
+            triangles=triangles,
             target_reduction=self.target_reduction,
             return_collapses=True,
         )
@@ -158,7 +158,7 @@ class Decimation:
         # Apply the collapses
         points, triangles, indice_mapping = fast_simplification.replay_simplification(
             points=points,
-            triangles=triangles.T,
+            triangles=triangles,
             collapses=self.collapses[0:n_collapses],
         )
 
@@ -185,7 +185,7 @@ class Decimation:
 
         return PolyData(
             torch.from_numpy(points).to(float_dtype),
-            triangles=torch.from_numpy(triangles.T).to(int_dtype),
+            triangles=torch.from_numpy(triangles).to(int_dtype),
             landmarks=landmarks,
             device=device,
         )
