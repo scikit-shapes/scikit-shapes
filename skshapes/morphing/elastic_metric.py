@@ -85,7 +85,7 @@ class ElasticMetric(BaseModel):
             floatScalarType: The sum of the squared norm of the sequence of speed vectors in the Riemannian metric.
 
         """
-        e0, e1 = edges
+        e0, e1 = edges[:, 0], edges[:, 1]
 
         a1 = (
             (velocities[:, e0, :] - velocities[:, e1, :])
