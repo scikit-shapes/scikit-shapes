@@ -20,18 +20,30 @@ class KeOpsSquaredDistances:
         points,
         cutoff: Optional[Number] = None,
         kernel: Optional[Callable] = None,
+        target_points=None,
     ):
+        if target_points is None:
+            target_points = points
+
+        M = target_points.shape[0]
         N = points.shape[0]
         D = points.shape[1]
         assert points.shape == (N, D)
+        assert target_points.shape == (M, D)
 
-        self.shape = (N, N)
+        self.shape = (M, N)
 
         if cutoff is None:
             x = points
+            y = target_points
             ranges = None
 
         else:
+            if M != N or not torch.allclose(points, target_points):
+                raise NotImplementedError(
+                    "Cutoff argument is not available yet when computing convolutions between different point clouds."
+                )
+
             bin_size = 1.5
             # Put points into bins of size 1
             point_labels = grid_cluster(points, bin_size)
@@ -61,10 +73,11 @@ class KeOpsSquaredDistances:
             ranges = from_matrix(x_ranges, x_ranges, keep)
 
             x = sorted_points
+            y = x
 
-        x_i = LazyTensor(x.view(N, 1, D))
-        x_j = LazyTensor(x.view(1, N, D))
-        D_ij = ((x_j - x_i) ** 2).sum(-1)
+        x_i = LazyTensor(x.view(1, N, D))
+        y_j = LazyTensor(y.view(M, 1, D))
+        D_ij = ((y_j - x_i) ** 2).sum(-1)
         self.K_ij = kernel(D_ij)
         self.K_ij.ranges = ranges
 
@@ -103,17 +116,33 @@ def squared_distances(
     cutoff: Optional[Number] = None,
     geodesic: bool = False,
     kernel: Optional[Callable] = None,
+    target_points=None,
 ):
-    """Returns the (N, N) matrix of squared distances between points."""
+    """Returns the matrix of squared distances between points.
+
+    If source_points is not None, then the (N, M) matrix of squared distances
+    between points (in rows) and source_points (in columns) is returned.
+
+    Else, the (N, N) matrix of squared distances between points is returned.
+
+    """
+
+    if target_points is None:
+        target_points = points
+
     # TODO: add support for batches!
     N = points.shape[0]
+    M = target_points.shape[0]
     D = points.shape[1]
     assert points.shape == (N, D)
+    assert target_points.shape == (M, D)
 
     if geodesic:
         raise NotImplementedError("Geodesic distances are not implemented yet.")
 
     if window is None:
-        return KeOpsSquaredDistances(points=points, cutoff=cutoff, kernel=kernel)
+        return KeOpsSquaredDistances(
+            points=points, cutoff=cutoff, kernel=kernel, target_points=target_points
+        )
 
     raise NotImplementedError()

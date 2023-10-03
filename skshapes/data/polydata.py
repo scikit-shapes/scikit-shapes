@@ -199,6 +199,7 @@ class PolyData(BaseShape, polydata_type):
             "point_shape_indices",
             "point_curvedness",
             "point_curvature_colors",
+            "mesh_convolution",
         ]
         for method_name in self.cached_methods:
             setattr(
@@ -210,7 +211,7 @@ class PolyData(BaseShape, polydata_type):
             )
 
     from .utils import cache_clear
-    from ..convolutions import _point_convolution
+    from ..convolutions import _point_convolution, _mesh_convolution
     from ..features import (
         _point_normals,
         _point_frames,

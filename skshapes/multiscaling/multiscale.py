@@ -15,6 +15,7 @@ from ..types import (
     Number,
     polydata_type,
 )
+from typing import List
 from ..utils import scatter
 import torch
 
@@ -218,24 +219,33 @@ class Multiscale:
         else:
             raise NotImplementedError("Only constant smoothing is supported for now")
 
-    # @typecheck
-    # def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
+    @typecheck
+    def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
+        source = self.at(signal_ratio)
+        target = self.at(target_ratio)
 
-    #     assert signal.shape[0] == self.at(signal_ratio).n_points, "signal must have the same number of points as the shape at signal ratio"
-    #     from ..convolutions import point_convolution
+        assert (
+            signal.shape[0] == source.n_points
+        ), "signal must have the same number of points as the shape at signal ratio"
 
-    #     # Store the kwargs to pass to the point convolution
-    #     point_convolution_args = point_convolution.__annotations__.keys()
-    #     convolutions_kwargs = dict()
-    #     for arg in kwargs:
-    #         if arg in point_convolution_args:
-    #             convolutions_kwargs[arg] = kwargs[arg]
+        # Store the kwargs to pass to the point convolution
+        point_convolution_args = source._point_convolution.__annotations__.keys()
+        convolutions_kwargs = dict()
+        for arg in kwargs:
+            if arg in point_convolution_args:
+                convolutions_kwargs[arg] = kwargs[arg]
 
-    #     self.at(signal_ratio).point_weights = torch.ones_like(signal)
+        C = source.point_convolution(target=target, **convolutions_kwargs)
 
-    #     C = self.at(signal_ratio).point_convolution(signal, **convolutions_kwargs)
+        return C @ signal
 
-    #     return C @ signal
+    @property
+    @typecheck
+    def ratios(self) -> List[Number]:
+        """Return the (sorted) available ratios."""
+        tmp = list(self.shapes.keys())
+        tmp.sort()
+        return tmp
 
     @typecheck
     def add_point_data(
@@ -249,38 +259,37 @@ def edge_smoothing(
     signal: NumericalTensor,
     shape: polydata_type,
     weight_by_length: bool = False,
-    gpu: bool = False,
 ) -> NumericalTensor:
     assert signal.shape[0] == shape.n_points
+    signal_device = signal.device
+    signal = signal.to(shape.device)
 
-    n_edges = shape.n_edges
-    n_points = shape.n_points
-    edges = shape.edges
+    K = shape.mesh_convolution(weight_by_length=weight_by_length)
 
-    # Edge smoothing
-    edges_revert = torch.zeros_like(edges)
-    edges_revert[0], edges_revert[1] = edges[1], edges[0]
+    return (K @ signal).to(signal_device)
 
-    indices = torch.cat((edges, edges_revert), dim=1)
 
-    if not weight_by_length:
-        values = torch.ones(2 * n_edges, dtype=torch.float32)
+@typecheck
+def vector_heat_smooting(
+    signal: NumericalTensor, shape: polydata_type
+) -> NumericalTensor:
+    try:
+        import potpourri3d as pp3d
+    except:
+        raise ImportError("Please install potpourri3d to use vector heat smoothing")
+
+    if shape.is_triangle_mesh():
+        V, F = shape.points.cpu().numpy(), shape.triangles.cpu().numpy()
+        if F.shape[0] == 3:
+            F = F.T
+
+        try:
+            solver = pp3d.MeshVectorHeatSolver(V, F)
+        except:
+            solver = pp3d.PointCloudHeatSolver(V)
+
     else:
-        values = shape.edge_lengths.repeat(2)
+        solver = pp3d.PointCloudHeatSolver(shape.points.cpu().numpy())
 
-    if torch.cuda.is_available() and gpu:
-        indices = indices.cuda()
-        values = values.cuda()
-        device = torch.device("cuda")
-    else:
-        device = torch.device("cpu")
-
-    S = torch.sparse_coo_tensor(
-        indices=indices, values=values, size=(n_points, n_points), device=device
-    )
-
-    degrees = S @ torch.ones(n_points, device=device)
-    output = (S @ signal.to(device)) / degrees
-    output = output.to(shape.device)
-
-    return output
+    ext = solver.extend_vector(torch.arange(len(signal)).numpy(), signal.cpu().numpy())
+    return torch.from_numpy(ext)

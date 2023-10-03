@@ -5,12 +5,17 @@ from ..types import typecheck, Points, Optional, Triangles, Number, Literal
 class Constant1Kernel:
     """A summation operator that stands for torch.ones(N, N)."""
 
-    def __init__(self, points):
+    def __init__(self, points, target_points=None):
+        if target_points is None:
+            target_points = points
+
         N = points.shape[0]
+        M = target_points.shape[0]
         D = points.shape[1]
         assert points.shape == (N, D)
+        assert target_points.shape == (M, D)
 
-        self.shape = (N, N)
+        self.shape = (M, N)
 
     def __matmul__(self, other):
         assert len(other.shape) in (1, 2)
@@ -32,9 +37,9 @@ class Constant1Kernel:
 
 
 @typecheck
-def constant_1_kernel(*, points, **kwargs) -> Constant1Kernel:
+def constant_1_kernel(*, points, target_points=None, **kwargs) -> Constant1Kernel:
     """Returns the (N, N) matrix of squared distances between points.
 
     For geodesic kernels, we may want to stick to connected components?
     """
-    return Constant1Kernel(points)
+    return Constant1Kernel(points, target_points)
