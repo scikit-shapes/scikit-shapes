@@ -1,6 +1,7 @@
 import skshapes as sks
 import torch
 from pykeops.torch import LazyTensor
+from typing import Optional
 
 
 def test_squared_distance():
@@ -160,3 +161,15 @@ def test_convolution_functional(
     B = kernel_sks @ a
 
     assert torch.allclose(o_s * (kernel_torch @ (i_s * a)), kernel_sks @ a, atol=1e-5)
+
+
+def test_mesh_convolution():
+    mesh = sks.Sphere()
+    # define a constant signal
+    signal = torch.rand(1) * torch.ones(mesh.n_points, dtype=torch.float32)
+
+    # assert that the signal is unchanged by the convolution
+    for weight_by_length in [True, False]:
+        kernel = mesh.mesh_convolution(weight_by_length=weight_by_length)
+        assert kernel.shape == (mesh.n_points, mesh.n_points)
+        assert torch.allclose(kernel @ signal, signal)
