@@ -282,6 +282,41 @@ def test_point_data2():
         sks_again.point_data["curvature"].numpy(), pv_mesh.point_data["curvature"]
     )
 
+def test_landmarks_creation():
+
+    mesh1 = sks.Sphere()
+    mesh2 = sks.Sphere()
+
+    landmarks_indices = [0, 1, 2, 3]
+    landmarks_values = 4 * [1.0]
+    
+    n_landmarks = len(landmarks_indices)
+    n_points = mesh1.n_points
+    landmarks = torch.sparse_coo_tensor(
+        indices=[[0, 1, 2, 3], landmarks_indices],
+        values=landmarks_values,
+        size=(n_landmarks, n_points),
+        device="cpu",
+    )
+
+    mesh1.landmarks = landmarks
+    mesh2.landmarks = landmarks_indices
+
+    assert torch.allclose(mesh1.landmark_points, mesh2.landmark_points)
+    assert torch.allclose(mesh1.landmark_indices, torch.tensor(landmarks_indices))
+    assert torch.allclose(mesh2.landmark_indices, torch.tensor(landmarks_indices))
+
+    assert mesh1.n_landmarks == 4
+    mesh1.add_landmarks(8)
+    assert mesh1.n_landmarks == 5
+    assert mesh1.landmark_indices[-1] == 8
+
+    mesh2.add_landmarks([8])
+
+    mesh1 = sks.PolyData(mesh1.to_pyvista())
+
+    assert torch.allclose(mesh1.landmark_points, mesh2.landmark_points)
+
 
 def test_landmarks_conservation():
     # Create a mesh and add landmarks

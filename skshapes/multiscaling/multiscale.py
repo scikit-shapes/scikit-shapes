@@ -15,7 +15,7 @@ from ..types import (
     Number,
     polydata_type,
 )
-from typing import List
+from typing import List, Literal
 from ..utils import scatter
 import torch
 
@@ -187,13 +187,15 @@ class Multiscale:
         *,
         low_res: Number,
         high_res: Number,
-        smoothing="constant"
+        smoothing: Literal["constant", "mesh_convolution"] = "constant",
+        **kwargs
     ) -> NumericalTensor:
         """Propagate a signal from a resolution to a higher resolution.
 
         This operation requires a smoothing operation. The available smoothing
         operations are :
         - "constant" : the signal is repeated at each point of the high resolution shape
+        - "mesh_convolution" : the signal is smoothed using the mesh convolution operator
 
         Args:
             signal (NumericalTensor): the signal to be propagated
@@ -209,15 +211,24 @@ class Multiscale:
         ), "signal must have the same number of points as the origin ratio"
         assert low_res <= high_res, "high_res must be smaller than low_res"
 
+        high_res_signal = torch.index_select(
+            signal,
+            dim=0,
+            index=self.indice_mapping(high_res=high_res, low_res=low_res),
+        )
+
         if smoothing == "constant":
-            return torch.index_select(
-                signal,
-                dim=0,
-                index=self.indice_mapping(high_res=high_res, low_res=low_res),
+            pass
+        elif smoothing == "mesh_convolution":
+            if "n_smoothing_steps" in kwargs:
+                n_smoothing_steps = kwargs["n_smoothing_steps"]
+            else:
+                n_smoothing_steps = 1
+            high_res_signal = edge_smoothing(
+                high_res_signal, self.at(high_res), n_smoothing_steps=n_smoothing_steps
             )
 
-        else:
-            raise NotImplementedError("Only constant smoothing is supported for now")
+        return high_res_signal
 
     @typecheck
     def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
@@ -259,20 +270,49 @@ def edge_smoothing(
     signal: NumericalTensor,
     shape: polydata_type,
     weight_by_length: bool = False,
+    n_smoothing_steps: int = 1,
 ) -> NumericalTensor:
+    """Smooth a signal on a triangle mesh by edge smoothing.
+
+    Args:
+        signal (NumericalTensor): the signal to be smoothed
+        shape (polydata_type): the triangle mesh on which the signal is defined
+        weight_by_length (bool, optional): Defaults to False.
+        n_smoothing_steps (int, optional): the number of smoothing operations to apply. Defaults to 1.
+
+    Returns:
+        NumericalTensor: the smoothed signal
+    """
     assert signal.shape[0] == shape.n_points
+    assert n_smoothing_steps >= 1, "n_smoothing_steps must be positive"
     signal_device = signal.device
     signal = signal.to(shape.device)
 
     K = shape.mesh_convolution(weight_by_length=weight_by_length)
 
-    return (K @ signal).to(signal_device)
+    output = signal.clone()
+    for _ in range(n_smoothing_steps):
+        output = K @ output
+
+    return output.to(signal_device)
 
 
 @typecheck
 def vector_heat_smooting(
     signal: NumericalTensor, shape: polydata_type
 ) -> NumericalTensor:
+    """Smooth a vector signal on a triangle mesh or a points cloud by vector heat smoothing using pp3d.
+
+    Args:
+        signal (NumericalTensor): the signal to be smoothed
+        shape (polydata_type): the triangle mesh or points cloud on which the signal is defined
+
+    Raises:
+        ImportError: potpourri3d must be installed to use vector heat smoothing
+
+    Returns:
+        NumericalTensor: the smoothed signal
+    """
     try:
         import potpourri3d as pp3d
     except:
@@ -280,8 +320,6 @@ def vector_heat_smooting(
 
     if shape.is_triangle_mesh():
         V, F = shape.points.cpu().numpy(), shape.triangles.cpu().numpy()
-        if F.shape[0] == 3:
-            F = F.T
 
         try:
             solver = pp3d.MeshVectorHeatSolver(V, F)

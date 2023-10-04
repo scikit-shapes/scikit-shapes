@@ -13,7 +13,7 @@ def _mesh_convolution(
     self,
     weight_by_length: bool = False,
 ) -> LinearOperator:
-    """Creates a convolution kernel on a triangle mesh as a (N, N) operator.
+    """Creates a convolution kernel on a triangle mesh or a wireframe polydata as a (N, N) operator.
 
     Args:
         weight_by_length (bool, optional): If True, the convolution kernel is
