@@ -56,15 +56,15 @@ def check_module_annotations(module, template, type):
 # Define the templates for the annotations of Loss and Morphing
 loss_template = {
     "__call__": {
-        "source": sks.Shape,
-        "target": sks.Shape,
+        "source": sks.shape_type,
+        "target": sks.shape_type,
         "return": sks.FloatScalar,
     }
 }
 
 morphing_template = {
     "morph": {
-        "shape": sks.Shape,
+        "shape": sks.shape_type,
         "return_path": bool,
         "return_regularization": bool,
         "return": sks.morphing.utils.MorphingOutput,

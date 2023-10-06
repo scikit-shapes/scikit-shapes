@@ -1,4 +1,3 @@
-from ..data import PolyData, Shape
 from .basemodel import BaseModel
 import torch
 
@@ -6,6 +5,9 @@ from ..types import (
     typecheck,
     Float2dTensor,
     Tuple,
+    polydata_type,
+    shape_type,
+    convert_inputs,
 )
 
 from .utils import MorphingOutput
@@ -22,10 +24,11 @@ class RigidMotion(BaseModel):
         self.n_steps = n_steps
         pass
 
+    @convert_inputs
     @typecheck
     def morph(
         self,
-        shape: PolyData,
+        shape: polydata_type,
         parameter: Float2dTensor,
         return_path: bool = False,
         return_regularization: bool = False,
@@ -72,10 +75,12 @@ class RigidMotion(BaseModel):
         )
 
     @typecheck
-    def parameter_shape(self, shape: Shape) -> Tuple[int, int]:
+    def parameter_shape(self, shape: shape_type) -> Tuple[int, int]:
         return (2, 3)
 
 
+@convert_inputs
+@typecheck
 def axis_angle_to_quaternion(axis_angle: torch.Tensor) -> torch.Tensor:
     """
     Convert rotations given as axis/angle to quaternions.
@@ -108,6 +113,8 @@ def axis_angle_to_quaternion(axis_angle: torch.Tensor) -> torch.Tensor:
     return quaternions
 
 
+@convert_inputs
+@typecheck
 def quaternion_to_matrix(quaternions: torch.Tensor) -> torch.Tensor:
     """
     Convert rotations given as quaternions to rotation matrices.
@@ -140,5 +147,7 @@ def quaternion_to_matrix(quaternions: torch.Tensor) -> torch.Tensor:
     return o.reshape(quaternions.shape[:-1] + (3, 3))
 
 
+@convert_inputs
+@typecheck
 def axis_angle_to_matrix(axis_angle: torch.Tensor) -> torch.Tensor:
     return quaternion_to_matrix(axis_angle_to_quaternion(axis_angle))

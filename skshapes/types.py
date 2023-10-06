@@ -24,15 +24,56 @@ from typing import (
 import torch
 import numpy as np
 
+float_dtype = torch.float32
+int_dtype = torch.int64
+
 
 def typecheck(func):
     return jaxtyped(beartype(func))
 
 
+def _convert_arg(x):
+    if isinstance(x, np.ndarray):
+        x = torch.from_numpy(x)
+
+    if isinstance(x, torch.Tensor):
+        if torch.is_floating_point(x) and x.dtype != float_dtype:
+            return x.to(float_dtype)
+        elif torch.is_complex(x):
+            raise ValueError("Complex tensors are not supported")
+        elif not torch.is_floating_point(x) and x.dtype != int_dtype:
+            return x.to(int_dtype)
+
+    return x
+
+
+def convert_inputs(func):
+    """A decorator that converts the input to the right type.
+
+    It converts the inputs arrays to the right type (torch.Tensor) and
+    convert the dtype of the tensor to the right one (float32 for float,
+    int64 for int), before calling the function.
+    """
+
+    def wrapper(*args, **kwargs):
+        # Convert args and kwargs to torch.Tensor
+        # and convert the dtype to the right one
+        new_args = []
+        for i, arg in enumerate(args):
+            new_args.append(_convert_arg(arg))
+
+        for key, value in kwargs.items():
+            kwargs[key] = _convert_arg(value)
+
+        return func(*new_args, **kwargs)
+
+    # Copy annotations (if not, beartype does not work)
+    wrapper.__annotations__ = func.__annotations__
+    return wrapper
+
+
 # Type aliases
 Number = Union[int, float]
-float_dtype = torch.float32
-int_dtype = torch.int64
 JaxFloat = Float32
 JaxDouble = Float64
 JaxInt = Int64
@@ -83,6 +124,8 @@ Landmarks = Annotated[
 
 
 # Types for shapes
+
+
 class polydata_type:
     pass
 

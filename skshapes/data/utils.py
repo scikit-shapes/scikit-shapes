@@ -1,18 +1,6 @@
 from __future__ import annotations
 
-from ..types import typecheck
-
-# from .polydata import PolyData
-# import pyvista
-
-
-# @typecheck
-# def read(filename: str) -> PolyData:
-#     mesh = pyvista.read(filename)
-#     if type(mesh) == pyvista.PolyData:
-#         return PolyData.from_pyvista(mesh)
-#     else:
-#         raise NotImplementedError("Images are not supported yet")
+from ..types import typecheck, convert_inputs
 
 
 from ..types import (
@@ -59,18 +47,12 @@ class DataAttributes(dict):
     def __getitem__(self, key: Any) -> NumericalTensor:
         return dict.__getitem__(self, key)
 
+    @convert_inputs
     @typecheck
-    def _check_value(
-        self, value: Union[NumericalArray, NumericalTensor]
-    ) -> NumericalTensor:
-        if isinstance(value, IntArray):
-            value = torch.from_numpy(value).to(int_dtype)
-        elif isinstance(value, FloatArray):
-            value = torch.from_numpy(value).to(float_dtype)
-
+    def _check_value(self, value: NumericalTensor) -> NumericalTensor:
         assert (
             value.shape[0] == self._n
-        ), f"Last dimension of the tensor should be {self._n}"
+        ), f"First dimension of the tensor should be {self._n}"
         if value.device != self._device:
             value = value.to(self._device)
 

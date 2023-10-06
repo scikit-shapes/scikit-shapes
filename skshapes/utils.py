@@ -1,5 +1,5 @@
 import torch
-from .types import NumericalTensor, Int1dTensor
+from .types import NumericalTensor, Int1dTensor, convert_inputs, typecheck
 from typing import Literal
 
 
@@ -34,6 +34,8 @@ src = torch.tensor([1, -1, 0.5, 0, 2, 1], dtype=torch.float32)
 index = torch.tensor([0, 1, 2, 0, 2, 3])
 
 
+@convert_inputs
+@typecheck
 def scatter(
     src: NumericalTensor,
     index: Int1dTensor,

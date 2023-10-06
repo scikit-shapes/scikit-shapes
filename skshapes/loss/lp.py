@@ -2,9 +2,8 @@
 
 from typing import Any
 import torch
-from ..data import PolyData
 
-from ..types import typecheck, FloatScalar, Number
+from ..types import typecheck, FloatScalar, Number, polydata_type
 
 from .baseloss import BaseLoss
 
@@ -47,7 +46,7 @@ class LpLoss(BaseLoss):
         self.p = p
 
     @typecheck
-    def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
+    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
         return _norm(x=(source.points - target.points), p=self.p)
 
 
@@ -65,7 +64,7 @@ class L2Loss(BaseLoss):
         self.p = p
 
     @typecheck
-    def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
+    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
         return _norm(x=(source.points - target.points), p=2)
 
 
@@ -95,5 +94,5 @@ class LandmarkLoss(BaseLoss):
         self.p = p
 
     @typecheck
-    def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
+    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
         return _norm(x=(source.landmark_points - target.landmark_points), p=self.p)

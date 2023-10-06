@@ -7,6 +7,7 @@ import numpy as np
 import functools
 
 from ..types import (
+    convert_inputs,
     typecheck,
     float_dtype,
     int_dtype,
@@ -48,6 +49,7 @@ class PolyData(BaseShape, polydata_type):
     For all these cases, it is possible to provide landmarks as a sparse tensor and device as a string or a torch device ("cpu" by default)
     """
 
+    @convert_inputs
     @typecheck
     def __init__(
         self,
@@ -92,7 +94,6 @@ class PolyData(BaseShape, polydata_type):
                 if landmarks is not None:
                     print(f"Warning: Mesh has been cleaned. Landmarks are ignored.")
                     landmarks = None
-                    point_data = None
 
                 if point_data is not None:
                     print(f"Warning: Mesh has been cleaned. Point_data are ignored.")
@@ -443,6 +444,7 @@ class PolyData(BaseShape, polydata_type):
             return edges
 
     @edges.setter
+    @convert_inputs
     @typecheck
     def edges(self, edges: Edges) -> None:
         """Set the edges of the shape. This will also set the triangles to None."""
@@ -463,6 +465,7 @@ class PolyData(BaseShape, polydata_type):
         return self._triangles
 
     @triangles.setter
+    @convert_inputs
     @typecheck
     def triangles(self, triangles: Triangles) -> None:
         """Set the triangles of the shape. This will also set the edges to None."""
@@ -484,6 +487,7 @@ class PolyData(BaseShape, polydata_type):
         return self._points
 
     @points.setter
+    @convert_inputs
     @typecheck
     def points(self, points: Points) -> None:
         if points.shape[0] != self.n_points:

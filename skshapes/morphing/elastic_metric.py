@@ -1,6 +1,5 @@
 import torch
 
-from ..data import PolyData
 from .basemodel import BaseModel
 
 from ..types import (
@@ -9,6 +8,8 @@ from ..types import (
     FloatScalar,
     Edges,
     Tuple,
+    polydata_type,
+    convert_inputs,
 )
 
 from .utils import MorphingOutput
@@ -19,10 +20,11 @@ class ElasticMetric(BaseModel):
     def __init__(self, n_steps: int = 1) -> None:
         self.n_steps = n_steps
 
+    @convert_inputs
     @typecheck
     def morph(
         self,
-        shape: PolyData,
+        shape: polydata_type,
         parameter: Float3dTensor,
         return_path: bool = False,
         return_regularization: bool = False,
@@ -71,6 +73,7 @@ class ElasticMetric(BaseModel):
             morphed_shape=morphed_shape, path=path, regularization=regularization
         )
 
+    @convert_inputs
     @typecheck
     def metric(
         self, points: Float3dTensor, edges: Edges, velocities: Float3dTensor
@@ -95,5 +98,5 @@ class ElasticMetric(BaseModel):
         return torch.sum(a1**2)
 
     @typecheck
-    def parameter_shape(self, shape: PolyData) -> Tuple[int, int, int]:
+    def parameter_shape(self, shape: polydata_type) -> Tuple[int, int, int]:
         return (self.n_steps, *shape.points.shape)

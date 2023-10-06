@@ -1,10 +1,9 @@
 """Abstract classes for losses."""
 
 from __future__ import annotations
-from ..types import typecheck, Number, FloatScalar, Any, float_dtype
+from ..types import typecheck, Number, FloatScalar, Any, float_dtype, shape_type
 
 from typing import List
-from ..data import Shape
 
 import torch
 
@@ -82,7 +81,7 @@ class EmptyLoss(BaseLoss):
         pass
 
     @typecheck
-    def __call__(self, source: Shape, target: Shape) -> FloatScalar:
+    def __call__(self, source: shape_type, target: shape_type) -> FloatScalar:
         """__call__ method of the EmptyLoss class. Always returns 0."""
         assert source.device.type == target.device.type
         return torch.tensor(0.0, dtype=float_dtype)
@@ -117,15 +116,15 @@ class SumLoss(BaseLoss):
         self.loss2 = loss2
 
     @typecheck
-    def __call__(self, source: Shape, target: Shape) -> FloatScalar:
+    def __call__(self, source: shape_type, target: shape_type) -> FloatScalar:
         """__call__ method of the SumLoss class.
 
         It returns the sum of the two losses.
 
         Args:
-            source (Shape): further restrictions on the source shape's type
+            source (shape_type): further restrictions on the source shape's type
                             can be imposed by the added losses
-            target (Shape): further restrictions on the target shape's type
+            target (shape_type): further restrictions on the target shape's type
                             can be imposed by the added losses
 
         Returns:
@@ -158,5 +157,5 @@ class ProductLoss(BaseLoss):
         self.scalar = scalar
 
     @typecheck
-    def __call__(self, source: Shape, target: Shape) -> FloatScalar:
+    def __call__(self, source: shape_type, target: shape_type) -> FloatScalar:
         return self.scalar * self.loss.__call__(source=source, target=target)

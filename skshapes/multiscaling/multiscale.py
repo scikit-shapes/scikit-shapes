@@ -5,6 +5,7 @@
 
 from ..types import (
     typecheck,
+    convert_inputs,
     Optional,
     FloatSequence,
     IntSequence,
@@ -145,6 +146,7 @@ class Multiscale:
             tmp = scatter(src=torch.arange(len(tmp)), index=tmp, reduce="min")
             return self.mappings_from_origin[low_res][tmp]
 
+    @convert_inputs
     @typecheck
     def signal_from_high_to_low_res(
         self,
@@ -180,6 +182,7 @@ class Multiscale:
             reduce=reduce,
         )
 
+    @convert_inputs
     @typecheck
     def signal_from_low_to_high_res(
         self,
@@ -230,6 +233,7 @@ class Multiscale:
 
         return high_res_signal
 
+    @convert_inputs
     @typecheck
     def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
         source = self.at(signal_ratio)
@@ -258,13 +262,8 @@ class Multiscale:
         tmp.sort()
         return tmp
 
-    @typecheck
-    def add_point_data(
-        self, signal, *, name, at=1, reduce="mean", smoothing="constant"
-    ):
-        pass
 
-
+@convert_inputs
 @typecheck
 def edge_smoothing(
     signal: NumericalTensor,
@@ -297,6 +296,7 @@ def edge_smoothing(
     return output.to(signal_device)
 
 
+@convert_inputs
 @typecheck
 def vector_heat_smooting(
     signal: NumericalTensor, shape: polydata_type

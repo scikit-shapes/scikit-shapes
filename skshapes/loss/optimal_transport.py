@@ -2,9 +2,8 @@
 
 from geomloss import SamplesLoss
 import torch
-from ..data import PolyData
 
-from ..types import typecheck, FloatScalar
+from ..types import typecheck, FloatScalar, polydata_type
 from .baseloss import BaseLoss
 
 
@@ -15,7 +14,7 @@ class OptimalTransportLoss(BaseLoss):
         self.loss = loss
 
     @typecheck
-    def __call__(self, source: PolyData, target: PolyData) -> FloatScalar:
+    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
         target_centers = target.triangle_centers
         target_weights = target.triangle_areas
 

@@ -1,6 +1,7 @@
-from ..data import Shape
+"""Registration between two shapes."""
+
 from ..optimization import Optimizer
-from ..types import typecheck, Union
+from ..types import typecheck, Union, shape_type
 from ..loss import Loss
 from ..morphing import Model
 import torch
@@ -42,8 +43,8 @@ class Registration:
     def fit(
         self,
         *,
-        source: Shape,
-        target: Shape,
+        source: shape_type,
+        target: shape_type,
     ) -> None:
         # Check that the shapes are on the same device
         assert (
@@ -118,7 +119,7 @@ class Registration:
             self.path_ = [s.to(self.output_device) for s in self.path_]
 
     @typecheck
-    def transform(self, *, source: Shape) -> Shape:
+    def transform(self, *, source: shape_type) -> shape_type:
         transformed_shape = self.model.morph(
             shape=source, parameter=self.parameter_
         ).morphed_shape
@@ -132,9 +133,9 @@ class Registration:
     def fit_transform(
         self,
         *,
-        source: Shape,
-        target: Shape,
-    ) -> Shape:
+        source: shape_type,
+        target: shape_type,
+    ) -> shape_type:
         # if source.device != self.device:
         #     source = source.to(self.device)
         # if target.device != self.device:

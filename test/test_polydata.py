@@ -62,10 +62,17 @@ def _cube():
 
 
 def test_polydata_creation():
-    # Shape with points and triangles
-    points = torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float32)
-    triangles = torch.tensor([[0, 1, 2]], dtype=torch.int64)
+    # Shape initialized with points and triangles
+    # dtype are automatically converted to float32 and int64 and numpy arrays are converted to torch.Tensor
+    points = torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float64)
+    triangles = torch.tensor([[0, 1, 2]], dtype=torch.int32).numpy()
+
     triangle = sks.PolyData(points=points, triangles=triangles)
+
+    assert isinstance(triangle.points, torch.Tensor)
+    assert triangle.points.dtype == torch.float32
+    assert isinstance(triangle.points, torch.Tensor)
+    assert triangle.triangles.dtype == torch.int64
 
     # edges are computed on the fly when the getter is called
     assert triangle._edges is None
@@ -299,6 +306,8 @@ def test_landmarks_creation():
         device="cpu",
     )
 
+    # Assert that initialize landmarks by vertex indices or with the
+    # sparse tensor gives the same result
     mesh1.landmarks = landmarks
     mesh2.landmarks = landmarks_indices
 
