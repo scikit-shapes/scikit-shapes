@@ -6,34 +6,25 @@ import torch
 import time
 
 
-mesh = sks.PolyData(examples.download_louis_louvre())
-# mesh = sks.PolyData(examples.download_black_vase())
+mesh = sks.PolyData(examples.download_louis_louvre().clean())
 
-values = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-indices = [
-    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
-    [
-        151807,
-        21294,
-        23344,
-        25789,
-        131262,
-        33852,
-        171465,
-        191680,
-        172653,
-        130895,
-        9743,
-        19185,
-        143397,
-        200885,
-    ],
+landmarks = [
+    151807,
+    21294,
+    23344,
+    25789,
+    131262,
+    33852,
+    171465,
+    191680,
+    172653,
+    130895,
+    9743,
+    19185,
+    143397,
+    200885,
 ]
-n_landmarks = 14
-n_points = mesh.n_points
-landmarks = torch.sparse_coo_tensor(
-    indices=indices, values=values, size=(n_landmarks, n_points), device="cpu"
-)
+
 mesh.landmarks = landmarks
 
 

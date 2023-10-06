@@ -2,46 +2,130 @@ import vedo
 import numpy as np
 import torch
 
-from ..types import typecheck, List, float_dtype, int_dtype
+from ..types import typecheck, float_dtype, int_dtype, polydata_type
 from ..data import PolyData
 
+from typing import List, Union
 
-class LandmarkSetter(vedo.Plotter):
+
+class LandmarkSetter:
+    """Initialize a landmark setter for a mesh or a list of meshes.
+
+    Args:
+        vedo (_type_): _description_
+    """
+
+    @typecheck
+    def __init__(self, mesh: Union[List[polydata_type], polydata_type]) -> None:
+        super().__init__()
+
+        if hasattr(mesh, "__iter__") and len(mesh) > 1:
+            self.landmarks_setter = LandmarkSetterMultipleMeshes(mesh)
+        elif hasattr(mesh, "__iter__") and len(mesh) == 1:
+            self.landmarks_setter = LandmarkSetterSingleMesh(mesh[0])
+        else:
+            self.landmarks_setter = LandmarkSetterSingleMesh(mesh)
+
+    def start(self):
+        self.landmarks_setter.start()
+
+
+class LandmarkSetterSingleMesh(vedo.Plotter):
+    """A landmark setterat that allows the user to select landmarks on a single mesh.
+
+    Args:
+        mesh (sks.Polydata): the mesh on which the landmarks are selected.
+    """
+
+    def __init__(self, mesh: polydata_type) -> None:
+        super().__init__()
+
+        self.mesh = mesh
+        self.landmarks = []
+
+        self.actor = self.mesh.to_vedo().linewidth(1)
+        self.actor.pickable(True)
+
+        self.add(self.actor)
+
+        self.lpoints = []
+        self.lpoints_pointcloud = vedo.Points(self.lpoints, r=15).pickable(False).c("r")
+        self.add(self.lpoints_pointcloud)
+
+        text = "Start by selecting landmarks on the reference mesh\nPress e to add a vertice\nPress d to delete the last point\nPress return when you are done"
+        self.instructions = vedo.Text2D(
+            text, pos="bottom-left", c="white", bg="green", font="Calco"
+        )
+        self.add(self.instructions)
+
+        self.add_callback("KeyPress", self._key_press)
+
+    def _key_press(self, evt):
+        """The _key_press method is called when the user presses a key. It is used to add or delete landmarks and update the display."""
+        if evt.keypress == "e":
+            pt = vedo.Points(self.actor.points()).closest_point(evt.picked3d)
+            indice = closest_vertex(self.actor.points().copy(), pt)
+            self.lpoints.append(pt)
+            self.landmarks.append(indice)
+
+        if evt.keypress == "d":
+            if len(self.lpoints) > 0:
+                self.lpoints.pop()
+                self.landmarks.pop()
+
+        if evt.keypress == "Return" and len(self.lpoints) > 0:
+            # Store the landmarks in the mesh
+            self.mesh.landmarks = self.landmarks
+            # Close the window
+            self.close()
+
+        # Update the display
+        self.remove(self.lpoints_pointcloud)
+        self.lpoints_pointcloud = vedo.Points(self.lpoints, r=15).pickable(False).c("r")
+        self.add(self.lpoints_pointcloud)
+        self.render()
+
+    def start(self):
+        self
+        self.reset_camera()
+        self.show(interactive=True)
+
+
+class LandmarkSetterMultipleMeshes(vedo.Plotter):
     """A LandmarkSetter is a vedo application that allows the user to select landmarks on a set of meshes.
 
     Args:
-        meshes (List[vedo.Mesh]): The meshes on which the landmarks are selected.
+        meshes (List[sks.PolyData]): The meshes on which the landmarks are selected.
         **kwargs: Keyword arguments passed to the vedo.Plotter constructor.
     """
 
     @typecheck
-    def __init__(self, meshes: List[PolyData], **kwargs) -> None:
-        super().__init__(N=2, sharecam=False, **kwargs)
+    def __init__(self, meshes: List[polydata_type]) -> None:
+        super().__init__(N=2, sharecam=False)
 
-        # The 3D landmarks are stored in a list of lists of 3D points
-        self.landmarks3d = [[] for i in range(len(meshes))]
-
-        self.original_meshes = meshes
+        # The landmarks (list of indices) are stored in a list of lists of indices
+        self.landmarks = [[] for i in range(len(meshes))]
 
         # Convert the meshes to vedo.Mesh objects
         self.meshes = meshes
-        self.actors = [vedo.Mesh(mesh.to_pyvista()) for mesh in meshes]
+        self.actors = [mesh.to_vedo() for mesh in meshes]
 
-        # The first mesh is the reference
+        # The first actor is the reference
         self.reference = self.actors[0]
         self.others = self.actors[1:]
 
         # At the beginning : the reference mesh is plotted on the left
         # and the first other mesh is plotted on the right
+        # TODO : set a better camera position
         self.current_other = self.others[0]
         self.at(0).add(self.reference.linewidth(1))
         self.at(1).add(self.current_other.linewidth(1))
 
         # At the beginning, we are in 'reference' mode, meaning that we are
         # selecting landmarks on the reference mesh
-        self.active = 0
         self.active_actor = self.reference
         self.reference_lpoints = []
+        self.reference_indices = []
         # The reference landmarks are stored in a vedo.Points object
         # for display purposes
         self.reference_lpoints_pointcloud = (
@@ -53,7 +137,7 @@ class LandmarkSetter(vedo.Plotter):
         self.reference_vertices = vedo.Points(self.reference.points())
 
         # Instructions corresponding to the "reference" mode
-        text_reference = "Start by selecting landmarks on the reference mesh\nPress z to add a point on the surface\nPress e to add a vertice\nPress d to delete the last point\nPress s when you are done"
+        text_reference = "Start by selecting landmarks on the reference mesh\nPress e to add a vertice\nPress d to delete the last point\nPress return when you are done"
         self.instructions_reference = vedo.Text2D(
             text_reference, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -62,7 +146,7 @@ class LandmarkSetter(vedo.Plotter):
         )  # Add the instructions to the left plot
 
         # Instructions corresponding to the "other" mode (not displayed at the beginning)
-        text_other = "Now select the same landmarks on the other meshes\nPress z to add a point on the surface\nPress e to add a vertice\nPress d to delete the last point\nPress s when you are done"
+        text_other = "Now select the same landmarks on the other meshes\nPress e to add a vertice\nPress d to delete the last point\nPress return when you are done"
         self.instructions_other = vedo.Text2D(
             text_other, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -73,8 +157,9 @@ class LandmarkSetter(vedo.Plotter):
     def start(self):
         """Start the landmark setter."""
         self._update()
-        self.show(interactive=True)
-        # return self
+        self.at(0).reset_camera()
+        self.at(1).reset_camera()
+        self.show(interactive=True, resetcam=False)
 
     def _done(self):
         """The _done method is called when the user presses the 's' key.
@@ -89,6 +174,7 @@ class LandmarkSetter(vedo.Plotter):
             self.at(1).add(self.instructions_other)
             self.other_id = 0
             self.other_lpoints = []
+            self.other_indices = []
 
             self.current_other = self.others[self.other_id]
 
@@ -96,26 +182,29 @@ class LandmarkSetter(vedo.Plotter):
             self.other_lpoints_pointcloud = (
                 vedo.Points(self.other_lpoints, r=15).pickable(False).c("r")
             )
+            self.at(0).remove(self.reference_lpoints_pointcloud)
             self.reference_lpoints_pointcloud.c("grey")
             self.point_to_pick = (
                 vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15)
                 .pickable(False)
                 .c("green")
             )
+            self.at(0).add(self.reference_lpoints_pointcloud)
 
-            self.landmarks3d[0] = self.reference_lpoints
+            self.landmarks[0] = self.reference_indices
             self._update()
 
         else:
-            self.landmarks3d[self.other_id + 1] = self.other_lpoints.copy()
-            self.other_lpoints = []
+            self.landmarks[self.other_id + 1] = self.other_indices.copy()
             self.other_id += 1
+            self.at(1).clear()
 
             if self.other_id < len(self.others):
+                self.other_lpoints = []
+                self.other_indices = []
                 self.current_other = self.others[self.other_id]
                 self.active_actor = self.current_other
 
-                self.at(1).clear()
                 self.at(1).add(self.current_other.linewidth(1))
 
                 self.other_lpoints_pointcloud = (
@@ -124,11 +213,11 @@ class LandmarkSetter(vedo.Plotter):
                 self._update()
 
             else:
-                self.close()
-
                 ls = self.landmarks
                 for i in range(len(ls)):
-                    self.original_meshes[i].landmarks = ls[i]
+                    self.meshes[i].landmarks = ls[i]
+
+                self.close()
 
     def _update(self):
         """The _update method update the display of the landmarks with the right color depending on the current mode and the current state of the landmarks selection."""
@@ -164,102 +253,48 @@ class LandmarkSetter(vedo.Plotter):
         """The _key_press method is called when the user presses a key. It is used to add or delete landmarks."""
 
         if self.mode == "reference" and evt.actor == self.reference:
-            if evt.keypress == "z":
-                pt = self.active_actor.closest_point(evt.picked3d)
-                self.reference_lpoints.append(pt)
-
             if evt.keypress == "e":
                 pt = vedo.Points(self.active_actor.points()).closest_point(evt.picked3d)
+                indice = closest_vertex(self.active_actor.points().copy(), pt)
                 self.reference_lpoints.append(pt)
+                self.reference_indices.append(indice)
 
             if evt.keypress == "d":
                 if len(self.reference_lpoints) > 0:
                     self.reference_lpoints.pop()
+                    self.reference_indices.pop()
 
-            if evt.keypress == "s":
+            if evt.keypress == "Return" and len(self.reference_lpoints) > 0:
                 self._done()
 
             self._update()
 
         elif self.mode == "others" and evt.actor == self.current_other:
-            if evt.keypress == "z" and len(self.other_lpoints) < self.n_landmarks:
-                pt = self.active_actor.closest_point(evt.picked3d)
-                self.other_lpoints.append(pt)
-
             if evt.keypress == "e" and len(self.other_lpoints) < self.n_landmarks:
                 pt = vedo.Points(self.active_actor.points()).closest_point(evt.picked3d)
+                indice = closest_vertex(self.active_actor.points().copy(), pt)
                 self.other_lpoints.append(pt)
+                self.other_indices.append(indice)
 
             if evt.keypress == "d":
                 if len(self.other_lpoints) > 0:
                     self.other_lpoints.pop()
+                    self.other_indices.pop()
 
-            if evt.keypress == "s" and len(self.other_lpoints) == self.n_landmarks:
+            if evt.keypress == "Return" and len(self.other_lpoints) == self.n_landmarks:
                 self._done()
             else:
                 self._update()
 
-    @property
-    def landmarks_as_3d_point_cloud(self):
-        """Return the landmarks as a list of two lists of 3D points."""
-
-        torch_landmarks = [
-            torch.from_numpy(np.array(landmarks)).type(float_dtype)
-            for landmarks in self.landmarks3d
-        ]
-
-        return torch_landmarks
-
-    @property
-    def landmarks(self, barycentric=True):
-        """Return the landmarks as a list of two lists of 3D points."""
-
-        torch_landmarks = [
-            torch.from_numpy(np.array(landmarks)).type(float_dtype)
-            for landmarks in self.landmarks3d
-        ]
-        if not barycentric:
-            return torch_landmarks
-
-        else:
-
-            def to_coo(landmarks, n):
-                device = landmarks[0][0].device
-
-                values = torch.tensor([], dtype=float_dtype, device=device)
-                indices = torch.zeros((2, 0), dtype=int_dtype, device=device)
-
-                for i, (c, v) in enumerate(landmarks):
-                    tmp = torch.concat(
-                        (i * torch.ones_like(v, device=device), v)
-                    ).reshape(2, -1)
-                    indices = torch.cat((indices, tmp), dim=1)
-
-                    values = torch.concat((values, c), dim=0)
-
-                return torch.sparse_coo_tensor(
-                    indices, values, (len(landmarks), n), device=device
-                )
-
-            return [
-                to_coo(
-                    [
-                        barycentric_coordinates(self.original_meshes[i], l)
-                        for l in torch_landmarks[i]
-                    ],
-                    self.original_meshes[i].n_points,
-                )
-                for i in range(len(self.original_meshes))
-            ]
+        self.render()
 
 
 @typecheck
-def barycentric_coordinates(mesh, point):
-    device = mesh.device
-    point = point.to(device)
-
+def closest_vertex(points, point):
+    """Given a list of vertices and a point, return the indice of the closest vertex."""
     # Compute the vectors from the point to the vertices
-    vertices = mesh.points
+    vertices = torch.tensor(points)
+    point = torch.tensor(point)
     vectors = vertices - point
     norms = torch.norm(vectors, dim=1)
 
@@ -273,75 +308,9 @@ def barycentric_coordinates(mesh, point):
         vertex_indice = indice[0]
 
         # The point is a vertex
-        return (
-            torch.tensor([1.0], device=device),
-            torch.tensor([vertex_indice], device=device),
-        )
+        return int(vertex_indice)
 
     else:
-        # Normalize the vectors
-        vectors /= norms.reshape(-1, 1)
-
-        A = mesh.edges[0]
-        B = mesh.edges[1]
-
-        cos_angles = (vectors[A] * vectors[B]).sum(dim=1)
-        # If cos(angle) = -1 <=> angle = pi, the point is on an edge
-
-        if torch.sum((cos_angles - (-1)).abs() < tol):
-            indice = torch.where((cos_angles - (-1)).abs() < tol)[0]
-            edge_indice = indice[0]
-
-            # The point is on an edge
-            # Coordinates
-            a, b = mesh.edges[:, edge_indice]
-            alpha = norms[b] / torch.norm(vertices[a] - vertices[b])
-            beta = norms[a] / torch.norm(vertices[a] - vertices[b])
-
-            return (
-                torch.tensor([alpha, beta], device=device),
-                torch.tensor([a, b], device=device),
-            )
-
-        else:
-            A = mesh.triangles[0]
-            B = mesh.triangles[1]
-            C = mesh.triangles[2]
-
-            angles_1 = torch.acos((vectors[A] * vectors[B]).sum(dim=1))
-            angles_2 = torch.acos((vectors[B] * vectors[C]).sum(dim=1))
-            angles_3 = torch.acos((vectors[C] * vectors[A]).sum(dim=1))
-
-            sum_angles = angles_1 + angles_2 + angles_3
-            # If sum_angles is close to 2pi, the point is inside the triangle, or its projection is inside the triangle
-
-            if torch.sum((sum_angles - (2 * torch.pi)).abs() < tol):
-                indices = torch.where((sum_angles - (2 * torch.pi)).abs() < tol)[0]
-                # If several indices, we must find the one for which the point is inside the triangle, and not only its projection
-                tmp = []
-                for i in indices:
-                    a, b, c = mesh.triangles[:, i]
-                    normals = mesh.triangle_normals[i]
-
-                    tmp.append(
-                        torch.abs(vectors[a].dot(normals))
-                        + torch.abs(vectors[b].dot(normals))
-                        + torch.abs(vectors[c].dot(normals))
-                    )
-
-                indice_triangle = indices[torch.argmin(torch.tensor(tmp))]
-
-                # The point is inside a triangle
-                # Coordinates
-                a, b, c = mesh.triangles[:, indice_triangle]
-                mat = torch.cat((vertices[a], vertices[b], vertices[c])).reshape(3, 3).T
-                alpha, beta, gamma = torch.inverse(mat) @ point
-
-                return (
-                    torch.tensor([alpha, beta, gamma], device=device),
-                    torch.tensor([a, b, c], device=device),
-                )
-
-            else:
-                # The point is outside the mesh
-                return None
+        # Error if the point is not on the mesh
+        if torch.sum(norms < tol) == 0:
+            raise ValueError("The point is not a vertex of the mesh")

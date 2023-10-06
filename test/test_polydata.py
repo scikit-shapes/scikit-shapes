@@ -282,14 +282,14 @@ def test_point_data2():
         sks_again.point_data["curvature"].numpy(), pv_mesh.point_data["curvature"]
     )
 
-def test_landmarks_creation():
 
+def test_landmarks_creation():
     mesh1 = sks.Sphere()
     mesh2 = sks.Sphere()
 
     landmarks_indices = [0, 1, 2, 3]
     landmarks_values = 4 * [1.0]
-    
+
     n_landmarks = len(landmarks_indices)
     n_points = mesh1.n_points
     landmarks = torch.sparse_coo_tensor(

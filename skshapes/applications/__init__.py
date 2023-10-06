@@ -1,1 +1,1 @@
-from .landmark_setter import LandmarkSetter
+from .vertices_landmark_setter import LandmarkSetter
