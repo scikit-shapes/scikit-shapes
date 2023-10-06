@@ -8,10 +8,14 @@ import pyvista
 
 from skshapes.utils import scatter
 
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
-def test_scatter():
+
+def test_scattrer_toy():
     """A toy example to test the scatter function"""
 
+    # dimension 1
     src = torch.tensor([1, -1, 0.5], dtype=torch.float32)
     index = torch.tensor([0, 1, 1], dtype=torch.int64)
 
@@ -31,6 +35,46 @@ def test_scatter():
         scatter(src=src, index=index, reduce="max"),
         torch.tensor([1, 0.5], dtype=torch.float32),
     )
+
+
+@given(
+    n=st.integers(min_value=1, max_value=500),
+    n_dim=st.integers(min_value=0, max_value=2),
+)
+@settings(deadline=None)
+def test_scatter_multidim(n, n_dim):
+    """Assert that the scatter function works as expected for multidimensional signals"""
+
+    # dimension d
+    d = torch.randint(1, 10, (n_dim,))
+
+    src = torch.rand(n, *d)
+    print(src.shape)
+
+    index = torch.randint(0, n, (n,)).view(-1)
+
+    # Convert the index to consecutive integers
+    index2 = index.clone()
+    for i, v in enumerate(torch.unique(index)):
+        index2[index == v] = i
+    index = index2
+
+    output_multidim = scatter(src=src, index=index, reduce="mean")
+
+    if n_dim == 1:
+        i = torch.randint(0, src.shape[1], (1,))
+        output = scatter(src=src[:, i].view(-1), index=index, reduce="mean")
+        assert torch.allclose(output, output_multidim[:, i].view(-1))
+
+    elif n_dim == 2:
+        i = torch.randint(0, src.shape[1], (1,))
+        j = torch.randint(0, src.shape[2], (1,))
+        output = scatter(src=src[:, i, j].view(-1), index=index, reduce="mean")
+        assert torch.allclose(output, output_multidim[:, i, j].view(-1))
+
+    elif n_dim == 0:
+        output = scatter(src=src.view(-1), index=index, reduce="mean")
+        assert torch.allclose(output, output_multidim.view(-1))
 
 
 def test_multiscale():
