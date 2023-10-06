@@ -7,7 +7,7 @@ from ..data import PolyData
 
 
 class BarycentricLandmarkSetter(vedo.Plotter):
-    """ !! This class has bugs and is not used in the library. !!
+    """!! This class has bugs and is not used in the library. !!
     A LandmarkSetter is a vedo application that allows the user to select landmarks on a set of meshes.
 
     This version allows to select landmarks that are barycentric coordinates of the vertices of the mesh.
