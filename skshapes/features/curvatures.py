@@ -554,7 +554,7 @@ def _point_curvature_colors(
     s = (1e-5 + s).log().abs()
     s = s / s.max()
     s = 1 - s
-    i = -self.point_shape_indices(scale=scale) #.abs()
+    i = -self.point_shape_indices(scale=scale)  # .abs()
     i = (1 + i) / 4
 
     if False:

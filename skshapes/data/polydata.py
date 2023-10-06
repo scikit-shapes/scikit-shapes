@@ -25,6 +25,7 @@ from ..types import (
     FloatTensor,
     IntTensor,
     polydata_type,
+    IntSequence,
 )
 
 from typing import Literal
@@ -55,7 +56,7 @@ class PolyData(BaseShape, polydata_type):
         edges: Optional[Edges] = None,
         triangles: Optional[Triangles] = None,
         device: Union[str, torch.device] = "cpu",
-        landmarks: Optional[Landmarks] = None,
+        landmarks: Optional[Union[Landmarks, IntSequence]] = None,
         point_data: Optional[DataAttributes] = None,
         cache_size: Optional[int] = None,
     ) -> None:
@@ -314,14 +315,14 @@ class PolyData(BaseShape, polydata_type):
             mesh = vedo.Mesh(
                 [
                     self.points.detach().cpu().numpy(),
-                    self.triangles.detach().cpu().numpy().T,
+                    self.triangles.detach().cpu().numpy(),
                 ]
             )
         elif self._edges is not None:
             mesh = vedo.Mesh(
                 [
                     self.points.detach().cpu().numpy(),
-                    self.edges.detach().cpu().numpy().T,
+                    self.edges.detach().cpu().numpy(),
                 ]
             )
         else:
@@ -535,26 +536,138 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def landmarks(self) -> Optional[Landmarks]:
+        """Get the landmarks of the shape.
+
+        The format is a sparse tensor of shape (n_landmarks, n_points),each line is a landmark in barycentric
+        coordinates. If you want to get the landmarks in 3D coordinates, use the landmark_points property. If
+        you want to get the landmarks as a list of indices, use the landmark_indices property.
+
+        If no landmarks are defined, returns None.
+        """
+
         return self._landmarks
+
+    @property
+    @typecheck
+    def n_landmarks(self) -> int:
+        """Return the number of landmarks."""
+        if self.landmarks is None:
+            return 0
+        else:
+            return self.landmarks.shape[0]
 
     @landmarks.setter
     @typecheck
-    def landmarks(self, landmarks: Landmarks) -> None:
+    def landmarks(self, landmarks: Union[Landmarks, IntSequence]) -> None:
         """Set the landmarks of the shape. The landmarks should be a sparse tensor of shape
-        (n_landmarks, n_points) (barycentric coordinates) or a ."""
-        assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
-        assert landmarks.dtype == float_dtype
+        (n_landmarks, n_points) (barycentric coordinates) or a list of indices."""
 
-        self._landmarks = landmarks.clone().to(self.device)
+        if hasattr(landmarks, "to_dense"):
+            # If landmarks is a sparse tensor
+            assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
+            assert landmarks.dtype == float_dtype
+            self._landmarks = landmarks.clone().to(self.device)
+
+        else:
+            # landmarks is a sequence of indices
+            assert torch.max(torch.tensor(landmarks)) < self.n_points
+
+            n_landmarks = len(landmarks)
+            n_points = self.n_points
+
+            indices = torch.zeros((2, n_landmarks), dtype=int_dtype)
+            indices[0] = torch.arange(n_landmarks, dtype=int_dtype)
+            indices[1] = torch.tensor(landmarks, dtype=int_dtype)
+
+            values = torch.ones_like(indices[0], dtype=float_dtype)
+
+            self._landmarks = torch.sparse_coo_tensor(
+                indices=indices,
+                values=values,
+                size=(n_landmarks, n_points),
+                device=self.device,
+            )
 
     @property
     @typecheck
     def landmark_points(self) -> Optional[Points]:
-        """Return the landmarks in 3D."""
+        """Return the landmarks in 3D coordinates."""
         if self.landmarks is None:
             return None
         else:
             return self.landmarks @ self.points
+
+    @property
+    @typecheck
+    def landmark_indices(self) -> Optional[IntTensor]:
+        """Return the indices of the landmarks.
+
+        If no landmarks are defined, returns None.
+        Raises an error if the landmarks are not indices (there are defined in barycentric coordinates).
+        """
+        if self.landmarks is None:
+            return None
+        else:
+            coalesced_landmarks = self.landmarks.coalesce()
+            values = coalesced_landmarks.values()
+            indices = coalesced_landmarks.indices()[1][values == 1]
+
+            if len(indices) != self.n_landmarks:
+                raise ValueError("Landmarks are not indices.")
+
+            return indices[values == 1]
+
+    def add_landmarks(self, indices: Union[IntSequence, int]) -> None:
+        """Add vertices landmarks to the shape.
+
+        Args:
+            indices (Union[IntSequence, int]): the indices of the vertices to landmark.
+        """
+        if not hasattr(indices, "__iter__"):
+            self.add_landmarks([indices])
+
+        else:
+            if self.landmarks is None:
+                self.landmarks = indices
+
+            else:
+                new_indices = torch.tensor(indices, dtype=int_dtype, device=self.device)
+
+                coalesced_landmarks = self.landmarks.coalesce()
+                old_values = coalesced_landmarks.values()
+                old_indices = coalesced_landmarks.indices()
+
+                n_new_landmarks = len(new_indices)
+                new_indices = torch.zeros(
+                    (2, n_new_landmarks), dtype=int_dtype, device=self.device
+                )
+                new_indices[0] = (
+                    torch.arange(n_new_landmarks, dtype=int_dtype) + self.n_landmarks
+                )
+                new_indices[1] = torch.tensor(
+                    indices, dtype=int_dtype, device=self.device
+                )
+
+                new_values = torch.ones_like(
+                    new_indices[0], dtype=float_dtype, device=self.device
+                )
+
+                n_landmarks = self.n_landmarks + n_new_landmarks
+                n_points = self.n_points
+
+                indices = torch.cat((old_indices, new_indices), dim=1)
+                values = torch.concat((old_values, new_values))
+
+                print(indices)
+                print(values)
+                print((n_landmarks, n_points))
+
+                self.landmarks = torch.sparse_coo_tensor(
+                    indices=indices,
+                    values=values,
+                    size=(n_landmarks, self.n_points),
+                    device=self.device,
+                )
 
     ##########################
     #### Shape properties ####

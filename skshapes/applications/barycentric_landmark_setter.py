@@ -6,8 +6,11 @@ from ..types import typecheck, List, float_dtype, int_dtype
 from ..data import PolyData
 
 
-class LandmarkSetter(vedo.Plotter):
-    """A LandmarkSetter is a vedo application that allows the user to select landmarks on a set of meshes.
+class BarycentricLandmarkSetter(vedo.Plotter):
+    """!! This class has bugs and is not used in the library. !!
+    A LandmarkSetter is a vedo application that allows the user to select landmarks on a set of meshes.
+
+    This version allows to select landmarks that are barycentric coordinates of the vertices of the mesh.
 
     Args:
         meshes (List[vedo.Mesh]): The meshes on which the landmarks are selected.
@@ -73,6 +76,8 @@ class LandmarkSetter(vedo.Plotter):
     def start(self):
         """Start the landmark setter."""
         self._update()
+        self.at(0).reset_camera()
+        self.at(1).reset_camera()
         self.show(interactive=True)
         # return self
 
@@ -180,6 +185,7 @@ class LandmarkSetter(vedo.Plotter):
                 self._done()
 
             self._update()
+            self.render()
 
         elif self.mode == "others" and evt.actor == self.current_other:
             if evt.keypress == "z" and len(self.other_lpoints) < self.n_landmarks:
@@ -223,9 +229,7 @@ class LandmarkSetter(vedo.Plotter):
 
         else:
 
-            def to_coo(landmarks, n):
-                device = landmarks[0][0].device
-
+            def to_coo(landmarks, n, device):
                 values = torch.tensor([], dtype=float_dtype, device=device)
                 indices = torch.zeros((2, 0), dtype=int_dtype, device=device)
 
@@ -248,6 +252,7 @@ class LandmarkSetter(vedo.Plotter):
                         for l in torch_landmarks[i]
                     ],
                     self.original_meshes[i].n_points,
+                    self.original_meshes[i].device,
                 )
                 for i in range(len(self.original_meshes))
             ]
