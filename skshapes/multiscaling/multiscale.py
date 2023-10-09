@@ -22,6 +22,7 @@ from ..types import (
     NumericalTensor,
     Number,
     polydata_type,
+    shape_type,
 )
 from typing import List, Literal
 from ..utils import scatter
@@ -41,15 +42,34 @@ class Multiscale:
         downscale_policy: Optional[dict] = None,
         upscale_policy: Optional[dict] = None,
     ) -> None:
-        """Initialize a multiscale object from a reference shape.
+        """Initialize a multiscale object from a reference shape. This class is particularly
+        useful to handle multiscale signals.
 
-        A dictionnary of shapes is created, with the reference shape at ratio 1.
-        The other ratios are created by decimation.
+        An instance of Multiscale contains a dict of shapes, with the ratios as keys.
+
+        For signal propagation, policies can be specified for downscaling and upscaling.
+
+        Policy for downscaling consists of a reduce operation and a pass_through option:
+        - reduce (str): the reduce operation. Available options are "sum", "min", "max", "mean"
+        - pass_through (bool): if True, the signal is propagated through all the ratios when
+          dowscaling. If False, the signal is propagated directly from the origin ratio to the
+            target ratio.
+
+        Policy for upscaling consists of a smoothing operation and a pass_through option:
+        - smoothing (str): the smoothing operation. Available options are "constant", "mesh_convolution"
+        - n_smoothing_steps (int): the number of smoothing operations to apply
+        - pass_through (bool): if True, the signal is propagated through all the ratios when
+
+        Default policies are:
+        - downscale_policy = {"reduce": "mean", "pass_through": False}
+        - upscale_policy = {"smoothing": "constant", "n_smoothing_steps": 1, "pass_through": False}
 
         Args:
             shape (Shape): the shape to be multiscaled (will be reffered to as ratio 1)
             ratios (Sequence of floats): the ratios at which the shape is multiscaled
             n_points (Sequence of ints): the (approximative) number of points at each ratio
+            downscale_policy (dict, optional): the policy for downscaling. Defaults to None.
+            upscale_policy (dict, optional): the policy for upscaling. Defaults to None.
         """
 
         if ratios is None and n_points is None:
@@ -141,68 +161,111 @@ class Multiscale:
         # find closest ratio
         closest_ratio = min(available_ratios, key=lambda x: abs(x - ratio))
         if update_signals:
-            self.update_signals(closest_ratio)
+            self.update_signals()
         return self.shapes[closest_ratio]
 
-    def update_signals(self, ratio: Number) -> None:
-        # check for new signals
+    @typecheck
+    def __getitem__(self, ratio: Number) -> polydata_type:
+        """Return the shape at a given ratio.
+
+        If the ratio does not exist, the closest ratio is returned.
+
+        Args:
+            ratio (Number): the ratio at which the shape is returned
+
+        Returns:
+            Shape: the shape at the given ratio
+        """
+        return self.at(ratio)
+
+    @property
+    def available_ratios(self):
+        """Return the available ratios (decreasing order)."""
         available_ratios = list(self.shapes.keys())
-        for r in available_ratios:
+        available_ratios.sort()
+        return available_ratios[::-1]
+
+    @typecheck
+    def propagate_signal(self, signal_name: str, origin_ratio: Number) -> None:
+        """Propagate a signal from the origin ratio to the available ratios following
+        the propagation policies.
+        """
+
+        # Ratios that are greater than the origin ratio (ascending order)
+        up_ratios = [r for r in self.available_ratios if r >= origin_ratio][::-1]
+
+        # Ratios that are smaller than the origin ratio (descending order)
+        down_ratios = [r for r in self.available_ratios if r <= origin_ratio]
+
+        signal_origin = self.at(origin_ratio, update_signals=False).point_data[
+            signal_name
+        ]
+
+        tmp = signal_origin
+        low_res = origin_ratio
+
+        for r in up_ratios[1:]:
+            self.at(r, update_signals=False).point_data[
+                signal_name
+            ] = self.signal_from_low_to_high_res(
+                tmp,
+                low_res=low_res,
+                high_res=r,
+                **self.upscale_policy,
+            )
+            self.signals[signal_name]["available_ratios"].append(r)
+            if self.upscale_policy["pass_through"]:
+                low_res = r
+                tmp = self.at(r, update_signals=False).point_data[signal_name]
+
+        tmp = signal_origin
+        high_res = origin_ratio
+
+        for r in down_ratios[1:]:
+            self.at(r, update_signals=False).point_data[
+                signal_name
+            ] = self.signal_from_high_to_low_res(
+                tmp,
+                high_res=high_res,
+                low_res=r,
+                **self.downscale_policy,
+            )
+            self.signals[signal_name]["available_ratios"].append(r)
+            if self.downscale_policy["pass_through"]:
+                tmp = self.at(r, update_signals=False).point_data[signal_name]
+                high_res = r
+
+    @typecheck
+    def update_signals(self) -> None:
+        """Update the signals at the available ratios.
+
+        This method is called automatically when at is called. It checks for new signals
+        accross the available ratios and propagate them. It also checks for new
+        ratios for existing signals and redo the propagation of the concerned signals.
+        """
+        # check for new signals
+        for r in self.available_ratios:
             for signal in self.at(r, update_signals=False).point_data:
+                # If the signal is not in the dict, add it and propagate it
+                # accross the available ratios
                 if signal not in self.signals.keys():
                     self.signals[signal] = {
                         "origin_ratio": r,
                         "available_ratios": [r],
-                        "downscale_args": self.downscale_policy,
-                        "upscale_args": self.upscale_policy,
                     }
+                    self.propagate_signal(
+                        signal_name=signal,
+                        origin_ratio=r,
+                    )
 
+        # check for new ratios for existing signals
         for signal in self.signals.keys():
-            if ratio not in self.signals[signal]["available_ratios"]:
-                origin_ratio = self.signals[signal]["origin_ratio"]
-
-                # propagate the signal from the origin ratio to the new ratio
-                if ratio < origin_ratio:
-                    if not self.signals[signal]["downscale_args"]["pass_through"]:
-                        path = [origin_ratio, ratio]
-                    else:
-                        available_ratios = list(self.shapes.keys())
-                        available_ratios.sort()
-                        available_ratios = available_ratios[::-1]
-                        path = [
-                            r for r in available_ratios if origin_ratio >= r >= ratio
-                        ]
-
-                    print(path)
-
-                    signal_at_ratio = self.signal_from_high_to_low_res(
-                        self.at(origin_ratio, update_signals=False)[signal],
-                        high_res=origin_ratio,
-                        low_res=ratio,
-                        **self.signals[signal]["downscale_args"],
+            for r in self.available_ratios:
+                if r not in self.signals[signal]["available_ratios"]:
+                    self.propagate_signal(
+                        signal_name=signal,
+                        origin_ratio=self.signals[signal]["origin_ratio"],
                     )
-
-                else:
-                    if not self.signals[signal]["downscale_args"]["pass_through"]:
-                        path = [origin_ratio, ratio]
-                    else:
-                        available_ratios = list(self.shapes.keys())
-                        available_ratios.sort()
-                        path = [
-                            r for r in available_ratios if origin_ratio <= r <= ratio
-                        ]
-
-                    print(path)
-
-                    signal_at_ratio = self.signal_from_low_to_high_res(
-                        self.at(origin_ratio, update_signals=False)[signal],
-                        low_res=origin_ratio,
-                        high_res=ratio,
-                        **self.signals[signal]["upscale_args"],
-                    )
-
-                self.at(ratio, update_signals=False)[signal] = signal_at_ratio
-                self.signals[signal]["available_ratios"].append(ratio)
 
     @typecheck
     def indice_mapping(self, high_res: Number, low_res: Number) -> Int1dTensor:
@@ -285,6 +348,7 @@ class Multiscale:
         low_res: Number,
         high_res: Number,
         smoothing: Literal["constant", "mesh_convolution"] = "constant",
+        n_smoothing_steps: int = 1,
         **kwargs,
     ) -> NumericalTensor:
         """Propagate a signal from a resolution to a higher resolution.
@@ -317,10 +381,6 @@ class Multiscale:
         if smoothing == "constant":
             pass
         elif smoothing == "mesh_convolution":
-            if "n_smoothing_steps" in kwargs:
-                n_smoothing_steps = kwargs["n_smoothing_steps"]
-            else:
-                n_smoothing_steps = 1
             high_res_signal = edge_smoothing(
                 high_res_signal,
                 self.at(high_res, update_signals=False),
