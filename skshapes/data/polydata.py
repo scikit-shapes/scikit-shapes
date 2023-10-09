@@ -534,6 +534,19 @@ class PolyData(BaseShape, polydata_type):
         ), "The number of points in the point_data entries should be the same as the number of points in the shape."
         self._point_data = point_data_dict.to(self.device)
 
+    @typecheck
+    def __getitem__(self, key: Any) -> NumericalTensor:
+        """Return the point data corresponding to the key."""
+        if key not in self._point_data:
+            raise KeyError(f"Point data {key} is not defined.")
+        return self._point_data[key]
+
+    @convert_inputs
+    @typecheck
+    def __setitem__(self, key: Any, value: NumericalTensor) -> None:
+        """Set the point data corresponding to the key."""
+        self._point_data[key] = value
+
     #################################
     #### Landmarks getter/setter ####
     #################################

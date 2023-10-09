@@ -3,6 +3,13 @@
 # TODO : add_points_data interface ? Deal with existing data ?
 # TODO : landmark interface ?
 
+
+# Signal management :
+# maintain a dict of signals/policy
+# when the multiscale is initialized, the list corresponds to the signals at the origin ratio
+# when a ratio is added, the signals are propagated to the new ratio
+# when at is called, the signal is propagated to the given ratio
+
 from ..types import (
     typecheck,
     convert_inputs,
@@ -30,7 +37,9 @@ class Multiscale:
         shape: polydata_type,
         *,
         ratios: Optional[FloatSequence] = None,
-        n_points: Optional[IntSequence] = None
+        n_points: Optional[IntSequence] = None,
+        downscale_policy: Optional[dict] = None,
+        upscale_policy: Optional[dict] = None,
     ) -> None:
         """Initialize a multiscale object from a reference shape.
 
@@ -59,12 +68,34 @@ class Multiscale:
 
         self.shapes = dict()
         self.mappings_from_origin = dict()
+        self.signals = dict()
+
+        self.upscale_policy = (
+            upscale_policy
+            if upscale_policy is not None
+            else {
+                "smoothing": "constant",
+                "n_smoothing_steps": 1,
+                "pass_through": False,
+            }
+        )
+        self.downscale_policy = (
+            downscale_policy
+            if downscale_policy is not None
+            else {"reduce": "mean", "pass_through": False}
+        )
+
+        for signal in shape.point_data:
+            self.signals[signal] = {
+                "origin_ratio": 1,
+                "available_ratios": [1],
+                "downscale_args": self.downscale_policy,
+                "upscale_args": self.upscale_policy,
+            }
 
         self.shapes[1] = shape
 
-        from ..data import PolyData
-
-        if type(shape) == PolyData and shape.is_triangle_mesh():
+        if hasattr(shape, "is_triangle_mesh") and shape.is_triangle_mesh():
             from ..decimation import Decimation
 
             self.decimation_module = Decimation(target_reduction=float(1 - min(ratios)))
@@ -95,7 +126,7 @@ class Multiscale:
             self.mappings_from_origin[ratio] = self.decimation_module._indice_mapping
 
     @typecheck
-    def at(self, ratio: Number):
+    def at(self, ratio: Number, update_signals: bool = True) -> polydata_type:
         """Return the shape at a given ratio.
 
         If the ratio does not exist, the closest ratio is returned.
@@ -109,7 +140,69 @@ class Multiscale:
         available_ratios = list(self.shapes.keys())
         # find closest ratio
         closest_ratio = min(available_ratios, key=lambda x: abs(x - ratio))
+        if update_signals:
+            self.update_signals(closest_ratio)
         return self.shapes[closest_ratio]
+
+    def update_signals(self, ratio: Number) -> None:
+        # check for new signals
+        available_ratios = list(self.shapes.keys())
+        for r in available_ratios:
+            for signal in self.at(r, update_signals=False).point_data:
+                if signal not in self.signals.keys():
+                    self.signals[signal] = {
+                        "origin_ratio": r,
+                        "available_ratios": [r],
+                        "downscale_args": self.downscale_policy,
+                        "upscale_args": self.upscale_policy,
+                    }
+
+        for signal in self.signals.keys():
+            if ratio not in self.signals[signal]["available_ratios"]:
+                origin_ratio = self.signals[signal]["origin_ratio"]
+
+                # propagate the signal from the origin ratio to the new ratio
+                if ratio < origin_ratio:
+                    if not self.signals[signal]["downscale_args"]["pass_through"]:
+                        path = [origin_ratio, ratio]
+                    else:
+                        available_ratios = list(self.shapes.keys())
+                        available_ratios.sort()
+                        available_ratios = available_ratios[::-1]
+                        path = [
+                            r for r in available_ratios if origin_ratio >= r >= ratio
+                        ]
+
+                    print(path)
+
+                    signal_at_ratio = self.signal_from_high_to_low_res(
+                        self.at(origin_ratio, update_signals=False)[signal],
+                        high_res=origin_ratio,
+                        low_res=ratio,
+                        **self.signals[signal]["downscale_args"],
+                    )
+
+                else:
+                    if not self.signals[signal]["downscale_args"]["pass_through"]:
+                        path = [origin_ratio, ratio]
+                    else:
+                        available_ratios = list(self.shapes.keys())
+                        available_ratios.sort()
+                        path = [
+                            r for r in available_ratios if origin_ratio <= r <= ratio
+                        ]
+
+                    print(path)
+
+                    signal_at_ratio = self.signal_from_low_to_high_res(
+                        self.at(origin_ratio, update_signals=False)[signal],
+                        low_res=origin_ratio,
+                        high_res=ratio,
+                        **self.signals[signal]["upscale_args"],
+                    )
+
+                self.at(ratio, update_signals=False)[signal] = signal_at_ratio
+                self.signals[signal]["available_ratios"].append(ratio)
 
     @typecheck
     def indice_mapping(self, high_res: Number, low_res: Number) -> Int1dTensor:
@@ -154,7 +247,8 @@ class Multiscale:
         *,
         high_res: Number,
         low_res: Number,
-        reduce="mean"
+        reduce="mean",
+        **kwargs,
     ) -> NumericalTensor:
         """Propagate a signal from a resolution to a lower resolution.
 
@@ -172,7 +266,7 @@ class Multiscale:
             NumericalTensor: the signal at the low resolution ratio
         """
         assert (
-            signal.shape[0] == self.at(high_res).n_points
+            signal.shape[0] == self.at(high_res, update_signals=False).n_points
         ), "signal must have the same number of points as the origin ratio"
         assert high_res >= low_res, "high_res must be greater than low_res"
 
@@ -191,7 +285,7 @@ class Multiscale:
         low_res: Number,
         high_res: Number,
         smoothing: Literal["constant", "mesh_convolution"] = "constant",
-        **kwargs
+        **kwargs,
     ) -> NumericalTensor:
         """Propagate a signal from a resolution to a higher resolution.
 
@@ -210,7 +304,7 @@ class Multiscale:
             NumericalTensor: the signal at the high resolution ratio
         """
         assert (
-            signal.shape[0] == self.at(low_res).n_points
+            signal.shape[0] == self.at(low_res, update_signals=False).n_points
         ), "signal must have the same number of points as the origin ratio"
         assert low_res <= high_res, "high_res must be smaller than low_res"
 
@@ -228,7 +322,9 @@ class Multiscale:
             else:
                 n_smoothing_steps = 1
             high_res_signal = edge_smoothing(
-                high_res_signal, self.at(high_res), n_smoothing_steps=n_smoothing_steps
+                high_res_signal,
+                self.at(high_res, update_signals=False),
+                n_smoothing_steps=n_smoothing_steps,
             )
 
         return high_res_signal
@@ -236,8 +332,8 @@ class Multiscale:
     @convert_inputs
     @typecheck
     def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
-        source = self.at(signal_ratio)
-        target = self.at(target_ratio)
+        source = self.at(signal_ratio, update_signals=False)
+        target = self.at(target_ratio, update_signals=False)
 
         assert (
             signal.shape[0] == source.n_points
