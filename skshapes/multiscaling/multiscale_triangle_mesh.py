@@ -89,8 +89,8 @@ class MultiscaleTriangleMesh:
         *,
         ratios: Optional[FloatSequence] = None,
         n_points: Optional[IntSequence] = None,
-        downscale_policy: Optional[dict] = None,
-        upscale_policy: Optional[dict] = None,
+        fine_to_coarse_policy: Optional[dict] = None,
+        coarse_to_fine_policy: Optional[dict] = None,
     ) -> None:
         """Initialize a multiscale object from a reference shape. This class is particularly
         useful to handle multiscale signals.
@@ -111,8 +111,8 @@ class MultiscaleTriangleMesh:
         - pass_through_all_scales (bool): if True, the signal is propagated through all the ratios when
 
         Default policies are:
-        - downscale_policy = {"reduce": "mean", "pass_through_all_scales": False}
-        - upscale_policy = {"smoothing": "constant", "n_smoothing_steps": 1, "pass_through_all_scales": False}
+        - fine_to_coarse_policy = {"reduce": "mean", "pass_through_all_scales": False}
+        - coarse_to_fine_policy = {"smoothing": "constant", "n_smoothing_steps": 1, "pass_through_all_scales": False}
 
         When adding a signal, the policies can be specified for the signal. If not specified, the default policies
         are used.
@@ -130,8 +130,8 @@ class MultiscaleTriangleMesh:
             shape (Shape): the shape to be multiscaled (will be reffered to as ratio 1)
             ratios (Sequence of floats): the ratios at which the shape is multiscaled
             n_points (Sequence of ints): the (approximative) number of points at each ratio
-            downscale_policy (dict, optional): the policy for downscaling. Defaults to None.
-            upscale_policy (dict, optional): the policy for upscaling. Defaults to None.
+            fine_to_coarse_policy (dict, optional): the policy for downscaling. Defaults to None.
+            coarse_to_fine_policy (dict, optional): the policy for upscaling. Defaults to None.
         """
         if not shape.is_triangle_mesh():
             raise ValueError("MultiscaleTriangleMesh only supports triangle meshes")
@@ -154,26 +154,20 @@ class MultiscaleTriangleMesh:
         self.mappings_from_origin = dict()
         self.signals = dict()
 
-        self.upscale_policy = (
-            upscale_policy
-            if upscale_policy is not None
+        self.coarse_to_fine_policy = (
+            coarse_to_fine_policy
+            if coarse_to_fine_policy is not None
             else {
                 "smoothing": "constant",
                 "n_smoothing_steps": 1,
                 "pass_through_all_scales": False,
             }
         )
-        self.downscale_policy = (
-            downscale_policy
-            if downscale_policy is not None
+        self.fine_to_coarse_policy = (
+            fine_to_coarse_policy
+            if fine_to_coarse_policy is not None
             else {"reduce": "mean", "pass_through_all_scales": False}
         )
-
-        for signal in shape.point_data:
-            self.signals[signal] = {
-                "origin_ratio": 1,
-                "available_ratios": [1],
-            }
 
         self.shapes[1] = shape
 
@@ -253,8 +247,8 @@ class MultiscaleTriangleMesh:
         *,
         key: str,
         at: Number = 1,
-        downscale_policy: Optional[dict] = None,
-        upscale_policy: Optional[dict] = None,
+        fine_to_coarse_policy: Optional[dict] = None,
+        coarse_to_fine_policy: Optional[dict] = None,
     ):
         """Add a signal to the multiscale object.
 
@@ -279,8 +273,8 @@ class MultiscaleTriangleMesh:
             key (str): _description_
             signal (Optional[NumericalTensor], optional): _description_. Defaults to None.
             at (Number, optional): _description_. Defaults to 1.
-            downscale_policy (Optional[dict], optional): _description_. Defaults to None.
-            upscale_policy (Optional[dict], optional): _description_. Defaults to None.
+            fine_to_coarse_policy (Optional[dict], optional): _description_. Defaults to None.
+            coarse_to_fine_policy (Optional[dict], optional): _description_. Defaults to None.
 
         Raises:
             ValueError: _description_
@@ -294,17 +288,17 @@ class MultiscaleTriangleMesh:
                     f"{key} not in the point_data of the shape at ratio {at}"
                 )
 
-        if downscale_policy is None:
-            downscale_policy = self.downscale_policy
+        if fine_to_coarse_policy is None:
+            fine_to_coarse_policy = self.fine_to_coarse_policy
 
-        if upscale_policy is None:
-            upscale_policy = self.upscale_policy
+        if coarse_to_fine_policy is None:
+            coarse_to_fine_policy = self.coarse_to_fine_policy
 
         self.signals[key] = {
             "origin_ratio": at,
             "available_ratios": [at],
-            "downscale_policy": downscale_policy,
-            "upscale_policy": upscale_policy,
+            "fine_to_coarse_policy": fine_to_coarse_policy,
+            "coarse_to_fine_policy": coarse_to_fine_policy,
         }
 
         self.at(at)[key] = signal
@@ -312,8 +306,8 @@ class MultiscaleTriangleMesh:
         self.propagate_signal(
             signal_name=key,
             origin_ratio=at,
-            downscale_policy=downscale_policy,
-            upscale_policy=upscale_policy,
+            fine_to_coarse_policy=fine_to_coarse_policy,
+            coarse_to_fine_policy=coarse_to_fine_policy,
         )
 
     @typecheck
@@ -321,8 +315,8 @@ class MultiscaleTriangleMesh:
         self,
         signal_name: str,
         origin_ratio: Number,
-        downscale_policy: Optional[dict] = None,
-        upscale_policy: Optional[dict] = None,
+        fine_to_coarse_policy: Optional[dict] = None,
+        coarse_to_fine_policy: Optional[dict] = None,
     ) -> None:
         """Propagate a signal from the origin ratio to the available ratios following
         the propagation policies.
@@ -330,10 +324,10 @@ class MultiscaleTriangleMesh:
 
         self.signals[signal_name]["available_ratios"] = []
 
-        if downscale_policy is None:
-            downscale_policy = self.downscale_policy
-        if upscale_policy is None:
-            upscale_policy = self.upscale_policy
+        if fine_to_coarse_policy is None:
+            fine_to_coarse_policy = self.fine_to_coarse_policy
+        if coarse_to_fine_policy is None:
+            coarse_to_fine_policy = self.coarse_to_fine_policy
 
         # Ratios that are greater than the origin ratio (ascending order)
         up_ratios = [r for r in self.available_ratios if r >= origin_ratio][::-1]
@@ -344,34 +338,40 @@ class MultiscaleTriangleMesh:
         signal_origin = self.at(origin_ratio).point_data[signal_name]
 
         tmp = signal_origin
-        low_res = origin_ratio
+        coarse_ratio = origin_ratio
 
         for r in up_ratios[1:]:
-            self.at(r).point_data[signal_name] = self.signal_from_low_to_high_res(
+            self.at(r).point_data[signal_name] = self.signal_from_coarse_to_fine(
                 tmp,
-                low_res=low_res,
-                high_res=r,
-                **upscale_policy,
+                coarse_ratio=coarse_ratio,
+                fine_ratio=r,
+                **coarse_to_fine_policy,
             )
             self.signals[signal_name]["available_ratios"].append(r)
-            if upscale_policy["pass_through_all_scales"]:
-                low_res = r
+            if (
+                "pass_through_all_scales" in coarse_to_fine_policy.keys()
+                and coarse_to_fine_policy["pass_through_all_scales"]
+            ):
+                coarse_ratio = r
                 tmp = self.at(r).point_data[signal_name]
 
         tmp = signal_origin
-        high_res = origin_ratio
+        fine_ratio = origin_ratio
 
         for r in down_ratios[1:]:
-            self.at(r).point_data[signal_name] = self.signal_from_high_to_low_res(
+            self.at(r).point_data[signal_name] = self.signal_from_fine_to_coarse(
                 tmp,
-                high_res=high_res,
-                low_res=r,
-                **downscale_policy,
+                fine_ratio=fine_ratio,
+                coarse_ratio=r,
+                **fine_to_coarse_policy,
             )
             self.signals[signal_name]["available_ratios"].append(r)
-            if downscale_policy["pass_through_all_scales"]:
+            if (
+                "pass_through_all_scales" in fine_to_coarse_policy.keys()
+                and fine_to_coarse_policy["pass_through_all_scales"]
+            ):
                 tmp = self.at(r).point_data[signal_name]
-                high_res = r
+                fine_ratio = r
 
     @typecheck
     def update_signals(self) -> None:
@@ -403,25 +403,29 @@ class MultiscaleTriangleMesh:
         for signal in self.signals.keys():
             for r in self.available_ratios:
                 if r not in self.signals[signal]["available_ratios"]:
-                    if "downscale_policy" not in self.signals[signal].keys():
-                        downscale_policy = self.downscale_policy
+                    if "fine_to_coarse_policy" not in self.signals[signal].keys():
+                        fine_to_coarse_policy = self.fine_to_coarse_policy
                     else:
-                        downscale_policy = self.signals[signal]["downscale_policy"]
+                        fine_to_coarse_policy = self.signals[signal][
+                            "fine_to_coarse_policy"
+                        ]
 
-                    if "upscale_policy" not in self.signals[signal].keys():
-                        upscale_policy = self.upscale_policy
+                    if "coarse_to_fine_policy" not in self.signals[signal].keys():
+                        coarse_to_fine_policy = self.coarse_to_fine_policy
                     else:
-                        upscale_policy = self.signals[signal]["upscale_policy"]
+                        coarse_to_fine_policy = self.signals[signal][
+                            "coarse_to_fine_policy"
+                        ]
 
                     self.propagate_signal(
                         signal_name=signal,
                         origin_ratio=self.signals[signal]["origin_ratio"],
-                        downscale_policy=downscale_policy,
-                        upscale_policy=upscale_policy,
+                        fine_to_coarse_policy=fine_to_coarse_policy,
+                        coarse_to_fine_policy=coarse_to_fine_policy,
                     )
 
     @typecheck
-    def indice_mapping(self, high_res: Number, low_res: Number) -> Int1dTensor:
+    def indice_mapping(self, fine_ratio: Number, coarse_ratio: Number) -> Int1dTensor:
         """Return the indice mapping from high to low resolution.
 
         The indice mapping is a 1d tensor of integers of length equal to the number of
@@ -429,40 +433,42 @@ class MultiscaleTriangleMesh:
         the corresponding point at the low resolution ratio.
 
         Args:
-            high_res (Number): the ratio of the high resolution shape
-            low_res (Number): the ratio of the low resolution shape
+            fine_ratio (Number): the ratio of the high resolution shape
+            coarse_ratio (Number): the ratio of the low resolution shape
 
         Returns:
             Int1dTensor: the indice mapping from high to low resolution
         """
 
-        assert high_res >= low_res, "high_res must be greater than low_res"
-        assert 0 < low_res <= 1, "low_res must be between 0 and 1"
-        assert 0 < high_res <= 1, "high_res must be between 0 and 1"
+        assert (
+            fine_ratio >= coarse_ratio
+        ), "fine_ratio must be greater than coarse_ratio"
+        assert 0 < coarse_ratio <= 1, "coarse_ratio must be between 0 and 1"
+        assert 0 < fine_ratio <= 1, "fine_ratio must be between 0 and 1"
 
         available_ratios = list(self.shapes.keys())
-        high_res = min(available_ratios, key=lambda x: abs(x - high_res))
-        low_res = min(available_ratios, key=lambda x: abs(x - low_res))
+        fine_ratio = min(available_ratios, key=lambda x: abs(x - fine_ratio))
+        coarse_ratio = min(available_ratios, key=lambda x: abs(x - coarse_ratio))
 
-        if high_res == low_res:
-            return torch.arange(self.shapes[high_res].n_points)
+        if fine_ratio == coarse_ratio:
+            return torch.arange(self.shapes[fine_ratio].n_points)
 
-        elif high_res == 1:
-            return self.mappings_from_origin[low_res]
+        elif fine_ratio == 1:
+            return self.mappings_from_origin[coarse_ratio]
 
         else:
-            tmp = self.mappings_from_origin[high_res]
+            tmp = self.mappings_from_origin[fine_ratio]
             tmp = scatter(src=torch.arange(len(tmp)), index=tmp, reduce="min")
-            return self.mappings_from_origin[low_res][tmp]
+            return self.mappings_from_origin[coarse_ratio][tmp]
 
     @convert_inputs
     @typecheck
-    def signal_from_high_to_low_res(
+    def signal_from_fine_to_coarse(
         self,
         signal: NumericalTensor,
         *,
-        high_res: Number,
-        low_res: Number,
+        fine_ratio: Number,
+        coarse_ratio: Number,
         reduce="mean",
         **kwargs,
     ) -> NumericalTensor:
@@ -474,32 +480,34 @@ class MultiscaleTriangleMesh:
 
         Args:
             signal (NumericalTensor): the signal to be propagated
-            high_res (Number): the ratio of the high resolution shape
-            low_res (Number): the ratio of the low resolution shape
+            fine_ratio (Number): the ratio of the high resolution shape
+            coarse_ratio (Number): the ratio of the low resolution shape
             reduce (str, optional): the reduce option. Defaults to "sum".
 
         Returns:
             NumericalTensor: the signal at the low resolution ratio
         """
         assert (
-            signal.shape[0] == self.at(high_res).n_points
+            signal.shape[0] == self.at(fine_ratio).n_points
         ), "signal must have the same number of points as the origin ratio"
-        assert high_res >= low_res, "high_res must be greater than low_res"
+        assert (
+            fine_ratio >= coarse_ratio
+        ), "fine_ratio must be greater than coarse_ratio"
 
         return scatter(
             src=signal,
-            index=self.indice_mapping(high_res=high_res, low_res=low_res),
+            index=self.indice_mapping(fine_ratio=fine_ratio, coarse_ratio=coarse_ratio),
             reduce=reduce,
         )
 
     @convert_inputs
     @typecheck
-    def signal_from_low_to_high_res(
+    def signal_from_coarse_to_fine(
         self,
         signal: NumericalTensor,
         *,
-        low_res: Number,
-        high_res: Number,
+        coarse_ratio: Number,
+        fine_ratio: Number,
         smoothing: Literal["constant", "mesh_convolution"] = "constant",
         n_smoothing_steps: int = 1,
         **kwargs,
@@ -513,34 +521,43 @@ class MultiscaleTriangleMesh:
 
         Args:
             signal (NumericalTensor): the signal to be propagated
-            low_res (Number): the ratio of the low resolution shape
-            high_res (Number): the ratio of the high resolution shape
+            coarse_ratio (Number): the ratio of the low resolution shape
+            fine_ratio (Number): the ratio of the high resolution shape
             smoothing (str, optional): the smoothing option. Defaults to "constant".
 
         Returns:
             NumericalTensor: the signal at the high resolution ratio
         """
         assert (
-            signal.shape[0] == self.at(low_res).n_points
+            signal.shape[0] == self.at(coarse_ratio).n_points
         ), "signal must have the same number of points as the origin ratio"
-        assert low_res <= high_res, "high_res must be smaller than low_res"
+        assert (
+            coarse_ratio <= fine_ratio
+        ), "fine_ratio must be smaller than coarse_ratio"
 
-        high_res_signal = torch.index_select(
+        fine_ratio_signal = torch.index_select(
             signal,
             dim=0,
-            index=self.indice_mapping(high_res=high_res, low_res=low_res),
+            index=self.indice_mapping(fine_ratio=fine_ratio, coarse_ratio=coarse_ratio),
         )
 
         if smoothing == "constant":
-            pass
-        elif smoothing == "mesh_convolution":
-            high_res_signal = edge_smoothing(
-                high_res_signal,
-                self.at(high_res),
-                n_smoothing_steps=n_smoothing_steps,
-            )
+            return fine_ratio_signal
 
-        return high_res_signal
+        # Else, smooth the signal
+
+        elif smoothing == "mesh_convolution":
+            C = self.at(fine_ratio).mesh_convolution()
+
+        # for _ in range(n_smoothing_steps):
+        #     fine_ratio_signal = C @ fine_ratio_signal
+        fine_ratio_signal = edge_smoothing(
+            fine_ratio_signal,
+            self.at(fine_ratio),
+            n_smoothing_steps=n_smoothing_steps,
+        )
+
+        return fine_ratio_signal
 
     @convert_inputs
     @typecheck
@@ -605,38 +622,38 @@ def edge_smoothing(
     return output.to(signal_device)
 
 
-@convert_inputs
-@typecheck
-def vector_heat_smooting(
-    signal: NumericalTensor, shape: polydata_type
-) -> NumericalTensor:
-    """Smooth a vector signal on a triangle mesh or a points cloud by vector heat smoothing using pp3d.
+# @convert_inputs
+# @typecheck
+# def vector_heat_smooting(
+#     signal: NumericalTensor, shape: polydata_type
+# ) -> NumericalTensor:
+#     """Smooth a vector signal on a triangle mesh or a points cloud by vector heat smoothing using pp3d.
 
-    Args:
-        signal (NumericalTensor): the signal to be smoothed
-        shape (polydata_type): the triangle mesh or points cloud on which the signal is defined
+#     Args:
+#         signal (NumericalTensor): the signal to be smoothed
+#         shape (polydata_type): the triangle mesh or points cloud on which the signal is defined
 
-    Raises:
-        ImportError: potpourri3d must be installed to use vector heat smoothing
+#     Raises:
+#         ImportError: potpourri3d must be installed to use vector heat smoothing
 
-    Returns:
-        NumericalTensor: the smoothed signal
-    """
-    try:
-        import potpourri3d as pp3d
-    except:
-        raise ImportError("Please install potpourri3d to use vector heat smoothing")
+#     Returns:
+#         NumericalTensor: the smoothed signal
+#     """
+#     try:
+#         import potpourri3d as pp3d
+#     except:
+#         raise ImportError("Please install potpourri3d to use vector heat smoothing")
 
-    if shape.is_triangle_mesh():
-        V, F = shape.points.cpu().numpy(), shape.triangles.cpu().numpy()
+#     if shape.is_triangle_mesh():
+#         V, F = shape.points.cpu().numpy(), shape.triangles.cpu().numpy()
 
-        try:
-            solver = pp3d.MeshVectorHeatSolver(V, F)
-        except:
-            solver = pp3d.PointCloudHeatSolver(V)
+#         try:
+#             solver = pp3d.MeshVectorHeatSolver(V, F)
+#         except:
+#             solver = pp3d.PointCloudHeatSolver(V)
 
-    else:
-        solver = pp3d.PointCloudHeatSolver(shape.points.cpu().numpy())
+#     else:
+#         solver = pp3d.PointCloudHeatSolver(shape.points.cpu().numpy())
 
-    ext = solver.extend_vector(torch.arange(len(signal)).numpy(), signal.cpu().numpy())
-    return torch.from_numpy(ext)
+#     ext = solver.extend_vector(torch.arange(len(signal)).numpy(), signal.cpu().numpy())
+#     return torch.from_numpy(ext)

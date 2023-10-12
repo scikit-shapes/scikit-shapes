@@ -103,24 +103,24 @@ def test_multiscale():
 
     # Pick a 2 random ratios
     r = torch.rand(2)
-    low_res_ratio, intermediate_ratio = r.min(), r.max()
-    low_res_ratio = float(low_res_ratio)
+    coarse_ratio, intermediate_ratio = r.min(), r.max()
+    coarse_ratio = float(coarse_ratio)
     intermediate_ratio = float(intermediate_ratio)
 
     # Test indice mapping
-    im = M.indice_mapping(high_res=intermediate_ratio, low_res=low_res_ratio)
+    im = M.indice_mapping(fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio)
     # Check that the number of points is correct
     assert im.shape[0] == M.at(intermediate_ratio).n_points
     # Check that the indices are correct
-    assert (im.max() + 1) == M.at(low_res_ratio).n_points
+    assert (im.max() + 1) == M.at(coarse_ratio).n_points
 
     # Test composition of indice mapping
-    im_from_intermediate_ratio_to_low_res_ratio = M.indice_mapping(
-        high_res=1, low_res=low_res_ratio
+    im_from_intermediate_ratio_to_coarse_ratio = M.indice_mapping(
+        fine_ratio=1, coarse_ratio=coarse_ratio
     )
-    im1 = M.indice_mapping(high_res=1, low_res=intermediate_ratio)
-    im2 = M.indice_mapping(high_res=intermediate_ratio, low_res=low_res_ratio)
-    assert torch.allclose(im_from_intermediate_ratio_to_low_res_ratio, im2[im1])
+    im1 = M.indice_mapping(fine_ratio=1, coarse_ratio=intermediate_ratio)
+    im2 = M.indice_mapping(fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio)
+    assert torch.allclose(im_from_intermediate_ratio_to_coarse_ratio, im2[im1])
 
     # Test signal propagation from high to low resolution
     signal_intermediate_ratio = torch.rand(M.at(1).n_points)
@@ -128,42 +128,42 @@ def test_multiscale():
     # Composition with "mean" doesn't work because of weighting
     i = torch.randint(0, len(reduce_options), (1,)).item()
     reduce = reduce_options[i]
-    # Direct propagation from ratio 1 to low_res_ratio
-    low_resol_signal = M.signal_from_high_to_low_res(
-        signal_intermediate_ratio, high_res=1, low_res=low_res_ratio, reduce=reduce
+    # Direct propagation from ratio 1 to coarse_ratio
+    low_resol_signal = M.signal_from_fine_to_coarse(
+        signal_intermediate_ratio, fine_ratio=1, coarse_ratio=coarse_ratio, reduce=reduce
     )
     # Composition of two propagations
-    intermediate_signal = M.signal_from_high_to_low_res(
-        signal_intermediate_ratio, high_res=1, low_res=intermediate_ratio, reduce=reduce
+    intermediate_signal = M.signal_from_fine_to_coarse(
+        signal_intermediate_ratio, fine_ratio=1, coarse_ratio=intermediate_ratio, reduce=reduce
     )
-    b = M.signal_from_high_to_low_res(
+    b = M.signal_from_fine_to_coarse(
         intermediate_signal,
-        high_res=intermediate_ratio,
-        low_res=low_res_ratio,
+        fine_ratio=intermediate_ratio,
+        coarse_ratio=coarse_ratio,
         reduce=reduce,
     )
     # Check that the two signals are equal
     assert torch.allclose(low_resol_signal, b)
 
     # Test signal propagation from low to high resolution with constant smoothing
-    tmp = M.signal_from_low_to_high_res(
+    tmp = M.signal_from_coarse_to_fine(
         low_resol_signal,
-        low_res=low_res_ratio,
-        high_res=intermediate_ratio,
+        coarse_ratio=coarse_ratio,
+        fine_ratio=intermediate_ratio,
         smoothing="constant",
     )
     assert tmp.shape[0] == M.at(intermediate_ratio).n_points
 
     # Propagate again to low resolution and check that we recover the original signal
     # with reduce="min", "max" or "mean"
-    back = M.signal_from_high_to_low_res(
-        tmp, high_res=intermediate_ratio, low_res=low_res_ratio, reduce="min"
+    back = M.signal_from_fine_to_coarse(
+        tmp, fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio, reduce="min"
     )
-    back2 = M.signal_from_high_to_low_res(
-        tmp, high_res=intermediate_ratio, low_res=low_res_ratio, reduce="max"
+    back2 = M.signal_from_fine_to_coarse(
+        tmp, fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio, reduce="max"
     )
-    back3 = M.signal_from_high_to_low_res(
-        tmp, high_res=intermediate_ratio, low_res=low_res_ratio, reduce="mean"
+    back3 = M.signal_from_fine_to_coarse(
+        tmp, fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio, reduce="mean"
     )
     assert torch.allclose(back, low_resol_signal)
     assert torch.allclose(back2, low_resol_signal)
@@ -172,13 +172,13 @@ def test_multiscale():
     signal_out = M.signal_convolution(
         signal,
         signal_ratio=1,
-        target_ratio=low_res_ratio,
+        target_ratio=coarse_ratio,
         kernel="gaussian",
         scale=0.01,
         normalize=True,
     )
 
-    assert signal_out.shape[0] == M.at(low_res_ratio).n_points
+    assert signal_out.shape[0] == M.at(coarse_ratio).n_points
 
 
 def test_multiscale_api():
@@ -187,7 +187,7 @@ def test_multiscale_api():
     mesh = sks.PolyData(examples.download_bunny())
     ratios = [0.01, 0.1, 0.5, 1]
 
-    upscale_policy = {"smoothing": "constant"}
+    coarse_to_fine_policy = {"smoothing": "constant"}
     downscale_policy = {"reduce": "mean"}
 
     M = sks.Multiscale(mesh, ratios=ratios)
