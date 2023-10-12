@@ -52,7 +52,7 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         self.lpoints_pointcloud = vedo.Points(self.lpoints, r=15).pickable(False).c("r")
         self.add(self.lpoints_pointcloud)
 
-        text = "Start by selecting landmarks on the reference shape\nPress e to add a vertice\nPress d to delete the last point\nPress return to validate the landmarks and close the window"
+        text = "Start by selecting landmarks on the reference shape\nPress e to add a vertice\nPress d to delete the last point\nPress z to validate the landmarks and close the window"
         self.instructions = vedo.Text2D(
             text, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -63,17 +63,18 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
     def _key_press(self, evt):
         """The _key_press method is called when the user presses a key. It is used to add or delete landmarks and update the display."""
         if evt.keypress == "e":
-            pt = vedo.Points(self.actor.points()).closest_point(evt.picked3d)
-            indice = closest_vertex(self.actor.points().copy(), pt)
-            self.lpoints.append(pt)
-            self.landmarks.append(indice)
+            if evt.picked3d is not None:
+                pt = vedo.Points(self.actor.points()).closest_point(evt.picked3d)
+                indice = closest_vertex(self.actor.points().copy(), pt)
+                self.lpoints.append(pt)
+                self.landmarks.append(indice)
 
         if evt.keypress == "d":
             if len(self.lpoints) > 0:
                 self.lpoints.pop()
                 self.landmarks.pop()
 
-        if evt.keypress == "Return" and len(self.lpoints) > 0:
+        if evt.keypress == "z" and len(self.lpoints) > 0:
             # Store the landmarks in the shape
             self.shape.landmarks = self.landmarks
             # Close the window
@@ -137,7 +138,7 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         self.reference_vertices = vedo.Points(self.reference.points())
 
         # Instructions corresponding to the "reference" mode
-        text_reference = "Start by selecting landmarks on the reference shape\nPress e to add a vertice\nPress d to delete the last point\nPress return to validate the landmarks"
+        text_reference = "Start by selecting landmarks on the reference shape\nPress e to add a vertice\nPress d to delete the last point\nPress z to validate the landmarks"
         self.instructions_reference = vedo.Text2D(
             text_reference, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -146,7 +147,7 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         )  # Add the instructions to the left plot
 
         # Instructions corresponding to the "other" mode (not displayed at the beginning)
-        text_other = "Now select the same landmarks on the other shapes\nPress e to add a vertice\nPress d to delete the last point\nPress return when you have selected all the landmarks"
+        text_other = "Now select the same landmarks on the other shapes\nPress e to add a vertice\nPress d to delete the last point\nPress z when you have selected all the landmarks"
         self.instructions_other = vedo.Text2D(
             text_other, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -254,34 +255,40 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
 
         if self.mode == "reference" and evt.actor == self.reference:
             if evt.keypress == "e":
-                pt = vedo.Points(self.active_actor.points()).closest_point(evt.picked3d)
-                indice = closest_vertex(self.active_actor.points().copy(), pt)
-                self.reference_lpoints.append(pt)
-                self.reference_indices.append(indice)
+                if evt.picked3d is not None:
+                    pt = vedo.Points(self.active_actor.points()).closest_point(
+                        evt.picked3d
+                    )
+                    indice = closest_vertex(self.active_actor.points().copy(), pt)
+                    self.reference_lpoints.append(pt)
+                    self.reference_indices.append(indice)
 
             if evt.keypress == "d":
                 if len(self.reference_lpoints) > 0:
                     self.reference_lpoints.pop()
                     self.reference_indices.pop()
 
-            if evt.keypress == "Return" and len(self.reference_lpoints) > 0:
+            if evt.keypress == "z" and len(self.reference_lpoints) > 0:
                 self._done()
 
             self._update()
 
         elif self.mode == "others" and evt.actor == self.current_other:
             if evt.keypress == "e" and len(self.other_lpoints) < self.n_landmarks:
-                pt = vedo.Points(self.active_actor.points()).closest_point(evt.picked3d)
-                indice = closest_vertex(self.active_actor.points().copy(), pt)
-                self.other_lpoints.append(pt)
-                self.other_indices.append(indice)
+                if evt.picked3d is not None:
+                    pt = vedo.Points(self.active_actor.points()).closest_point(
+                        evt.picked3d
+                    )
+                    indice = closest_vertex(self.active_actor.points().copy(), pt)
+                    self.other_lpoints.append(pt)
+                    self.other_indices.append(indice)
 
             if evt.keypress == "d":
                 if len(self.other_lpoints) > 0:
                     self.other_lpoints.pop()
                     self.other_indices.pop()
 
-            if evt.keypress == "Return" and len(self.other_lpoints) == self.n_landmarks:
+            if evt.keypress == "z" and len(self.other_lpoints) == self.n_landmarks:
                 self._done()
             else:
                 self._update()

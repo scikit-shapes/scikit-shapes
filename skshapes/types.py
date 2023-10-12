@@ -47,7 +47,7 @@ def _convert_arg(x):
     return x
 
 
-def convert_inputs(func):
+def convert_inputs(func, parameters=None):
     """A decorator that converts the input to the right type.
 
     It converts the inputs arrays to the right type (torch.Tensor) and
@@ -64,7 +64,7 @@ def convert_inputs(func):
         # Convert args and kwargs to torch.Tensor
         # and convert the dtype to the right one
         new_args = []
-        for i, arg in enumerate(args):
+        for arg in args:
             new_args.append(_convert_arg(arg))
 
         for key, value in kwargs.items():
