@@ -23,7 +23,11 @@ def test_registration():
         sks.loss.L2Loss(),
         0.8 * sks.loss.L2Loss() + 2 * sks.loss.OptimalTransportLoss(),
     ]
-    models = [sks.morphing.ElasticMetric(), sks.morphing.RigidMotion()]
+    models = [
+        sks.morphing.ElasticMetric(),
+        sks.morphing.RigidMotion(),
+        sks.morphing.SplineDeformation(),
+    ]
     for loss in losses:
         for model in models:
             r = sks.tasks.Registration(

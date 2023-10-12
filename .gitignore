@@ -163,5 +163,6 @@ cython_debug/
 # Do not push to github the output of local tests
 **/output/*
 
-
+# Notebook files
+Untitled-1.ipynb
 example.ipynb
