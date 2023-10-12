@@ -47,19 +47,24 @@ def _convert_arg(x):
     return x
 
 
-def convert_inputs(func):
+def convert_inputs(func, parameters=None):
     """A decorator that converts the input to the right type.
 
     It converts the inputs arrays to the right type (torch.Tensor) and
     convert the dtype of the tensor to the right one (float32 for float,
     int64 for int), before calling the function.
+
+    TODO: so far, it only works with numpy arrays and torch tensors.
+    Is it relevant to add support for lists and tuples ? -> must be careful
+    on which arguments are converted (only the ones that are supposed to be
+    converted to torch.Tensor).
     """
 
     def wrapper(*args, **kwargs):
         # Convert args and kwargs to torch.Tensor
         # and convert the dtype to the right one
         new_args = []
-        for i, arg in enumerate(args):
+        for arg in args:
             new_args.append(_convert_arg(arg))
 
         for key, value in kwargs.items():
@@ -97,7 +102,7 @@ Float3dTensor = JaxFloat[torch.Tensor, "_ _ _"]
 FloatScalar = JaxFloat[torch.Tensor, ""]
 Int1dTensor = JaxInt[torch.Tensor, "_"]
 
-FloatSequence = Union[Float1dTensor, Float1dArray, List[float]]
+FloatSequence = Union[Float1dTensor, Float1dArray, List[float], List[Number]]
 IntSequence = Union[Int1dTensor, Int1dArray, List[int]]
 
 DoubleTensor = JaxDouble[torch.Tensor, "..."]
