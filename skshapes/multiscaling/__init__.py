@@ -1,6 +1,5 @@
 from .multiscale import Multiscale
 from .multiscale_triangle_mesh import (
     MultiscaleTriangleMesh,
-    edge_smoothing,
-    vector_heat_smooting,
+    # edge_smoothing,
 )

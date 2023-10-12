@@ -130,11 +130,17 @@ def test_multiscale():
     reduce = reduce_options[i]
     # Direct propagation from ratio 1 to coarse_ratio
     low_resol_signal = M.signal_from_fine_to_coarse(
-        signal_intermediate_ratio, fine_ratio=1, coarse_ratio=coarse_ratio, reduce=reduce
+        signal_intermediate_ratio,
+        fine_ratio=1,
+        coarse_ratio=coarse_ratio,
+        reduce=reduce,
     )
     # Composition of two propagations
     intermediate_signal = M.signal_from_fine_to_coarse(
-        signal_intermediate_ratio, fine_ratio=1, coarse_ratio=intermediate_ratio, reduce=reduce
+        signal_intermediate_ratio,
+        fine_ratio=1,
+        coarse_ratio=intermediate_ratio,
+        reduce=reduce,
     )
     b = M.signal_from_fine_to_coarse(
         intermediate_signal,
