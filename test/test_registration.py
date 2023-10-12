@@ -3,6 +3,9 @@ import pyvista
 import torch
 import pytest
 
+# TODO : for diffeo, integrator = Euler is not the best : add modularity
+# -> runge-kutta 2
+
 
 def test_registration():
     # Load two meshes

@@ -179,3 +179,30 @@ def test_multiscale():
     )
 
     assert signal_out.shape[0] == M.at(low_res_ratio).n_points
+
+
+def test_multiscale_api():
+    """Test the multiscale signal API"""
+
+    mesh = sks.PolyData(examples.download_bunny())
+    ratios = [0.01, 0.1, 0.5, 1]
+
+    upscale_policy = {"smoothing": "constant"}
+    downscale_policy = {"reduce": "mean"}
+
+    M = sks.Multiscale(mesh, ratios=ratios)
+
+    n = M.at(0.1).n_points
+    M.at(0.1)["test_signal"] = torch.rand(n)
+    assert "test_signal" not in M.at(0.5).point_data.keys()
+
+    M.add_signal(
+        key="test_signal",
+        at=0.1,
+    )
+
+    assert "test_signal" in M.at(0.5).point_data.keys()
+
+    M.add_ratio(0.2)
+    n_points = M.at(0.2).n_points
+    assert M.at(0.2)["test_signal"].shape[0] == n_points

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from ..types import (
     typecheck,
     convert_inputs,
@@ -14,6 +16,67 @@ from ..types import (
 from typing import List, Literal
 from ..utils import scatter
 import torch
+
+
+# class SingleScale(PolyData):
+#     """SingleScale is a polydata wrapper with reference to a multiscale object."""
+
+#     def __init__(self, polydata: polydata_type, multiscale: MultiscaleTriangleMesh, ratio=Number) -> None:
+#         """Initialize a SingleScale object.
+
+#         Args:
+#             polydata (polydata_type): the polydata to be wrapped
+#         """
+#         points = polydata.points
+#         edges = polydata.edges
+#         triangles = polydata.triangles
+#         device = polydata.device
+#         landmarks = polydata.landmarks
+#         point_data = polydata.point_data
+#         try:
+#             cache_size = polydata.cache_size
+#         except:
+#             cache_size = None
+#         super().__init__(
+#             points=points,
+#             edges=edges,
+#             triangles=triangles,
+#             device=device,
+#             landmarks=landmarks,
+#             point_data=point_data,
+#             cache_size=cache_size,
+#         )
+
+#         self.multiscale = multiscale
+#         self.ratio = ratio
+
+
+#     @property
+#     def point_data(self) -> DataAttributes:
+#         warn("To set the value of a point_data entry, use the __setitem__ method, and not the point_data property")
+#         return self._point_data
+
+#     @point_data.setter
+#     @typecheck
+#     def point_data(self, point_data_dict: dict) -> None:
+#         if not isinstance(point_data_dict, DataAttributes):
+#             # Convert the point_data to a DataAttributes object
+#             # the from_dict method will check that the point_data are valid
+#             point_data_dict = DataAttributes.from_dict(point_data_dict)
+
+#         assert (
+#             point_data_dict.n == self.n_points
+#         ), "The number of points in the point_data entries should be the same as the number of points in the shape."
+#         self._point_data = point_data_dict.to(self.device)
+
+#     def __setitem__(self, key, value):
+#         self._point_data[key] = value
+#         # update the multiscale object
+
+#     def __repr__(self):
+#         return (
+#             f"SingleScale object at ratio {self.ratio} of shape {self.n_points} points"
+#         )
 
 
 class MultiscaleTriangleMesh:
@@ -36,20 +99,32 @@ class MultiscaleTriangleMesh:
 
         For signal propagation, policies can be specified for downscaling and upscaling.
 
-        Policy for downscaling consists of a reduce operation and a pass_through option:
+        Policy for downscaling consists of a reduce operation and a pass_through_all_scales option:
         - reduce (str): the reduce operation. Available options are "sum", "min", "max", "mean"
-        - pass_through (bool): if True, the signal is propagated through all the ratios when
+        - pass_through_all_scales (bool): if True, the signal is propagated through all the ratios when
           dowscaling. If False, the signal is propagated directly from the origin ratio to the
             target ratio.
 
-        Policy for upscaling consists of a smoothing operation and a pass_through option:
+        Policy for upscaling consists of a smoothing operation and a pass_through_all_scales option:
         - smoothing (str): the smoothing operation. Available options are "constant", "mesh_convolution"
         - n_smoothing_steps (int): the number of smoothing operations to apply
-        - pass_through (bool): if True, the signal is propagated through all the ratios when
+        - pass_through_all_scales (bool): if True, the signal is propagated through all the ratios when
 
         Default policies are:
-        - downscale_policy = {"reduce": "mean", "pass_through": False}
-        - upscale_policy = {"smoothing": "constant", "n_smoothing_steps": 1, "pass_through": False}
+        - downscale_policy = {"reduce": "mean", "pass_through_all_scales": False}
+        - upscale_policy = {"smoothing": "constant", "n_smoothing_steps": 1, "pass_through_all_scales": False}
+
+        When adding a signal, the policies can be specified for the signal. If not specified, the default policies
+        are used.
+
+        To add a signal to the multiscale object, use the add_signal method. The signal can be specified as a tensor
+        or as a key in the point_data of the shape at the origin ratio. If the signal is specified as a tensor, it
+        is added to the point_data of the shape at the origin ratio. The signal is then propagated to the available
+        ratios following the policies. Whan adding a new ratio after a signal has been added, the signal is updated.
+
+        Be careful that modifying directly the point_data of a shape in the multiscale object will not update the
+        signals at other scale. Please make sure that no modification is done directly on the point_data of a shape
+        in the multiscale object after the call of the add_signal method.
 
         Args:
             shape (Shape): the shape to be multiscaled (will be reffered to as ratio 1)
@@ -85,21 +160,19 @@ class MultiscaleTriangleMesh:
             else {
                 "smoothing": "constant",
                 "n_smoothing_steps": 1,
-                "pass_through": False,
+                "pass_through_all_scales": False,
             }
         )
         self.downscale_policy = (
             downscale_policy
             if downscale_policy is not None
-            else {"reduce": "mean", "pass_through": False}
+            else {"reduce": "mean", "pass_through_all_scales": False}
         )
 
         for signal in shape.point_data:
             self.signals[signal] = {
                 "origin_ratio": 1,
                 "available_ratios": [1],
-                "downscale_args": self.downscale_policy,
-                "upscale_args": self.upscale_policy,
             }
 
         self.shapes[1] = shape
@@ -115,7 +188,7 @@ class MultiscaleTriangleMesh:
 
     @typecheck
     def add_ratio(self, ratio: float) -> None:
-        """Add a ratio to the multiscale object.
+        """Add a ratio to the multiscale object and update the signals.
 
         Args:
             ratio (float): ratio to be added
@@ -125,13 +198,17 @@ class MultiscaleTriangleMesh:
             # ratio already exists, do nothing
             pass
         else:
-            self.shapes[ratio] = self.decimation_module.transform(
+            polydata = self.decimation_module.transform(
                 self.shapes[1], target_reduction=1 - ratio
             )
+
+            # self.shapes[ratio] = SingleScale(polydata, multiscale=self, ratio=ratio)
+            self.shapes[ratio] = polydata
             self.mappings_from_origin[ratio] = self.decimation_module._indice_mapping
+        self.update_signals()
 
     @typecheck
-    def at(self, ratio: Number, update_signals: bool = True) -> polydata_type:
+    def at(self, ratio: Number) -> polydata_type:
         """Return the shape at a given ratio.
 
         If the ratio does not exist, the closest ratio is returned.
@@ -145,8 +222,6 @@ class MultiscaleTriangleMesh:
         available_ratios = list(self.shapes.keys())
         # find closest ratio
         closest_ratio = min(available_ratios, key=lambda x: abs(x - ratio))
-        if update_signals:
-            self.update_signals()
         return self.shapes[closest_ratio]
 
     @typecheck
@@ -170,11 +245,95 @@ class MultiscaleTriangleMesh:
         available_ratios.sort()
         return available_ratios[::-1]
 
+    @convert_inputs
     @typecheck
-    def propagate_signal(self, signal_name: str, origin_ratio: Number) -> None:
+    def add_signal(
+        self,
+        signal: Optional[NumericalTensor] = None,
+        *,
+        key: str,
+        at: Number = 1,
+        downscale_policy: Optional[dict] = None,
+        upscale_policy: Optional[dict] = None,
+    ):
+        """Add a signal to the multiscale object.
+
+        The signal can be specified as a couple key/tensor (can be multidimensional) or as a key, if the signal is already
+        stored in the point_data of the shape at the desired ratio. Upscale and downscale policies can be specified for
+        the signal. If not specified, the default policies of the multiscale instance are used.
+
+        This function add (if needed) the signal to the point_data of the shape at ratio "at", and propagate the signal through
+        the available ratios following the policies. After calling this function, the signal is available at all the available
+        ratios.
+
+        If a new ratio is added to the multiscale instance after the adding of the signal with add_ratio, all the signals are
+        updated.
+
+        Example :
+        >>> M = sks.Multiscale(shape, ratios=[0.5, 0.1])
+        >>> signal = torch.rand(M.at(0.5).n_points)
+        >>> M.add_signal(key="signal", at=0.5)
+        >>> M.at(0.1).point_data["signal"].shape[0] == M.at(0.1).n_points # True
+
+        Args:
+            key (str): _description_
+            signal (Optional[NumericalTensor], optional): _description_. Defaults to None.
+            at (Number, optional): _description_. Defaults to 1.
+            downscale_policy (Optional[dict], optional): _description_. Defaults to None.
+            upscale_policy (Optional[dict], optional): _description_. Defaults to None.
+
+        Raises:
+            ValueError: _description_
+        """
+
+        if signal is None:
+            try:
+                signal = self.at(at).point_data[key]
+            except:
+                raise ValueError(
+                    f"{key} not in the point_data of the shape at ratio {at}"
+                )
+
+        if downscale_policy is None:
+            downscale_policy = self.downscale_policy
+
+        if upscale_policy is None:
+            upscale_policy = self.upscale_policy
+
+        self.signals[key] = {
+            "origin_ratio": at,
+            "available_ratios": [at],
+            "downscale_policy": downscale_policy,
+            "upscale_policy": upscale_policy,
+        }
+
+        self.at(at)[key] = signal
+
+        self.propagate_signal(
+            signal_name=key,
+            origin_ratio=at,
+            downscale_policy=downscale_policy,
+            upscale_policy=upscale_policy,
+        )
+
+    @typecheck
+    def propagate_signal(
+        self,
+        signal_name: str,
+        origin_ratio: Number,
+        downscale_policy: Optional[dict] = None,
+        upscale_policy: Optional[dict] = None,
+    ) -> None:
         """Propagate a signal from the origin ratio to the available ratios following
         the propagation policies.
         """
+
+        self.signals[signal_name]["available_ratios"] = []
+
+        if downscale_policy is None:
+            downscale_policy = self.downscale_policy
+        if upscale_policy is None:
+            upscale_policy = self.upscale_policy
 
         # Ratios that are greater than the origin ratio (ascending order)
         up_ratios = [r for r in self.available_ratios if r >= origin_ratio][::-1]
@@ -182,74 +341,83 @@ class MultiscaleTriangleMesh:
         # Ratios that are smaller than the origin ratio (descending order)
         down_ratios = [r for r in self.available_ratios if r <= origin_ratio]
 
-        signal_origin = self.at(origin_ratio, update_signals=False).point_data[
-            signal_name
-        ]
+        signal_origin = self.at(origin_ratio).point_data[signal_name]
 
         tmp = signal_origin
         low_res = origin_ratio
 
         for r in up_ratios[1:]:
-            self.at(r, update_signals=False).point_data[
-                signal_name
-            ] = self.signal_from_low_to_high_res(
+            self.at(r).point_data[signal_name] = self.signal_from_low_to_high_res(
                 tmp,
                 low_res=low_res,
                 high_res=r,
-                **self.upscale_policy,
+                **upscale_policy,
             )
             self.signals[signal_name]["available_ratios"].append(r)
-            if self.upscale_policy["pass_through"]:
+            if upscale_policy["pass_through_all_scales"]:
                 low_res = r
-                tmp = self.at(r, update_signals=False).point_data[signal_name]
+                tmp = self.at(r).point_data[signal_name]
 
         tmp = signal_origin
         high_res = origin_ratio
 
         for r in down_ratios[1:]:
-            self.at(r, update_signals=False).point_data[
-                signal_name
-            ] = self.signal_from_high_to_low_res(
+            self.at(r).point_data[signal_name] = self.signal_from_high_to_low_res(
                 tmp,
                 high_res=high_res,
                 low_res=r,
-                **self.downscale_policy,
+                **downscale_policy,
             )
             self.signals[signal_name]["available_ratios"].append(r)
-            if self.downscale_policy["pass_through"]:
-                tmp = self.at(r, update_signals=False).point_data[signal_name]
+            if downscale_policy["pass_through_all_scales"]:
+                tmp = self.at(r).point_data[signal_name]
                 high_res = r
 
     @typecheck
     def update_signals(self) -> None:
         """Update the signals at the available ratios.
 
-        This method is called automatically when at is called. It checks for new signals
-        accross the available ratios and propagate them. It also checks for new
+        It checks for new
         ratios for existing signals and redo the propagation of the concerned signals.
         """
+
+        # This is not needed anymore, since we propagate the signals added with add_signal
+        # and do not try to automatically detect the signals
+
         # check for new signals
-        for r in self.available_ratios:
-            for signal in self.at(r, update_signals=False).point_data:
-                # If the signal is not in the dict, add it and propagate it
-                # accross the available ratios
-                if signal not in self.signals.keys():
-                    self.signals[signal] = {
-                        "origin_ratio": r,
-                        "available_ratios": [r],
-                    }
-                    self.propagate_signal(
-                        signal_name=signal,
-                        origin_ratio=r,
-                    )
+        # for r in self.available_ratios:
+        #     for signal in self.at(r, update_signals=False).point_data:
+        #         # If the signal is not in the dict, add it and propagate it
+        #         # accross the available ratios
+        #         if signal not in self.signals.keys():
+        #             self.signals[signal] = {
+        #                 "origin_ratio": r,
+        #                 "available_ratios": [r],
+        #             }
+        #             self.propagate_signal(
+        #                 signal_name=signal,
+        #                 origin_ratio=r,
+        #             )
 
         # check for new ratios for existing signals
         for signal in self.signals.keys():
             for r in self.available_ratios:
                 if r not in self.signals[signal]["available_ratios"]:
+                    if "downscale_policy" not in self.signals[signal].keys():
+                        downscale_policy = self.downscale_policy
+                    else:
+                        downscale_policy = self.signals[signal]["downscale_policy"]
+
+                    if "upscale_policy" not in self.signals[signal].keys():
+                        upscale_policy = self.upscale_policy
+                    else:
+                        upscale_policy = self.signals[signal]["upscale_policy"]
+
                     self.propagate_signal(
                         signal_name=signal,
                         origin_ratio=self.signals[signal]["origin_ratio"],
+                        downscale_policy=downscale_policy,
+                        upscale_policy=upscale_policy,
                     )
 
     @typecheck
@@ -314,7 +482,7 @@ class MultiscaleTriangleMesh:
             NumericalTensor: the signal at the low resolution ratio
         """
         assert (
-            signal.shape[0] == self.at(high_res, update_signals=False).n_points
+            signal.shape[0] == self.at(high_res).n_points
         ), "signal must have the same number of points as the origin ratio"
         assert high_res >= low_res, "high_res must be greater than low_res"
 
@@ -353,7 +521,7 @@ class MultiscaleTriangleMesh:
             NumericalTensor: the signal at the high resolution ratio
         """
         assert (
-            signal.shape[0] == self.at(low_res, update_signals=False).n_points
+            signal.shape[0] == self.at(low_res).n_points
         ), "signal must have the same number of points as the origin ratio"
         assert low_res <= high_res, "high_res must be smaller than low_res"
 
@@ -368,7 +536,7 @@ class MultiscaleTriangleMesh:
         elif smoothing == "mesh_convolution":
             high_res_signal = edge_smoothing(
                 high_res_signal,
-                self.at(high_res, update_signals=False),
+                self.at(high_res),
                 n_smoothing_steps=n_smoothing_steps,
             )
 
@@ -377,8 +545,8 @@ class MultiscaleTriangleMesh:
     @convert_inputs
     @typecheck
     def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
-        source = self.at(signal_ratio, update_signals=False)
-        target = self.at(target_ratio, update_signals=False)
+        source = self.at(signal_ratio)
+        target = self.at(target_ratio)
 
         assert (
             signal.shape[0] == source.n_points

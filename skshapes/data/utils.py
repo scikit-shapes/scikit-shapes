@@ -71,7 +71,7 @@ class DataAttributes(dict):
         i = 0
         while f"attribute_{i}" in self.keys():
             i += 1
-
+            
         dict.__setitem__(self, f"attribute_{i}", value)
 
     @typecheck
