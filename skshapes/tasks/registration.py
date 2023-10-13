@@ -62,6 +62,9 @@ class Registration:
         if target.device != self.optim_device:
             target = target.to(self.optim_device)
 
+        print("source.device", source.device)
+        print("target.device", target.device)
+
         # Define the loss function
         def loss_fn(parameter):
             return_regularization = False if self.regularization == 0 else True
@@ -92,6 +95,8 @@ class Registration:
             loss_value.backward()
             return loss_value
 
+        print("ok so far")
+
         # Run the optimization
         for i in range(self.n_iter):
             loss_value = optimizer.step(closure)
@@ -102,20 +107,25 @@ class Registration:
         self.internal_parameter_device_type = parameter.device.type
 
         # Move the parameter to the output device
-        self.parameter_ = parameter.detach().to(self.output_device)
+        self.parameter_ = parameter.clone().detach().to(self.output_device)
+
+        print("few chances to get here")
 
         morphing = self.model.morph(
             shape=source,
-            parameter=self.parameter_,
+            parameter=parameter,
             return_path=True,
             return_regularization=True,
         )
+
+        print("few chances to get here")
 
         self.regularization_ = morphing.regularization.to(self.output_device)
         self.transformed_shape_ = morphing.morphed_shape
         self.path_ = morphing.path
 
-        if self.path_[0].device != self.output_device:
+        if self.transformed_shape_.device != self.output_device:
+            self.transformed_shape_ = self.transformed_shape_.to(self.output_device)
             self.path_ = [s.to(self.output_device) for s in self.path_]
 
     @typecheck

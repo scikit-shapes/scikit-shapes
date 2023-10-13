@@ -7,7 +7,7 @@ import pytest
 # -> runge-kutta 2
 
 
-def test_registration():
+def test_registration_cpu():
     # Load two meshes
     source = sks.PolyData(pyvista.Sphere())
     target = sks.PolyData(pyvista.Sphere())
@@ -63,46 +63,51 @@ def test_registration_device():
     """
 
     n_steps = 5
-    model = sks.RigidMotion(n_steps=n_steps)
+    models = [
+        sks.RigidMotion(n_steps=n_steps),
+        sks.SplineDeformation(n_steps=n_steps),
+        sks.ElasticMetric(n_steps=n_steps),
+    ]
     loss = sks.OptimalTransportLoss()
     optimizer = sks.LBFGS()
 
-    for device in ["cpu", "cuda"]:
-        for gpu in [False, True]:
-            source = shape1.to(device)
-            target = shape2.to(device)
+    for model in models:
+        for device in ["cpu", "cuda"]:
+            for gpu in [False, True]:
+                source = shape1.to(device)
+                target = shape2.to(device)
 
-            task = sks.Registration(
-                model=model,
-                loss=loss,
-                optimizer=optimizer,
-                n_iter=3,
-                gpu=gpu,
-                regularization=10,
-                verbose=1,
-            )
+                task = sks.Registration(
+                    model=model,
+                    loss=loss,
+                    optimizer=optimizer,
+                    n_iter=3,
+                    gpu=gpu,
+                    regularization=10,
+                    verbose=1,
+                )
 
-            newshape = task.fit_transform(source=source, target=target)
+                newshape = task.fit_transform(source=source, target=target)
 
-            # Check that the device on which the optimization is performed corresponds to the gpu argument
-            if gpu:
-                assert task.internal_parameter_device_type == "cuda"
-            else:
-                assert task.internal_parameter_device_type == "cpu"
+                # Check that the device on which the optimization is performed corresponds to the gpu argument
+                if gpu:
+                    assert task.internal_parameter_device_type == "cuda"
+                else:
+                    assert task.internal_parameter_device_type == "cpu"
 
-            # Check that the device of the output is the same as the input's shapes
-            assert task.parameter_.device.type == source.device.type
-            assert newshape.device.type == target.device.type
+                # Check that the device of the output is the same as the input's shapes
+                assert task.parameter_.device.type == source.device.type
+                assert newshape.device.type == target.device.type
 
-            # Check that the length of task.path_ is equal to n_steps
-            assert len(task.path_) == n_steps + 1
+                # Check that the length of task.path_ is equal to n_steps
+                assert len(task.path_) == n_steps + 1
 
-    # Check that if source and target are on different devices, an error is raised
-    source = shape1.to("cpu")
-    target = shape2.to("cuda")
-    try:
-        task.fit(source=source, target=target)
-    except:
-        pass
-    else:
-        raise AssertionError("Should have raised an error")
+        # Check that if source and target are on different devices, an error is raised
+        source = shape1.to("cpu")
+        target = shape2.to("cuda")
+        try:
+            task.fit(source=source, target=target)
+        except:
+            pass
+        else:
+            raise AssertionError("Should have raised an error")
