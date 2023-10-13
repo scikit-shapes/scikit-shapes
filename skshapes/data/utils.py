@@ -71,7 +71,7 @@ class DataAttributes(dict):
         i = 0
         while f"attribute_{i}" in self.keys():
             i += 1
-            
+
         dict.__setitem__(self, f"attribute_{i}", value)
 
     @typecheck
@@ -166,7 +166,7 @@ class DataAttributes(dict):
 
         d = dict(self)
         for key, value in d.items():
-            d[key] = value.cpu().numpy()
+            d[key] = value.detach().cpu().numpy()
 
         return d
 

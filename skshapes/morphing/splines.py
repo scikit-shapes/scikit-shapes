@@ -56,6 +56,7 @@ class EulerIntegrator(Integrator):
     @typecheck
     def __call__(self, p: Points, q: Points, H, dt: Number) -> Tuple[Points, Points]:
         Gp, Gq = torch.autograd.grad(H(p, q), (p, q), create_graph=True)
+
         pdot, qdot = -Gq, Gp
         p = p + pdot * dt
         q = q + qdot * dt
@@ -87,23 +88,20 @@ class SplineDeformation(BaseModel):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
-        # If intial_shape or target_shape are not defined, raise an error
-        # TODO : maybe better to add a boolean attribute self.initialized ?
-
-        path = []
-
-        p = parameter.clone().detach()
+        if parameter.device != shape.device:
+            p = parameter.to(shape.device)
+        else:
+            p = parameter
         p.requires_grad = True
+
         q = shape.points.clone()
         q.requires_grad = True
 
         # Compute the regularization
+        regularization = torch.tensor(0.0, device=shape.device)
         if return_regularization:
             regularization = self.cometric(parameter, q) / 2
-        else:
-            regularization = None
 
-        q.requires_grad = True  # Needed to compute the gradient of H
         H = lambda p, q: self.cometric(p, q) / 2  # Hamiltonian
         dt = 1 / self.n_steps  # Time step
 
@@ -113,11 +111,12 @@ class SplineDeformation(BaseModel):
             path = [shape.copy() for _ in range(self.n_steps + 1)]
 
         for i in range(self.n_steps):
-            if self.integrator == "Euler":
-                p, q = Euler_integrator(p, q, H, dt)
+            p, q = self.integrator(p, q, H, dt)
+            if return_path:
+                path[i + 1].points = q.clone()
 
         morphed_shape = shape.copy()
-        morphed_shape.points = q.clone().detach()
+        morphed_shape.points = q
 
         return MorphingOutput(
             morphed_shape=morphed_shape, path=path, regularization=regularization

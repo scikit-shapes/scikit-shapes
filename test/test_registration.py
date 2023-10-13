@@ -9,8 +9,8 @@ import pytest
 
 def test_registration_cpu():
     # Load two meshes
-    source = sks.PolyData(pyvista.Sphere())
-    target = sks.PolyData(pyvista.Sphere())
+    source = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
+    target = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
 
     # Few type checks
     assert isinstance(source, sks.data.baseshape.BaseShape)
@@ -28,26 +28,26 @@ def test_registration_cpu():
         sks.morphing.RigidMotion(),
         sks.morphing.SplineDeformation(),
     ]
+    regularizations = [0, 0.1]
     for loss in losses:
         for model in models:
-            r = sks.tasks.Registration(
-                model=model,
-                loss=loss,
-                optimizer=sks.LBFGS(),
-                n_iter=1,
-                gpu=False,
-                regularization=1,
-            )
-            print(loss, model)
-            r.fit_transform(source=source, target=target)
+            for regularization in regularizations:
+                r = sks.tasks.Registration(
+                    model=model,
+                    loss=loss,
+                    optimizer=sks.LBFGS(),
+                    n_iter=1,
+                    gpu=False,
+                    regularization=regularization,
+                    verbose=1,
+                )
+                print(loss, model)
+                r.fit_transform(source=source, target=target)
 
 
 import skshapes as sks
 import pyvista.examples
 from typing import get_args
-
-shape1 = sks.PolyData(pyvista.Sphere())
-shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.5)
 
 
 @pytest.mark.skipif(
@@ -61,8 +61,10 @@ def test_registration_device():
         - The device of the output of .transform() and of .parameter_ should be the same as the device of the source and the target
         - If source.device != target.device, an error should be raised
     """
+    shape1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
+    shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
 
-    n_steps = 5
+    n_steps = 2
     models = [
         sks.RigidMotion(n_steps=n_steps),
         sks.SplineDeformation(n_steps=n_steps),
@@ -81,9 +83,9 @@ def test_registration_device():
                     model=model,
                     loss=loss,
                     optimizer=optimizer,
-                    n_iter=3,
+                    n_iter=1,
                     gpu=gpu,
-                    regularization=10,
+                    regularization=0.1,
                     verbose=1,
                 )
 

@@ -341,7 +341,7 @@ class PolyData(BaseShape, polydata_type):
             mesh.metadata["landmarks_values"] = coalesced_landmarks.values()
             mesh.metadata["landmarks_indices"] = coalesced_landmarks.indices()
             mesh.metadata["landmarks_size"] = coalesced_landmarks.size()
-            mesh.metadata["landmark_points"] = self.landmark_points
+            mesh.metadata["landmark_points"] = self.landmark_points.detach()
 
         return mesh
 
@@ -386,7 +386,7 @@ class PolyData(BaseShape, polydata_type):
             polydata.field_data["landmarks_values"] = coalesced_landmarks.values()
             polydata.field_data["landmarks_indices"] = coalesced_landmarks.indices()
             polydata.field_data["landmarks_size"] = coalesced_landmarks.size()
-            polydata.field_data["landmark_points"] = self.landmark_points
+            polydata.field_data["landmark_points"] = self.landmark_points.detach()
 
         return polydata
 
