@@ -168,7 +168,13 @@ class PolyData(BaseShape, polydata_type):
 
         if landmarks is not None:
             # Call the setter that will clone and check the validity of the landmarks
-            self.landmarks = landmarks
+            if hasattr(landmarks, "to_dense"):
+                # landmarks is a sparse tensor
+                self.landmarks = landmarks.to(self.device)
+            else:
+                # landmarks is a list of indices
+                self.landmark_indices = landmarks
+
         elif "landmarks_from_pv" in locals():
             self.landmarks = landmarks_from_pv.to(self.device)
         else:
@@ -236,16 +242,8 @@ class PolyData(BaseShape, polydata_type):
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[Number] = None,
-        implementation: Literal["vtk", "sks"] = "vtk",
     ) -> PolyData:
-        """Decimate the shape using the Quadric Decimation algorithm.
-
-        Args:
-            target_reduction (float): the target reduction ratio. Must be between 0 and 1.
-
-        Returns:
-            PolyData: the decimated PolyData
-        """
+        """Decimate the shape using the Quadric Decimation algorithm."""
         if target_reduction is None and n_points is None:
             raise ValueError("Either target_reduction or n_points must be provided.")
 
@@ -262,9 +260,10 @@ class PolyData(BaseShape, polydata_type):
             target_reduction >= 0 and target_reduction <= 1
         ), "target_reduction must be between 0 and 1"
 
-        mesh = self.to_pyvista()
-        mesh = mesh.decimate(target_reduction)
-        return PolyData(mesh, device=self.device)
+        from ..decimation import Decimation
+
+        d = Decimation(target_reduction=target_reduction, n_points=n_points)
+        return d.fit_transform(self)
 
     @typecheck
     def save(self, filename: str) -> None:
@@ -575,35 +574,13 @@ class PolyData(BaseShape, polydata_type):
 
     @landmarks.setter
     @typecheck
-    def landmarks(self, landmarks: Union[Landmarks, IntSequence]) -> None:
+    def landmarks(self, landmarks: Landmarks) -> None:
         """Set the landmarks of the shape. The landmarks should be a sparse tensor of shape
         (n_landmarks, n_points) (barycentric coordinates) or a list of indices."""
 
-        if hasattr(landmarks, "to_dense"):
-            # If landmarks is a sparse tensor
-            assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
-            assert landmarks.dtype == float_dtype
-            self._landmarks = landmarks.clone().to(self.device)
-
-        else:
-            # landmarks is a sequence of indices
-            assert torch.max(torch.tensor(landmarks)) < self.n_points
-
-            n_landmarks = len(landmarks)
-            n_points = self.n_points
-
-            indices = torch.zeros((2, n_landmarks), dtype=int_dtype)
-            indices[0] = torch.arange(n_landmarks, dtype=int_dtype)
-            indices[1] = torch.tensor(landmarks, dtype=int_dtype)
-
-            values = torch.ones_like(indices[0], dtype=float_dtype)
-
-            self._landmarks = torch.sparse_coo_tensor(
-                indices=indices,
-                values=values,
-                size=(n_landmarks, n_points),
-                device=self.device,
-            )
+        assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
+        assert landmarks.dtype == float_dtype
+        self._landmarks = landmarks.clone().to(self.device)
 
     @property
     @typecheck
@@ -633,6 +610,29 @@ class PolyData(BaseShape, polydata_type):
                 raise ValueError("Landmarks are not indices.")
 
             return indices[values == 1]
+
+    @landmark_indices.setter
+    @typecheck
+    def landmark_indices(self, landmarks: IntSequence) -> None:
+        """Set the landmarks of the shape. The landmarks should be a list of indices."""
+
+        assert torch.max(torch.tensor(landmarks)) < self.n_points
+
+        n_landmarks = len(landmarks)
+        n_points = self.n_points
+
+        indices = torch.zeros((2, n_landmarks), dtype=int_dtype)
+        indices[0] = torch.arange(n_landmarks, dtype=int_dtype)
+        indices[1] = torch.tensor(landmarks, dtype=int_dtype)
+
+        values = torch.ones_like(indices[0], dtype=float_dtype)
+
+        self.landmarks = torch.sparse_coo_tensor(
+            indices=indices,
+            values=values,
+            size=(n_landmarks, n_points),
+            device=self.device,
+        )
 
     def add_landmarks(self, indices: Union[IntSequence, int]) -> None:
         """Add vertices landmarks to the shape.

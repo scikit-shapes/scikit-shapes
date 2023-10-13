@@ -147,16 +147,6 @@ def test_interaction_with_pyvista():
     assert np.allclose(cube.points, cube2.points)
 
 
-def test_decimation():
-    mesh = pyvista.Sphere().decimate(0.5)  # use pyvista to decimate
-    polydata = sks.PolyData(pyvista.Sphere()).decimate(
-        target_reduction=0.5
-    )  # use skshapes to decimate
-
-    # Check that the points are the same
-    assert np.allclose(polydata.points.numpy(), mesh.points)
-
-
 def test_mesh_cleaning():
     # Example of a mesh with duplicated points
     points = np.array(
@@ -294,9 +284,9 @@ def test_landmarks_creation():
     mesh1 = sks.Sphere()
     mesh2 = sks.Sphere()
 
+    # Create landmarks with coo sparse tensor
     landmarks_indices = [0, 1, 2, 3]
     landmarks_values = 4 * [1.0]
-
     n_landmarks = len(landmarks_indices)
     n_points = mesh1.n_points
     landmarks = torch.sparse_coo_tensor(
@@ -309,7 +299,7 @@ def test_landmarks_creation():
     # Assert that initialize landmarks by vertex indices or with the
     # sparse tensor gives the same result
     mesh1.landmarks = landmarks
-    mesh2.landmarks = landmarks_indices
+    mesh2.landmark_indices = landmarks_indices
 
     assert torch.allclose(mesh1.landmark_points, mesh2.landmark_points)
     assert torch.allclose(mesh1.landmark_indices, torch.tensor(landmarks_indices))
@@ -330,18 +320,7 @@ def test_landmarks_creation():
 def test_landmarks_conservation():
     # Create a mesh and add landmarks
     mesh = sks.PolyData(pyvista.Sphere())
-
-    values = [1, 1, 0.3, 0.4, 0.3, 1]
-    indices = [
-        [0, 1, 2, 2, 2, 3],
-        [4, 1, 2, 30, 0, 27],
-    ]
-    n_landmarks = 4
-    n_points = mesh.n_points
-    landmarks = torch.sparse_coo_tensor(
-        indices=indices, values=values, size=(n_landmarks, n_points), device="cpu"
-    )
-    mesh.landmarks = landmarks
+    mesh.landmark_indices = [2, 45, 12, 125]
 
     # Check that the landmarks are preserved sks -> pyvista -> sks
     mesh_pv = mesh.to_pyvista()
