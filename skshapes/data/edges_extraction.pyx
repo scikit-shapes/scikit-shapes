@@ -24,10 +24,7 @@ def extract_edges(FLOAT_DTYPE_t [:, :] points, INT_DTYPE_t [:, :] triangles):
     if not np.asarray(points).flags['C_CONTIGUOUS']:
         points = np.ascontiguousarray(points, dtype=FLOAT_DTYPE)
     if not np.asarray(triangles).flags['C_CONTIGUOUS']:
-        print("triangles is not contiguous")
         triangles = np.ascontiguousarray(triangles, dtype=INT_DTYPE)
-    else:
-        print("triangles is contiguous")
 
     cdef int n_points = points.shape[0]
     cdef vector[vector[int]] neighbors = vector[vector[int]](n_points)

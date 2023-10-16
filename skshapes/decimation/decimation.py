@@ -115,10 +115,12 @@ class Decimation:
             return_collapses=True,
         )
 
+        actual_reduction = 1 - len(decimated_points) / len(points)
+
         # Save the results
-        self.collapses = collapses
-        self.target_reduction = self.target_reduction
-        self.ref_mesh = mesh
+        self.collapses_ = collapses
+        self.ref_mesh_ = mesh
+        self.actual_reduction_ = actual_reduction
 
     @typecheck
     def transform(
@@ -162,7 +164,7 @@ class Decimation:
             collapses=self.collapses[0:n_collapses],
         )
 
-        self._indice_mapping = torch.Tensor(indice_mapping).to(int_dtype)
+        self.indice_mapping_ = torch.Tensor(indice_mapping).to(int_dtype)
 
         # If there are landmarks on the mesh, we compute the coordinates of the landmarks in the decimated mesh
         if mesh.landmarks is not None:
@@ -199,3 +201,47 @@ class Decimation:
 
         self.fit(mesh)
         return self.transform(mesh)
+
+    @typecheck
+    @property
+    def collapses(self):
+        """
+        Returns the collapses of the decimation algorithm.
+        """
+        if hasattr(self, "collapses_"):
+            return self.collapses_
+        else:
+            raise ValueError("The decimation object has not been fitted yet.")
+
+    @typecheck
+    @property
+    def indice_mapping(self):
+        """
+        Returns the indice mapping of the decimation algorithm.
+        """
+        if hasattr(self, "indice_mapping_"):
+            return self.indice_mapping_
+        else:
+            raise ValueError("The decimation object has not been fitted yet.")
+
+    @typecheck
+    @property
+    def actual_reduction(self):
+        """
+        Returns the actual reduction of the decimation algorithm.
+        """
+        if hasattr(self, "actual_reduction_"):
+            return self.actual_reduction_
+        else:
+            raise ValueError("The decimation object has not been fitted yet.")
+
+    @typecheck
+    @property
+    def ref_mesh(self):
+        """
+        Returns the reference mesh of the decimation algorithm.
+        """
+        if hasattr(self, "ref_mesh_"):
+            return self.ref_mesh_
+        else:
+            raise ValueError("The decimation object has not been fitted yet.")

@@ -16,6 +16,7 @@ from ..types import (
 from typing import List, Literal
 from ..utils import scatter
 import torch
+from ..decimation import Decimation
 
 
 # class SingleScale(PolyData):
@@ -91,6 +92,7 @@ class MultiscaleTriangleMesh:
         n_points: Optional[IntSequence] = None,
         fine_to_coarse_policy: Optional[dict] = None,
         coarse_to_fine_policy: Optional[dict] = None,
+        decimation_module: Optional[Decimation] = None,
     ) -> None:
         """Initialize a multiscale object from a reference shape. This class is particularly
         useful to handle multiscale signals.
@@ -126,12 +128,16 @@ class MultiscaleTriangleMesh:
         signals at other scale. Please make sure that no modification is done directly on the point_data of a shape
         in the multiscale object after the call of the add_signal method.
 
+        A decimation module can be specified to handle the decimation of the shapes. If not specified, it is created
+        automatically.
+
         Args:
             shape (Shape): the shape to be multiscaled (will be reffered to as ratio 1)
             ratios (Sequence of floats): the ratios at which the shape is multiscaled
             n_points (Sequence of ints): the (approximative) number of points at each ratio
             fine_to_coarse_policy (dict, optional): the policy for downscaling. Defaults to None.
             coarse_to_fine_policy (dict, optional): the policy for upscaling. Defaults to None.
+            decimation_module (Decimation, optional): if not None, the decimation module to be used. Defaults to None.
         """
         if not shape.is_triangle_mesh():
             raise ValueError("MultiscaleTriangleMesh only supports triangle meshes")
@@ -171,10 +177,16 @@ class MultiscaleTriangleMesh:
 
         self.shapes[1] = shape
 
-        from ..decimation import Decimation
+        if decimation_module is None:
+            self.decimation_module = Decimation(target_reduction=float(1 - min(ratios)))
+            self.decimation_module.fit(shape)
 
-        self.decimation_module = Decimation(target_reduction=float(1 - min(ratios)))
-        self.decimation_module.fit(shape)
+        else:
+            if not hasattr(decimation_module, "actual_reduction_"):
+                raise ValueError(
+                    "The decimation module has not been fitted. Please call the fit method of the decimation module before passing it to the Multiscale constructor."
+                )
+            self.decimation_module = decimation_module
 
         for ratio in ratios:
             if ratio != 1:
@@ -198,7 +210,7 @@ class MultiscaleTriangleMesh:
 
             # self.shapes[ratio] = SingleScale(polydata, multiscale=self, ratio=ratio)
             self.shapes[ratio] = polydata
-            self.mappings_from_origin[ratio] = self.decimation_module._indice_mapping
+            self.mappings_from_origin[ratio] = self.decimation_module.indice_mapping
         self.update_signals()
 
     @typecheck
@@ -246,7 +258,7 @@ class MultiscaleTriangleMesh:
         signal: Optional[NumericalTensor] = None,
         *,
         key: str,
-        at: Number = 1,
+        at: Number,
         fine_to_coarse_policy: Optional[dict] = None,
         coarse_to_fine_policy: Optional[dict] = None,
     ):
