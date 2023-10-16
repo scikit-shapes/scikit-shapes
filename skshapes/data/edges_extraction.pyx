@@ -16,6 +16,19 @@ ctypedef cnp.double_t FLOAT_DTYPE_t
 
 def extract_edges(FLOAT_DTYPE_t [:, :] points, INT_DTYPE_t [:, :] triangles):
 
+    assert points.shape[1] == 3
+    assert triangles.shape[0] == 3, "Triangles must be a 3xn_triangles array"
+
+    # if needed convert to contiguous arrays
+    # this is important for reading the data in C++
+    if not np.asarray(points).flags['C_CONTIGUOUS']:
+        points = np.ascontiguousarray(points, dtype=FLOAT_DTYPE)
+    if not np.asarray(triangles).flags['C_CONTIGUOUS']:
+        print("triangles is not contiguous")
+        triangles = np.ascontiguousarray(triangles, dtype=INT_DTYPE)
+    else:
+        print("triangles is contiguous")
+
     cdef int n_points = points.shape[0]
     cdef vector[vector[int]] neighbors = vector[vector[int]](n_points)
 
@@ -23,6 +36,7 @@ def extract_edges(FLOAT_DTYPE_t [:, :] points, INT_DTYPE_t [:, :] triangles):
     cdef int i, j, k, l
     cdef int n_triangles = triangles.shape[1]
 
+    # edges store the (repeated edges)
     cdef INT_DTYPE_t [:, :] edges = np.zeros((2, 3 * n_triangles), dtype=INT_DTYPE)
 
     for i in range(n_triangles):
@@ -34,7 +48,7 @@ def extract_edges(FLOAT_DTYPE_t [:, :] points, INT_DTYPE_t [:, :] triangles):
         edges[0, 3 * i + 2] = triangles[1, i]
         edges[1, 3 * i + 2] = triangles[2, i]
 
-    # Lexicographic sort
+    # Sort edges by lexicographic sort
     cdef INT_DTYPE_t[:] order = np.lexsort((np.asarray(edges[1, :]), np.asarray(edges[0, :])))
     
     # Remove duplicates
