@@ -13,7 +13,7 @@ from ..types import (
     Number,
     polydata_type,
 )
-from typing import List, Literal
+from typing import List, Literal, Union
 from ..utils import scatter
 import torch
 from ..decimation import Decimation
@@ -208,10 +208,8 @@ class MultiscaleTriangleMesh:
                 self.shapes[1], target_reduction=1 - ratio
             )
 
-            # self.shapes[ratio] = SingleScale(polydata, multiscale=self, ratio=ratio)
             self.shapes[ratio] = polydata
             self.mappings_from_origin[ratio] = self.decimation_module.indice_mapping
-        self.update_signals()
 
     @typecheck
     def at(self, ratio: Number) -> polydata_type:
@@ -232,16 +230,7 @@ class MultiscaleTriangleMesh:
 
     @typecheck
     def __getitem__(self, ratio: Number) -> polydata_type:
-        """Return the shape at a given ratio.
-
-        If the ratio does not exist, the closest ratio is returned.
-
-        Args:
-            ratio (Number): the ratio at which the shape is returned
-
-        Returns:
-            Shape: the shape at the given ratio
-        """
+        """Return the shape at a given ratio.        self.update_signals()"""
         return self.at(ratio)
 
     @property
@@ -253,12 +242,15 @@ class MultiscaleTriangleMesh:
 
     @convert_inputs
     @typecheck
-    def add_signal(
+    def propagate(
         self,
         signal: Optional[NumericalTensor] = None,
         *,
         key: str,
-        at: Number,
+        from_ratio=None,
+        to_ratio: Union[Number, FloatSequence, Literal["all"]] = "all",
+        from_n_points: Optional[int] = None,
+        to_n_points: Union[int, IntSequence, Literal["all"]] = "all",
         fine_to_coarse_policy: Optional[dict] = None,
         coarse_to_fine_policy: Optional[dict] = None,
     ):
@@ -292,12 +284,28 @@ class MultiscaleTriangleMesh:
             ValueError: _description_
         """
 
+        if from_ratio is None and from_n_points is None:
+            raise ValueError("You must specify either from_ratio or from_n_points")
+
+        if from_ratio is not None:
+            assert (
+                from_n_points is None
+            ), "You cannot specify both from_ratio and from_n_points"
+            assert 0 < from_ratio <= 1, "from_ratio must be between 0 and 1"
+
+        if from_n_points is not None:
+            assert (
+                0 < from_n_points <= self.at(1).n_points
+            ), "from_n_points must be between 0 and the number of points in the mesh"
+            from_ratio = 1 - (from_n_points / self.at(1).n_points)
+
         if signal is None:
+            # If the signal is not specified, it must be in the point_data of the shape at from_ratio
             try:
-                signal = self.at(at).point_data[key]
+                signal = self.at(from_ratio).point_data[key]
             except:
                 raise ValueError(
-                    f"{key} not in the point_data of the shape at ratio {at}"
+                    f"{key} not in the point_data of the shape at ratio {from_ratio}"
                 )
 
         if fine_to_coarse_policy is None:
@@ -307,26 +315,44 @@ class MultiscaleTriangleMesh:
             coarse_to_fine_policy = self.coarse_to_fine_policy
 
         self.signals[key] = {
-            "origin_ratio": at,
-            "available_ratios": [at],
+            "origin_ratio": from_ratio,
+            "available_ratios": [from_ratio],
             "fine_to_coarse_policy": fine_to_coarse_policy,
             "coarse_to_fine_policy": coarse_to_fine_policy,
         }
 
-        self.at(at)[key] = signal
+        self.at(from_ratio)[key] = signal
 
-        self.propagate_signal(
+        if from_n_points is not None:
+            if to_n_points == "all":
+                to_ratios = self.available_ratios
+            elif isinstance(to_n_points, int):
+                to_ratios = [1 - (to_n_points / self.at(1).n_points)]
+            else:
+                to_ratios = [1 - (npts / self.at(1).n_points) for npts in to_n_points]
+
+        elif from_ratio is not None:
+            if to_ratio == "all":
+                to_ratios = self.available_ratios
+            elif not hasattr(to_ratio, "__iter__"):
+                to_ratios = [to_ratio]
+            else:
+                to_ratios = to_ratio
+
+        self._propagate_signal(
             signal_name=key,
-            origin_ratio=at,
+            origin_ratio=from_ratio,
+            to_ratios=to_ratios,
             fine_to_coarse_policy=fine_to_coarse_policy,
             coarse_to_fine_policy=coarse_to_fine_policy,
         )
 
     @typecheck
-    def propagate_signal(
+    def _propagate_signal(
         self,
         signal_name: str,
         origin_ratio: Number,
+        to_ratios: FloatSequence,
         fine_to_coarse_policy: Optional[dict] = None,
         coarse_to_fine_policy: Optional[dict] = None,
     ) -> None:
@@ -342,10 +368,10 @@ class MultiscaleTriangleMesh:
             coarse_to_fine_policy = self.coarse_to_fine_policy
 
         # Ratios that are greater than the origin ratio (ascending order)
-        up_ratios = [r for r in self.available_ratios if r >= origin_ratio][::-1]
+        up_ratios = [r for r in to_ratios if r >= origin_ratio][::-1]
 
         # Ratios that are smaller than the origin ratio (descending order)
-        down_ratios = [r for r in self.available_ratios if r <= origin_ratio]
+        down_ratios = [r for r in to_ratios if r <= origin_ratio]
 
         signal_origin = self.at(origin_ratio).point_data[signal_name]
 
@@ -384,57 +410,6 @@ class MultiscaleTriangleMesh:
             ):
                 tmp = self.at(r).point_data[signal_name]
                 fine_ratio = r
-
-    @typecheck
-    def update_signals(self) -> None:
-        """Update the signals at the available ratios.
-
-        It checks for new
-        ratios for existing signals and redo the propagation of the concerned signals.
-        """
-
-        # This is not needed anymore, since we propagate the signals added with add_signal
-        # and do not try to automatically detect the signals
-
-        # check for new signals
-        # for r in self.available_ratios:
-        #     for signal in self.at(r, update_signals=False).point_data:
-        #         # If the signal is not in the dict, add it and propagate it
-        #         # accross the available ratios
-        #         if signal not in self.signals.keys():
-        #             self.signals[signal] = {
-        #                 "origin_ratio": r,
-        #                 "available_ratios": [r],
-        #             }
-        #             self.propagate_signal(
-        #                 signal_name=signal,
-        #                 origin_ratio=r,
-        #             )
-
-        # check for new ratios for existing signals
-        for signal in self.signals.keys():
-            for r in self.available_ratios:
-                if r not in self.signals[signal]["available_ratios"]:
-                    if "fine_to_coarse_policy" not in self.signals[signal].keys():
-                        fine_to_coarse_policy = self.fine_to_coarse_policy
-                    else:
-                        fine_to_coarse_policy = self.signals[signal][
-                            "fine_to_coarse_policy"
-                        ]
-
-                    if "coarse_to_fine_policy" not in self.signals[signal].keys():
-                        coarse_to_fine_policy = self.coarse_to_fine_policy
-                    else:
-                        coarse_to_fine_policy = self.signals[signal][
-                            "coarse_to_fine_policy"
-                        ]
-
-                    self.propagate_signal(
-                        signal_name=signal,
-                        origin_ratio=self.signals[signal]["origin_ratio"],
-                        fine_to_coarse_policy=fine_to_coarse_policy,
-                        coarse_to_fine_policy=coarse_to_fine_policy,
-                    )
 
     @typecheck
     def indice_mapping(self, fine_ratio: Number, coarse_ratio: Number) -> Int1dTensor:

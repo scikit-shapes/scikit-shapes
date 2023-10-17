@@ -202,9 +202,10 @@ def test_multiscale_signal_api():
     M.at(0.1)["test_signal"] = torch.rand(n)
     assert "test_signal" not in M.at(0.5).point_data.keys()
 
-    M.add_signal(
+    M.propagate(
         key="test_signal",
-        at=0.1,
+        from_ratio=0.1,
+        to_ratio=0.5,
         coarse_to_fine_policy=coarse_to_fine_policy,
         fine_to_coarse_policy=fine_to_coarse_policy,
     )
@@ -214,8 +215,8 @@ def test_multiscale_signal_api():
     assert "test_signal" in M.at(0.5).point_data.keys()
 
     M.add_ratio(0.2)
-    n_points = M.at(0.2).n_points
-    assert M.at(0.2)["test_signal"].shape[0] == n_points
+
+    assert "test_signal" not in M.at(0.2).point_data.keys()
 
 
 if False:

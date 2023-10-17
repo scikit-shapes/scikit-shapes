@@ -48,7 +48,9 @@ M = sks.Multiscale(
 )  # Create the multiscale object
 
 mesh["signal"] = stripify(mesh.points[:, 0], n_strips=8)  # Define a signal on the mesh
-M.add_signal(key="signal", at=1)  # add the signal to the multiscale object
+M.propagate(
+    key="signal", from_ratio=1, to_ratio="all"
+)  # add the signal to the multiscale object
 # show(M, "signal", revert=False, cpos=cpos) # show the signal at all scales
 
 assert M.at(0.05)["signal"].shape[0] == M.at(0.05).n_points
@@ -56,16 +58,18 @@ assert M.at(0.05)["signal"].shape[0] == M.at(0.05).n_points
 coarse_signal = M.at(0.01)["signal"]  # Get the coarse signal
 
 
-M.add_signal(
+M.propagate(
     coarse_signal,
     key="signal2",
-    at=0.01,
+    from_ratio=0.01,
+    to_ratio="all",
     coarse_to_fine_policy={"smoothing": "constant"},
 )
-M.add_signal(
+M.propagate(
     coarse_signal,
     key="signal3",
-    at=0.01,
+    from_ratio=0.01,
+    to_ratio="all",
     coarse_to_fine_policy={
         "smoothing": "mesh_convolution",
         "pass_through_all_scales": True,
