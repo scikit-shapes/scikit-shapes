@@ -26,7 +26,7 @@ def test_registration_cpu():
     models = [
         sks.morphing.ElasticMetric(),
         sks.morphing.RigidMotion(),
-        sks.morphing.SplineDeformation(),
+        sks.morphing.KernelDeformation(),
     ]
     regularizations = [0, 0.1]
     for loss in losses:
@@ -67,7 +67,7 @@ def test_registration_device():
     n_steps = 2
     models = [
         sks.RigidMotion(n_steps=n_steps),
-        sks.SplineDeformation(n_steps=n_steps),
+        sks.KernelDeformation(n_steps=n_steps),
         sks.ElasticMetric(n_steps=n_steps),
     ]
     loss = sks.OptimalTransportLoss()

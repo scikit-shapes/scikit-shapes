@@ -17,7 +17,7 @@ from math import sqrt
 from pykeops.torch import LazyTensor
 
 
-class Cometric:
+class Kernel:
     """All cometrics used in spline models should inherit from this class"""
 
     pass
@@ -29,7 +29,7 @@ class Integrator:
     pass
 
 
-class GaussianCometric(Cometric):
+class GaussianKernel(Kernel):
     def __init__(self, sigma=0.1):
         self.sigma = sigma
 
@@ -67,17 +67,17 @@ from .utils import MorphingOutput
 from typing import Literal
 
 
-class SplineDeformation(BaseModel):
+class KernelDeformation(BaseModel):
     @typecheck
     def __init__(
         self,
         n_steps: int = 1,
         integrator: Integrator = EulerIntegrator(),
-        cometric: Cometric = GaussianCometric(),
+        kernel: Kernel = GaussianKernel(),
         **kwargs,
     ) -> None:
         self.integrator = integrator
-        self.cometric = cometric
+        self.cometric = kernel
         self.n_steps = n_steps
 
     @typecheck

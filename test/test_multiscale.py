@@ -187,14 +187,14 @@ def test_multiscale():
     assert signal_out.shape[0] == M.at(coarse_ratio).n_points
 
 
-def test_multiscale_api():
+def test_multiscale_signal_api():
     """Test the multiscale signal API"""
 
     mesh = sks.PolyData(examples.download_bunny())
     ratios = [0.01, 0.1, 0.5, 1]
 
     coarse_to_fine_policy = {"smoothing": "constant"}
-    downscale_policy = {"reduce": "mean"}
+    fine_to_coarse_policy = {"reduce": "mean"}
 
     M = sks.Multiscale(mesh, ratios=ratios)
 
@@ -205,10 +205,31 @@ def test_multiscale_api():
     M.add_signal(
         key="test_signal",
         at=0.1,
+        coarse_to_fine_policy=coarse_to_fine_policy,
+        fine_to_coarse_policy=fine_to_coarse_policy,
     )
+
+    M.at(0.5)["test_signal"] = torch.rand(M.at(0.5).n_points)
 
     assert "test_signal" in M.at(0.5).point_data.keys()
 
     M.add_ratio(0.2)
     n_points = M.at(0.2).n_points
     assert M.at(0.2)["test_signal"].shape[0] == n_points
+
+
+if False:
+    M = sks.Multiscale(mesh, n_points=(100, 1000, 10000))
+    M.at(n_points=1000)["color"] = torch.rand(1000)
+    M.propagate("color", from_n_points=1000, to_n_points=100, policy="mean")
+    M.propagate("color", from_n_points=100, to_n_points=1000, policy="smooth")
+
+    M.propagate("color", from_n_points=100, to_n_points="all", policy="smooth")
+    M.add_ratio(0.5, propagate=None, policy=None)
+    M.propagate(...)
+
+    policy = sks.Policy(
+        smoothing="mesh_convolution",
+        n_smoothing_steps=10,
+        pass_through_all_scales=True,
+    )

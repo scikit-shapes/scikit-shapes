@@ -21,10 +21,8 @@ def extract_edges(FLOAT_DTYPE_t [:, :] points, INT_DTYPE_t [:, :] triangles):
 
     # if needed convert to contiguous arrays
     # this is important for reading the data in C++
-    if not np.asarray(points).flags['C_CONTIGUOUS']:
-        points = np.ascontiguousarray(points, dtype=FLOAT_DTYPE)
-    if not np.asarray(triangles).flags['C_CONTIGUOUS']:
-        triangles = np.ascontiguousarray(triangles, dtype=INT_DTYPE)
+    points = np.ascontiguousarray(points, dtype=FLOAT_DTYPE)
+    triangles = np.ascontiguousarray(triangles, dtype=INT_DTYPE)
 
     cdef int n_points = points.shape[0]
     cdef vector[vector[int]] neighbors = vector[vector[int]](n_points)
