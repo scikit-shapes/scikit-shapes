@@ -28,19 +28,85 @@ from ..types import (
 from typing import List, Literal
 from ..utils import scatter
 import torch
-from typing import Union
+from typing import Union, Tuple
 from .multiscale_triangle_mesh import MultiscaleTriangleMesh
+from ..decimation import Decimation
 
 
 class Multiscale:
     @typecheck
     def __new__(
-        cls, shape: shape_type, **kwargs
-    ) -> Union[MultiscaleTriangleMesh, None]:
-        if hasattr(shape, "is_triangle_mesh") and shape.is_triangle_mesh:
-            instance = super(Multiscale, cls).__new__(MultiscaleTriangleMesh)
-            instance.__init__(shape=shape, **kwargs)
-            return instance
+        cls,
+        shape: Union[shape_type, List[shape_type]],
+        correspondence: bool = False,
+        **kwargs,
+    ) -> Union[MultiscaleTriangleMesh, List[MultiscaleTriangleMesh]]:
+        """Create a multiscale object from a shape or a list of shapes.
+
+        Args:
+            shape (Union[shape_type, List[shape_type]]): A shape or a list of shapes.
+            correspondence (bool, optional): Wether the shapes of the list should be considered to be in correspondence or not.
+
+        Returns:
+            Union[MultiscaleTriangleMesh, List[MultiscaleTriangleMesh]]
+        """
+        if isinstance(shape, list) and not correspondence:
+            # if no correspondence, do nothing more than call the constructor
+            # independently on each shape
+            return [cls(s, **kwargs) for s in shape]
+
+        elif not isinstance(shape, list):
+            # here Multiscale is called on a single shape, compute the multiscale object
+            # depending on the type of the shape
+            if hasattr(shape, "is_triangle_mesh") and shape.is_triangle_mesh:
+                instance = super(Multiscale, cls).__new__(MultiscaleTriangleMesh)
+                instance.__init__(shape=shape, **kwargs)
+                return instance
+
+            else:
+                raise NotImplementedError("Only triangle meshes are supported for now")
+
+        elif isinstance(shape, list) and correspondence:
+            # here Multiscale is called on a list of shapes thath are supposed to be
+            # corresponding to each other. The correspondence is used to decimate
+            # the shapes in parallel.
+
+            if hasattr(shape[0], "is_triangle_mesh") and shape[0].is_triangle_mesh:
+                # Triangle meshes
+
+                if "ratios" in kwargs.keys():
+                    target_reduction = 1 - min(kwargs["ratios"])
+                elif "n_points" in kwargs.keys():
+                    target_reduction = 1 - min(kwargs["n_points"])
+
+                # check that all shapes are triangle meshes and share the same topology
+                assert all(
+                    [s.is_triangle_mesh for s in shape]
+                ), "All shapes must be triangle meshes to be used with correspondence"
+                assert all(
+                    [s.n_points == shape[0].n_points for s in shape]
+                ), "All shapes must have the same number of points to be decimated in correspondence"
+                assert all(
+                    [torch.allclose(s.triangles, shape[0].triangles) for s in shape]
+                ), "All shapes must have the same triangles to be decimated in correspondence"
+
+                # compute the decimation module
+                decimation_module = Decimation(target_reduction=target_reduction)
+                decimation_module.fit(shape[0])
+
+                # add the decimation module to the kwargs
+                kwargs["decimation_module"] = decimation_module
+
+                return [cls(s, **kwargs) for s in shape]
+
+            else:
+                raise NotImplementedError("Only triangle meshes are supported for now")
 
         else:
-            raise NotImplementedError("Only triangle meshes are supported for now")
+            if hasattr(shape, "is_triangle_mesh") and shape.is_triangle_mesh:
+                instance = super(Multiscale, cls).__new__(MultiscaleTriangleMesh)
+                instance.__init__(shape=shape, **kwargs)
+                return instance
+
+            else:
+                raise NotImplementedError("Only triangle meshes are supported for now")

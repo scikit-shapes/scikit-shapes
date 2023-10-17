@@ -219,6 +219,29 @@ def test_multiscale_signal_api():
     assert "test_signal" not in M.at(0.2).point_data.keys()
 
 
+def test_multiscale_list():
+    mesh1 = sks.Sphere()
+    mesh2 = sks.Sphere()
+
+    # Test correspondence = True
+    multimesh1, multimesh2 = sks.Multiscale(
+        [mesh1, mesh2], correspondence=True, ratios=[0.1]
+    )
+    # Test that the two multiscale objects are equal
+    assert torch.allclose(multimesh1.at(0.1).points, multimesh2.at(0.1).points)
+    # test that they share the same decimation module
+    assert multimesh1.decimation_module == multimesh2.decimation_module
+
+    # Test correspondence = False
+    multimesh1, multimesh2 = sks.Multiscale(
+        [mesh1, mesh2], correspondence=False, ratios=[0.1]
+    )
+    # Test that the two multiscale objects are equal
+    assert torch.allclose(multimesh1.at(0.1).points, multimesh2.at(0.1).points)
+    # test that they do not share the same decimation module
+    assert multimesh1.decimation_module != multimesh2.decimation_module
+
+
 if False:
     M = sks.Multiscale(mesh, n_points=(100, 1000, 10000))
     M.at(n_points=1000)["color"] = torch.rand(1000)
