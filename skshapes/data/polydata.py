@@ -243,10 +243,6 @@ class PolyData(BaseShape, polydata_type):
     )
 
     @typecheck
-    def _init_from_pyvista(self, mesh: pyvista.PolyData) -> None:
-        pass
-
-    @typecheck
     def decimate(
         self,
         *,
@@ -351,9 +347,6 @@ class PolyData(BaseShape, polydata_type):
                     # If the data is 1D or 2D, we add it as a point data
                     mesh.pointdata[key] = point_data_dict[key]
                 else:
-                    from warnings import warn
-
-                    warn()
                     # If the data is 3D or more, we must be careful
                     # because vedo does not support 3D or more point data
                     shape = point_data_dict[key].shape
@@ -425,41 +418,6 @@ class PolyData(BaseShape, polydata_type):
             polydata.field_data["landmark_points"] = self.landmark_points.detach()
 
         return polydata
-
-    @classmethod
-    @typecheck
-    def from_pyvista(
-        cls, mesh: pyvista.PolyData, device: Optional[Union[str, torch.device]] = "cpu"
-    ) -> PolyData:
-        import warnings
-
-        warnings.warn(
-            "from_pyvista is deprecated, use PolyData(mesh) instead", DeprecationWarning
-        )
-        """Create a Shape from a PyVista PolyData object."""
-
-        points = torch.from_numpy(mesh.points).to(float_dtype)
-
-        if mesh.is_all_triangles:
-            triangles = mesh.faces.reshape(-1, 4)[:, 1:]
-            triangles = torch.from_numpy(triangles.copy())
-            edges = None
-
-        elif mesh.triangulate().is_all_triangles:
-            triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:]
-            triangles = torch.from_numpy(triangles.copy())
-            edges = None
-
-        elif len(mesh.lines) > 0:
-            edges = mesh.lines.reshape(-1, 3)[:, 1:]
-            edges = torch.from_numpy(edges.copy())
-            triangles = None
-
-        else:
-            edges = None
-            triangles = None
-
-        return cls(points=points, edges=edges, triangles=triangles, device=device)
 
     #############################
     #### Edges getter/setter ####

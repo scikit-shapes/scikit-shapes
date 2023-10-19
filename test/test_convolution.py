@@ -174,6 +174,7 @@ def test_mesh_convolution():
         assert kernel.shape == (mesh.n_points, mesh.n_points)
         assert torch.allclose(kernel @ signal, signal)
 
+
 def test_multidimensional_matrix_multiplication():
     """test the LinearOperator class for multidimensional matrix multiplication
 
@@ -182,30 +183,33 @@ def test_multidimensional_matrix_multiplication():
     ensor, t being a tuple of integers.
     """
 
-    # Define a LinearOperator of shape (n, m)
-    randint = lambda x : torch.randint(1, x, (1,))[0]
+    # Define a LinearOperator of shape (n, m)
+    randint = lambda up, low=1: torch.randint(low, up, (1,))[0] if up > low else low
 
-    n, m = randint(10), randint(10)
-    a, b, c = randint(10), randint(10), randint(10)
+    n, m = randint(10, low=2), randint(10, low=2)
+    a, b, c = randint(10, low=2), randint(10, low=2), randint(10, low=2)
 
     matrix = torch.rand(n, m)
     M = sks.convolutions.LinearOperator(matrix)
     A = torch.rand(m, a, b, c)
 
-    # assert that the @ operator is well defined and that the output has the right shape
+    # assert that the @ operator is well defined and that the output has the right shape
     result = M @ A
     assert result.shape == (n, a, b, c)
 
     # take a random index (i, j, k, l) and assert that the output is correct
-    # at this index
+    # at this index
     i, j, k, l = randint(n), randint(a), randint(b), randint(c)
-    assert result[i, j, k, l] == sum([matrix[i, ii] * A[ii, j, k, l] for ii in range(m)])
-
+    print(result.shape)
+    print(result[i, j, k, l])
+    assert torch.isclose(
+        result[i, j, k, l], sum([matrix[i, ii] * A[ii, j, k, l] for ii in range(m)])
+    )
 
 
 def test_multidimensional_signal_convolution():
     """Test that the mesh convolution operator is well defined for multidimensional signals
-    
+
     The mesh convolution operator is defined as a matrix of shape (n_points, n_points)
     where n_points is the number of points of the mesh. In this test, we define a signal
     on the mesh, where each point is associated a tensor of shape (a, b, c) where a, b, c
@@ -218,15 +222,15 @@ def test_multidimensional_signal_convolution():
     n_points = mesh.n_points
 
     # Set a multidimensional signal on the mesh, to each point is associated a tensor of shape (a, b, c)
-    # where a, b, c are random integers between 1 and 10
-    randtriplet = lambda n_max : (int(i) for i in torch.randint(1, n_max, (3,)))
+    # where a, b, c are random integers between 1 and 10
+    randtriplet = lambda n_max: (int(i) for i in torch.randint(1, n_max, (3,)))
     a, b, c = randtriplet(10)
     data = torch.rand(n_points, a, b, c)
     mesh["signal"] = data
 
-    # Compute the mesh convolution operator
+    # Compute the mesh convolution operator
     M = mesh.mesh_convolution()
-    # assert that the @ operator is well defined
+    # assert that the @ operator is well defined
     # and that the output signal has the expected shape
     assert M.shape == (n_points, n_points)
     assert mesh["signal"].shape == (n_points, a, b, c)
