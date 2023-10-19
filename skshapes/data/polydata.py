@@ -1,3 +1,5 @@
+"""PolyData class."""
+
 from __future__ import annotations
 
 import pyvista
@@ -79,7 +81,6 @@ class PolyData(BaseShape, polydata_type):
 
         # If the user provides a pyvista mesh, we extract the points, edges and triangles from it
         # If the user provides a path to a mesh, we read it with pyvista and extract the points, edges and triangles from it
-
         if type(points) in [vedo.Mesh, pyvista.PolyData, str]:
             if type(points) == vedo.Mesh:
                 mesh = pyvista.PolyData(points.polydata())
@@ -87,6 +88,7 @@ class PolyData(BaseShape, polydata_type):
                 mesh = pyvista.read(points)
             elif type(points) == pyvista.PolyData:
                 mesh = points
+            # Now, mesh is a pyvista mesh
 
             cleaned_mesh = mesh.clean()
             if cleaned_mesh.n_points != mesh.n_points:
@@ -129,6 +131,11 @@ class PolyData(BaseShape, polydata_type):
                 point_data = DataAttributes.from_pyvista_datasetattributes(
                     mesh.point_data
                 )
+                for key in point_data.keys():
+                    if str(key) + "_shape" in mesh.field_data:
+                        point_data[key] = point_data[key].reshape(
+                            mesh.field_data[str(key) + "_shape"]
+                        )
 
             if (
                 ("landmarks_values" in mesh.field_data)
@@ -182,7 +189,10 @@ class PolyData(BaseShape, polydata_type):
 
         # Initialize the point_data if it was not done before
         if point_data is None:
-            self._point_data = DataAttributes(n=self.n_points, device=self.device)
+            self._point_data = DataAttributes(
+                n=self.n_points,
+                device=self.device,
+            )
         else:
             assert (
                 point_data.n == self.n_points
@@ -260,10 +270,15 @@ class PolyData(BaseShape, polydata_type):
             target_reduction >= 0 and target_reduction <= 1
         ), "target_reduction must be between 0 and 1"
 
-        from ..decimation import Decimation
+        if self.is_triangle_mesh:
+            from ..decimation import Decimation
 
-        d = Decimation(target_reduction=target_reduction, n_points=n_points)
-        return d.fit_transform(self)
+            d = Decimation(target_reduction=target_reduction, n_points=n_points)
+            return d.fit_transform(self)
+        else:
+            raise NotImplementedError(
+                "Decimation is only implemented for triangle meshes so far."
+            )
 
     @typecheck
     def save(self, filename: str) -> None:
@@ -332,7 +347,18 @@ class PolyData(BaseShape, polydata_type):
         if len(self.point_data) > 0:
             point_data_dict = self.point_data.to_numpy_dict()
             for key in point_data_dict:
-                mesh.pointdata[key] = point_data_dict[key]
+                if len(point_data_dict[key].shape) <= 2:
+                    # If the data is 1D or 2D, we add it as a point data
+                    mesh.pointdata[key] = point_data_dict[key]
+                else:
+                    from warnings import warn
+
+                    warn()
+                    # If the data is 3D or more, we must be careful
+                    # because vedo does not support 3D or more point data
+                    shape = point_data_dict[key].shape
+                    mesh.pointdata["data"] = point_data_dict[key].reshape(shape[0], -1)
+                    mesh.metadata[str(key) + "_shape"] = shape
 
         # Add the landmarks if any
         if hasattr(self, "_landmarks") and self.landmarks is not None:
@@ -377,7 +403,18 @@ class PolyData(BaseShape, polydata_type):
         if len(self.point_data) > 0:
             point_data_dict = self.point_data.to_numpy_dict()
             for key in point_data_dict:
-                polydata.point_data[key] = point_data_dict[key]
+                if len(point_data_dict[key].shape) <= 2:
+                    # If the data is 1D or 2D, we add it as a point data
+                    polydata.point_data[key] = point_data_dict[key]
+                else:
+                    # If the data is 3D or more, we must be careful
+                    # because pyvista does not support 3D or more point data
+                    polydata.point_data[key] = point_data_dict[key].reshape(
+                        self.n_points, -1
+                    )
+                    polydata.field_data[str(key) + "_shape"] = point_data_dict[
+                        key
+                    ].shape
 
         # Add the landmarks if any
         if hasattr(self, "_landmarks") and self.landmarks is not None:

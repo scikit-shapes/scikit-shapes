@@ -176,7 +176,7 @@ def test_point_data():
     mesh = sks.PolyData(pyvista.Sphere())
 
     # Add some point_data
-    mesh.point_data["hessians"] = torch.rand(mesh.n_points, 3, 3)
+    mesh.point_data["hessians"] = torch.rand(mesh.n_points, 3, 3, 4)
     mesh.point_data["normals"] = torch.rand(mesh.n_points, 3)
     mesh.point_data.append(torch.rand(mesh.n_points))
 
@@ -193,7 +193,7 @@ def test_point_data():
     copy = mesh.copy()
     assert torch.allclose(copy.point_data["hessians"], mesh.point_data["hessians"])
     copy.point_data["hessians"] = torch.rand(
-        mesh.n_points, 3, 3
+        *mesh["hessians"].shape
     )  # If the copy was not correct, this would also change the point_data of the original mesh
     assert not torch.allclose(copy.point_data["hessians"], mesh.point_data["hessians"])
 
@@ -237,6 +237,7 @@ def test_point_data():
 def test_point_data2():
     # Load a pyvista.PolyData and add an attribute
     pv_mesh = pyvista.Sphere()
+    # The attribute is matrix valued
     pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 3)
 
     # Convert it to a skshapes.PolyData

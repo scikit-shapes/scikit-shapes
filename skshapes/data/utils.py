@@ -50,9 +50,11 @@ class DataAttributes(dict):
     @convert_inputs
     @typecheck
     def _check_value(self, value: NumericalTensor) -> NumericalTensor:
-        assert (
-            value.shape[0] == self._n
-        ), f"First dimension of the tensor should be {self._n}"
+        if value.shape[0] != self._n:
+            raise ValueError(
+                f"First dimension of the tensor should be {self._n}, got {value.shape[0]}"
+            )
+
         if value.device != self._device:
             value = value.to(self._device)
 
