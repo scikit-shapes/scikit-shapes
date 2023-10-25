@@ -13,7 +13,7 @@ from ..types import (
     Number,
     polydata_type,
 )
-from typing import List, Literal, Union
+from beartype.typing import List, Literal, Union
 from ..utils import scatter
 import torch
 from ..decimation import Decimation

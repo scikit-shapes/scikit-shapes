@@ -244,7 +244,7 @@ def cached_method(*lru_args, **lru_kwargs):
 
 
 from functools import cached_property, lru_cache, partial, update_wrapper
-from typing import Callable, Optional, TypeVar, Union
+from beartype.typing import Callable, Optional, TypeVar, Union
 
 T = TypeVar("T")
 

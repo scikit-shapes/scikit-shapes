@@ -111,6 +111,7 @@ class Registration:
             return_regularization=True,
         )
 
+        self.loss_ = loss_value.detach().to(self.output_device)
         self.regularization_ = morphing.regularization.to(self.output_device)
         self.transformed_shape_ = morphing.morphed_shape
         self.path_ = morphing.path

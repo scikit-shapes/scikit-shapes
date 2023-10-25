@@ -47,7 +47,7 @@ def test_registration_cpu():
 
 import skshapes as sks
 import pyvista.examples
-from typing import get_args
+from beartype.typing import get_args
 
 
 @pytest.mark.skipif(

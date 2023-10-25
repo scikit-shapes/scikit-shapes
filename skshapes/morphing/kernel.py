@@ -10,7 +10,7 @@ from ..types import (
     Number,
 )
 
-from typing import Tuple
+from beartype.typing import Tuple
 
 import torch
 from math import sqrt
@@ -64,7 +64,7 @@ class EulerIntegrator(Integrator):
 
 
 from .utils import MorphingOutput
-from typing import Literal
+from beartype.typing import Literal
 
 
 class KernelDeformation(BaseModel):

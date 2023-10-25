@@ -5,7 +5,7 @@ import torch
 from ..types import typecheck, float_dtype, int_dtype, polydata_type
 from ..data import PolyData
 
-from typing import List, Union
+from beartype.typing import List, Union
 
 
 class LandmarkSetter:

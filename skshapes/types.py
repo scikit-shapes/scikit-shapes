@@ -7,7 +7,7 @@ Ex: the generic type Shape is defned in skshapes.data, the generic type Loss is 
 
 from beartype import beartype
 from jaxtyping import jaxtyped, Float32, Float64, Int64, Float, Int
-from typing import (
+from beartype.typing import (
     Any,
     Optional,
     Union,
@@ -117,9 +117,9 @@ Triangles = JaxInt[torch.Tensor, "_ 3"]
 # Then we use the torch.Tensor type and checks are made at runtime
 # with assert statements
 try:
-    from typing import Annotated  # Python >= 3.9
+    from beartype.typing import Annotated  # Python >= 3.9
 except ImportError:
-    from typing_extensions import Annotated  # Python < 3.9
+    from beartype.typing_extensions import Annotated  # Python < 3.9
 
 from beartype.vale import Is
 

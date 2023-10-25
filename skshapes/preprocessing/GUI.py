@@ -8,7 +8,7 @@ os.environ["QT_API"] = "pyqt5"
 from qtpy import QtWidgets
 import pyvista as pv
 from pyvistaqt import QtInteractor, MainWindow
-from typing import Optional, Tuple
+from beartype.typing import Optional, Tuple
 import numpy as np
 import yaml
 from enum import Enum

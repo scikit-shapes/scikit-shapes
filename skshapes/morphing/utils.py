@@ -1,5 +1,5 @@
 from ..data import Shape
-from typing import NamedTuple, Optional, List
+from beartype.typing import NamedTuple, Optional, List
 from ..types import FloatScalar
 
 

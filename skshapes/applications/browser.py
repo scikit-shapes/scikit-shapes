@@ -1,6 +1,6 @@
 import vedo
 from ..types import typecheck, shape_type
-from typing import List
+from beartype.typing import List
 
 
 class Browser:

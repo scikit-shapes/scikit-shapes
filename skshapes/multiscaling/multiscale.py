@@ -25,10 +25,10 @@ from ..types import (
     polydata_type,
     shape_type,
 )
-from typing import List, Literal
+from beartype.typing import List, Literal
 from ..utils import scatter
 import torch
-from typing import Union, Tuple
+from beartype.typing import Union, Tuple
 from .multiscale_triangle_mesh import MultiscaleTriangleMesh
 from ..decimation import Decimation
 

@@ -1,6 +1,6 @@
 import skshapes as sks
 import pyvista.examples
-from typing import get_args
+from beartype.typing import get_args
 import pytest
 import torch
 

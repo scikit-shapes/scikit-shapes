@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from pykeops.torch import LazyTensor
 
-from typing import NamedTuple
+from beartype.typing import NamedTuple
 
 from ..utils import diagonal_ranges
 from ..types import (

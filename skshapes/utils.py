@@ -1,6 +1,6 @@
 import torch
 from .types import NumericalTensor, Int1dTensor, convert_inputs, typecheck
-from typing import Literal
+from beartype.typing import Literal
 
 
 def ranges_slices(batch):

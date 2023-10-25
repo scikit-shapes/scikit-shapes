@@ -166,3 +166,6 @@ cython_debug/
 # Notebook files
 Untitled-1.ipynb
 example.ipynb
+
+# Weights and Biases
+*wandb/

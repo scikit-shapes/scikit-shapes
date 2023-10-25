@@ -31,7 +31,7 @@ from ..types import (
     IntSequence,
 )
 
-from typing import Literal
+from beartype.typing import Literal
 from .baseshape import BaseShape
 from .utils import DataAttributes
 
