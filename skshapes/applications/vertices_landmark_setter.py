@@ -5,7 +5,7 @@ import torch
 from ..types import typecheck, float_dtype, int_dtype, polydata_type
 from ..data import PolyData
 
-from beartype.typing import List, Union
+from typing import Union
 
 
 class LandmarkSetter:
@@ -16,7 +16,7 @@ class LandmarkSetter:
     """
 
     @typecheck
-    def __init__(self, shapes: Union[List[polydata_type], polydata_type]) -> None:
+    def __init__(self, shapes: Union[list[polydata_type], polydata_type]) -> None:
         super().__init__()
 
         if hasattr(shapes, "__iter__") and len(shapes) > 1:
@@ -96,12 +96,12 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
     """A LandmarkSetter is a vedo application that allows the user to select landmarks on a set of polydatas.
 
     Args:
-        shapes (List[sks.PolyData]): The shapes on which the landmarks are selected.
+        shapes (list[sks.PolyData]): The shapes on which the landmarks are selected.
         **kwargs: Keyword arguments passed to the vedo.Plotter constructor.
     """
 
     @typecheck
-    def __init__(self, shapes: List[polydata_type]) -> None:
+    def __init__(self, shapes: list[polydata_type]) -> None:
         super().__init__(N=2, sharecam=False)
 
         # The landmarks (list of indices) are stored in a list of lists of indices

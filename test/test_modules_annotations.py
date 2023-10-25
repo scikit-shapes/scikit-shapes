@@ -1,5 +1,5 @@
 import inspect
-from beartype.typing import Union, get_origin, get_args
+from typing import Union, get_origin, get_args
 import skshapes as sks
 
 

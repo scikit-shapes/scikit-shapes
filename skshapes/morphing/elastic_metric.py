@@ -103,6 +103,6 @@ class ElasticMetric(BaseModel):
         return torch.sum(a1**2)
 
     @typecheck
-    def parameter_shape(self, shape: polydata_type) -> Tuple[int, int, int]:
+    def parameter_shape(self, shape: polydata_type) -> tuple[int, int, int]:
         n_points = shape.points.shape[0]
         return (n_points, self.n_steps, 3)

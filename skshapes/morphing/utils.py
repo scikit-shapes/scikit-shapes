@@ -1,9 +1,9 @@
 from ..data import Shape
-from beartype.typing import NamedTuple, Optional, List
+from typing import NamedTuple, Optional
 from ..types import FloatScalar
 
 
 class MorphingOutput(NamedTuple):
     morphed_shape: Optional[Shape] = None
     regularization: Optional[FloatScalar] = None
-    path: Optional[List[Shape]] = None
+    path: Optional[list[Shape]] = None

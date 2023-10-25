@@ -10,7 +10,7 @@ from ..types import (
     Number,
 )
 
-from beartype.typing import Tuple
+from typing import Tuple
 
 import torch
 from math import sqrt
@@ -54,7 +54,7 @@ class EulerIntegrator(Integrator):
         pass
 
     @typecheck
-    def __call__(self, p: Points, q: Points, H, dt: Number) -> Tuple[Points, Points]:
+    def __call__(self, p: Points, q: Points, H, dt: Number) -> tuple[Points, Points]:
         Gp, Gq = torch.autograd.grad(H(p, q), (p, q), create_graph=True)
 
         pdot, qdot = -Gq, Gp
@@ -64,7 +64,7 @@ class EulerIntegrator(Integrator):
 
 
 from .utils import MorphingOutput
-from beartype.typing import Literal
+from typing import Literal
 
 
 class KernelDeformation(BaseModel):
@@ -123,5 +123,5 @@ class KernelDeformation(BaseModel):
         )
 
     @typecheck
-    def parameter_shape(self, shape: polydata_type) -> Tuple[int, int]:
+    def parameter_shape(self, shape: polydata_type) -> tuple[int, int]:
         return shape.points.shape

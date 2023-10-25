@@ -9,7 +9,7 @@ from .optimal_transport import OptimalTransportLoss
 from .nearest_neighbors import NearestNeighborsLoss
 
 
-from beartype.typing import Union
+from typing import Union
 
 # The skshapes.Loss type is a union of all the loss functions
 # Note that BaseLoss is not included in the union, as it is an abstract class

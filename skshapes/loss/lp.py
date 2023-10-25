@@ -1,6 +1,6 @@
 """Lp losses for PolyData."""
 
-from beartype.typing import Any
+from typing import Any
 import torch
 
 from ..types import typecheck, FloatScalar, Number, polydata_type

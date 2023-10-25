@@ -5,7 +5,7 @@ from ..data import PolyData
 import torch
 
 from ..types import typecheck, float_dtype, int_dtype
-from beartype.typing import Optional, Literal
+from typing import Optional, Literal
 
 
 import fast_simplification

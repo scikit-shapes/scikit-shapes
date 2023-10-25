@@ -8,7 +8,7 @@ os.environ["QT_API"] = "pyqt5"
 from qtpy import QtWidgets
 import pyvista as pv
 from pyvistaqt import QtInteractor, MainWindow
-from beartype.typing import Optional, Tuple
+from typing import Optional
 import numpy as np
 import yaml
 from enum import Enum
@@ -19,7 +19,7 @@ class ShapesViewer(MainWindow):
         self,
         parent: Optional[MainWindow] = None,
         title: Optional[str] = None,
-        size: Optional[Tuple[int, int]] = None,
+        size: Optional[tuple[int, int]] = None,
         show: Optional[bool] = False,
     ) -> None:
         super().__init__(parent, title, size)
@@ -174,7 +174,7 @@ class LandmarkSelector(MainWindow):
         scene,
         parent: Optional[MainWindow] = None,
         title: Optional[str] = None,
-        size: Optional[Tuple[int, int]] = None,
+        size: Optional[tuple[int, int]] = None,
     ) -> None:
         super().__init__(parent, title, size)
 

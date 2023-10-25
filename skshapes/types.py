@@ -13,7 +13,6 @@ from beartype.typing import (
     Union,
     TypeVar,
     Generic,
-    List,
     Tuple,
     NamedTuple,
     Dict,
@@ -102,8 +101,8 @@ Float3dTensor = JaxFloat[torch.Tensor, "_ _ _"]
 FloatScalar = JaxFloat[torch.Tensor, ""]
 Int1dTensor = JaxInt[torch.Tensor, "_"]
 
-FloatSequence = Union[Float1dTensor, Float1dArray, List[float], List[Number]]
-IntSequence = Union[Int1dTensor, Int1dArray, List[int]]
+FloatSequence = Union[Float1dTensor, Float1dArray, list[float], list[Number]]
+IntSequence = Union[Int1dTensor, Int1dArray, list[int]]
 
 DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]

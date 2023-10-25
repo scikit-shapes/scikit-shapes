@@ -13,7 +13,7 @@ from ..types import (
     Number,
     polydata_type,
 )
-from beartype.typing import List, Literal, Union
+from typing import Literal, Union
 from ..utils import scatter
 import torch
 from ..decimation import Decimation
@@ -569,7 +569,7 @@ class MultiscaleTriangleMesh:
 
     @property
     @typecheck
-    def ratios(self) -> List[Number]:
+    def ratios(self) -> list[Number]:
         """Return the (sorted) available ratios."""
         tmp = list(self.shapes.keys())
         tmp.sort()

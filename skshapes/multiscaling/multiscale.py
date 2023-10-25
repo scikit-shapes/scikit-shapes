@@ -25,10 +25,10 @@ from ..types import (
     polydata_type,
     shape_type,
 )
-from beartype.typing import List, Literal
+from typing import Literal
 from ..utils import scatter
 import torch
-from beartype.typing import Union, Tuple
+from typing import Union
 from .multiscale_triangle_mesh import MultiscaleTriangleMesh
 from ..decimation import Decimation
 
@@ -37,18 +37,18 @@ class Multiscale:
     @typecheck
     def __new__(
         cls,
-        shape: Union[shape_type, List[shape_type]],
+        shape: Union[shape_type, list[shape_type]],
         correspondence: bool = False,
         **kwargs,
-    ) -> Union[MultiscaleTriangleMesh, List[MultiscaleTriangleMesh]]:
+    ) -> Union[MultiscaleTriangleMesh, list[MultiscaleTriangleMesh]]:
         """Create a multiscale object from a shape or a list of shapes.
 
         Args:
-            shape (Union[shape_type, List[shape_type]]): A shape or a list of shapes.
+            shape (Union[shape_type,list[shape_type]]): A shape or a list of shapes.
             correspondence (bool, optional): Wether the shapes of the list should be considered to be in correspondence or not.
 
         Returns:
-            Union[MultiscaleTriangleMesh, List[MultiscaleTriangleMesh]]
+            Union[MultiscaleTriangleMesh,list[MultiscaleTriangleMesh]]
         """
         if isinstance(shape, list) and not correspondence:
             # if no correspondence, do nothing more than call the constructor

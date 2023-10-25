@@ -1,7 +1,7 @@
 import skshapes as sks
 import torch
 from pykeops.torch import LazyTensor
-from beartype.typing import Optional
+from typing import Optional
 
 
 def test_squared_distance():

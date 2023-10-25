@@ -2,7 +2,7 @@ import vedo
 import numpy as np
 import torch
 
-from ..types import typecheck, List, float_dtype, int_dtype
+from ..types import typecheck, list, float_dtype, int_dtype
 from ..data import PolyData
 
 
@@ -13,12 +13,12 @@ class BarycentricLandmarkSetter(vedo.Plotter):
     This version allows to select landmarks that are barycentric coordinates of the vertices of the mesh.
 
     Args:
-        meshes (List[vedo.Mesh]): The meshes on which the landmarks are selected.
+        meshes (list[vedo.Mesh]): The meshes on which the landmarks are selected.
         **kwargs: Keyword arguments passed to the vedo.Plotter constructor.
     """
 
     @typecheck
-    def __init__(self, meshes: List[PolyData], **kwargs) -> None:
+    def __init__(self, meshes: list[PolyData], **kwargs) -> None:
         super().__init__(N=2, sharecam=False, **kwargs)
 
         # The 3D landmarks are stored in a list of lists of 3D points

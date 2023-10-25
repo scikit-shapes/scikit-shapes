@@ -3,8 +3,6 @@
 from __future__ import annotations
 from ..types import typecheck, Number, FloatScalar, Any, float_dtype, shape_type
 
-from beartype.typing import List
-
 import torch
 
 

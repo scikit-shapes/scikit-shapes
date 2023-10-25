@@ -5,7 +5,7 @@ sys.path.append(sys.path[0][:-4])
 import torch
 import vedo as vd
 import skshapes as sks
-from beartype.typing import Optional, Literal
+from typing import Optional, Literal
 
 
 def create_point_cloud(n_points: int, f: callable, normals=False):

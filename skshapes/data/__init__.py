@@ -4,7 +4,7 @@ from .image import Image
 from .dataset import Dataset
 from .utils import DataAttributes
 
-from beartype.typing import Union
+from typing import Union
 
 Shape = Union[PolyData, Image]
 

@@ -1,7 +1,7 @@
 import torch.optim
 
 # from ..types import Optimizer
-from beartype.typing import Union
+from typing import Union
 
 
 class BaseOptimizer:

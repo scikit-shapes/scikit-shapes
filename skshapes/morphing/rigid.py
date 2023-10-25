@@ -4,7 +4,6 @@ import torch
 from ..types import (
     typecheck,
     Float2dTensor,
-    Tuple,
     polydata_type,
     shape_type,
     convert_inputs,
@@ -75,7 +74,7 @@ class RigidMotion(BaseModel):
         )
 
     @typecheck
-    def parameter_shape(self, shape: shape_type) -> Tuple[int, int]:
+    def parameter_shape(self, shape: shape_type) -> tuple[int, int]:
         return (2, 3)
 
 
