@@ -7,6 +7,7 @@ from typing import NamedTuple
 from ..utils import diagonal_ranges
 from ..types import (
     typecheck,
+    float_dtype,
     Points,
     Optional,
     Triangles,
@@ -127,7 +128,10 @@ def smooth_curvatures(
 
         # Reshape to get the two covariance matrices:
         PPt_PQt = PPt_PQt.view(N, 2, 2, 2)
-        PPt, PQt = PPt_PQt[:, :, 0, :], PPt_PQt[:, :, 1, :]  # (N, 2, 2), (N, 2, 2)
+        PPt, PQt = (
+            PPt_PQt[:, :, 0, :],
+            PPt_PQt[:, :, 1, :],
+        )  # (N, 2, 2), (N, 2, 2)
 
         # Add a small ridge regression:
         PPt[:, 0, 0] += reg
@@ -288,7 +292,7 @@ def _point_quadratic_coefficients(
     def central_moments(*, order):
         return self.point_moments(
             order=order, scale=scale, central=True, dtype="double", **kwargs
-        ).float()
+        ).to(float_dtype)
 
     moms = [None] + [central_moments(order=k) for k in [1, 2, 3, 4]]
 

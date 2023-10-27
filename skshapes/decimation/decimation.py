@@ -4,7 +4,7 @@ import pyvista
 from ..data import PolyData
 import torch
 
-from ..types import typecheck, float_dtype, int_dtype
+from ..types import typecheck, convert_inputs, float_dtype, int_dtype
 from typing import Optional, Literal
 
 
@@ -102,13 +102,17 @@ class Decimation:
             mesh, "triangles"
         ), "Quadric decimation only works for triangular meshes"
 
-        points = mesh.points.clone().cpu().numpy()
-        triangles = mesh.triangles.clone().cpu().numpy()
+        points = mesh.points.clone().cpu().numpy().astype(np.float32)
+        triangles = mesh.triangles.clone().cpu().numpy().astype(np.int64)
 
         # Run the quadric decimation algorithm
         # import pyDecimation
 
-        decimated_points, decimated_triangles, collapses = fast_simplification.simplify(
+        (
+            decimated_points,
+            decimated_triangles,
+            collapses,
+        ) = fast_simplification.simplify(
             points=points,
             triangles=triangles,
             target_reduction=self.target_reduction,
@@ -150,15 +154,19 @@ class Decimation:
         device = mesh.device
 
         # Replay the decimation process on the mesh
-        points = mesh.points.clone().cpu().numpy()
-        triangles = mesh.triangles.clone().cpu().numpy()
+        points = mesh.points.clone().cpu().numpy().astype(np.float32)
+        triangles = mesh.triangles.clone().cpu().numpy().astype(np.int64)
 
         # Compute the number of collapses to apply
         rate = target_reduction / self.target_reduction
         n_collapses = int(rate * len(self.collapses))
 
         # Apply the collapses
-        points, triangles, indice_mapping = fast_simplification.replay_simplification(
+        (
+            points,
+            triangles,
+            indice_mapping,
+        ) = fast_simplification.replay_simplification(
             points=points,
             triangles=triangles,
             collapses=self.collapses[0:n_collapses],
@@ -180,7 +188,9 @@ class Decimation:
 
             # If there are landmarks in the decimated mesh, we create a sparse tensor with the landmarks
             landmarks = torch.sparse_coo_tensor(
-                values=l_values, indices=new_indices, size=(n_landmarks, len(points))
+                values=l_values,
+                indices=new_indices,
+                size=(n_landmarks, len(points)),
             )
         else:
             landmarks = None

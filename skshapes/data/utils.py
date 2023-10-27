@@ -9,7 +9,6 @@ from ..types import (
     Union,
     FloatTensor,
     IntTensor,
-    Dict,
     NumericalTensor,
     NumericalArray,
     float_dtype,
@@ -60,6 +59,7 @@ class DataAttributes(dict):
 
         return value
 
+    @convert_inputs
     @typecheck
     def __setitem__(
         self, key: Any, value: Union[NumericalTensor, NumericalArray]
@@ -67,6 +67,7 @@ class DataAttributes(dict):
         value = self._check_value(value)
         dict.__setitem__(self, key, value)
 
+    @convert_inputs
     @typecheck
     def append(self, value: Union[FloatTensor, IntTensor]) -> None:
         value = self._check_value(value)
@@ -94,13 +95,13 @@ class DataAttributes(dict):
     @classmethod
     def from_dict(
         cls,
-        attributes: Dict[Any, Union[NumericalTensor, NumericalArray]],
+        attributes: dict[Any, Union[NumericalTensor, NumericalArray]],
         device: Optional[Union[str, torch.device]] = None,
     ) -> DataAttributes:
         """Create a DataAttributes object from a dictionary of attributes
 
         Args:
-            attributes (Dict[str, Union[FloatTensor, IntTensor]]): The dictionary of attributes
+            attributes (dict[str, Union[FloatTensor, IntTensor]]): The dictionary of attributes
 
         Returns:
             DataAttributes: The DataAttributes object
@@ -163,7 +164,7 @@ class DataAttributes(dict):
         return cls.from_dict(attributes=dict_attributes, device=device)
 
     @typecheck
-    def to_numpy_dict(self) -> Dict[Any, NumericalArray]:
+    def to_numpy_dict(self) -> dict[Any, NumericalArray]:
         """Converts the DataAttributes object to a dictionary of numpy arrays"""
 
         d = dict(self)
@@ -202,7 +203,8 @@ if False:
     class cached_property(object):
         """
         A property that is only computed once per instance and then replaces itself
-        with an ordinary attribute. Deleting the attribute resets the property."""
+        with an ordinary attribute. Deleting the attribute resets the property.
+        """
 
         def __init__(self, func):
             self.__doc__ = getattr(func, "__doc__")
@@ -244,7 +246,8 @@ def cached_method(*lru_args, **lru_kwargs):
 
 
 from functools import cached_property, lru_cache, partial, update_wrapper
-from typing import Callable, Optional, TypeVar, Union
+from typing import Optional, TypeVar, Union
+from collections.abc import Callable
 
 T = TypeVar("T")
 

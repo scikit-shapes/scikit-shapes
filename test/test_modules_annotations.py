@@ -75,7 +75,9 @@ morphing_template = {
 # Define the tests
 def test_losses():
     check_module_annotations(
-        module=sks.loss, template=loss_template, type=sks.loss.baseloss.BaseLoss
+        module=sks.loss,
+        template=loss_template,
+        type=sks.loss.baseloss.BaseLoss,
     )
 
 

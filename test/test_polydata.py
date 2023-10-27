@@ -63,16 +63,17 @@ def _cube():
 
 def test_polydata_creation():
     # Shape initialized with points and triangles
-    # dtype are automatically converted to float32 and int64 and numpy arrays are converted to torch.Tensor
+    # dtype are automatically converted to float32 and int64 and numpy arrays
+    # are converted to torch.Tensor
     points = torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float64)
     triangles = torch.tensor([[0, 1, 2]], dtype=torch.int32).numpy()
 
     triangle = sks.PolyData(points=points, triangles=triangles)
 
     assert isinstance(triangle.points, torch.Tensor)
-    assert triangle.points.dtype == torch.float32
+    assert triangle.points.dtype == sks.float_dtype
     assert isinstance(triangle.points, torch.Tensor)
-    assert triangle.triangles.dtype == torch.int64
+    assert triangle.triangles.dtype == sks.int_dtype
 
     # edges are computed on the fly when the getter is called
     assert triangle._edges is None
@@ -135,7 +136,8 @@ def test_interaction_with_pyvista():
     assert not cube.is_all_triangles
     assert cube.n_cells == 6
     assert cube.n_points == 8
-    # Create a PolyData from a pyvista mesh and check that the faces are converted to triangles
+    # Create a PolyData from a pyvista mesh and check that the faces are
+    # converted to triangles
     polydata = sks.PolyData(cube)
     assert polydata.n_points == 8
     assert polydata.n_triangles == 12
@@ -194,7 +196,8 @@ def test_point_data():
     assert torch.allclose(copy.point_data["hessians"], mesh.point_data["hessians"])
     copy.point_data["hessians"] = torch.rand(
         *mesh["hessians"].shape
-    )  # If the copy was not correct, this would also change the point_data of the original mesh
+    )  # If the copy was not correct, this would also change the point_data of
+    # the original mesh
     assert not torch.allclose(copy.point_data["hessians"], mesh.point_data["hessians"])
 
     new_point_data = {
@@ -217,10 +220,12 @@ def test_point_data():
         pass
     else:
         raise AssertionError(
-            "Should have raised an error, the point_data should be a dict or a sks.data.utils.DataAttributes object"
+            "Should have raised an error, the point_data should be a dict or"
+            + "a sks.data.utils.DataAttributes object"
         )
 
-    # Check that trying to set the point_data with an invalid dict (here the size of the tensors is not correct) raises an error
+    # Check that trying to set the point_data with an invalid dict (here the
+    # size of the tensors is not correct) raises an error
     try:
         mesh.point_data = {
             "colors": torch.rand(mesh.n_points + 2, 3),
@@ -230,7 +235,8 @@ def test_point_data():
         pass
     else:
         raise AssertionError(
-            "Should have raised an error, the size of the colors tensor is not correct"
+            "Should have raised an error, the size of the colors tensor is"
+            + "not correct"
         )
 
 
@@ -250,12 +256,14 @@ def test_point_data2():
         torch.from_numpy(pv_mesh.point_data["curvature"]).to(dtype),
     )
 
-    # Assert that both device attributes for the mesh and the point_data are cpu
+    # Assert that both device attributes for the mesh and the point_data are
+    # cpu
     assert sks_mesh.device.type == "cpu"
     assert sks_mesh.point_data.device.type == "cpu"
 
     sks_mesh.point_data["color"] = torch.rand(sks_mesh.n_points, 3).cpu()
-    # It is also possible to assign a numpy array, it will be automatically converted to a torch.Tensor
+    # It is also possible to assign a numpy array, it will be automatically
+    # converted to a torch.Tensor
     sks_mesh.point_data["normals"] = np.random.rand(sks_mesh.n_points, 3)
 
     back_to_pyvista = sks_mesh.to_pyvista()
@@ -271,13 +279,15 @@ def test_point_data2():
     back_to_vedo = sks_mesh.to_vedo()
     assert type(back_to_vedo) == vedo.Mesh
     assert np.allclose(
-        back_to_vedo.pointdata["curvature"], sks_mesh.point_data["curvature"].numpy()
+        back_to_vedo.pointdata["curvature"],
+        sks_mesh.point_data["curvature"].numpy(),
     )
 
     # From vedo to sks
     sks_again = sks.PolyData(back_to_vedo)
     assert np.allclose(
-        sks_again.point_data["curvature"].numpy(), pv_mesh.point_data["curvature"]
+        sks_again.point_data["curvature"].numpy(),
+        pv_mesh.point_data["curvature"],
     )
 
 
@@ -364,27 +374,38 @@ def test_point_data_cuda():
         torch.from_numpy(pv_mesh.point_data["curvature"]).to(dtype),
     )
 
-    # Assert that both device attributes for the mesh and the point_data are cpu
+    # Assert that both device attributes for the mesh and the point_data are
+    # cpu
     assert sks_mesh.device.type == "cpu"
     assert sks_mesh.point_data.device.type == "cpu"
 
     sks_mesh.point_data["color"] = torch.rand(sks_mesh.n_points, 3).cpu()
-    # It is also possible to assign a numpy array, it will be automatically converted to a torch.Tensor
+    # It is also possible to assign a numpy array, it will be automatically
+    # converted to a torch.Tensor
     sks_mesh.point_data["normals"] = np.random.rand(sks_mesh.n_points, 3)
+
+    # Assert that the point_data attributes are correctly formatted
+    assert sks_mesh.point_data["color"].dtype == sks.float_dtype
+    assert sks_mesh.point_data["normals"].dtype == sks.float_dtype
 
     ############" CUDA PART ############"
 
     # Move the mesh to cuda
     sks_mesh_cuda = sks_mesh.to("cuda")
 
-    # Assert that both device attributes for the mesh and the point_data are cuda
+    # Assert that both device attributes for the mesh and the point_data are
+    # cuda
     assert sks_mesh_cuda.device.type == "cuda"
     assert sks_mesh_cuda.point_data.device.type == "cuda"
 
-    # If a new attribute is added  to the mesh, it is automatically moved to the same device as the mesh
-    sks_mesh_cuda.point_data["color"] = torch.rand(sks_mesh_cuda.n_points, 3).cpu()
-    # It is also possible to assign a numpy array, it will be automatically converted to a torch.Tensor
-    sks_mesh_cuda.point_data["normals"] = np.random.rand(sks_mesh_cuda.n_points, 3)
+    # If a new attribute is added  to the mesh, it is automatically moved to
+    # the same device as the mesh
+    color = torch.rand(sks_mesh_cuda.n_points, 3).cpu()
+    sks_mesh_cuda.point_data["color"] = color
+    # It is also possible to assign a numpy array, it will be automatically
+    # converted to a torch.Tensor
+    normals = np.random.rand(sks_mesh_cuda.n_points, 3)
+    sks_mesh_cuda.point_data["normals"] = normals
 
     assert sks_mesh_cuda.point_data["color"].device.type == "cuda"
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"

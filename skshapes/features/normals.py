@@ -24,7 +24,10 @@ def _point_normals(
         for k in range(3):
             # n[self.triangles[k, i]] += tri_n[i]
             n.scatter_reduce_(
-                dim=0, index=self.triangles[k].view(-1, 1), src=tri_n, reduce="sum"
+                dim=0,
+                index=self.triangles[k].view(-1, 1),
+                src=tri_n,
+                reduce="sum",
             )
 
     else:

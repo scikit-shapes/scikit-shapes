@@ -1,13 +1,9 @@
-"""In this module, we define the basic types used in the library (those who are only relying on third-part libraries).
-These types are used to annotate the functions and classes of the library.
-Types that corresponds to classes are defined in the classes module to avoid circular import.
+""" Basic types aliases and utility functions for scikit-shapes. """
 
-Ex: the generic type Shape is defned in skshapes.data, the generic type Loss is defined in skshapes.loss
-"""
 
 from beartype import beartype
-from jaxtyping import jaxtyped, Float32, Float64, Int64, Float, Int
-from beartype.typing import (
+from jaxtyping import jaxtyped, Float32, Float64, Int32, Int64, Float, Int
+from typing import (
     Any,
     Optional,
     Union,
@@ -15,15 +11,27 @@ from beartype.typing import (
     Generic,
     Tuple,
     NamedTuple,
-    Dict,
     TypeVar,
     Literal,
-    Callable,
 )
 import torch
 import numpy as np
+import os
+from warnings import warn
 
-float_dtype = torch.float32
+
+admissile_float_dtypes = ["float32", "float64"]
+float_dtype = os.environ.get("SKSHAPES_FLOAT_DTYPE", "float32")
+
+if float_dtype in admissile_float_dtypes:
+    float_dtype = getattr(torch, float_dtype)
+
+else:
+    warn(
+        f"Unknown float dtype {float_dtype}. Possible values are {admissile_float_dtypes}. Using float32 as default."
+    )
+    float_dtype = torch.float32
+
 int_dtype = torch.int64
 
 
@@ -78,9 +86,20 @@ def convert_inputs(func, parameters=None):
 
 # Type aliases
 Number = Union[int, float]
-JaxFloat = Float32
+
+from jaxtyping import jaxtyped, Float32, Float64, Int64, Float, Int
+
+correspondance = {
+    torch.float32: Float32,
+    torch.float64: Float64,
+    torch.int64: Int64,
+    torch.int32: Int32,
+}
+
+
+JaxFloat = correspondance[float_dtype]
 JaxDouble = Float64
-JaxInt = Int64
+JaxInt = correspondance[int_dtype]
 
 # Numpy array types
 FloatArray = Float[np.ndarray, "..."]  # Any float format numpy array
@@ -101,8 +120,10 @@ Float3dTensor = JaxFloat[torch.Tensor, "_ _ _"]
 FloatScalar = JaxFloat[torch.Tensor, ""]
 Int1dTensor = JaxInt[torch.Tensor, "_"]
 
-FloatSequence = Union[Float1dTensor, Float1dArray, list[float], list[Number]]
-IntSequence = Union[Int1dTensor, Int1dArray, list[int]]
+FloatSequence = Union[
+    Float[torch.Tensor, "_"], Float[np.ndarray, "_"], list[float], list[Number]
+]
+IntSequence = Union[Int[torch.Tensor, "_"], Int[np.ndarray, "_"], list[int]]
 
 DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
@@ -123,7 +144,8 @@ except ImportError:
 from beartype.vale import Is
 
 Landmarks = Annotated[
-    torch.Tensor, Is[lambda tensor: tensor.dtype == float_dtype and tensor.is_sparse]
+    torch.Tensor,
+    Is[lambda tensor: tensor.dtype == float_dtype and tensor.is_sparse],
 ]
 
 

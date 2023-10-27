@@ -27,13 +27,13 @@ jobs:
         run: |
           pip install -e .
 
-      - name: Try to import
-        run: |
-          python -c "import skshapes"
 
       - name: Test with pytest
         run: |
           pip install pytest hypothesis
+          export SKSHAPES_FLOAT_DTYPE=float64
+          pytest .
+          export SKSHAPES_FLOAT_DTYPE=float32
           pytest .
 
 #TODO : add linting

@@ -1,7 +1,7 @@
 """Registration between two shapes."""
 
 from ..optimization import Optimizer
-from ..types import typecheck, Union, shape_type
+from ..types import typecheck, Union, shape_type, float_dtype
 from ..loss import Loss
 from ..morphing import Model
 import torch
@@ -79,7 +79,9 @@ class Registration:
 
         # Initialize the parameter tensor using the template provided by the model, and set it to be optimized
         parameter_shape = self.model.parameter_shape(shape=source)
-        parameter = torch.zeros(parameter_shape, device=self.optim_device)
+        parameter = torch.zeros(
+            parameter_shape, device=self.optim_device, dtype=float_dtype
+        )
         parameter.requires_grad = True
 
         # Initialize the optimizer

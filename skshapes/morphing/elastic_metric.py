@@ -78,7 +78,9 @@ class ElasticMetric(BaseModel):
 
         ###### Finally, we return the NamedTuple containing this information #####
         return MorphingOutput(
-            morphed_shape=morphed_shape, path=path, regularization=regularization
+            morphed_shape=morphed_shape,
+            path=path,
+            regularization=regularization,
         )
 
     @convert_inputs

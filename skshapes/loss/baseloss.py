@@ -1,7 +1,14 @@
 """Abstract classes for losses."""
 
 from __future__ import annotations
-from ..types import typecheck, Number, FloatScalar, Any, float_dtype, shape_type
+from ..types import (
+    typecheck,
+    Number,
+    FloatScalar,
+    Any,
+    float_dtype,
+    shape_type,
+)
 
 import torch
 

@@ -231,7 +231,10 @@ class LandmarkSelector(MainWindow):
         self.reference_shape = scene.meshes[0]
         self.plotter1.add_mesh(self.reference_shape)
         self.plotter1.enable_point_picking(
-            pickable_window=False, show_message=False, use_mesh=True, callback=None
+            pickable_window=False,
+            show_message=False,
+            use_mesh=True,
+            callback=None,
         )
         self.reference_landmarks = []
 

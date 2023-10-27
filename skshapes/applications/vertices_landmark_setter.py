@@ -140,7 +140,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         # Instructions corresponding to the "reference" mode
         text_reference = "Start by selecting landmarks on the reference shape\nPress e to add a vertice\nPress d to delete the last point\nPress z to validate the landmarks"
         self.instructions_reference = vedo.Text2D(
-            text_reference, pos="bottom-left", c="white", bg="green", font="Calco"
+            text_reference,
+            pos="bottom-left",
+            c="white",
+            bg="green",
+            font="Calco",
         )
         self.at(0).add(
             self.instructions_reference

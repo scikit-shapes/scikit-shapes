@@ -16,24 +16,24 @@ def test_scattrer_toy():
     """A toy example to test the scatter function"""
 
     # dimension 1
-    src = torch.tensor([1, -1, 0.5], dtype=torch.float32)
-    index = torch.tensor([0, 1, 1], dtype=torch.int64)
+    src = torch.tensor([1, -1, 0.5], dtype=sks.float_dtype)
+    index = torch.tensor([0, 1, 1], dtype=sks.int_dtype)
 
     assert torch.allclose(
         scatter(src=src, index=index, reduce="mean"),
-        torch.tensor([1, -0.25], dtype=torch.float32),
+        torch.tensor([1, -0.25], dtype=sks.float_dtype),
     )
     assert torch.allclose(
         scatter(src=src, index=index, reduce="sum"),
-        torch.tensor([1, -0.5], dtype=torch.float32),
+        torch.tensor([1, -0.5], dtype=sks.float_dtype),
     )
     assert torch.allclose(
         scatter(src=src, index=index, reduce="min"),
-        torch.tensor([1, -1], dtype=torch.float32),
+        torch.tensor([1, -1], dtype=sks.float_dtype),
     )
     assert torch.allclose(
         scatter(src=src, index=index, reduce="max"),
-        torch.tensor([1, 0.5], dtype=torch.float32),
+        torch.tensor([1, 0.5], dtype=sks.float_dtype),
     )
 
 
@@ -163,13 +163,22 @@ def test_multiscale():
     # Propagate again to low resolution and check that we recover the original signal
     # with reduce="min", "max" or "mean"
     back = M.signal_from_fine_to_coarse(
-        tmp, fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio, reduce="min"
+        tmp,
+        fine_ratio=intermediate_ratio,
+        coarse_ratio=coarse_ratio,
+        reduce="min",
     )
     back2 = M.signal_from_fine_to_coarse(
-        tmp, fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio, reduce="max"
+        tmp,
+        fine_ratio=intermediate_ratio,
+        coarse_ratio=coarse_ratio,
+        reduce="max",
     )
     back3 = M.signal_from_fine_to_coarse(
-        tmp, fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio, reduce="mean"
+        tmp,
+        fine_ratio=intermediate_ratio,
+        coarse_ratio=coarse_ratio,
+        reduce="mean",
     )
     assert torch.allclose(back, low_resol_signal)
     assert torch.allclose(back2, low_resol_signal)
@@ -240,6 +249,8 @@ def test_multiscale_list():
     assert torch.allclose(multimesh1.at(0.1).points, multimesh2.at(0.1).points)
     # test that they do not share the same decimation module
     assert multimesh1.decimation_module != multimesh2.decimation_module
+
+    assert multimesh1.at(0.1).points.dtype == sks.float_dtype
 
 
 if False:

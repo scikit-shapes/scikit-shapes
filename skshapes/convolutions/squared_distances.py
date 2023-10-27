@@ -10,7 +10,16 @@ from pykeops.torch.cluster import (
 
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Optional, Triangles, Number, Literal, Callable
+from ..types import (
+    typecheck,
+    Points,
+    Optional,
+    Triangles,
+    Number,
+    Literal,
+)
+
+from collections.abc import Callable
 
 
 class KeOpsSquaredDistances:
@@ -142,7 +151,10 @@ def squared_distances(
 
     if window is None:
         return KeOpsSquaredDistances(
-            points=points, cutoff=cutoff, kernel=kernel, target_points=target_points
+            points=points,
+            cutoff=cutoff,
+            kernel=kernel,
+            target_points=target_points,
         )
 
     raise NotImplementedError()

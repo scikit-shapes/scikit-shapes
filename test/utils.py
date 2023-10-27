@@ -8,10 +8,12 @@ import skshapes as sks
 from typing import Optional, Literal
 
 
-def create_point_cloud(n_points: int, f: callable, normals=False):
+def create_point_cloud(
+    n_points: int, f: callable, normals=False, dtype=sks.float_dtype
+):
     """Create a point cloud from a function f: R^3 -> R."""
-    x = torch.linspace(-1, 1, n_points)
-    y = torch.linspace(-1, 1, n_points)
+    x = torch.linspace(-1, 1, n_points).to(dtype=dtype)
+    y = torch.linspace(-1, 1, n_points).to(dtype=dtype)
 
     if normals:
         x.requires_grad = True
@@ -20,7 +22,7 @@ def create_point_cloud(n_points: int, f: callable, normals=False):
     x, y = torch.meshgrid(x, y, indexing="ij")
     x = x.reshape(-1)
     y = y.reshape(-1)
-    z = f(x, y)
+    z = f(x, y).to(dtype=dtype)
 
     N = len(x)
     assert N == n_points**2
@@ -69,8 +71,10 @@ def create_shape(
         shape = sks.PolyData(file_name).decimate(n_points=n_points)
         print("Loaded shape with {:,} points".format(shape.n_points))
 
-    shape.points = shape.points + offset * torch.randn(1, 3)
-    shape.points = shape.points + noise * torch.randn(shape.n_points, 3)
+    shape.points = shape.points + offset * torch.randn(1, 3).to(sks.float_dtype)
+    shape.points = shape.points + noise * torch.randn(shape.n_points, 3).to(
+        sks.float_dtype
+    )
     return shape
 
 

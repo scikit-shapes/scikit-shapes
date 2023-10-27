@@ -34,7 +34,10 @@ def test_decimation_landmarks():
     n_landmarks = 4
     n_points = mesh.n_points
     landmarks = torch.sparse_coo_tensor(
-        indices=indices, values=values, size=(n_landmarks, n_points), device="cpu"
+        indices=indices,
+        values=values,
+        size=(n_landmarks, n_points),
+        device="cpu",
     )
     mesh.landmarks = landmarks
 
@@ -43,6 +46,7 @@ def test_decimation_landmarks():
 
     assert mesh.landmarks is not None
     assert decimated_mesh.landmarks is not None
+    assert decimated_mesh.points.dtype == sks.float_dtype
     assert len(decimated_mesh.landmark_points) == len(
         mesh.landmark_points
     )  # assert that the number of landmarks is the same
@@ -74,7 +78,7 @@ def test_torch_sparse_tensor_repetitions():
 )
 def test_decimation_gpu():
     # Assert that the decimation works with PolyData on the gpu
-    sphere = sks.PolyData(pyvista.Sphere(), device="cuda")
+    sphere = sks.Sphere().to("cuda")
 
     dec = sks.Decimation(n_points=15)
     dec.fit(sphere)
@@ -83,3 +87,5 @@ def test_decimation_gpu():
 
     newsphere = dec.transform(sphere.to("cuda"))
     assert newsphere.points.device.type == "cuda"
+
+    assert newsphere.points.dtype == sks.float_dtype

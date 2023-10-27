@@ -107,7 +107,8 @@ def axis_angle_to_quaternion(axis_angle: torch.Tensor) -> torch.Tensor:
         0.5 - (angles[small_angles] * angles[small_angles]) / 48
     )
     quaternions = torch.cat(
-        [torch.cos(half_angles), axis_angle * sin_half_angles_over_angles], dim=-1
+        [torch.cos(half_angles), axis_angle * sin_half_angles_over_angles],
+        dim=-1,
     )
     return quaternions
 

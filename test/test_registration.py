@@ -42,7 +42,8 @@ def test_registration_cpu():
                     verbose=1,
                 )
                 print(loss, model)
-                r.fit_transform(source=source, target=target)
+                out = r.fit_transform(source=source, target=target)
+                assert out.points.dtype == sks.float_dtype
 
 
 import skshapes as sks
@@ -54,11 +55,15 @@ from typing import get_args
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_registration_device():
-    """This test ensure the behavior of the registration task with respect to the devices of the source, target and the gpu argument.
+    """This test ensure the behavior of the registration task with respect to
+        the devices of the source, target and the gpu argument.
     Expected behavior:
-        - If the gpu argument is True, the optimization should occurs on the gpu
-        - If the gpu argument is False, the optimization should occurs on the gpu
-        - The device of the output of .transform() and of .parameter_ should be the same as the device of the source and the target
+        - If the gpu argument is True, the optimization should occurs on the
+            gpu
+        - If the gpu argument is False, the optimization should occurs on the
+            gpu
+        - The device of the output of .transform() and of .parameter_ should be
+            the same as the device of the source and the target
         - If source.device != target.device, an error should be raised
     """
     shape1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
@@ -91,20 +96,23 @@ def test_registration_device():
 
                 newshape = task.fit_transform(source=source, target=target)
 
-                # Check that the device on which the optimization is performed corresponds to the gpu argument
+                # Check that the device on which the optimization is performed
+                # corresponds to the gpu argument
                 if gpu:
                     assert task.internal_parameter_device_type == "cuda"
                 else:
                     assert task.internal_parameter_device_type == "cpu"
 
-                # Check that the device of the output is the same as the input's shapes
+                # Check that the device of the output is the same as the
+                # input's shapes
                 assert task.parameter_.device.type == source.device.type
                 assert newshape.device.type == target.device.type
 
                 # Check that the length of task.path_ is equal to n_steps
                 assert len(task.path_) == n_steps + 1
 
-        # Check that if source and target are on different devices, an error is raised
+        # Check that if source and target are on different devices, an error is
+        #  raised
         source = shape1.to("cpu")
         target = shape2.to("cuda")
         try:

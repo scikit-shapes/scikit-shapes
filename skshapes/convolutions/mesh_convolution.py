@@ -2,6 +2,7 @@ from ..types import (
     typecheck,
     NumericalTensor,
     polydata_type,
+    float_dtype,
 )
 
 import torch
@@ -28,20 +29,23 @@ def _mesh_convolution(
     edges = self.edges
 
     # Edge smoothing
-    edges_revert = torch.zeros_like(edges)
+    edges_revert = torch.zeros_like(edges, dtype=float_dtype)
     edges_revert[:, 0], edges_revert[:, 1] = edges[:, 1], edges[:, 0]
 
     indices = torch.cat((edges.T, edges_revert.T), dim=1)
 
     if not weight_by_length:
-        values = torch.ones(2 * n_edges, dtype=torch.float32)
+        values = torch.ones(2 * n_edges, dtype=float_dtype)
     else:
-        values = self.edge_lengths.repeat(2)
+        values = self.edge_lengths.repeat(2).to(dtype=float_dtype)
 
     S = torch.sparse_coo_tensor(
-        indices=indices, values=values, size=(n_points, n_points), device=self.device
+        indices=indices,
+        values=values,
+        size=(n_points, n_points),
+        device=self.device,
     )
 
-    degrees = S @ torch.ones(n_points, device=self.device)
+    degrees = S @ torch.ones(n_points, device=self.device, dtype=float_dtype)
 
     return LinearOperator(S, output_scaling=1 / degrees)

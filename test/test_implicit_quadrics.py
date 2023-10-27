@@ -11,7 +11,12 @@ from hypothesis import strategies as st
 import numpy as np
 import vedo as vd
 
-from .utils import create_point_cloud, dim4, quadratic_function, quadratic_gradient
+from .utils import (
+    create_point_cloud,
+    dim4,
+    quadratic_function,
+    quadratic_gradient,
+)
 
 
 @given(n_points=st.integers(min_value=5, max_value=10))
@@ -19,9 +24,12 @@ from .utils import create_point_cloud, dim4, quadratic_function, quadratic_gradi
 def test_quadratic_function(*, n_points: int):
     """Test on a simple dataset z = f(x, y)."""
     # Create the dataset
+    import skshapes.types as types
+
     points = create_point_cloud(
         n_points=n_points,
         f=lambda x, y: x**2 + y**2,
+        dtype=types.float_dtype,
     )
 
     N = len(points)

@@ -58,7 +58,11 @@ class BarycentricLandmarkSetter(vedo.Plotter):
         # Instructions corresponding to the "reference" mode
         text_reference = "Start by selecting landmarks on the reference mesh\nPress z to add a point on the surface\nPress e to add a vertice\nPress d to delete the last point\nPress s when you are done"
         self.instructions_reference = vedo.Text2D(
-            text_reference, pos="bottom-left", c="white", bg="green", font="Calco"
+            text_reference,
+            pos="bottom-left",
+            c="white",
+            bg="green",
+            font="Calco",
         )
         self.at(0).add(
             self.instructions_reference

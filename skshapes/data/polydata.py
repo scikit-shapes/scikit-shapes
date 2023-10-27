@@ -373,7 +373,10 @@ class PolyData(BaseShape, polydata_type):
         if self._triangles is not None:
             np_triangles = self._triangles.detach().cpu().numpy()
             faces = np.concatenate(
-                [np.ones((self.n_triangles, 1), dtype=np.int64) * 3, np_triangles],
+                [
+                    np.ones((self.n_triangles, 1), dtype=np.int64) * 3,
+                    np_triangles,
+                ],
                 axis=1,
             )
             polydata = pyvista.PolyData(
@@ -383,7 +386,8 @@ class PolyData(BaseShape, polydata_type):
         elif self._edges is not None:
             np_edges = self._edges.detach().cpu().numpy()
             lines = np.concatenate(
-                [np.ones((self.n_edges, 1), dtype=np.int64) * 2, np_edges], axis=1
+                [np.ones((self.n_edges, 1), dtype=np.int64) * 2, np_edges],
+                axis=1,
             )
             polydata = pyvista.PolyData(
                 self._points.detach().cpu().numpy(), lines=lines
@@ -568,10 +572,12 @@ class PolyData(BaseShape, polydata_type):
             return self.landmarks.shape[0]
 
     @landmarks.setter
+    @convert_inputs
     @typecheck
     def landmarks(self, landmarks: Landmarks) -> None:
         """Set the landmarks of the shape. The landmarks should be a sparse tensor of shape
-        (n_landmarks, n_points) (barycentric coordinates) or a list of indices."""
+        (n_landmarks, n_points) (barycentric coordinates) or a list of indices.
+        """
 
         assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
         assert landmarks.dtype == float_dtype
@@ -812,8 +818,10 @@ class PolyData(BaseShape, polydata_type):
             # so we must repeat the areas 3 times, without interleaving.
             areas = areas.repeat(3)
             return torch.bincount(
-                self.triangles.T.flatten(), weights=areas, minlength=self.n_points
-            )
+                self.triangles.T.flatten(),
+                weights=areas,
+                minlength=self.n_points,
+            ).to(float_dtype)
 
         elif self.edges is not None:
             lengths = self.edge_lengths / 2
@@ -821,7 +829,9 @@ class PolyData(BaseShape, polydata_type):
             # so we must repeat the lengths 2 times, without interleaving.
             lengths = lengths.repeat(2)
             return torch.bincount(
-                self.edges.T.flatten(), weights=lengths, minlength=self.n_points
+                self.edges.T.flatten(),
+                weights=lengths,
+                minlength=self.n_points,
             )
 
         return torch.ones(self.n_points, dtype=float_dtype, device=self.device)

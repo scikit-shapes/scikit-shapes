@@ -4,6 +4,7 @@ import torch
 from .basemodel import BaseModel
 from ..types import (
     typecheck,
+    convert_inputs,
     Points,
     FloatScalar,
     polydata_type,
@@ -119,7 +120,9 @@ class KernelDeformation(BaseModel):
         morphed_shape.points = q
 
         return MorphingOutput(
-            morphed_shape=morphed_shape, path=path, regularization=regularization
+            morphed_shape=morphed_shape,
+            path=path,
+            regularization=regularization,
         )
 
     @typecheck
