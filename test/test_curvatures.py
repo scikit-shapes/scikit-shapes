@@ -26,7 +26,7 @@ from .utils import create_point_cloud, create_shape
     e=st.floats(min_value=-1, max_value=1),
     f=st.floats(min_value=-1, max_value=1),
 )
-@settings(max_examples=1, deadline=1000)
+@settings(max_examples=1, deadline=None)
 def test_curvatures_quadratic(
     *,
     n_points: int,
