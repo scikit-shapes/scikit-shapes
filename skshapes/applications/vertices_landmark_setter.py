@@ -1,10 +1,6 @@
 import vedo
-import numpy as np
 import torch
-
-from ..types import typecheck, float_dtype, int_dtype, polydata_type
-from ..data import PolyData
-
+from ..types import typecheck, polydata_type
 from typing import Union
 
 
@@ -33,7 +29,8 @@ class LandmarkSetter:
 
 
 class LandmarkSetterSingleMesh(vedo.Plotter):
-    """A landmark setter that allows the user to select landmarks on a single polydata.
+    """A landmark setter that allows the user to select landmarks on a single
+    polydata.
 
     Args:
         shape (sks.Polydata): the polydata on which the landmarks are selected.
@@ -56,7 +53,9 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         )
         self.add(self.lpoints_pointcloud)
 
-        text = "Start by selecting landmarks on the reference shape\nPress e to add a vertice\nPress d to delete the last point\nPress z to validate the landmarks and close the window"
+        text = "Start by selecting landmarks on the reference shape\n"
+        +"Press e to add a vertice\nPress d to delete the last point\n"
+        +"Press z to validate the landmarks and close the window"
         self.instructions = vedo.Text2D(
             text, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -65,7 +64,8 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         self.add_callback("KeyPress", self._key_press)
 
     def _key_press(self, evt):
-        """The _key_press method is called when the user presses a key. It is used to add or delete landmarks and update the display."""
+        """The _key_press method is called when the user presses a key. It is
+        used to add or delete landmarks and update the display."""
         if evt.keypress == "e":
             if evt.picked3d is not None:
                 pt = vedo.Points(self.actor.points()).closest_point(
@@ -101,10 +101,12 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
 
 
 class LandmarkSetterMultipleMeshes(vedo.Plotter):
-    """A LandmarkSetter is a vedo application that allows the user to select landmarks on a set of polydatas.
+    """A LandmarkSetter is a vedo application that allows the user to select
+    landmarks on a set of polydatas.
 
     Args:
-        shapes (list[sks.PolyData]): The shapes on which the landmarks are selected.
+        shapes (list[sks.PolyData]): The shapes on which the landmarks are
+            selected.
         **kwargs: Keyword arguments passed to the vedo.Plotter constructor.
     """
 
@@ -112,7 +114,8 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
     def __init__(self, shapes: list[polydata_type]) -> None:
         super().__init__(N=2, sharecam=False)
 
-        # The landmarks (list of indices) are stored in a list of lists of indices
+        # The landmarks (list of indices) are stored in a list of lists of
+        # indices
         self.landmarks = [[] for i in range(len(shapes))]
 
         # Convert the shapes to vedo.Mesh objects
@@ -141,12 +144,15 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             vedo.Points(self.reference_lpoints, r=15).pickable(False).c("r")
         )
         self.mode = "reference"
-        # The reference vertices are stored in a vedo.Points object, we do not display them but we store them to be able to
+        # The reference vertices are stored in a vedo.Points object, we do not
+        # display them but we store them to be able to
         # pick them
         self.reference_vertices = vedo.Points(self.reference.points())
 
         # Instructions corresponding to the "reference" mode
-        text_reference = "Start by selecting landmarks on the reference shape\nPress e to add a vertice\nPress d to delete the last point\nPress z to validate the landmarks"
+        text_reference = "Start by selecting landmarks on the reference shape"
+        +"\nPress e to add a vertice\nPress d to delete the last point\n"
+        +"Press z to validate the landmarks"
         self.instructions_reference = vedo.Text2D(
             text_reference,
             pos="bottom-left",
@@ -158,8 +164,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             self.instructions_reference
         )  # Add the instructions to the left plot
 
-        # Instructions corresponding to the "other" mode (not displayed at the beginning)
-        text_other = "Now select the same landmarks on the other shapes\nPress e to add a vertice\nPress d to delete the last point\nPress z when you have selected all the landmarks"
+        # Instructions corresponding to the "other" mode (not displayed at the
+        # beginning)
+        text_other = "Now select the same landmarks on the other shapes\n"
+        +"Press e to add a vertice\nPress d to delete the last point\n"
+        +"Press z when you have selected all the landmarks"
         self.instructions_other = vedo.Text2D(
             text_other, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -176,8 +185,12 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
 
     def _done(self):
         """The _done method is called when the user presses the 's' key.
-        If the current mode is 'reference', it stores information about the number of landmarks to be set on the other shapes and switches to 'others' mode.
-        If the current mode is 'others', it stores the landmarks for the current shape and switches to the next shape. If no other shape is left, it closes the window.
+        If the current mode is 'reference', it stores information about the
+            number of landmarks to be set on the other shapes and switches to
+            'others' mode.
+        If the current mode is 'others', it stores the landmarks for the
+            current shape and switches to the next shape. If no other shape is
+            left, it closes the window.
         """
 
         if self.mode == "reference":
@@ -237,7 +250,9 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
                 self.close()
 
     def _update(self):
-        """The _update method update the display of the landmarks with the right color depending on the current mode and the current state of the landmarks selection."""
+        """The _update method update the display of the landmarks with the
+        right color depending on the current mode and the current state of the
+        landmarks selection."""
 
         if self.mode == "reference":
             self.at(0).remove(self.reference_lpoints_pointcloud)
@@ -273,7 +288,8 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             self.at(1).add(self.other_lpoints_pointcloud)
 
     def _key_press(self, evt):
-        """The _key_press method is called when the user presses a key. It is used to add or delete landmarks."""
+        """The _key_press method is called when the user presses a key. It is
+        used to add or delete landmarks."""
 
         if self.mode == "reference" and evt.actor == self.reference:
             if evt.keypress == "e":
@@ -330,7 +346,8 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
 
 @typecheck
 def closest_vertex(points, point):
-    """Given a list of vertices and a point, return the indice of the closest vertex."""
+    """Given a list of vertices and a point, return the indice of the closest
+    vertex."""
     # Compute the vectors from the point to the vertices
     vertices = torch.tensor(points)
     point = torch.tensor(point)

@@ -1,5 +1,5 @@
 import vedo
-from ..types import typecheck, shape_type
+from ..types import shape_type
 
 
 class Browser:

@@ -9,11 +9,7 @@ from ..types import (
     polydata_type,
     Number,
 )
-
-from typing import Tuple
-
-import torch
-from math import sqrt
+from .utils import MorphingOutput
 from pykeops.torch import LazyTensor
 
 
@@ -24,7 +20,8 @@ class Kernel:
 
 
 class Integrator:
-    """All hamiltonian integrators used in spline models should inherit from this class"""
+    """All hamiltonian integrators used in spline models should inherit from
+    this class"""
 
     pass
 
@@ -67,10 +64,6 @@ class EulerIntegrator(Integrator):
         return p, q
 
 
-from .utils import MorphingOutput
-from typing import Literal
-
-
 class KernelDeformation(BaseModel):
     @typecheck
     def __init__(
@@ -106,7 +99,10 @@ class KernelDeformation(BaseModel):
         if return_regularization:
             regularization = self.cometric(parameter, q) / 2
 
-        H = lambda p, q: self.cometric(p, q) / 2  # Hamiltonian
+        # Define the hamiltonian
+        def H(p, q):
+            return self.cometric(p, q) / 2
+
         dt = 1 / self.n_steps  # Time step
 
         if not return_path:

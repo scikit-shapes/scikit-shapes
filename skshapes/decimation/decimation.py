@@ -1,51 +1,31 @@
 import numpy as np
-import pyvista
-
 from ..data import PolyData
 import torch
-
-from ..types import typecheck, convert_inputs, float_dtype, int_dtype
-from typing import Optional, Literal
-
-
+from ..types import typecheck, float_dtype, int_dtype
+from typing import Optional
 import fast_simplification
 
 
 class Decimation:
     """
-    This class implements the quadric decimation algorithm. The goal of decimation is to reduce the number of points of a mesh while preserving its shape.
-    The algorithm is based on the following paper : https://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf
-
-    An implementation of the algorithm is available in vtk : https://vtk.org/doc/nightly/html/classvtkQuadricDecimation.html, it is accessible through the
-    method="vtk" argument. The parameters of the vtk implementation are the same as the default parameters used in pyvista (https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PolyDataFilters.decimate.html#pyvista.PolyDataFilters.decimate)
-
-    Usage example :
-    mesh = sks.PolyData("data/mesh.vtk")
-    decimator = sks.Decimation(target_reduction=0.5, method="vtk")
-    mesh_decimated = decimator.fit_transform(mesh) # mesh_decimated is a sks.PolyData object with (approximately) half the number of points of mesh
-
-
-    A drawback of the vtk implementation appears when the decimation is applied to several meshes with the same connectivity (eg the dataset SCAPE consisting of human poses where points and triangles are in correspondence accross poses).
-    Indeed, applying the vtk decimation to each mesh independently will result in a loss of correspondence between points and triangles. To avoid this, the implementation="sks" argument can be used.
-    Another drawback is that if landmarks are present in the mesh, there is no way to keep them after the decimation.
-
-    The method="sks" argument corresponds to a custom implementation of the algorithm that allows to run the same decimation on several meshes with the same connectivity in order to keep the correspondence between points and triangles in low-resolution meshes.
-    It also allows to keep landmarks after the decimation when landmarks are stored in barycentric coordinates on the mesh.
-    It is an implementation based on the C++ vtk code but written in python using numba's JIT engine to speed up the computations. In this implementation, we keep track of the collapses that are performed during the decimation in order to be able to apply the same collapses to other meshes with the same connectivity.
-
+    This class implements the quadric decimation algorithm. The goal of
+    decimation is to reduce the number of points of a mesh while preserving its
+    shape.
 
     Usage examples :
 
     # assume that pose1 and pose2 are two meshes with the same connectivity:
 
     pose1, pose2 = sks.PolyData("data/pose1.vtk","data/pose2.vtk")
-    decimator = sks.Decimation(target_reduction=0.5, method="sks")
+    decimator = sks.Decimation(target_reduction=0.5)
     decimator.fit(cat1)
     pose1_decimated = decimator.transform(cat1)
     pose2_decimated = decimator.transform(cat2)
-    assert torch.allclose(pose1_decimated.triangles, pose2_decimated.triangles) # pose1_decimated and pose2_decimated have the same connectivity
+    assert torch.allclose(pose1_decimated.triangles, pose2_decimated.triangles)
+    # pose1_decimated and pose2_decimated have the same connectivity
 
-    # if landmarks are present in the meshes, they are kept after the decimation
+    # if landmarks are present in the meshes, they are kept after the
+    # decimation
     if pose1.landmarks is not None:
         assert pose1_decimated.landmarks is not None
     if pose2.landmarks is not None:
@@ -60,14 +40,20 @@ class Decimation:
         n_points: Optional[int] = None,
     ) -> None:
         """
-        Initialize the quadric decimation algorithm with a target reduction or the desired number of points in lox-resulution mesh and choose between vtk and sks implementations.
+        Initialize the quadric decimation algorithm with a target reduction or
+        the desired number of points in lox-resulution mesh and choose between
+        vtk and sks implementations.
 
         Args:
-            target_reduction (float, optional): The target reduction of the number of points in the low-resolution mesh. Must be between 0 and 1. Defaults to None.
-            n_points (int, optional): The desired number of points in the low-resolution mesh. Defaults to None.
+            target_reduction (float, optional): The target reduction of the
+                number of points in the low-resolution mesh. Must be between
+                0 and1. Defaults to None.
+            n_points (int, optional): The desired number of points in the
+                low-resolution mesh. Defaults to None.
 
         Raises:
-            ValueError: If both target_reduction and n_points are provided or if none of them is provided.
+            ValueError: If both target_reduction and n_points are provided or
+            if none of them is provided.
         """
         if target_reduction is None and n_points is None:
             raise ValueError(
@@ -136,9 +122,12 @@ class Decimation:
         Transform a mesh using the decimation algorithm.
         Args:
             mesh (PolyData): The mesh to transform.
-            target_reduction (float, optional): The target reduction of the number of points in the low-resolution mesh. Must be between 0 and 1. Defaults to 1.
-                                                If the target_reduction is greater than the target_reduction used to fit the decimation object, the decimation
-                                                will be applied with the target_reduction used to fit the decimation object. Defaults to 1.
+            target_reduction (float, optional): The target reduction of the
+                number of points in the low-resolution mesh. Must be between 0
+                and 1. Defaults to 1. If the target_reduction is greater than
+                the target_reduction used to fit the decimation object, the
+                decimation will be applied with the target_reduction used to
+                fit the decimation object. Defaults to 1.
         """
         assert (
             0 <= target_reduction <= 1
@@ -146,12 +135,19 @@ class Decimation:
         if target_reduction > self.target_reduction:
             target_reduction = self.target_reduction
 
-        assert (
-            mesh.n_points == self.ref_mesh.n_points
-        ), "The number of points of the mesh to decimate must be the same as the reference mesh"
-        assert torch.allclose(
+        if mesh.n_points != self.ref_mesh.n_points:
+            raise ValueError(
+                "The number of points of the mesh to decimate must be the same"
+                + " as the reference mesh"
+            )
+
+        if not torch.allclose(
             mesh.triangles.cpu(), self.ref_mesh.triangles.cpu()
-        ), "The triangles of the mesh to decimate must be the same as the reference mesh"
+        ):
+            raise ValueError(
+                "The triangles of the mesh to decimate must be the same as the"
+                + " reference mesh"
+            )
 
         device = mesh.device
 
@@ -176,7 +172,8 @@ class Decimation:
 
         self.indice_mapping_ = torch.Tensor(indice_mapping).to(int_dtype)
 
-        # If there are landmarks on the mesh, we compute the coordinates of the landmarks in the decimated mesh
+        # If there are landmarks on the mesh, we compute the coordinates of the
+        # landmarks in the decimated mesh
         if mesh.landmarks is not None:
             coalesced_landmarks = mesh.landmarks.coalesce()
             l_values = coalesced_landmarks.values()
@@ -185,10 +182,12 @@ class Decimation:
             n_landmarks = l_size[0]
 
             new_indices = l_indices.clone()
-            # the second line of new_indices corresponds to the indices of the points, we need to apply the mapping
+            # the second line of new_indices corresponds to the indices of the
+            # points, we need to apply the mapping
             new_indices[1] = torch.from_numpy(indice_mapping[new_indices[1]])
 
-            # If there are landmarks in the decimated mesh, we create a sparse tensor with the landmarks
+            # If there are landmarks in the decimated mesh, we create a sparse
+            # tensor with the landmarks
             landmarks = torch.sparse_coo_tensor(
                 values=l_values,
                 indices=new_indices,
@@ -207,10 +206,8 @@ class Decimation:
     @typecheck
     def fit_transform(self, mesh: PolyData) -> PolyData:
         """
-        Fit and transform a mesh using the decimation algorithm. The behavior depends on the implementation of the algorithm.
-
+        Decimate and return decimated mesh.
         """
-
         self.fit(mesh)
         return self.transform(mesh)
 

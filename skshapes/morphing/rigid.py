@@ -14,8 +14,10 @@ from .utils import MorphingOutput
 
 class RigidMotion(BaseModel):
     """
-    Rigid motion morphing. The parameter is a (2, 3) tensor, where the first row
-    is the rotation axis-angle and the second row is the translation vector.
+    Rigid motion morphing.
+
+    The parameter is a (2, 3) tensor, where the first row is the rotation
+    axis-angle and the second row is the translation vector.
     """
 
     @typecheck
@@ -131,7 +133,6 @@ def quaternion_to_matrix(quaternions: torch.Tensor) -> torch.Tensor:
         Rotation matrices as tensor of shape (..., 3, 3).
     """
     r, i, j, k = torch.unbind(quaternions, -1)
-    # pyre-fixme[58]: `/` is not supported for operand types `float` and `Tensor`.
     two_s = 2.0 / (quaternions * quaternions).sum(-1)
 
     o = torch.stack(

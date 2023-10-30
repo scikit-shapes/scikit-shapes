@@ -45,7 +45,8 @@ class ElasticMetric(BaseModel):
             ),
             dim=1,
         )
-        # Compute the sequence of points by adding the cumulative sum of the velocity sequence to the initial shape
+        # Compute the sequence of points by adding the cumulative sum of the
+        # velocity sequence to the initial shape
         newpoints = (
             shape.points.repeat(self.n_steps + 1, 1)
             .reshape(self.n_steps + 1, n_points, d)
@@ -53,7 +54,7 @@ class ElasticMetric(BaseModel):
             + cumvelocities
         )
 
-        ###### Then, we compute the morphed shape + regularization/path if needed #####
+        # Then, we compute the morphed shape + regularization/path if needed
 
         # Compute the morphed shape
         morphed_shape = shape.copy()
@@ -75,7 +76,7 @@ class ElasticMetric(BaseModel):
 
         assert parameter.shape == self.parameter_shape(shape)
 
-        ###### Finally, we return the NamedTuple containing this information #####
+        # Finally, we return the NamedTuple containing this information
         return MorphingOutput(
             morphed_shape=morphed_shape,
             path=path,
@@ -87,14 +88,18 @@ class ElasticMetric(BaseModel):
     def metric(
         self, points: Float3dTensor, edges: Edges, velocities: Float3dTensor
     ) -> FloatScalar:
-        """Compute the sum of the norms of a sequence of speed vectors in Riemannian metric with respect to associated points.
+        """Compute the sum of the norms of a sequence of speed vectors in
+        Riemannian metric with respect to associated points.
 
         Args:
-            velocity (float3dTensorType (n_points, n_steps, d) ): The sequence of speed vectors ).
-            points (float3dTensorType (n_points, n_steps, d) ): The sequence of points.
+            velocity (float3dTensorType (n_points, n_steps, d) ): The sequence
+                of speed vectors ).
+            points (float3dTensorType (n_points, n_steps, d) ): The sequence of
+                points.
 
         Returns:
-            floatScalarType: The sum of the squared norm of the sequence of speed vectors in the Riemannian metric.
+            floatScalarType: The sum of the squared norm of the sequence of
+            speed vectors in the Riemannian metric.
 
         """
         e0, e1 = edges[:, 0], edges[:, 1]

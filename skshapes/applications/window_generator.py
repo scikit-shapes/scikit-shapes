@@ -1,22 +1,26 @@
 import sys
 from PyQt5 import Qt, QtWidgets
 from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
-from vedo import Plotter, Sphere, Cone
+from vedo import Plotter
 
 
 class WindowGenerator(Qt.QMainWindow):
     """A window with custom widgets: buttons, checkboxes, vedoPlotter...
 
     Args:
-        widgets (list): A list of dictionaries, each dictionary should have the following keys:
-            - type: The type of the widget, can be one of: "CheckBox", "Choice", "Button", "Label", "VTKPlotter"
+        widgets (list): A list of dictionaries, each dictionary should have the
+        following keys:
+            - type: The type of the widget, can be one of: "CheckBox",
+                "Choice", "Button", "Label", "VTKPlotter"
             - key: A unique key to identify the widget
-            - value: The value of the widget, depends on the type of the widget:
+            - value: The value of the widget, depends on the type of the
+                widget:
                 - CheckBox: The text to display next to the checkbox
                 - Choice: A list of choice values
                 - Button: The text to display on the button
                 - Label: The text to display in the label
-                - VTKPlotter: A vedo object constructor like Sphere or Cone or None (if no object to display)
+                - VTKPlotter: A vedo object constructor like Sphere or Cone or
+                    None (if no object to display)
     """
 
     def __init__(self, widgets):

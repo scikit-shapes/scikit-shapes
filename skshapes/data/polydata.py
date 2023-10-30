@@ -299,8 +299,7 @@ class PolyData(BaseShape, polydata_type):
     def save(self, filename: str) -> None:
         """Save the shape at the specified location.
         Format accepted by PyVista are supported (.ply, .stl, .vtk)
-        see: https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/
-        pointset.py#L439-L1283
+        see: https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/pointset.py#L439-L1283  # noqa: E501
 
         Args:
             path (str): the path where to save the shape.

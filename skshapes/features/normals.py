@@ -6,6 +6,7 @@ from ..utils import diagonal_ranges
 from ..types import typecheck, Points, FloatTensor, Triangles, Number
 from typing import Optional
 
+
 @typecheck
 def _point_normals(
     self,
