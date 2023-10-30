@@ -109,7 +109,9 @@ Float1dArray = Float[np.ndarray, "_"]
 Int1dArray = Int[np.ndarray, "_"]
 
 # Numerical types
-FloatTensor = JaxFloat[torch.Tensor, "..."]  # Only Float32 tensors are FloatTensors
+FloatTensor = JaxFloat[
+    torch.Tensor, "..."
+]  # Only Float32 tensors are FloatTensors
 IntTensor = JaxInt[torch.Tensor, "..."]  # Only Int64 tensors are IntTensors
 NumericalTensor = Union[FloatTensor, IntTensor]
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]

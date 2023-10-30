@@ -47,16 +47,20 @@ class Registration:
         target: shape_type,
     ) -> None:
         # Check that the shapes are on the same device
-        assert (
-            source.device == target.device
-        ), "Source and target shapes must be on the same device, found source on device {} and target on device {}".format(
-            source.device, target.device
-        )
+        if source.device != target.device:
+            raise ValueError(
+                "Source and target shapes must be on the same device, found"
+                + "source on device {} and target on device {}".format(
+                    source.device, target.device
+                )
+            )
+
         self.output_device = (
             source.device
         )  # Save the device on which the output will be
 
-        # Make copies of the source and target and move them to the optimization device
+        # Make copies of the source and target and move them to the
+        # optimization device
         if source.device != self.optim_device:
             source = source.to(self.optim_device)
         if target.device != self.optim_device:
@@ -77,7 +81,8 @@ class Registration:
                 + self.regularization * morphing.regularization
             )
 
-        # Initialize the parameter tensor using the template provided by the model, and set it to be optimized
+        # Initialize the parameter tensor using the template provided by the
+        # model, and set it to be optimized
         parameter_shape = self.model.parameter_shape(shape=source)
         parameter = torch.zeros(
             parameter_shape, device=self.optim_device, dtype=float_dtype
@@ -118,9 +123,12 @@ class Registration:
         self.transformed_shape_ = morphing.morphed_shape
         self.path_ = morphing.path
 
-        # If needed : move the transformed shape and the path to the output device
+        # If needed : move the transformed shape and the path to the output
+        # device
         if self.transformed_shape_.device != self.output_device:
-            self.transformed_shape_ = self.transformed_shape_.to(self.output_device)
+            self.transformed_shape_ = self.transformed_shape_.to(
+                self.output_device
+            )
             self.path_ = [s.to(self.output_device) for s in self.path_]
 
         self.transformed_shape_.points
@@ -135,7 +143,7 @@ class Registration:
 
         if transformed_shape.device != self.output_device:
             return transformed_shape.to(self.output_device)
-        else:  # If transformed_shape is already on the output device, avoid a copy
+        else:  # If transformed_shape is on the output device don't copy
             return transformed_shape
 
     @typecheck

@@ -1,7 +1,7 @@
 import skshapes as sks
 import torch
-from pykeops.torch import LazyTensor
-from typing import Optional
+from hypothesis import given, settings
+from hypothesis import strategies as st
 
 
 def test_squared_distance():
@@ -90,14 +90,6 @@ def test_convolution_trivial():
     assert torch.allclose(gaussian_kernel_torch @ a, gaussian_kernel_sks @ a)
 
 
-from hypothesis import given, settings
-from hypothesis import strategies as st
-
-from math import isnan
-
-from .utils import create_point_cloud, create_shape
-
-
 @given(
     N=st.integers(min_value=2, max_value=500),
     M=st.integers(min_value=2, max_value=500),
@@ -174,7 +166,7 @@ def test_convolution_functional(
     A = o_s * (kernel_torch @ (i_s * a))
     B = kernel_sks @ a
 
-    assert torch.allclose(o_s * (kernel_torch @ (i_s * a)), kernel_sks @ a, atol=1e-4)
+    assert torch.allclose(A, B, atol=1e-4)
 
 
 def test_mesh_convolution():
@@ -192,13 +184,15 @@ def test_mesh_convolution():
 def test_multidimensional_matrix_multiplication():
     """test the LinearOperator class for multidimensional matrix multiplication
 
-    More precisely, we test that if M is a Linearoperator of shape (n, m) and A a
-    tensor of shape (m, *t), then M @ A is well defined and results in a (n, *t)
-    ensor, t being a tuple of integers.
+    More precisely, we test that if M is a Linearoperator of shape (n, m) and
+    A a tensor of shape (m, *t), then M @ A is well defined and results in a
+    (n, *t) tensor, t being a tuple of integers.
     """
 
     # Define a LinearOperator of shape (n, m)
-    randint = lambda up, low=1: torch.randint(low, up, (1,))[0] if up > low else low
+    randint = (
+        lambda up, low=1: torch.randint(low, up, (1,))[0] if up > low else low
+    )
 
     n, m = randint(10, low=2), randint(10, low=2)
     a, b, c = randint(10, low=2), randint(10, low=2), randint(10, low=2)
@@ -207,7 +201,8 @@ def test_multidimensional_matrix_multiplication():
     M = sks.convolutions.LinearOperator(matrix)
     A = torch.rand(m, a, b, c).to(sks.float_dtype)
 
-    # assert that the @ operator is well defined and that the output has the right shape
+    # assert that the @ operator is well defined and that the output has the
+    # right shape
     result = M @ A
     assert result.shape == (n, a, b, c)
 
@@ -218,27 +213,34 @@ def test_multidimensional_matrix_multiplication():
     print(result[i, j, k, l])
     assert torch.isclose(
         result[i, j, k, l],
-        sum([matrix[i, ii] * A[ii, j, k, l] for ii in range(m)]).to(sks.float_dtype),
+        sum([matrix[i, ii] * A[ii, j, k, l] for ii in range(m)]).to(
+            sks.float_dtype
+        ),
     )
 
 
 def test_multidimensional_signal_convolution():
-    """Test that the mesh convolution operator is well defined for multidimensional signals
+    """Test that the mesh convolution operator is well defined for
+        multidimensional signals
 
-    The mesh convolution operator is defined as a matrix of shape (n_points, n_points)
-    where n_points is the number of points of the mesh. In this test, we define a signal
-    on the mesh, where each point is associated a tensor of shape (a, b, c) where a, b, c
-    are random integers between 1 and 10. The mesh convolution operator is then applied
-    to this signal, and the output signal is checked to have the right shape after matrix
+    The mesh convolution operator is defined as a matrix of shape
+    (n_points, n_points) where n_points is the number of points of the mesh. In
+    this test, we define a signal on the mesh, where each point is associated a
+    tensor of shape (a, b, c) where a, b, c are random integers between 1 and
+    10. The mesh convolution operator is then applied to this signal, and the
+    output signal is checked to have the right shape after matrix
     multiplication.
     """
 
     mesh = sks.Sphere()
     n_points = mesh.n_points
 
-    # Set a multidimensional signal on the mesh, to each point is associated a tensor of shape (a, b, c)
-    # where a, b, c are random integers between 1 and 10
-    randtriplet = lambda n_max: (int(i) for i in torch.randint(1, n_max, (3,)))
+    # Set a multidimensional signal on the mesh, to each point is associated a
+    # tensor of shape (a, b, c) where a, b, c are random integers between 1 and
+    # 10
+    def randtriplet(n_max):
+        return (int(i) for i in torch.randint(1, n_max, (3,)))
+
     a, b, c = randtriplet(10)
     data = torch.rand(n_points, a, b, c).to(sks.float_dtype)
     mesh["signal"] = data

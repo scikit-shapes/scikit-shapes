@@ -46,11 +46,6 @@ def test_registration_cpu():
                 assert out.points.dtype == sks.float_dtype
 
 
-import skshapes as sks
-import pyvista.examples
-from typing import get_args
-
-
 @pytest.mark.skipif(
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
@@ -117,7 +112,7 @@ def test_registration_device():
         target = shape2.to("cuda")
         try:
             task.fit(source=source, target=target)
-        except:
+        except ValueError:
             pass
         else:
             raise AssertionError("Should have raised an error")

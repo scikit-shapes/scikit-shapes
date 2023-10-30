@@ -12,13 +12,16 @@ class NearestNeighborsLoss(BaseLoss):
         pass
 
     @typecheck
-    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
+    def __call__(
+        self, source: polydata_type, target: polydata_type
+    ) -> FloatScalar:
         """
         Args:
             x (torch.Tensor): the current mesh
         Returns:
             loss (torch.Tensor): the data attachment loss
         """
+        super().__call__(source=source, target=target)
 
         source_points = source.points
         target_points = target.points

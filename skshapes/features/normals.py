@@ -15,7 +15,9 @@ def _point_normals(
 ) -> Points:
     if scale is None:
         if self.triangles is None:
-            raise ValueError("If no triangles are provided, you must specify a scale.")
+            raise ValueError(
+                "If no triangles are provided, you must specify a scale."
+            )
 
         tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
         n = torch.zeros_like(self.points)
@@ -32,7 +34,9 @@ def _point_normals(
 
     else:
         # Get a smooth field of normals via the Structure Tensor:
-        local_cov = self.point_moments(order=2, scale=scale, central=True, **kwargs)
+        local_cov = self.point_moments(
+            order=2, scale=scale, central=True, **kwargs
+        )
         local_QL = torch.linalg.eigh(local_cov)
         local_nuv = local_QL.eigenvectors  # (N, 3, 3)
         n = local_nuv[:, :, 0]
@@ -176,7 +180,9 @@ def smooth_normals(
     # Support for heterogeneous batch processing:
     if batch is not None:
         batch_vertices = batch
-        batch_centers = batch[triangles[0, :]] if triangles is not None else batch
+        batch_centers = (
+            batch[triangles[0, :]] if triangles is not None else batch
+        )
         K_ij.ranges = diagonal_ranges(batch_vertices, batch_centers)
 
     if single_scale:
@@ -210,7 +216,9 @@ def tangent_vectors(normals):
     s = (2 * (z >= 0)) - 1.0  # = z.sign(), but =1. if z=0.
     a = -1 / (s + z)
     b = x * y * a
-    uv = torch.stack((1 + s * x * x * a, s * b, -s * x, b, s + y * y * a, -y), dim=-1)
+    uv = torch.stack(
+        (1 + s * x * x * a, s * b, -s * x, b, s + y * y * a, -y), dim=-1
+    )
     uv = uv.view(uv.shape[:-1] + (2, 3))
 
     return uv

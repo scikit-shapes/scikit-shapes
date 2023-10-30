@@ -114,9 +114,11 @@ class DataAttributes(dict):
         # Ensure that the number of elements of the attributes is the same
         n = list(attributes.values())[0].shape[0]
         for value in attributes.values():
-            assert (
-                value.shape[0] == n
-            ), "The number of elements of the dictionnary should be the same to be converted into a DataAttributes object"
+            if value.shape[0] != n:
+                raise ValueError(
+                    "The number of elements of the dictionnary should be the"
+                    + "same to be converted into a DataAttributes object"
+                )
 
         if device is None:
             # Ensure that the attributes are on the same device (if they are torch.Tensor, unless they have no device attribute and we set device to cpu)
@@ -293,7 +295,11 @@ def instance_lru_cache(
 def cache_clear(self):
     """Reload all cached properties."""
     cls = self.__class__
-    attrs = [a for a in dir(self) if isinstance(getattr(cls, a, cls), cached_property)]
+    attrs = [
+        a
+        for a in dir(self)
+        if isinstance(getattr(cls, a, cls), cached_property)
+    ]
     for a in attrs:
         delattr(self, a)
 

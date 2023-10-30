@@ -1,7 +1,3 @@
-import sys
-
-sys.path.append(sys.path[0][:-4])
-
 import time
 import numpy as np
 import torch
@@ -11,10 +7,13 @@ from pytest import approx
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-import numpy as np
 import vedo as vd
 
 from .utils import create_point_cloud, create_shape
+
+import sys
+
+sys.path.append(sys.path[0][:-4])
 
 
 @given(
@@ -37,17 +36,21 @@ def test_curvatures_quadratic(
     e: float,
     f: float,
 ):
-    # Our current estimation method relies on the estimation of the tangent plane,
-    # and does not give perfect results for quadratic functions "off center".
+    # Our current estimation method relies on the estimation of the tangent
+    # plane, and does not give perfect results for quadratic functions "off
+    # center".
     # See e.g. the function f(x,y) = y**2 + y.
     #
-    # Another issue is a fairly large variance for very large values of the coefficients,
+    # Another issue is a fairly large variance for very large values of the
+    # coefficients,
     # e.g. f(x,y) = 2 * x * y
     d = 0 * d
     e = 0 * e
 
     def poly(x, y):
-        return 0.5 * a * x**2 + b * x * y + 0.5 * c * y**2 + d * x + e * y + f
+        return (
+            0.5 * a * x**2 + b * x * y + 0.5 * c * y**2 + d * x + e * y + f
+        )
 
     # See Example 4.2 in Curvature formulas for implicit curves and surfaces,
     # Goldman, 2005, for reference on those formulas, keeping in mind that
@@ -61,10 +64,12 @@ def test_curvatures_quadratic(
     # Term 2: - (1 + ||Grad(f)||^2) * trace(H(f))
     mean = mean - denom * (a + c)
     mean = mean / (2 * denom ** (1.5))
-    # Our convention for unoriented point clouds is that the mean curvature is >= 0:
+    # Our convention for unoriented point clouds is that the mean curvature
+    # is >= 0:
     mean = np.abs(mean)
 
-    # Create a point clouds around [0, 0] in the (x,y) plane and compute z = f(x, y).
+    # Create a point clouds around [0, 0] in the (x,y) plane and compute
+    # z = f(x, y).
     # Point shape.points[0] = [0, 0, f(0, 0)]
     shape = create_shape(shape="unit patch", n_points=n_points, function=poly)
 
@@ -85,7 +90,9 @@ def test_curvatures_quadratic(
     relative_scale=st.floats(min_value=0.1, max_value=0.12),
 )
 @settings(deadline=None)
-def test_curvatures_sphere(*, n_points: int, radius: float, relative_scale: float):
+def test_curvatures_sphere(
+    *, n_points: int, radius: float, relative_scale: float
+):
     # Create a sphere with the correct radius and an arbitrary center:
     shape = create_shape(shape="sphere", n_points=n_points, radius=radius)
 
@@ -102,7 +109,9 @@ def display_curvatures_old(*, function: callable, scale=1):
     points = points + 0.05 * torch.randn(len(points), 3)
 
     # Fit a quadratic function to the point cloud
-    curvatures = sks.smooth_curvatures_2(points=points, normals=normals, scale=scale)
+    curvatures = sks.smooth_curvatures_2(
+        points=points, normals=normals, scale=scale
+    )
 
     # Our surface points:
     r = 500 / np.sqrt(len(points))
@@ -127,7 +136,10 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
         curvedness = shape.point_curvedness(scale=s)
         r2 = shape.point_quadratic_coefficients(scale=s).r2
         kmax, kmin = shape.point_principal_curvatures(scale=s)
-        print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}, R2: {r2[highlight]}")
+        print(
+            f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]},"
+            + f" R2: {r2[highlight]}"
+        )
         quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
         assert quadratic_fit.shape == (3, 3, 3)
 
@@ -141,7 +153,9 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
         ).sum(dim=(2, 3))
         assert local_fit.shape == (n_samples, 3)
 
-        reference_point = vd.Points(shape.points[highlight].view(1, 3), c="red", r=10)
+        reference_point = vd.Points(
+            shape.points[highlight].view(1, 3), c="red", r=10
+        )
         local_average = vd.Points(Xm[highlight].view(1, 3), c="blue", r=10)
         local_fit = vd.Points(local_fit, c=(235, 158, 52), r=5)
 
@@ -226,7 +240,10 @@ if __name__ == "__main__":
             n_points=1000,
         ),
         dict(
-            function=lambda x, y: 0.5 * x * x / 3 - x * y - 0.5 * 1.5 * y * y + 2,
+            function=lambda x, y: 0.5 * x * x / 3
+            - x * y
+            - 0.5 * 1.5 * y * y
+            + 2,
             scale=0.05,
             n_points=15,
             noise=0.0001,
@@ -285,8 +302,8 @@ if __name__ == "__main__":
             os.makedirs("output")
 
         # Export to chrome://tracing
-        prof.export_chrome_trace(f"output/trace_curvatures.json")
+        prof.export_chrome_trace("output/trace_curvatures.json")
         prof.export_stacks(
-            f"output/stacks_curvatures.txt",
+            "output/stacks_curvatures.txt",
             "self_cpu_time_total",  # "self_cuda_time_total",
         )

@@ -46,7 +46,10 @@ class LpLoss(BaseLoss):
         self.p = p
 
     @typecheck
-    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
+    def __call__(
+        self, source: polydata_type, target: polydata_type
+    ) -> FloatScalar:
+        super().__call__(source=source, target=target)
         return _norm(x=(source.points - target.points), p=self.p)
 
 
@@ -64,7 +67,10 @@ class L2Loss(BaseLoss):
         self.p = p
 
     @typecheck
-    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
+    def __call__(
+        self, source: polydata_type, target: polydata_type
+    ) -> FloatScalar:
+        super().__call__(source=source, target=target)
         return _norm(x=(source.points - target.points), p=2)
 
 
@@ -94,5 +100,10 @@ class LandmarkLoss(BaseLoss):
         self.p = p
 
     @typecheck
-    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
-        return _norm(x=(source.landmark_points - target.landmark_points), p=self.p)
+    def __call__(
+        self, source: polydata_type, target: polydata_type
+    ) -> FloatScalar:
+        super().__call__(source=source, target=target)
+        return _norm(
+            x=(source.landmark_points - target.landmark_points), p=self.p
+        )

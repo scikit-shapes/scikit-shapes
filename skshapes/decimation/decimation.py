@@ -70,7 +70,9 @@ class Decimation:
             ValueError: If both target_reduction and n_points are provided or if none of them is provided.
         """
         if target_reduction is None and n_points is None:
-            raise ValueError("Either target_reduction or n_points must be provided.")
+            raise ValueError(
+                "Either target_reduction or n_points must be provided."
+            )
 
         if target_reduction is not None and n_points is not None:
             raise ValueError(

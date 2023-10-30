@@ -46,6 +46,7 @@ setup(
     author_email="skshapes@gmail.com",
     url="",
     install_requires=dependencies,
-    packages=["skshapes"] + ["skshapes." + submodule for submodule in submodules],
+    packages=["skshapes"]
+    + ["skshapes." + submodule for submodule in submodules],
     ext_modules=cythonize(extension),
 )

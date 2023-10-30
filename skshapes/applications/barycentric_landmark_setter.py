@@ -107,7 +107,9 @@ class BarycentricLandmarkSetter(vedo.Plotter):
             )
             self.reference_lpoints_pointcloud.c("grey")
             self.point_to_pick = (
-                vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15)
+                vedo.Points(
+                    [self.reference_lpoints[len(self.other_lpoints)]], r=15
+                )
                 .pickable(False)
                 .c("green")
             )
@@ -128,7 +130,9 @@ class BarycentricLandmarkSetter(vedo.Plotter):
                 self.at(1).add(self.current_other.linewidth(1))
 
                 self.other_lpoints_pointcloud = (
-                    vedo.Points(self.other_lpoints, r=15).pickable(False).c("r")
+                    vedo.Points(self.other_lpoints, r=15)
+                    .pickable(False)
+                    .c("r")
                 )
                 self._update()
 
@@ -145,7 +149,9 @@ class BarycentricLandmarkSetter(vedo.Plotter):
         if self.mode == "reference":
             self.at(0).remove(self.reference_lpoints_pointcloud)
             self.reference_lpoints_pointcloud = (
-                vedo.Points(self.reference_lpoints, r=15).pickable(False).c("r")
+                vedo.Points(self.reference_lpoints, r=15)
+                .pickable(False)
+                .c("r")
             )
             self.at(0).add(self.reference_lpoints_pointcloud)
 
@@ -153,13 +159,17 @@ class BarycentricLandmarkSetter(vedo.Plotter):
             self.at(0).remove(self.point_to_pick)
             if len(self.other_lpoints) < self.n_landmarks:
                 self.point_to_pick = (
-                    vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15)
+                    vedo.Points(
+                        [self.reference_lpoints[len(self.other_lpoints)]], r=15
+                    )
                     .pickable(False)
                     .c("green")
                 )
             else:
                 self.point_to_pick = (
-                    vedo.Points(self.reference_lpoints, r=15).pickable(False).c("green")
+                    vedo.Points(self.reference_lpoints, r=15)
+                    .pickable(False)
+                    .c("green")
                 )
             self.at(0).add(self.point_to_pick)
 
@@ -178,7 +188,9 @@ class BarycentricLandmarkSetter(vedo.Plotter):
                 self.reference_lpoints.append(pt)
 
             if evt.keypress == "e":
-                pt = vedo.Points(self.active_actor.points()).closest_point(evt.picked3d)
+                pt = vedo.Points(self.active_actor.points()).closest_point(
+                    evt.picked3d
+                )
                 self.reference_lpoints.append(pt)
 
             if evt.keypress == "d":
@@ -192,19 +204,30 @@ class BarycentricLandmarkSetter(vedo.Plotter):
             self.render()
 
         elif self.mode == "others" and evt.actor == self.current_other:
-            if evt.keypress == "z" and len(self.other_lpoints) < self.n_landmarks:
+            if (
+                evt.keypress == "z"
+                and len(self.other_lpoints) < self.n_landmarks
+            ):
                 pt = self.active_actor.closest_point(evt.picked3d)
                 self.other_lpoints.append(pt)
 
-            if evt.keypress == "e" and len(self.other_lpoints) < self.n_landmarks:
-                pt = vedo.Points(self.active_actor.points()).closest_point(evt.picked3d)
+            if (
+                evt.keypress == "e"
+                and len(self.other_lpoints) < self.n_landmarks
+            ):
+                pt = vedo.Points(self.active_actor.points()).closest_point(
+                    evt.picked3d
+                )
                 self.other_lpoints.append(pt)
 
             if evt.keypress == "d":
                 if len(self.other_lpoints) > 0:
                     self.other_lpoints.pop()
 
-            if evt.keypress == "s" and len(self.other_lpoints) == self.n_landmarks:
+            if (
+                evt.keypress == "s"
+                and len(self.other_lpoints) == self.n_landmarks
+            ):
                 self._done()
             else:
                 self._update()
@@ -325,7 +348,9 @@ def barycentric_coordinates(mesh, point):
             # If sum_angles is close to 2pi, the point is inside the triangle, or its projection is inside the triangle
 
             if torch.sum((sum_angles - (2 * torch.pi)).abs() < tol):
-                indices = torch.where((sum_angles - (2 * torch.pi)).abs() < tol)[0]
+                indices = torch.where(
+                    (sum_angles - (2 * torch.pi)).abs() < tol
+                )[0]
                 # If several indices, we must find the one for which the point is inside the triangle, and not only its projection
                 tmp = []
                 for i in indices:
@@ -343,7 +368,11 @@ def barycentric_coordinates(mesh, point):
                 # The point is inside a triangle
                 # Coordinates
                 a, b, c = mesh.triangles[:, indice_triangle]
-                mat = torch.cat((vertices[a], vertices[b], vertices[c])).reshape(3, 3).T
+                mat = (
+                    torch.cat((vertices[a], vertices[b], vertices[c]))
+                    .reshape(3, 3)
+                    .T
+                )
                 alpha, beta, gamma = torch.inverse(mat) @ point
 
                 return (

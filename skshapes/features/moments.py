@@ -122,7 +122,9 @@ def _point_moments(
             # Use recursion (-> cache) to compute Conv @ X and Conv @ XX
             Xm = recursion(k=1)  # (N, D)
             moments = recursion(k=2)  # (N, D, D)
-            moments = moments - (Xm.view(N, D, 1) * Xm.view(N, 1, D))  # (N, D, D)
+            moments = moments - (
+                Xm.view(N, D, 1) * Xm.view(N, 1, D)
+            )  # (N, D, D)
 
         assert moments.shape == (N, D, D)
 
@@ -130,14 +132,18 @@ def _point_moments(
         if not central:
             # X^3 as a (N, D, D, D) tensor
             XXX = X.view(N, D, 1, 1) * X.view(N, 1, D, 1) * X.view(N, 1, 1, D)
-            moments = (Conv @ XXX.view(N, D * D * D)).view(N, D, D, D)  # (N, D, D, D)
+            moments = (Conv @ XXX.view(N, D * D * D)).view(
+                N, D, D, D
+            )  # (N, D, D, D)
         else:
             # Use recursion (-> cache) to compute Conv @ X, Conv @ XX, Conv @ X^3
             Xm = recursion(k=1)  # (N, D)
             mom_2 = recursion(k=2)  # (N, D, D)
             moments = recursion(k=3)  # (N, D, D, D)
 
-            XmXmXm = Xm.view(N, D, 1, 1) * Xm.view(N, 1, D, 1) * Xm.view(N, 1, 1, D)
+            XmXmXm = (
+                Xm.view(N, D, 1, 1) * Xm.view(N, 1, D, 1) * Xm.view(N, 1, 1, D)
+            )
 
             moments = moments - symmetric_sum(Xm, mom_2) + 2 * XmXmXm
 
@@ -184,7 +190,9 @@ def _point_moments(
 
     if rescale:
         if scale is None:
-            raise ValueError("A finite scale must be provided if rescale is True")
+            raise ValueError(
+                "A finite scale must be provided if rescale is True"
+            )
 
         moments = moments / scale**order
 

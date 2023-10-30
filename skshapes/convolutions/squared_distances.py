@@ -73,7 +73,9 @@ class KeOpsSquaredDistances:
 
             # Compute a coarse Boolean mask:
             # print("Centroids:", x_centroids.shape)
-            D2_c = ((x_centroids[:, None, :] - x_centroids[None, :, :]) ** 2).sum(2)
+            D2_c = (
+                (x_centroids[:, None, :] - x_centroids[None, :, :]) ** 2
+            ).sum(2)
             cutoff_distance = np.sqrt(cutoff) + np.sqrt(D) * bin_size
             keep = D2_c < cutoff_distance**2
             print(
@@ -147,7 +149,9 @@ def squared_distances(
     assert target_points.shape == (M, D)
 
     if geodesic:
-        raise NotImplementedError("Geodesic distances are not implemented yet.")
+        raise NotImplementedError(
+            "Geodesic distances are not implemented yet."
+        )
 
     if window is None:
         return KeOpsSquaredDistances(

@@ -14,7 +14,10 @@ class OptimalTransportLoss(BaseLoss):
         self.loss = loss
 
     @typecheck
-    def __call__(self, source: polydata_type, target: polydata_type) -> FloatScalar:
+    def __call__(
+        self, source: polydata_type, target: polydata_type
+    ) -> FloatScalar:
+        super().__call__(source=source, target=target)
         target_centers = target.triangle_centers
         target_weights = target.triangle_areas
 
@@ -22,4 +25,6 @@ class OptimalTransportLoss(BaseLoss):
         source_weights = source.triangle_areas
 
         Loss = SamplesLoss(loss=self.loss, **self.kwargs)
-        return Loss(source_weights, source_centers, target_weights, target_centers)
+        return Loss(
+            source_weights, source_centers, target_weights, target_centers
+        )

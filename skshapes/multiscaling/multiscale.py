@@ -59,19 +59,26 @@ class Multiscale:
             # here Multiscale is called on a single shape, compute the multiscale object
             # depending on the type of the shape
             if hasattr(shape, "is_triangle_mesh") and shape.is_triangle_mesh:
-                instance = super(Multiscale, cls).__new__(MultiscaleTriangleMesh)
+                instance = super(Multiscale, cls).__new__(
+                    MultiscaleTriangleMesh
+                )
                 instance.__init__(shape=shape, **kwargs)
                 return instance
 
             else:
-                raise NotImplementedError("Only triangle meshes are supported for now")
+                raise NotImplementedError(
+                    "Only triangle meshes are supported for now"
+                )
 
         elif isinstance(shape, list) and correspondence:
             # here Multiscale is called on a list of shapes thath are supposed to be
             # corresponding to each other. The correspondence is used to decimate
             # the shapes in parallel.
 
-            if hasattr(shape[0], "is_triangle_mesh") and shape[0].is_triangle_mesh:
+            if (
+                hasattr(shape[0], "is_triangle_mesh")
+                and shape[0].is_triangle_mesh
+            ):
                 # Triangle meshes
 
                 if "ratios" in kwargs.keys():
@@ -87,11 +94,16 @@ class Multiscale:
                     [s.n_points == shape[0].n_points for s in shape]
                 ), "All shapes must have the same number of points to be decimated in correspondence"
                 assert all(
-                    [torch.allclose(s.triangles, shape[0].triangles) for s in shape]
+                    [
+                        torch.allclose(s.triangles, shape[0].triangles)
+                        for s in shape
+                    ]
                 ), "All shapes must have the same triangles to be decimated in correspondence"
 
                 # compute the decimation module
-                decimation_module = Decimation(target_reduction=target_reduction)
+                decimation_module = Decimation(
+                    target_reduction=target_reduction
+                )
                 decimation_module.fit(shape[0])
 
                 # add the decimation module to the kwargs
@@ -100,13 +112,19 @@ class Multiscale:
                 return [cls(s, **kwargs) for s in shape]
 
             else:
-                raise NotImplementedError("Only triangle meshes are supported for now")
+                raise NotImplementedError(
+                    "Only triangle meshes are supported for now"
+                )
 
         else:
             if hasattr(shape, "is_triangle_mesh") and shape.is_triangle_mesh:
-                instance = super(Multiscale, cls).__new__(MultiscaleTriangleMesh)
+                instance = super(Multiscale, cls).__new__(
+                    MultiscaleTriangleMesh
+                )
                 instance.__init__(shape=shape, **kwargs)
                 return instance
 
             else:
-                raise NotImplementedError("Only triangle meshes are supported for now")
+                raise NotImplementedError(
+                    "Only triangle meshes are supported for now"
+                )

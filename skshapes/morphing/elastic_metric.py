@@ -100,7 +100,9 @@ class ElasticMetric(BaseModel):
         """
         e0, e1 = edges[:, 0], edges[:, 1]
 
-        a1 = ((velocities[e0] - velocities[e1]) * (points[e0] - points[e1])).sum(dim=2)
+        a1 = (
+            (velocities[e0] - velocities[e1]) * (points[e0] - points[e1])
+        ).sum(dim=2)
 
         return torch.sum(a1**2)
 

@@ -69,8 +69,16 @@ class BaseLoss:
         return ProductLoss(loss=loss, scalar=scalar)
 
     @typecheck
-    def __call__(self, *args: Any, **kwds: Any) -> Any:
-        pass
+    def __call__(
+        self, source: shape_type, target: shape_type, **kwargs: Any
+    ) -> Any:
+        if source.device != target.device:
+            raise ValueError(
+                "Source and target shapes must be on the same device, found"
+                + "source on device {} and target on device {}".format(
+                    source.device, target.device
+                )
+            )
 
 
 class EmptyLoss(BaseLoss):
@@ -86,8 +94,11 @@ class EmptyLoss(BaseLoss):
         pass
 
     @typecheck
-    def __call__(self, source: shape_type, target: shape_type) -> FloatScalar:
+    def __call__(
+        self, *, source: shape_type, target: shape_type
+    ) -> FloatScalar:
         """__call__ method of the EmptyLoss class. Always returns 0."""
+        super().__call__(source=source, target=target)
         assert source.device.type == target.device.type
         return torch.tensor(0.0, dtype=float_dtype)
 
@@ -135,9 +146,9 @@ class SumLoss(BaseLoss):
         Returns:
             FloatScalar: the sum of the two losses
         """
-        return self.loss1.__call__(source=source, target=target) + self.loss2.__call__(
+        return self.loss1.__call__(
             source=source, target=target
-        )
+        ) + self.loss2.__call__(source=source, target=target)
 
 
 class ProductLoss(BaseLoss):
@@ -149,7 +160,9 @@ class ProductLoss(BaseLoss):
     """
 
     @typecheck
-    def __init__(self, loss: BaseLoss = EmptyLoss(), scalar: Number = 1.0) -> None:
+    def __init__(
+        self, loss: BaseLoss = EmptyLoss(), scalar: Number = 1.0
+    ) -> None:
         """Constructor of the ProductLoss class.
 
         It saves the loss and the scalar as attributes of the class.

@@ -1,0 +1,7 @@
+[flake8]
+ignore = E741, E241, E203, W503
+
+# E741 : ambiguous variable name ("l")
+# E241 : multiple spaces after ',' or ':'
+# E203 : whitespace before ':'
+# W503 : line break before binary operator

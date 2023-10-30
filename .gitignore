@@ -169,3 +169,6 @@ example.ipynb
 
 # Weights and Biases
 *wandb/
+
+# Tensorboard
+*runs/

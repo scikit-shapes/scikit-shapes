@@ -46,7 +46,9 @@ class GaussianKernel(Kernel):
             .sum(dim=2)
             .exp()
         )  # Symbolic matrix of kernel distances Kq.shape = NxN
-        Kqp = Kq @ p  # Matrix-vector product Kq.shape = NxN, shape.shape = Nx3 Kp
+        Kqp = (
+            Kq @ p
+        )  # Matrix-vector product Kq.shape = NxN, shape.shape = Nx3 Kp
         return (p * Kqp).sum()  # Scalar product <p, Kqp>
 
 
@@ -55,7 +57,9 @@ class EulerIntegrator(Integrator):
         pass
 
     @typecheck
-    def __call__(self, p: Points, q: Points, H, dt: Number) -> tuple[Points, Points]:
+    def __call__(
+        self, p: Points, q: Points, H, dt: Number
+    ) -> tuple[Points, Points]:
         Gp, Gq = torch.autograd.grad(H(p, q), (p, q), create_graph=True)
 
         pdot, qdot = -Gq, Gp

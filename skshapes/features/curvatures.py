@@ -108,7 +108,9 @@ def smooth_curvatures(
         uv_i = LazyTensor(uv.view(N, 1, 6))
 
         # Pseudo-geodesic squared distance:
-        d2_ij = ((x_j - x_i) ** 2).sum(-1) * ((2 - (n_i | n_j)) ** 2)  # (N, N, 1)
+        d2_ij = ((x_j - x_i) ** 2).sum(-1) * (
+            (2 - (n_i | n_j)) ** 2
+        )  # (N, N, 1)
         # Gaussian window:
         window_ij = (-d2_ij / (2 * (scale**2))).exp()  # (N, N, 1)
 
@@ -205,7 +207,9 @@ def smooth_curvatures_2(
     n_i = LazyTensor(normals.view(N, 1, 3))
     # Tangent bases:
     uv_i = LazyTensor(uv.view(N, 1, 6))
-    ones_ = LazyTensor(torch.ones(1, 1, 1, device=points.device, dtype=points.dtype))
+    ones_ = LazyTensor(
+        torch.ones(1, 1, 1, device=points.device, dtype=points.dtype)
+    )
 
     # Squared distance:
     d2_ij = ((x_j - x_i) ** 2).sum(-1)  # (N, N, 1)
@@ -406,7 +410,9 @@ def _point_quadratic_fits(
         ],
         device=Xm.device,
     )
-    term_2 = nuv["u"].view(N, 3, 1, 1) * tangent_1.view(1, 1, 3, 3)  # (N, 3, 3, 3)
+    term_2 = nuv["u"].view(N, 3, 1, 1) * tangent_1.view(
+        1, 1, 3, 3
+    )  # (N, 3, 3, 3)
 
     # Third term: linear term in tangent space, following v:
     tangent_2 = torch.Tensor(
@@ -417,7 +423,9 @@ def _point_quadratic_fits(
         ],
         device=Xm.device,
     )
-    term_3 = nuv["v"].view(N, 3, 1, 1) * tangent_2.view(1, 1, 3, 3)  # (N, 3, 3, 3)
+    term_3 = nuv["v"].view(N, 3, 1, 1) * tangent_2.view(
+        1, 1, 3, 3
+    )  # (N, 3, 3, 3)
 
     # Fourth term: quadratic term in tangent space, following n:
     UU = coefs[:, 0]
@@ -431,7 +439,9 @@ def _point_quadratic_fits(
         [UU, UV / 2, U / 2, UV / 2, VV, V / 2, U / 2, V / 2, O], dim=-1
     ).view(N, 3, 3)
 
-    term_4 = nuv["n"].view(N, 3, 1, 1) * quadratic.view(N, 1, 3, 3)  # (N, 3, 3, 3)
+    term_4 = nuv["n"].view(N, 3, 1, 1) * quadratic.view(
+        N, 1, 3, 3
+    )  # (N, 3, 3, 3)
 
     # Sum:
     fit = term_1 + term_2 + term_3 + term_4

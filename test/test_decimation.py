@@ -5,8 +5,8 @@ import pytest
 
 
 def test_decimation_basic():
-    ## Assert that the if we fit_transform the decimator from sks on a mesh, and then transform a copy of the mesh
-    ## the result is the same
+    """Assert that the if we fit_transform the decimator from sks on a mesh,
+    and then transform a copy of the mesh the result is the same"""
 
     sphere = sks.PolyData(pyvista.Sphere())
     sphere_copy = sks.PolyData(pyvista.Sphere())
@@ -19,8 +19,12 @@ def test_decimation_basic():
     decimated_sphere_copy = decimation.transform(sphere_copy)
 
     # Assert that the result is the same
-    assert torch.allclose(decimated_sphere.points, decimated_sphere_copy.points)
-    assert torch.allclose(decimated_sphere.triangles, decimated_sphere_copy.triangles)
+    assert torch.allclose(
+        decimated_sphere.points, decimated_sphere_copy.points
+    )
+    assert torch.allclose(
+        decimated_sphere.triangles, decimated_sphere_copy.triangles
+    )
 
 
 def test_decimation_landmarks():
@@ -53,7 +57,8 @@ def test_decimation_landmarks():
 
 
 def test_torch_sparse_tensor_repetitions():
-    """Assert that the torch.sparse_coo_tensor can handle repetitions in the indices and sum the values"""
+    """Assert that the torch.sparse_coo_tensor can handle repetitions in the
+    indices and sum the values"""
     import random
 
     a = random.random()

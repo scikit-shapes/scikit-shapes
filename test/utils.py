@@ -1,11 +1,11 @@
-import sys
-
-sys.path.append(sys.path[0][:-4])
-
 import torch
+from torch.profiler import profile, ProfilerActivity
 import vedo as vd
 import skshapes as sks
 from typing import Optional, Literal
+import sys
+
+sys.path.append(sys.path[0][:-4])
 
 
 def create_point_cloud(
@@ -71,7 +71,9 @@ def create_shape(
         shape = sks.PolyData(file_name).decimate(n_points=n_points)
         print("Loaded shape with {:,} points".format(shape.n_points))
 
-    shape.points = shape.points + offset * torch.randn(1, 3).to(sks.float_dtype)
+    shape.points = shape.points + offset * torch.randn(1, 3).to(
+        sks.float_dtype
+    )
     shape.points = shape.points + noise * torch.randn(shape.n_points, 3).to(
         sks.float_dtype
     )
@@ -109,9 +111,6 @@ def vedo_frames(points, frames):
     return [n, u, v]
 
 
-from torch.profiler import profile, ProfilerActivity
-
-
 def profiler():
     activities = [ProfilerActivity.CPU]
     if torch.cuda.is_available():
@@ -122,6 +121,8 @@ def profiler():
         record_shapes=True,
         profile_memory=True,
         with_stack=True,
-        experimental_config=torch._C._profiler._ExperimentalConfig(verbose=True),
+        experimental_config=torch._C._profiler._ExperimentalConfig(
+            verbose=True
+        ),
     )
     return myprof

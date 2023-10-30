@@ -68,7 +68,9 @@ def implicit_quadrics(
     weights = weights / weights.sum()
 
     # As explained in Section IX, we normalize the point cloud to ensure numerical stability:
-    points, sigma, mean_point = normalize_point_cloud(points=points, weights=weights)
+    points, sigma, mean_point = normalize_point_cloud(
+        points=points, weights=weights
+    )
     # points is now a (weighted) point cloud centered at the origin, with a unit variance.
     # sigma and mean_point are the scaling and translation factors.
 

@@ -9,7 +9,11 @@ def ranges_slices(batch):
     indices = Ns.cumsum(0)
     ranges = torch.cat((0 * indices[:1], indices))
     ranges = (
-        torch.stack((ranges[:-1], ranges[1:])).t().int().contiguous().to(batch.device)
+        torch.stack((ranges[:-1], ranges[1:]))
+        .t()
+        .int()
+        .contiguous()
+        .to(batch.device)
     )
     slices = (1 + torch.arange(len(Ns))).int().to(batch.device)
 
@@ -65,7 +69,9 @@ def scatter(
             index = index.unsqueeze(-1)
 
         index = index.expand_as(src)
-        output = torch.zeros(torch.max(index + 1), *(src[0].shape), dtype=src.dtype)
+        output = torch.zeros(
+            torch.max(index + 1), *(src[0].shape), dtype=src.dtype
+        )
 
     else:
         output = torch.zeros(torch.max(index + 1), dtype=src.dtype)
@@ -80,7 +86,9 @@ def scatter(
     except:
         try:
             # Scatter syntax for pytorch == 1.11
-            output = torch.scatter_reduce(input=src, index=index, dim=0, reduce=reduce)
+            output = torch.scatter_reduce(
+                input=src, index=index, dim=0, reduce=reduce
+            )
             return output
 
         except:

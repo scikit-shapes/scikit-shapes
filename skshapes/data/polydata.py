@@ -94,11 +94,15 @@ class PolyData(BaseShape, polydata_type):
             if cleaned_mesh.n_points != mesh.n_points:
                 mesh = cleaned_mesh
                 if landmarks is not None:
-                    print(f"Warning: Mesh has been cleaned. Landmarks are ignored.")
+                    print(
+                        f"Warning: Mesh has been cleaned. Landmarks are ignored."
+                    )
                     landmarks = None
 
                 if point_data is not None:
-                    print(f"Warning: Mesh has been cleaned. Point_data are ignored.")
+                    print(
+                        f"Warning: Mesh has been cleaned. Point_data are ignored."
+                    )
                     point_data = None
 
                 if len(mesh.point_data) > 0:
@@ -251,7 +255,9 @@ class PolyData(BaseShape, polydata_type):
     ) -> PolyData:
         """Decimate the shape using the Quadric Decimation algorithm."""
         if target_reduction is None and n_points is None:
-            raise ValueError("Either target_reduction or n_points must be provided.")
+            raise ValueError(
+                "Either target_reduction or n_points must be provided."
+            )
 
         if target_reduction is not None and n_points is not None:
             raise ValueError(
@@ -269,7 +275,9 @@ class PolyData(BaseShape, polydata_type):
         if self.is_triangle_mesh:
             from ..decimation import Decimation
 
-            d = Decimation(target_reduction=target_reduction, n_points=n_points)
+            d = Decimation(
+                target_reduction=target_reduction, n_points=n_points
+            )
             return d.fit_transform(self)
         else:
             raise NotImplementedError(
@@ -293,7 +301,9 @@ class PolyData(BaseShape, polydata_type):
     #### Copy functions #####
     #########################
     @typecheck
-    def copy(self, device: Optional[Union[str, torch.device]] = None) -> PolyData:
+    def copy(
+        self, device: Optional[Union[str, torch.device]] = None
+    ) -> PolyData:
         """Return a copy of the shape"""
         if device is None:
             device = self.device
@@ -350,7 +360,9 @@ class PolyData(BaseShape, polydata_type):
                     # If the data is 3D or more, we must be careful
                     # because vedo does not support 3D or more point data
                     shape = point_data_dict[key].shape
-                    mesh.pointdata["data"] = point_data_dict[key].reshape(shape[0], -1)
+                    mesh.pointdata["data"] = point_data_dict[key].reshape(
+                        shape[0], -1
+                    )
                     mesh.metadata[str(key) + "_shape"] = shape
 
         # Add the landmarks if any
@@ -416,10 +428,16 @@ class PolyData(BaseShape, polydata_type):
         # Add the landmarks if any
         if hasattr(self, "_landmarks") and self.landmarks is not None:
             coalesced_landmarks = self.landmarks.coalesce()
-            polydata.field_data["landmarks_values"] = coalesced_landmarks.values()
-            polydata.field_data["landmarks_indices"] = coalesced_landmarks.indices()
+            polydata.field_data[
+                "landmarks_values"
+            ] = coalesced_landmarks.values()
+            polydata.field_data[
+                "landmarks_indices"
+            ] = coalesced_landmarks.indices()
             polydata.field_data["landmarks_size"] = coalesced_landmarks.size()
-            polydata.field_data["landmark_points"] = self.landmark_points.detach()
+            polydata.field_data[
+                "landmark_points"
+            ] = self.landmark_points.detach()
 
         return polydata
 
@@ -433,8 +451,12 @@ class PolyData(BaseShape, polydata_type):
             return self._edges
 
         elif self._triangles is not None:
-            points_numpy = self.points.detach().cpu().numpy().astype(np.float64)
-            triangles_numpy = self.triangles.detach().cpu().numpy().astype(np.int64)
+            points_numpy = (
+                self.points.detach().cpu().numpy().astype(np.float64)
+            )
+            triangles_numpy = (
+                self.triangles.detach().cpu().numpy().astype(np.int64)
+            )
             edges = extract_edges(points_numpy, triangles_numpy.T)
             edges = torch.from_numpy(edges.T).to(int_dtype).to(self.device)
 
@@ -649,7 +671,9 @@ class PolyData(BaseShape, polydata_type):
                 self.landmarks = indices
 
             else:
-                new_indices = torch.tensor(indices, dtype=int_dtype, device=self.device)
+                new_indices = torch.tensor(
+                    indices, dtype=int_dtype, device=self.device
+                )
 
                 coalesced_landmarks = self.landmarks.coalesce()
                 old_values = coalesced_landmarks.values()
@@ -660,7 +684,8 @@ class PolyData(BaseShape, polydata_type):
                     (2, n_new_landmarks), dtype=int_dtype, device=self.device
                 )
                 new_indices[0] = (
-                    torch.arange(n_new_landmarks, dtype=int_dtype) + self.n_landmarks
+                    torch.arange(n_new_landmarks, dtype=int_dtype)
+                    + self.n_landmarks
                 )
                 new_indices[1] = torch.tensor(
                     indices, dtype=int_dtype, device=self.device
@@ -743,7 +768,9 @@ class PolyData(BaseShape, polydata_type):
         if self.edges is None:
             raise ValueError("Edges cannot be computed")
 
-        return (self.points[self.edges[:, 0]] + self.points[self.edges[:, 1]]) / 2
+        return (
+            self.points[self.edges[:, 0]] + self.points[self.edges[:, 1]]
+        ) / 2
 
     @property
     @typecheck
@@ -754,9 +781,9 @@ class PolyData(BaseShape, polydata_type):
         if self.edges is None:
             raise ValueError("Edges cannot be computed")
 
-        return (self.points[self.edges[:, 0]] - self.points[self.edges[:, 1]]).norm(
-            dim=1
-        )
+        return (
+            self.points[self.edges[:, 0]] - self.points[self.edges[:, 1]]
+        ).norm(dim=1)
 
     @property
     @typecheck

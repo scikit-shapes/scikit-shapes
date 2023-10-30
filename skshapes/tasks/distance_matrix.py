@@ -17,7 +17,9 @@ class DistanceMatrix:
         **kwargs,
     ) -> None:
         if device == "auto":
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            device = torch.device(
+                "cuda" if torch.cuda.is_available() else "cpu"
+            )
 
         self.device = device
         self.verbose = verbose

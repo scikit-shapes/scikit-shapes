@@ -140,13 +140,17 @@ class MultiscaleTriangleMesh:
             decimation_module (Decimation, optional): if not None, the decimation module to be used. Defaults to None.
         """
         if not shape.is_triangle_mesh():
-            raise ValueError("MultiscaleTriangleMesh only supports triangle meshes")
+            raise ValueError(
+                "MultiscaleTriangleMesh only supports triangle meshes"
+            )
 
         if ratios is None and n_points is None:
             raise ValueError("You must specify either ratios or n_points")
 
         if ratios is not None:
-            assert n_points is None, "You cannot specify both ratios and n_points"
+            assert (
+                n_points is None
+            ), "You cannot specify both ratios and n_points"
             assert 0 < max(ratios) <= 1, "ratios must be between 0 and 1"
             assert 0 < min(ratios) <= 1, "ratios must be between 0 and 1"
 
@@ -178,7 +182,9 @@ class MultiscaleTriangleMesh:
         self.shapes[1] = shape
 
         if decimation_module is None:
-            self.decimation_module = Decimation(target_reduction=float(1 - min(ratios)))
+            self.decimation_module = Decimation(
+                target_reduction=float(1 - min(ratios))
+            )
             self.decimation_module.fit(shape)
 
         else:
@@ -209,7 +215,9 @@ class MultiscaleTriangleMesh:
             )
 
             self.shapes[ratio] = polydata
-            self.mappings_from_origin[ratio] = self.decimation_module.indice_mapping
+            self.mappings_from_origin[
+                ratio
+            ] = self.decimation_module.indice_mapping
 
     @typecheck
     def at(self, ratio: Number) -> polydata_type:
@@ -285,7 +293,9 @@ class MultiscaleTriangleMesh:
         """
 
         if from_ratio is None and from_n_points is None:
-            raise ValueError("You must specify either from_ratio or from_n_points")
+            raise ValueError(
+                "You must specify either from_ratio or from_n_points"
+            )
 
         if from_ratio is not None:
             assert (
@@ -329,7 +339,9 @@ class MultiscaleTriangleMesh:
             elif isinstance(to_n_points, int):
                 to_ratios = [1 - (to_n_points / self.at(1).n_points)]
             else:
-                to_ratios = [1 - (npts / self.at(1).n_points) for npts in to_n_points]
+                to_ratios = [
+                    1 - (npts / self.at(1).n_points) for npts in to_n_points
+                ]
 
         elif from_ratio is not None:
             if to_ratio == "all":
@@ -379,7 +391,9 @@ class MultiscaleTriangleMesh:
         coarse_ratio = origin_ratio
 
         for r in up_ratios[1:]:
-            self.at(r).point_data[signal_name] = self.signal_from_coarse_to_fine(
+            self.at(r).point_data[
+                signal_name
+            ] = self.signal_from_coarse_to_fine(
                 tmp,
                 coarse_ratio=coarse_ratio,
                 fine_ratio=r,
@@ -397,7 +411,9 @@ class MultiscaleTriangleMesh:
         fine_ratio = origin_ratio
 
         for r in down_ratios[1:]:
-            self.at(r).point_data[signal_name] = self.signal_from_fine_to_coarse(
+            self.at(r).point_data[
+                signal_name
+            ] = self.signal_from_fine_to_coarse(
                 tmp,
                 fine_ratio=fine_ratio,
                 coarse_ratio=r,
@@ -412,7 +428,9 @@ class MultiscaleTriangleMesh:
                 fine_ratio = r
 
     @typecheck
-    def indice_mapping(self, fine_ratio: Number, coarse_ratio: Number) -> Int1dTensor:
+    def indice_mapping(
+        self, fine_ratio: Number, coarse_ratio: Number
+    ) -> Int1dTensor:
         """Return the indice mapping from high to low resolution.
 
         The indice mapping is a 1d tensor of integers of length equal to the number of
@@ -435,7 +453,9 @@ class MultiscaleTriangleMesh:
 
         available_ratios = list(self.shapes.keys())
         fine_ratio = min(available_ratios, key=lambda x: abs(x - fine_ratio))
-        coarse_ratio = min(available_ratios, key=lambda x: abs(x - coarse_ratio))
+        coarse_ratio = min(
+            available_ratios, key=lambda x: abs(x - coarse_ratio)
+        )
 
         if fine_ratio == coarse_ratio:
             return torch.arange(self.shapes[fine_ratio].n_points)
@@ -483,7 +503,9 @@ class MultiscaleTriangleMesh:
 
         return scatter(
             src=signal,
-            index=self.indice_mapping(fine_ratio=fine_ratio, coarse_ratio=coarse_ratio),
+            index=self.indice_mapping(
+                fine_ratio=fine_ratio, coarse_ratio=coarse_ratio
+            ),
             reduce=reduce,
         )
 
@@ -525,7 +547,9 @@ class MultiscaleTriangleMesh:
         fine_ratio_signal = torch.index_select(
             signal,
             dim=0,
-            index=self.indice_mapping(fine_ratio=fine_ratio, coarse_ratio=coarse_ratio),
+            index=self.indice_mapping(
+                fine_ratio=fine_ratio, coarse_ratio=coarse_ratio
+            ),
         )
 
         if smoothing == "constant":
@@ -557,7 +581,9 @@ class MultiscaleTriangleMesh:
         ), "signal must have the same number of points as the shape at signal ratio"
 
         # Store the kwargs to pass to the point convolution
-        point_convolution_args = source._point_convolution.__annotations__.keys()
+        point_convolution_args = (
+            source._point_convolution.__annotations__.keys()
+        )
         convolutions_kwargs = dict()
         for arg in kwargs:
             if arg in point_convolution_args:

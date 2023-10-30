@@ -41,7 +41,9 @@ class RigidMotion(BaseModel):
         translation = parameter[1]
         center = shape.points.mean(dim=0)
 
-        newpoints = (matrix @ (shape.points - center).T).T + center + translation
+        newpoints = (
+            (matrix @ (shape.points - center).T).T + center + translation
+        )
 
         morphed_shape = shape.copy()
         morphed_shape.points = newpoints
@@ -61,7 +63,9 @@ class RigidMotion(BaseModel):
                     center = shape.points.mean(dim=0)
 
                     newpoints = (
-                        (matrix @ (shape.points - center).T).T + center + translation
+                        (matrix @ (shape.points - center).T).T
+                        + center
+                        + translation
                     )
                     newshape = shape.copy()
                     newshape.points = newpoints

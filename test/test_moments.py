@@ -1,17 +1,12 @@
+import torch
+import skshapes as sks
+from hypothesis import given, settings
+from hypothesis import strategies as st
+import vedo as vd
+from .utils import create_shape, vedo_frames
 import sys
 
 sys.path.append(sys.path[0][:-4])
-
-import torch
-import skshapes as sks
-
-from hypothesis import given, settings
-from hypothesis import strategies as st
-
-import numpy as np
-import vedo as vd
-
-from .utils import create_shape, vedo_frames
 
 
 def moments(X):
@@ -54,7 +49,9 @@ def test_moments_1(*, n_points: int, scale: float, offset: float):
             )
             mom = mom[0]
             print(f"mom: {mom}")
-            assert torch.allclose(mom.double(), gt[order - 1], atol=1e-4, rtol=1e-2)
+            assert torch.allclose(
+                mom.double(), gt[order - 1], atol=1e-4, rtol=1e-2
+            )
 
 
 def display_moments(*, scale=1, **kwargs):
@@ -66,7 +63,9 @@ def display_moments(*, scale=1, **kwargs):
     local_QL = torch.linalg.eigh(local_cov)
     local_nuv = local_QL.eigenvectors  # (N, 3, 3)
 
-    local_frame = local_QL.eigenvectors * local_QL.eigenvalues.view(-1, 1, 3).sqrt()
+    local_frame = (
+        local_QL.eigenvectors * local_QL.eigenvalues.view(-1, 1, 3).sqrt()
+    )
     local_frame = local_frame / scale
 
     # Pick 10 points at random:
@@ -98,20 +97,29 @@ def display_moments(*, scale=1, **kwargs):
         spheres = shape.to_vedo()
 
     spheres_1 = (
-        spheres.clone().alpha(0.5).cmap("viridis", density, vmin=0).add_scalarbar()
+        spheres.clone()
+        .alpha(0.5)
+        .cmap("viridis", density, vmin=0)
+        .add_scalarbar()
     )
     spheres_2 = (
         spheres.clone()
         .cmap("viridis", (3 * anisotropy) ** (1 / 3), vmin=0)
         .add_scalarbar()
     )
-    spheres_3 = spheres.clone().cmap("viridis", curvedness, vmin=0).add_scalarbar()
+    spheres_3 = (
+        spheres.clone().cmap("viridis", curvedness, vmin=0).add_scalarbar()
+    )
     spheres_4 = (
-        spheres.clone().cmap("RdBu_r", shape_index, vmin=-1, vmax=1).add_scalarbar()
+        spheres.clone()
+        .cmap("RdBu_r", shape_index, vmin=-1, vmax=1)
+        .add_scalarbar()
     )
 
     # Vectors to the local average:
-    quiver = vd.Arrows(shape.points[mask], local_average[mask], c="green", alpha=0.9)
+    quiver = vd.Arrows(
+        shape.points[mask], local_average[mask], c="green", alpha=0.9
+    )
 
     # Local tangent frames:
     s = 1.5 * shape.standard_deviation[0] / len(mask) ** (1 / 2)

@@ -1,13 +1,7 @@
 import skshapes as sks
 import torch
-import numpy as np
-
 from pyvista import examples
-import pyvista
-
-
 from skshapes.utils import scatter
-
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -43,7 +37,8 @@ def test_scattrer_toy():
 )
 @settings(deadline=None)
 def test_scatter_multidim(n, n_dim):
-    """Assert that the scatter function works as expected for multidimensional signals"""
+    """Assert that the scatter function works as expected for multidimensional
+    signals"""
 
     # dimension d
     d = torch.randint(1, 10, (n_dim,))
@@ -80,11 +75,11 @@ def test_scatter_multidim(n, n_dim):
 def test_multiscale():
     """Test the multiscale class for triangle meshes.
 
-    This test is based on the bunny example from pyvista.examples (~34K points).)
+    This test is based on the bunny example from pyvista.examples (~34K points)
 
-    We initialize a multiscale object with 10 random ratios, pick two random ratios
-    and test the signal propagation from high to low resolution and back, specifically
-    the composition of two propagations.
+    We initialize a multiscale object with 10 random ratios, pick two random
+    ratios and test the signal propagation from high to low resolution and
+    back, specifically the composition of two propagations.
     """
 
     # Load a triangle mesh (~34k points)
@@ -108,7 +103,9 @@ def test_multiscale():
     intermediate_ratio = float(intermediate_ratio)
 
     # Test indice mapping
-    im = M.indice_mapping(fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio)
+    im = M.indice_mapping(
+        fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio
+    )
     # Check that the number of points is correct
     assert im.shape[0] == M.at(intermediate_ratio).n_points
     # Check that the indices are correct
@@ -119,7 +116,9 @@ def test_multiscale():
         fine_ratio=1, coarse_ratio=coarse_ratio
     )
     im1 = M.indice_mapping(fine_ratio=1, coarse_ratio=intermediate_ratio)
-    im2 = M.indice_mapping(fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio)
+    im2 = M.indice_mapping(
+        fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio
+    )
     assert torch.allclose(im_from_intermediate_ratio_to_coarse_ratio, im2[im1])
 
     # Test signal propagation from high to low resolution
@@ -151,7 +150,8 @@ def test_multiscale():
     # Check that the two signals are equal
     assert torch.allclose(low_resol_signal, b)
 
-    # Test signal propagation from low to high resolution with constant smoothing
+    # Test signal propagation from low to high resolution with constant
+    # smoothing
     tmp = M.signal_from_coarse_to_fine(
         low_resol_signal,
         coarse_ratio=coarse_ratio,
@@ -160,7 +160,8 @@ def test_multiscale():
     )
     assert tmp.shape[0] == M.at(intermediate_ratio).n_points
 
-    # Propagate again to low resolution and check that we recover the original signal
+    # Propagate again to low resolution and check that we recover the original
+    # signal
     # with reduce="min", "max" or "mean"
     back = M.signal_from_fine_to_coarse(
         tmp,
@@ -182,6 +183,7 @@ def test_multiscale():
     )
     assert torch.allclose(back, low_resol_signal)
     assert torch.allclose(back2, low_resol_signal)
+    assert torch.allclose(back3, low_resol_signal)
 
     signal = torch.rand(M.at(1).n_points)
     signal_out = M.signal_convolution(
@@ -251,20 +253,3 @@ def test_multiscale_list():
     assert multimesh1.decimation_module != multimesh2.decimation_module
 
     assert multimesh1.at(0.1).points.dtype == sks.float_dtype
-
-
-if False:
-    M = sks.Multiscale(mesh, n_points=(100, 1000, 10000))
-    M.at(n_points=1000)["color"] = torch.rand(1000)
-    M.propagate("color", from_n_points=1000, to_n_points=100, policy="mean")
-    M.propagate("color", from_n_points=100, to_n_points=1000, policy="smooth")
-
-    M.propagate("color", from_n_points=100, to_n_points="all", policy="smooth")
-    M.add_ratio(0.5, propagate=None, policy=None)
-    M.propagate(...)
-
-    policy = sks.Policy(
-        smoothing="mesh_convolution",
-        n_smoothing_steps=10,
-        pass_through_all_scales=True,
-    )

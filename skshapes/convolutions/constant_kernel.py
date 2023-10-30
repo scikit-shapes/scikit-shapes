@@ -37,7 +37,9 @@ class Constant1Kernel:
 
 
 @typecheck
-def constant_1_kernel(*, points, target_points=None, **kwargs) -> Constant1Kernel:
+def constant_1_kernel(
+    *, points, target_points=None, **kwargs
+) -> Constant1Kernel:
     """Returns the (N, N) matrix of squared distances between points.
 
     For geodesic kernels, we may want to stick to connected components?

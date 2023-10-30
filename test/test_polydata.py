@@ -1,11 +1,12 @@
-# from skshapes.data import PolyData
 import torch
-import numpy as np
 import pyvista
+from pyvista.core.pointset import PolyData as PyvistaPolyData
+import numpy as np
 import vedo
 import skshapes as sks
 import pytest
 import os
+from beartype.roar import BeartypeCallHintParamViolation
 
 
 def _cube():
@@ -65,7 +66,9 @@ def test_polydata_creation():
     # Shape initialized with points and triangles
     # dtype are automatically converted to float32 and int64 and numpy arrays
     # are converted to torch.Tensor
-    points = torch.tensor([[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float64)
+    points = torch.tensor(
+        [[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float64
+    )
     triangles = torch.tensor([[0, 1, 2]], dtype=torch.int32).numpy()
 
     triangle = sks.PolyData(points=points, triangles=triangles)
@@ -112,7 +115,6 @@ def test_polydata_creation():
 
 def test_interaction_with_pyvista():
     # Import/export from/to pyvista
-    import pyvista
     from pyvista.examples import load_sphere
 
     mesh = load_sphere()
@@ -184,21 +186,26 @@ def test_point_data():
 
     try:
         mesh.point_data.append(torch.rand(mesh.n_points + 1))
-    except:
+    except ValueError:
         pass
     else:
         raise AssertionError(
-            "Should have raised an error, the size of the tensor is not correct"
+            "Should have raised an error, the size of the tensor is not"
+            + " correct"
         )
 
     # Check that the point_data are correctly copied
     copy = mesh.copy()
-    assert torch.allclose(copy.point_data["hessians"], mesh.point_data["hessians"])
+    assert torch.allclose(
+        copy.point_data["hessians"], mesh.point_data["hessians"]
+    )
     copy.point_data["hessians"] = torch.rand(
         *mesh["hessians"].shape
     )  # If the copy was not correct, this would also change the point_data of
     # the original mesh
-    assert not torch.allclose(copy.point_data["hessians"], mesh.point_data["hessians"])
+    assert not torch.allclose(
+        copy.point_data["hessians"], mesh.point_data["hessians"]
+    )
 
     new_point_data = {
         "rotations": torch.rand(mesh.n_points, 3, 3),
@@ -216,7 +223,7 @@ def test_point_data():
     # Check that trying to set the point_data with a wrong type raises an error
     try:
         mesh.point_data = 4
-    except:
+    except BeartypeCallHintParamViolation:
         pass
     else:
         raise AssertionError(
@@ -231,7 +238,7 @@ def test_point_data():
             "colors": torch.rand(mesh.n_points + 2, 3),
             "normals": torch.rand(mesh.n_points, 3),
         }
-    except:
+    except ValueError:
         pass
     else:
         raise AssertionError(
@@ -267,7 +274,7 @@ def test_point_data2():
     sks_mesh.point_data["normals"] = np.random.rand(sks_mesh.n_points, 3)
 
     back_to_pyvista = sks_mesh.to_pyvista()
-    assert type(back_to_pyvista) == pyvista.PolyData
+    assert type(back_to_pyvista) is PyvistaPolyData
 
     # Assert that the point_data attributes are correctly copied
     assert "color" in back_to_pyvista.point_data.keys()
@@ -277,7 +284,7 @@ def test_point_data2():
     )
 
     back_to_vedo = sks_mesh.to_vedo()
-    assert type(back_to_vedo) == vedo.Mesh
+    assert type(back_to_vedo) is vedo.Mesh
     assert np.allclose(
         back_to_vedo.pointdata["curvature"],
         sks_mesh.point_data["curvature"].numpy(),
@@ -313,8 +320,12 @@ def test_landmarks_creation():
     mesh2.landmark_indices = landmarks_indices
 
     assert torch.allclose(mesh1.landmark_points, mesh2.landmark_points)
-    assert torch.allclose(mesh1.landmark_indices, torch.tensor(landmarks_indices))
-    assert torch.allclose(mesh2.landmark_indices, torch.tensor(landmarks_indices))
+    assert torch.allclose(
+        mesh1.landmark_indices, torch.tensor(landmarks_indices)
+    )
+    assert torch.allclose(
+        mesh2.landmark_indices, torch.tensor(landmarks_indices)
+    )
 
     assert mesh1.n_landmarks == 4
     mesh1.add_landmarks(8)
@@ -387,8 +398,6 @@ def test_point_data_cuda():
     # Assert that the point_data attributes are correctly formatted
     assert sks_mesh.point_data["color"].dtype == sks.float_dtype
     assert sks_mesh.point_data["normals"].dtype == sks.float_dtype
-
-    ############" CUDA PART ############"
 
     # Move the mesh to cuda
     sks_mesh_cuda = sks_mesh.to("cuda")

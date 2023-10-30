@@ -16,7 +16,9 @@ class LandmarkSetter:
     """
 
     @typecheck
-    def __init__(self, shapes: Union[list[polydata_type], polydata_type]) -> None:
+    def __init__(
+        self, shapes: Union[list[polydata_type], polydata_type]
+    ) -> None:
         super().__init__()
 
         if hasattr(shapes, "__iter__") and len(shapes) > 1:
@@ -49,7 +51,9 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         self.add(self.actor)
 
         self.lpoints = []
-        self.lpoints_pointcloud = vedo.Points(self.lpoints, r=15).pickable(False).c("r")
+        self.lpoints_pointcloud = (
+            vedo.Points(self.lpoints, r=15).pickable(False).c("r")
+        )
         self.add(self.lpoints_pointcloud)
 
         text = "Start by selecting landmarks on the reference shape\nPress e to add a vertice\nPress d to delete the last point\nPress z to validate the landmarks and close the window"
@@ -64,7 +68,9 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         """The _key_press method is called when the user presses a key. It is used to add or delete landmarks and update the display."""
         if evt.keypress == "e":
             if evt.picked3d is not None:
-                pt = vedo.Points(self.actor.points()).closest_point(evt.picked3d)
+                pt = vedo.Points(self.actor.points()).closest_point(
+                    evt.picked3d
+                )
                 indice = closest_vertex(self.actor.points().copy(), pt)
                 self.lpoints.append(pt)
                 self.landmarks.append(indice)
@@ -82,7 +88,9 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
 
         # Update the display
         self.remove(self.lpoints_pointcloud)
-        self.lpoints_pointcloud = vedo.Points(self.lpoints, r=15).pickable(False).c("r")
+        self.lpoints_pointcloud = (
+            vedo.Points(self.lpoints, r=15).pickable(False).c("r")
+        )
         self.add(self.lpoints_pointcloud)
         self.render()
 
@@ -190,7 +198,9 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             self.at(0).remove(self.reference_lpoints_pointcloud)
             self.reference_lpoints_pointcloud.c("grey")
             self.point_to_pick = (
-                vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15)
+                vedo.Points(
+                    [self.reference_lpoints[len(self.other_lpoints)]], r=15
+                )
                 .pickable(False)
                 .c("green")
             )
@@ -213,7 +223,9 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
                 self.at(1).add(self.current_other.linewidth(1))
 
                 self.other_lpoints_pointcloud = (
-                    vedo.Points(self.other_lpoints, r=15).pickable(False).c("r")
+                    vedo.Points(self.other_lpoints, r=15)
+                    .pickable(False)
+                    .c("r")
                 )
                 self._update()
 
@@ -230,7 +242,9 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         if self.mode == "reference":
             self.at(0).remove(self.reference_lpoints_pointcloud)
             self.reference_lpoints_pointcloud = (
-                vedo.Points(self.reference_lpoints, r=15).pickable(False).c("r")
+                vedo.Points(self.reference_lpoints, r=15)
+                .pickable(False)
+                .c("r")
             )
             self.at(0).add(self.reference_lpoints_pointcloud)
 
@@ -238,13 +252,17 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             self.at(0).remove(self.point_to_pick)
             if len(self.other_lpoints) < self.n_landmarks:
                 self.point_to_pick = (
-                    vedo.Points([self.reference_lpoints[len(self.other_lpoints)]], r=15)
+                    vedo.Points(
+                        [self.reference_lpoints[len(self.other_lpoints)]], r=15
+                    )
                     .pickable(False)
                     .c("green")
                 )
             else:
                 self.point_to_pick = (
-                    vedo.Points(self.reference_lpoints, r=15).pickable(False).c("green")
+                    vedo.Points(self.reference_lpoints, r=15)
+                    .pickable(False)
+                    .c("green")
                 )
             self.at(0).add(self.point_to_pick)
 
@@ -263,7 +281,9 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
                     pt = vedo.Points(self.active_actor.points()).closest_point(
                         evt.picked3d
                     )
-                    indice = closest_vertex(self.active_actor.points().copy(), pt)
+                    indice = closest_vertex(
+                        self.active_actor.points().copy(), pt
+                    )
                     self.reference_lpoints.append(pt)
                     self.reference_indices.append(indice)
 
@@ -278,12 +298,17 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             self._update()
 
         elif self.mode == "others" and evt.actor == self.current_other:
-            if evt.keypress == "e" and len(self.other_lpoints) < self.n_landmarks:
+            if (
+                evt.keypress == "e"
+                and len(self.other_lpoints) < self.n_landmarks
+            ):
                 if evt.picked3d is not None:
                     pt = vedo.Points(self.active_actor.points()).closest_point(
                         evt.picked3d
                     )
-                    indice = closest_vertex(self.active_actor.points().copy(), pt)
+                    indice = closest_vertex(
+                        self.active_actor.points().copy(), pt
+                    )
                     self.other_lpoints.append(pt)
                     self.other_indices.append(indice)
 
@@ -292,7 +317,10 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
                     self.other_lpoints.pop()
                     self.other_indices.pop()
 
-            if evt.keypress == "z" and len(self.other_lpoints) == self.n_landmarks:
+            if (
+                evt.keypress == "z"
+                and len(self.other_lpoints) == self.n_landmarks
+            ):
                 self._done()
             else:
                 self._update()
