@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pyvista
+from pyvista.core.pointset import PolyData as PyvistaPolyData
 import vedo
 import torch
 import numpy as np
@@ -14,7 +15,6 @@ from ..types import (
     float_dtype,
     int_dtype,
     Number,
-    NumericalArray,
     NumericalTensor,
     Points,
     Edges,
@@ -25,13 +25,11 @@ from ..types import (
     Float1dTensor,
     Float2dTensor,
     Any,
-    FloatTensor,
     IntTensor,
     polydata_type,
     IntSequence,
 )
 
-from typing import Literal
 from .baseshape import BaseShape
 from .utils import DataAttributes
 
@@ -48,7 +46,8 @@ class PolyData(BaseShape, polydata_type):
     - a path to a mesh
     - points, edges and triangles as torch tensors
 
-    For all these cases, it is possible to provide landmarks as a sparse tensor and device as a string or a torch device ("cpu" by default)
+    For all these cases, it is possible to provide landmarks as a sparse tensor
+    and device as a string or a torch device ("cpu" by default)
     """
 
     @convert_inputs
@@ -68,25 +67,33 @@ class PolyData(BaseShape, polydata_type):
 
         Args:
             points (Points): the points of the shape.
-            edges (Optional[Edges], optional): the edges of the shape. Defaults to None.
-            triangles (Optional[Triangles], optional): the triangles of the shape. Defaults to None.
-            device (Optional[Union[str, torch.device]], optional): the device on which the shape is stored. Defaults to "cpu".
-            landmarks (Optional[Landmarks], optional): _description_. Defaults to None.
-            point_data (Optional[DataAttributes], optional): _description_. Defaults to None.
-            cache_size (Optional[int], optional): Size of the cache for memoized properties.
+            edges (Optional[Edges], optional): the edges of the shape. Defaults
+                to None.
+            triangles (Optional[Triangles], optional): the triangles of the
+                shape. Defaults to None.
+            device (Optional[Union[str, torch.device]], optional): the device
+                on which the shape is stored. Defaults to "cpu".
+            landmarks (Optional[Landmarks], optional): _description_.
+                Defaults to None.
+            point_data (Optional[DataAttributes], optional): _description_.
+                Defaults to None.
+            cache_size (Optional[int], optional): Size of the cache for
+                memoized properties.
                 Defaults to None (= no cache limit).
-                Use a smaller value if you intend to e.g. compute point curvatures
-                at many different scales.
+                Use a smaller value if you intend to e.g. compute point
+                curvatures at many different scales.
         """
 
-        # If the user provides a pyvista mesh, we extract the points, edges and triangles from it
-        # If the user provides a path to a mesh, we read it with pyvista and extract the points, edges and triangles from it
+        # If the user provides a pyvista mesh, we extract the points, edges and
+        # triangles from it
+        # If the user provides a path to a mesh, we read it with pyvista and
+        # extract the points, edges and triangles from it
         if type(points) in [vedo.Mesh, pyvista.PolyData, str]:
-            if type(points) == vedo.Mesh:
+            if type(points) is vedo.Mesh:
                 mesh = pyvista.PolyData(points.polydata())
-            elif type(points) == str:
+            elif type(points) is str:
                 mesh = pyvista.read(points)
-            elif type(points) == pyvista.PolyData:
+            elif type(points) is PyvistaPolyData:
                 mesh = points
             # Now, mesh is a pyvista mesh
 
@@ -95,19 +102,22 @@ class PolyData(BaseShape, polydata_type):
                 mesh = cleaned_mesh
                 if landmarks is not None:
                     print(
-                        f"Warning: Mesh has been cleaned. Landmarks are ignored."
+                        "Warning: Mesh has been cleaned."
+                        + " Landmarks are ignored."
                     )
                     landmarks = None
 
                 if point_data is not None:
                     print(
-                        f"Warning: Mesh has been cleaned. Point_data are ignored."
+                        "Warning: Mesh has been cleaned."
+                        + " Point_data are ignored."
                     )
                     point_data = None
 
                 if len(mesh.point_data) > 0:
                     print(
-                        f"Warning: Mesh has been cleaned. Point_data from original shape are ignored."
+                        "Warning: Mesh has been cleaned. Point_data from"
+                        + " original shape are ignored."
                     )
 
             points = torch.from_numpy(mesh.points).to(float_dtype)
@@ -158,18 +168,21 @@ class PolyData(BaseShape, polydata_type):
 
         self._device = torch.device(device)
 
-        # We don't call the setters here because the setter of points is meant to be used when the shape is modified
-        # in order to check the validity of the new points
+        # We don't call the setters here because the setter of points is meant
+        # to be used when the shape is modified in order to check the validity
+        # of the new points
         self._points = points.clone().to(device)
 
         # /!\ If triangles is not None, edges will be ignored
         if triangles is not None:
-            # Call the setter that will clone and check the validity of the triangles
+            # Call the setter that will clone and check the validity of the
+            # triangles
             self.triangles = triangles
             self._edges = None
 
         elif edges is not None:
-            # Call the setter that will clone and check the validity of the edges
+            # Call the setter that will clone and check the validity of the
+            # edges
             self.edges = edges
             self._triangles = None
 
@@ -178,7 +191,8 @@ class PolyData(BaseShape, polydata_type):
             self._edges = None
 
         if landmarks is not None:
-            # Call the setter that will clone and check the validity of the landmarks
+            # Call the setter that will clone and check the validity of the
+            # landmarks
             if hasattr(landmarks, "to_dense"):
                 # landmarks is a sparse tensor
                 self.landmarks = landmarks.to(self.device)
@@ -288,7 +302,8 @@ class PolyData(BaseShape, polydata_type):
     def save(self, filename: str) -> None:
         """Save the shape at the specified location.
         Format accepted by PyVista are supported (.ply, .stl, .vtk)
-        see : https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/pointset.py#L439-L1283
+        see: https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/
+        pointset.py#L439-L1283
 
         Args:
             path (str): the path where to save the shape.
@@ -467,10 +482,11 @@ class PolyData(BaseShape, polydata_type):
     @convert_inputs
     @typecheck
     def edges(self, edges: Edges) -> None:
-        """Set the edges of the shape. This will also set the triangles to None."""
+        """Set the edges of the shape and the triangles to None."""
         if edges.max() >= self.n_points:
             raise ValueError(
-                "The maximum vertex index in the triangles is larger than the number of points."
+                "The maximum vertex index in the triangles is larger than the"
+                + " number of points."
             )
         self._edges = edges.clone().to(self.device)
         self._triangles = None
@@ -488,10 +504,11 @@ class PolyData(BaseShape, polydata_type):
     @convert_inputs
     @typecheck
     def triangles(self, triangles: Triangles) -> None:
-        """Set the triangles of the shape. This will also set the edges to None."""
+        """Set the triangles of the shape and edges to None."""
         if triangles.max() >= self.n_points:
             raise ValueError(
-                "The maximum vertex index in the triangles is larger than the number of points."
+                "The maximum vertex index in the triangles is larger than the"
+                + " number of points."
             )
 
         self._triangles = triangles.clone().to(self.device)
@@ -549,9 +566,12 @@ class PolyData(BaseShape, polydata_type):
             # the from_dict method will check that the point_data are valid
             point_data_dict = DataAttributes.from_dict(point_data_dict)
 
-        assert (
-            point_data_dict.n == self.n_points
-        ), "The number of points in the point_data entries should be the same as the number of points in the shape."
+        if point_data_dict.n != self.n_points:
+            raise ValueError(
+                "The number of points in the point_data entries should be the"
+                + " same as the number of points in the shape."
+            )
+
         self._point_data = point_data_dict.to(self.device)
 
     @typecheck
@@ -575,9 +595,11 @@ class PolyData(BaseShape, polydata_type):
     def landmarks(self) -> Optional[Landmarks]:
         """Get the landmarks of the shape.
 
-        The format is a sparse tensor of shape (n_landmarks, n_points),each line is a landmark in barycentric
-        coordinates. If you want to get the landmarks in 3D coordinates, use the landmark_points property. If
-        you want to get the landmarks as a list of indices, use the landmark_indices property.
+        The format is a sparse tensor of shape (n_landmarks, n_points), each
+        line is a landmark in barycentric coordinates. If you want to get the
+        landmarks in 3D coordinates, use the landmark_points property. If you
+        want to get the landmarks as a list of indices, use the
+        landmark_indices property.
 
         If no landmarks are defined, returns None.
         """
@@ -597,8 +619,9 @@ class PolyData(BaseShape, polydata_type):
     @convert_inputs
     @typecheck
     def landmarks(self, landmarks: Landmarks) -> None:
-        """Set the landmarks of the shape. The landmarks should be a sparse tensor of shape
-        (n_landmarks, n_points) (barycentric coordinates) or a list of indices.
+        """Set the landmarks of the shape. The landmarks should be a sparse
+        tensor of shape (n_landmarks, n_points) (barycentric coordinates) or a
+        list of indices.
         """
 
         assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
@@ -620,7 +643,8 @@ class PolyData(BaseShape, polydata_type):
         """Return the indices of the landmarks.
 
         If no landmarks are defined, returns None.
-        Raises an error if the landmarks are not indices (there are defined in barycentric coordinates).
+        Raises an error if the landmarks are not indices (there are defined in
+        barycentric coordinates).
         """
         if self.landmarks is None:
             return None
@@ -637,7 +661,8 @@ class PolyData(BaseShape, polydata_type):
     @landmark_indices.setter
     @typecheck
     def landmark_indices(self, landmarks: IntSequence) -> None:
-        """Set the landmarks of the shape. The landmarks should be a list of indices."""
+        """Set the landmarks of the shape. The landmarks should be a list of
+        indices."""
 
         assert torch.max(torch.tensor(landmarks)) < self.n_points
 
@@ -661,7 +686,8 @@ class PolyData(BaseShape, polydata_type):
         """Add vertices landmarks to the shape.
 
         Args:
-            indices (Union[IntSequence, int]): the indices of the vertices to landmark.
+            indices (Union[IntSequence, int]): the indices of the vertices to
+            landmark.
         """
         if not hasattr(indices, "__iter__"):
             self.add_landmarks([indices])
@@ -748,7 +774,8 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def standard_deviation(self) -> Float1dTensor:
-        """Returns the standard deviation (radius) of the shape as a (N_batch,) tensor."""
+        """Returns the standard deviation (radius) of the shape as a (N_batch,)
+        tensor."""
         # TODO: add support for batch vectors
         # TODO: add support for point weights
         return (

@@ -1,15 +1,9 @@
 from .polydata import PolyData
 from .image import Image
-
-from .dataset import Dataset
-from .utils import DataAttributes
-
 from typing import Union
+import pyvista
 
 Shape = Union[PolyData, Image]
-
-
-import pyvista
 
 
 def Sphere():

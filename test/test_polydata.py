@@ -213,7 +213,12 @@ def test_point_data():
     }
 
     mesh.point_data = new_point_data  # Replace the point_data
+    for key, value in mesh.point_data.items():
+        print(key)
     mesh.point_data.append(torch.rand(mesh.n_points, 2))  # Add a new feature
+    print("")
+    for key, value in mesh.point_data.items():
+        print(key)
     assert list(mesh.point_data.keys()) == [
         "rotations",
         "colors",

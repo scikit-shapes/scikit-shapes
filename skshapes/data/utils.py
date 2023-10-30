@@ -1,40 +1,46 @@
 from __future__ import annotations
+from functools import lru_cache, partial, update_wrapper
+import functools
+import weakref
 
-from ..types import typecheck, convert_inputs
-
-
+from collections.abc import Callable
 from ..types import (
-    Any,
-    Optional,
-    Union,
+    typecheck,
+    convert_inputs,
     FloatTensor,
     IntTensor,
     NumericalTensor,
     NumericalArray,
-    float_dtype,
-    FloatArray,
-    IntArray,
-    int_dtype,
 )
+from typing import Optional, TypeVar, Union, Any
 import torch
 import pyvista
 import numpy as np
 
 
 class DataAttributes(dict):
-    """This class is a dictionary aimed to store attributes associated to a data structure (e.g. a set of points, a set of triangles, etc.)
-    When a new attribute is added to the dictionary, it is checked that its size is compatible with the size of the data structure.
+    """This class is a dictionary aimed to store attributes associated to a
+    data structure (e.g. a set of points, a set of triangles, etc.)
+    When a new attribute is added to the dictionary, it is checked that its
+    size is compatible with the size of the data structure.
 
-    The DataAttributes structure ensures that all the attributes are torch.Tensor and on the same device, doing the necessary conversions if needed.
+    The DataAttributes structure ensures that all the attributes are
+    torch.Tensor and on the same device, doing the necessary conversions if
+    needed.
 
 
     There are two ways to add an attribute to the dictionary:
-        - With an explicit name, using the __setitem__ method (e.g. A["attribute"] = attribute)
-        - Without an explicit name, using the append method (e.g. A.append(attribute)) which will automatically set "attribute_{i}" where i is the minimum integer such that "attribute_{i}" is not already in the dictionary
+        - With an explicit name, using the __setitem__ method (e.g.
+            A["attribute"] = attribute)
+        - Without an explicit name, using the append method (e.g.
+            A.append(attribute)) which will automatically set "attribute_{i}"
+            where i is the minimum integer such that "attribute_{i}" is not
+            already in the dictionary
 
     Args:
         n (int): The number of elements of the set
-        device (torch.device): The device on which the attributes should be stored
+        device (torch.device): The device on which the attributes should be
+                                stored
     """
 
     @typecheck
@@ -51,7 +57,8 @@ class DataAttributes(dict):
     def _check_value(self, value: NumericalTensor) -> NumericalTensor:
         if value.shape[0] != self._n:
             raise ValueError(
-                f"First dimension of the tensor should be {self._n}, got {value.shape[0]}"
+                f"First dimension of the tensor should be {self._n}, got"
+                + f"{value.shape[0]}"
             )
 
         if value.device != self._device:
@@ -101,14 +108,16 @@ class DataAttributes(dict):
         """Create a DataAttributes object from a dictionary of attributes
 
         Args:
-            attributes (dict[str, Union[FloatTensor, IntTensor]]): The dictionary of attributes
+            attributes (dict[str, Union[FloatTensor, IntTensor]]): The
+                                        dictionary of attributes
 
         Returns:
             DataAttributes: The DataAttributes object
         """
         if len(attributes) == 0:
             raise ValueError(
-                "The dictionary of attributes should not be empty to initialize a DataAttributes object"
+                "The dictionary of attributes should not be empty to"
+                + " initialize a DataAttributes object"
             )
 
         # Ensure that the number of elements of the attributes is the same
@@ -121,13 +130,17 @@ class DataAttributes(dict):
                 )
 
         if device is None:
-            # Ensure that the attributes are on the same device (if they are torch.Tensor, unless they have no device attribute and we set device to cpu)
+            # Ensure that the attributes are on the same device (if they are
+            # torch.Tensor, unless they have no device attribute and we set
+            # device to cpu)
             if hasattr(list(attributes.values())[0], "device"):
                 device = list(attributes.values())[0].device
                 for value in attributes.values():
-                    assert (
-                        value.device == device
-                    ), "The attributes should be on the same device to be converted into a DataAttributes object"
+                    if value.device != device:
+                        raise ValueError(
+                            "The attributes should be on the same device to be"
+                            + " converted into a DataAttributes object"
+                        )
             else:
                 device = torch.device("cpu")
 
@@ -143,10 +156,12 @@ class DataAttributes(dict):
         attributes: pyvista.DataSetAttributes,
         device: Optional[Union[str, torch.device]] = None,
     ) -> DataAttributes:
-        """Create a DataAttributes object from a pyvista.DataSetAttributes object
+        """Create a DataAttributes object from a pyvista.DataSetAttributes
+            object
 
         Args:
-            attributes (pyvista.DataSetAttributes): The pyvista.DataSetAttributes object
+            attributes (pyvista.DataSetAttributes): The
+                pyvista.DataSetAttributes object
 
         Returns:
             DataAttributes: The DataAttributes object
@@ -162,12 +177,14 @@ class DataAttributes(dict):
 
         # return attributes
 
-        # Then, convert the dictionary to a DataAttributes object with from_dict
+        # Then, convert the dictionary to a DataAttributes object with
+        # from_dict
         return cls.from_dict(attributes=dict_attributes, device=device)
 
     @typecheck
     def to_numpy_dict(self) -> dict[Any, NumericalArray]:
-        """Converts the DataAttributes object to a dictionary of numpy arrays"""
+        """Converts the DataAttributes object to a dictionary of numpy
+        arrays"""
 
         d = dict(self)
         for key, value in d.items():
@@ -184,7 +201,8 @@ class DataAttributes(dict):
     @typecheck
     def n(self, n: Any) -> None:
         raise ValueError(
-            "You cannot change the number of elements of the set after the creation of the DataAttributes object"
+            "You cannot change the number of elements of the set after the"
+            + " creation of the DataAttributes object"
         )
 
     @property
@@ -196,7 +214,9 @@ class DataAttributes(dict):
     @typecheck
     def device(self, device: Any) -> None:
         raise ValueError(
-            "You cannot change the device of the set after the creation of the DataAttributes object, use .to(device) to make a copy of the DataAttributes object on the new device"
+            "You cannot change the device of the set after the creation of the"
+            + " DataAttributes object, use .to(device) to make a copy of the"
+            + " DataAttributes object on the new device"
         )
 
 
@@ -204,7 +224,8 @@ if False:
 
     class cached_property(object):
         """
-        A property that is only computed once per instance and then replaces itself
+        A property that is only computed once per instance and then replaces
+        itself
         with an ordinary attribute. Deleting the attribute resets the property.
         """
 
@@ -220,10 +241,6 @@ if False:
 
 else:
     from functools import cached_property
-
-
-import functools
-import weakref
 
 
 def cached_method(*lru_args, **lru_kwargs):
@@ -246,10 +263,6 @@ def cached_method(*lru_args, **lru_kwargs):
 
     return decorator
 
-
-from functools import cached_property, lru_cache, partial, update_wrapper
-from typing import Optional, TypeVar, Union
-from collections.abc import Callable
 
 T = TypeVar("T")
 
