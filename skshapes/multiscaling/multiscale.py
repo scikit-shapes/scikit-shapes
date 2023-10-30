@@ -5,7 +5,8 @@
 
 # Signal management :
 # maintain a dict of signals/policy
-# when the multiscale is initialized, the list corresponds to the signals at the origin ratio
+# when the multiscale is initialized, the list corresponds to the signals at
+# the origin ratio
 # when a ratio is added, the signals are propagated to the new ratio
 # when at is called, the signal is propagated to the given ratio
 
@@ -15,9 +16,6 @@ from ..types import (
     typecheck,
     shape_type,
 )
-from typing import Literal, Optional
-from ..utils import scatter
-import torch
 from typing import Union
 from .multiscale_triangle_mesh import MultiscaleTriangleMesh
 from ..decimation import Decimation
@@ -34,8 +32,10 @@ class Multiscale:
         """Create a multiscale object from a shape or a list of shapes.
 
         Args:
-            shape (Union[shape_type,list[shape_type]]): A shape or a list of shapes.
-            correspondence (bool, optional): Wether the shapes of the list should be considered to be in correspondence or not.
+            shape (Union[shape_type,list[shape_type]]): A shape or a list of
+                shapes.
+            correspondence (bool, optional): Wether the shapes of the list
+                should be considered to be in correspondence or not.
 
         Returns:
             Union[MultiscaleTriangleMesh,list[MultiscaleTriangleMesh]]
@@ -46,8 +46,8 @@ class Multiscale:
             return [cls(s, **kwargs) for s in shape]
 
         elif not isinstance(shape, list):
-            # here Multiscale is called on a single shape, compute the multiscale object
-            # depending on the type of the shape
+            # here Multiscale is called on a single shape, compute the
+            # multiscale object depending on the type of the shape
             if hasattr(shape, "is_triangle_mesh") and shape.is_triangle_mesh:
                 instance = super(Multiscale, cls).__new__(
                     MultiscaleTriangleMesh
@@ -61,9 +61,9 @@ class Multiscale:
                 )
 
         elif isinstance(shape, list) and correspondence:
-            # here Multiscale is called on a list of shapes thath are supposed to be
-            # corresponding to each other. The correspondence is used to decimate
-            # the shapes in parallel.
+            # here Multiscale is called on a list of shapes thath are supposed
+            # to be corresponding to each other. The correspondence is used to
+            # decimate the shapes in parallel.
 
             if (
                 hasattr(shape[0], "is_triangle_mesh")
@@ -76,19 +76,27 @@ class Multiscale:
                 elif "n_points" in kwargs.keys():
                     target_reduction = 1 - min(kwargs["n_points"])
 
-                # check that all shapes are triangle meshes and share the same topology
-                assert all(
-                    [s.is_triangle_mesh for s in shape]
-                ), "All shapes must be triangle meshes to be used with correspondence"
-                assert all(
-                    [s.n_points == shape[0].n_points for s in shape]
-                ), "All shapes must have the same number of points to be decimated in correspondence"
-                assert all(
-                    [
-                        torch.allclose(s.triangles, shape[0].triangles)
-                        for s in shape
-                    ]
-                ), "All shapes must have the same triangles to be decimated in correspondence"
+                # check that all shapes are triangle meshes and share the same
+                # topology
+                if not all([s.is_triangle_mesh for s in shape]):
+                    raise ValueError(
+                        "All shapes must be triangle meshes to be decimated"
+                        + " in correspondence"
+                    )
+
+                if not all([s.n_points == shape[0].n_points for s in shape]):
+                    raise ValueError(
+                        "All shapes must have the same number of points to be"
+                        + " decimated in correspondence"
+                    )
+
+                if not all(
+                    [s.n_triangles == shape[0].n_triangles for s in shape]
+                ):
+                    raise ValueError(
+                        "All shapes must have the same number of triangles to"
+                        + " be decimated in correspondence"
+                    )
 
                 # compute the decimation module
                 decimation_module = Decimation(

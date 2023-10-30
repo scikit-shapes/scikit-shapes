@@ -1,8 +1,6 @@
 """Optimal transport loss for PolyData."""
 
 from geomloss import SamplesLoss
-import torch
-
 from ..types import typecheck, FloatScalar, polydata_type
 from .baseloss import BaseLoss
 

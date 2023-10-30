@@ -137,10 +137,10 @@ class SumLoss(BaseLoss):
         It returns the sum of the two losses.
 
         Args:
-            source (shape_type): further restrictions on the source shape's type
-                            can be imposed by the added losses
-            target (shape_type): further restrictions on the target shape's type
-                            can be imposed by the added losses
+            source (shape_type): further restrictions on the source shape's
+                type can be imposed by the added losses
+            target (shape_type): further restrictions on the target shape's
+                type can be imposed by the added losses
 
         Returns:
             FloatScalar: the sum of the two losses

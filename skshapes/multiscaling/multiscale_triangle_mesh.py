@@ -16,67 +16,6 @@ import torch
 from ..decimation import Decimation
 
 
-# class SingleScale(PolyData):
-#     """SingleScale is a polydata wrapper with reference to a multiscale object."""
-
-#     def __init__(self, polydata: polydata_type, multiscale: MultiscaleTriangleMesh, ratio=Number) -> None:
-#         """Initialize a SingleScale object.
-
-#         Args:
-#             polydata (polydata_type): the polydata to be wrapped
-#         """
-#         points = polydata.points
-#         edges = polydata.edges
-#         triangles = polydata.triangles
-#         device = polydata.device
-#         landmarks = polydata.landmarks
-#         point_data = polydata.point_data
-#         try:
-#             cache_size = polydata.cache_size
-#         except:
-#             cache_size = None
-#         super().__init__(
-#             points=points,
-#             edges=edges,
-#             triangles=triangles,
-#             device=device,
-#             landmarks=landmarks,
-#             point_data=point_data,
-#             cache_size=cache_size,
-#         )
-
-#         self.multiscale = multiscale
-#         self.ratio = ratio
-
-
-#     @property
-#     def point_data(self) -> DataAttributes:
-#         warn("To set the value of a point_data entry, use the __setitem__ method, and not the point_data property")
-#         return self._point_data
-
-#     @point_data.setter
-#     @typecheck
-#     def point_data(self, point_data_dict: dict) -> None:
-#         if not isinstance(point_data_dict, DataAttributes):
-#             # Convert the point_data to a DataAttributes object
-#             # the from_dict method will check that the point_data are valid
-#             point_data_dict = DataAttributes.from_dict(point_data_dict)
-
-#         assert (
-#             point_data_dict.n == self.n_points
-#         ), "The number of points in the point_data entries should be the same as the number of points in the shape."
-#         self._point_data = point_data_dict.to(self.device)
-
-#     def __setitem__(self, key, value):
-#         self._point_data[key] = value
-#         # update the multiscale object
-
-#     def __repr__(self):
-#         return (
-#             f"SingleScale object at ratio {self.ratio} of shape {self.n_points} points"
-#         )
-
-
 class MultiscaleTriangleMesh:
     """A class to handle multiscale data."""
 
@@ -91,50 +30,22 @@ class MultiscaleTriangleMesh:
         coarse_to_fine_policy: Optional[dict] = None,
         decimation_module: Optional[Decimation] = None,
     ) -> None:
-        """Initialize a multiscale object from a reference shape. This class is particularly
-        useful to handle multiscale signals.
+        """Initialize a multiscale object
 
-        An instance of Multiscale contains a dict of shapes, with the ratios as keys.
-
-        For signal propagation, policies can be specified for downscaling and upscaling.
-
-        Policy for downscaling consists of a reduce operation and a pass_through_all_scales option:
-        - reduce (str): the reduce operation. Available options are "sum", "min", "max", "mean"
-        - pass_through_all_scales (bool): if True, the signal is propagated through all the ratios when
-          dowscaling. If False, the signal is propagated directly from the origin ratio to the
-            target ratio.
-
-        Policy for upscaling consists of a smoothing operation and a pass_through_all_scales option:
-        - smoothing (str): the smoothing operation. Available options are "constant", "mesh_convolution"
-        - n_smoothing_steps (int): the number of smoothing operations to apply
-        - pass_through_all_scales (bool): if True, the signal is propagated through all the ratios when
-
-        Default policies are:
-        - fine_to_coarse_policy = {"reduce": "mean", "pass_through_all_scales": False}
-        - coarse_to_fine_policy = {"smoothing": "constant", "n_smoothing_steps": 1, "pass_through_all_scales": False}
-
-        When adding a signal, the policies can be specified for the signal. If not specified, the default policies
-        are used.
-
-        To add a signal to the multiscale object, use the add_signal method. The signal can be specified as a tensor
-        or as a key in the point_data of the shape at the origin ratio. If the signal is specified as a tensor, it
-        is added to the point_data of the shape at the origin ratio. The signal is then propagated to the available
-        ratios following the policies. Whan adding a new ratio after a signal has been added, the signal is updated.
-
-        Be careful that modifying directly the point_data of a shape in the multiscale object will not update the
-        signals at other scale. Please make sure that no modification is done directly on the point_data of a shape
-        in the multiscale object after the call of the add_signal method.
-
-        A decimation module can be specified to handle the decimation of the shapes. If not specified, it is created
-        automatically.
 
         Args:
-            shape (Shape): the shape to be multiscaled (will be reffered to as ratio 1)
-            ratios (Sequence of floats): the ratios at which the shape is multiscaled
-            n_points (Sequence of ints): the (approximative) number of points at each ratio
-            fine_to_coarse_policy (dict, optional): the policy for downscaling. Defaults to None.
-            coarse_to_fine_policy (dict, optional): the policy for upscaling. Defaults to None.
-            decimation_module (Decimation, optional): if not None, the decimation module to be used. Defaults to None.
+            shape (Shape): the shape to be multiscaled (will be reffered to as
+                ratio 1)
+            ratios (Sequence of floats): the ratios at which the shape is
+                multiscaled
+            n_points (Sequence of ints): the (approximative) number of points
+                at each ratio
+            fine_to_coarse_policy (dict, optional): the policy for downscaling.
+                Defaults to None.
+            coarse_to_fine_policy (dict, optional): the policy for upscaling.
+                Defaults to None.
+            decimation_module (Decimation, optional): if not None, the
+                decimation module to be used. Defaults to None.
         """
         if not shape.is_triangle_mesh():
             raise ValueError(
@@ -154,7 +65,7 @@ class MultiscaleTriangleMesh:
         if n_points is not None:
             assert (
                 0 < max(n_points) <= shape.n_points
-            ), "n_points must be between 0 and the number of points in the mesh"
+            ), "n_points must be between 0 and n_points"
             ratios = [1 - (npts / shape.n_points) for npts in n_points]
 
         self.shapes = dict()
@@ -187,7 +98,9 @@ class MultiscaleTriangleMesh:
         else:
             if not hasattr(decimation_module, "actual_reduction_"):
                 raise ValueError(
-                    "The decimation module has not been fitted. Please call the fit method of the decimation module before passing it to the Multiscale constructor."
+                    "The decimation module has not been fitted. Please call"
+                    + " fit method of the decimation module before passing it"
+                    + " to the Multiscale constructor."
                 )
             self.decimation_module = decimation_module
 
@@ -261,29 +174,35 @@ class MultiscaleTriangleMesh:
     ):
         """Add a signal to the multiscale object.
 
-        The signal can be specified as a couple key/tensor (can be multidimensional) or as a key, if the signal is already
-        stored in the point_data of the shape at the desired ratio. Upscale and downscale policies can be specified for
-        the signal. If not specified, the default policies of the multiscale instance are used.
+        The signal can be specified as a couple key/tensor (can be
+        multidimensional) or as a key, if the signal is already
+        stored in the point_data of the shape at the desired ratio. Upscale and
+        downscale policies can be specified for the signal. If not specified,
+        the default policies of the multiscale instance are used.
 
-        This function add (if needed) the signal to the point_data of the shape at ratio "at", and propagate the signal through
-        the available ratios following the policies. After calling this function, the signal is available at all the available
-        ratios.
+        This function add (if needed) the signal to the point_data of the shape
+        at ratio "at", and propagate the signal through the available ratios
+        following the policies. After calling this function, the signal is
+        available at all the available ratios.
 
-        If a new ratio is added to the multiscale instance after the adding of the signal with add_ratio, all the signals are
-        updated.
+        If a new ratio is added to the multiscale instance after the adding of
+        the signal with add_ratio, all the signals are updated.
 
         Example :
         >>> M = sks.Multiscale(shape, ratios=[0.5, 0.1])
         >>> signal = torch.rand(M.at(0.5).n_points)
         >>> M.add_signal(key="signal", at=0.5)
-        >>> M.at(0.1).point_data["signal"].shape[0] == M.at(0.1).n_points # True
+        >>> M.at(0.1)["signal"].shape[0] == M.at(0.1).n_points # True
 
         Args:
             key (str): _description_
-            signal (Optional[NumericalTensor], optional): _description_. Defaults to None.
+            signal (Optional[NumericalTensor], optional): _description_.
+                Defaults to None.
             at (Number, optional): _description_. Defaults to 1.
-            fine_to_coarse_policy (Optional[dict], optional): _description_. Defaults to None.
-            coarse_to_fine_policy (Optional[dict], optional): _description_. Defaults to None.
+            fine_to_coarse_policy (Optional[dict], optional): _description_.
+                Defaults to None.
+            coarse_to_fine_policy (Optional[dict], optional): _description_.
+                Defaults to None.
 
         Raises:
             ValueError: _description_
@@ -303,17 +222,18 @@ class MultiscaleTriangleMesh:
         if from_n_points is not None:
             assert (
                 0 < from_n_points <= self.at(1).n_points
-            ), "from_n_points must be between 0 and the number of points in the mesh"
+            ), "from_n_points must be between 0 and n_points"
             from_ratio = 1 - (from_n_points / self.at(1).n_points)
 
         if signal is None:
-            # If the signal is not specified, it must be in the point_data of the shape at from_ratio
-            try:
-                signal = self.at(from_ratio).point_data[key]
-            except:
+            # If the signal is not specified, it must be in the point_data of
+            # the shape at from_ratio
+            if key not in self.at(from_ratio).point_data.keys():
                 raise ValueError(
-                    f"{key} not in the point_data of the shape at ratio {from_ratio}"
+                    f"{key} not in the point_data of the shape at ratio"
+                    + f" {from_ratio}"
                 )
+            signal = self.at(from_ratio).point_data[key]
 
         if fine_to_coarse_policy is None:
             fine_to_coarse_policy = self.fine_to_coarse_policy
@@ -365,8 +285,8 @@ class MultiscaleTriangleMesh:
         fine_to_coarse_policy: Optional[dict] = None,
         coarse_to_fine_policy: Optional[dict] = None,
     ) -> None:
-        """Propagate a signal from the origin ratio to the available ratios following
-        the propagation policies.
+        """Propagate a signal from the origin ratio to the available ratios
+        following the propagation policy.
         """
 
         self.signals[signal_name]["available_ratios"] = []
@@ -430,9 +350,10 @@ class MultiscaleTriangleMesh:
     ) -> Int1dTensor:
         """Return the indice mapping from high to low resolution.
 
-        The indice mapping is a 1d tensor of integers of length equal to the number of
-        points at the high resolution ratio. Each element of the tensor is the index of
-        the corresponding point at the low resolution ratio.
+        The indice mapping is a 1d tensor of integers of length equal to the
+        number of points at the high resolution ratio. Each element of the
+        tensor is the index of the corresponding point at the low resolution
+        ratio.
 
         Args:
             fine_ratio (Number): the ratio of the high resolution shape
@@ -478,9 +399,10 @@ class MultiscaleTriangleMesh:
     ) -> NumericalTensor:
         """Propagate a signal from a resolution to a lower resolution.
 
-        This operation is a scatter operation, with the indice mapping as index.
-        A reduce operation is applied to the scatter. The available reduce operations
-        are "sum", "min", "max", "mean".
+        This operation is a scatter operation, with the indice mapping as
+        index.
+        A reduce operation is applied to the scatter. The available reduce
+        operations are "sum", "min", "max", "mean".
 
         Args:
             signal (NumericalTensor): the signal to be propagated
@@ -522,14 +444,17 @@ class MultiscaleTriangleMesh:
 
         This operation requires a smoothing operation. The available smoothing
         operations are :
-        - "constant" : the signal is repeated at each point of the high resolution shape
-        - "mesh_convolution" : the signal is smoothed using the mesh convolution operator
+        - "constant" : the signal is repeated at each point of the high
+            resolution shape
+        - "mesh_convolution" : the signal is smoothed using the mesh
+            convolution operator
 
         Args:
             signal (NumericalTensor): the signal to be propagated
             coarse_ratio (Number): the ratio of the low resolution shape
             fine_ratio (Number): the ratio of the high resolution shape
-            smoothing (str, optional): the smoothing option. Defaults to "constant".
+            smoothing (str, optional): the smoothing option.
+                Defaults to "constant".
 
         Returns:
             NumericalTensor: the signal at the high resolution ratio
@@ -555,15 +480,11 @@ class MultiscaleTriangleMesh:
         # Else, smooth the signal
 
         elif smoothing == "mesh_convolution":
-            C = self.at(fine_ratio).mesh_convolution()
-
-        # for _ in range(n_smoothing_steps):
-        #     fine_ratio_signal = C @ fine_ratio_signal
-        fine_ratio_signal = edge_smoothing(
-            fine_ratio_signal,
-            self.at(fine_ratio),
-            n_smoothing_steps=n_smoothing_steps,
-        )
+            fine_ratio_signal = edge_smoothing(
+                fine_ratio_signal,
+                self.at(fine_ratio),
+                n_smoothing_steps=n_smoothing_steps,
+            )
 
         return fine_ratio_signal
 
@@ -573,9 +494,11 @@ class MultiscaleTriangleMesh:
         source = self.at(signal_ratio)
         target = self.at(target_ratio)
 
-        assert (
-            signal.shape[0] == source.n_points
-        ), "signal must have the same number of points as the shape at signal ratio"
+        if signal.shape[0] != source.n_points:
+            raise ValueError(
+                "signal must have the same number of points as"
+                + " the shape at signal ratio"
+            )
 
         # Store the kwargs to pass to the point convolution
         point_convolution_args = (
@@ -613,7 +536,8 @@ def edge_smoothing(
         signal (NumericalTensor): the signal to be smoothed
         shape (polydata_type): the triangle mesh on which the signal is defined
         weight_by_length (bool, optional): Defaults to False.
-        n_smoothing_steps (int, optional): the number of smoothing operations to apply. Defaults to 1.
+        n_smoothing_steps (int, optional): the number of smoothing operations
+            to apply. Defaults to 1.
 
     Returns:
         NumericalTensor: the smoothed signal
@@ -630,40 +554,3 @@ def edge_smoothing(
         output = K @ output
 
     return output.to(signal_device)
-
-
-# @convert_inputs
-# @typecheck
-# def vector_heat_smooting(
-#     signal: NumericalTensor, shape: polydata_type
-# ) -> NumericalTensor:
-#     """Smooth a vector signal on a triangle mesh or a points cloud by vector heat smoothing using pp3d.
-
-#     Args:
-#         signal (NumericalTensor): the signal to be smoothed
-#         shape (polydata_type): the triangle mesh or points cloud on which the signal is defined
-
-#     Raises:
-#         ImportError: potpourri3d must be installed to use vector heat smoothing
-
-#     Returns:
-#         NumericalTensor: the smoothed signal
-#     """
-#     try:
-#         import potpourri3d as pp3d
-#     except:
-#         raise ImportError("Please install potpourri3d to use vector heat smoothing")
-
-#     if shape.is_triangle_mesh():
-#         V, F = shape.points.cpu().numpy(), shape.triangles.cpu().numpy()
-
-#         try:
-#             solver = pp3d.MeshVectorHeatSolver(V, F)
-#         except:
-#             solver = pp3d.PointCloudHeatSolver(V)
-
-#     else:
-#         solver = pp3d.PointCloudHeatSolver(shape.points.cpu().numpy())
-
-#     ext = solver.extend_vector(torch.arange(len(signal)).numpy(), signal.cpu().numpy())
-#     return torch.from_numpy(ext)

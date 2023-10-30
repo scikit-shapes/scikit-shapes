@@ -1,10 +1,7 @@
 """Lp losses for PolyData."""
 
-from typing import Any
 import torch
-
 from ..types import typecheck, FloatScalar, Number, polydata_type
-
 from .baseloss import BaseLoss
 
 
@@ -77,7 +74,8 @@ class L2Loss(BaseLoss):
 class LandmarkLoss(BaseLoss):
     """Landmark loss for PolyData.
 
-    This class defines the Lp loss between the landmarks of two PolyData objects.
+    This class defines the Lp loss between the landmarks of two PolyData
+    objects.
     If X = (x_i) and Y = (y_i) are the landmarks of two PolyData objects, the
     Lp loss is defined as:
     Lp(X, Y) = sum_i ||x_i - y_i||_p
