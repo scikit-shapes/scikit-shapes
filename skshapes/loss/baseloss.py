@@ -5,11 +5,10 @@ from ..types import (
     typecheck,
     Number,
     FloatScalar,
-    Any,
     float_dtype,
     shape_type,
 )
-
+from typing import Any
 import torch
 
 

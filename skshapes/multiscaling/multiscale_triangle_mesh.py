@@ -3,17 +3,14 @@ from __future__ import annotations
 from ..types import (
     typecheck,
     convert_inputs,
-    Optional,
     FloatSequence,
     IntSequence,
-    int_dtype,
-    float_dtype,
     Int1dTensor,
     NumericalTensor,
     Number,
     polydata_type,
 )
-from typing import Literal, Union
+from typing import Literal, Union, Optional
 from ..utils import scatter
 import torch
 from ..decimation import Decimation

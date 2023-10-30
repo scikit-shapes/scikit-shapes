@@ -20,16 +20,13 @@ from ..types import (
     Edges,
     Triangles,
     Landmarks,
-    Optional,
-    Union,
     Float1dTensor,
     Float2dTensor,
-    Any,
     IntTensor,
     polydata_type,
     IntSequence,
 )
-
+from typing import Optional, Any, Union
 from .baseshape import BaseShape
 from .utils import DataAttributes
 

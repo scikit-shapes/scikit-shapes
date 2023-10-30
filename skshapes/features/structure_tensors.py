@@ -2,7 +2,7 @@ import torch
 from pykeops.torch import LazyTensor
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Optional, Triangles, Number
+from ..types import typecheck, Points, Triangles, Number
 
 
 def structure_tensors(*, points: Points, scale=1.0, ranges=None):

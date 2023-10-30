@@ -13,12 +13,10 @@ from ..utils import diagonal_ranges
 from ..types import (
     typecheck,
     Points,
-    Optional,
     Triangles,
     Number,
-    Literal,
 )
-
+from typing import Optional, Literal
 from collections.abc import Callable
 
 

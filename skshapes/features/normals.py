@@ -3,8 +3,8 @@ from pykeops.torch import LazyTensor
 import torch.nn.functional as F
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Optional, FloatTensor, Triangles, Number
-
+from ..types import typecheck, Points, FloatTensor, Triangles, Number
+from typing import Optional
 
 @typecheck
 def _point_normals(

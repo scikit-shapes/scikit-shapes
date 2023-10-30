@@ -13,19 +13,9 @@ from __future__ import annotations
 
 from ..types import (
     typecheck,
-    convert_inputs,
-    Optional,
-    FloatSequence,
-    IntSequence,
-    int_dtype,
-    float_dtype,
-    Int1dTensor,
-    NumericalTensor,
-    Number,
-    polydata_type,
     shape_type,
 )
-from typing import Literal
+from typing import Literal, Optional
 from ..utils import scatter
 import torch
 from typing import Union

@@ -7,7 +7,6 @@ from ..types import (
     Float3dTensor,
     FloatScalar,
     Edges,
-    Tuple,
     polydata_type,
     convert_inputs,
 )

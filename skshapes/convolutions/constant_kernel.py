@@ -1,5 +1,6 @@
 import torch
-from ..types import typecheck, Points, Optional, Triangles, Number, Literal
+from ..types import typecheck, Points, Triangles, Number
+from typing import Optional, Literal
 
 
 class Constant1Kernel:

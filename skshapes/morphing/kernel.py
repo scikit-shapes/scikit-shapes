@@ -4,7 +4,6 @@ import torch
 from .basemodel import BaseModel
 from ..types import (
     typecheck,
-    convert_inputs,
     Points,
     FloatScalar,
     polydata_type,

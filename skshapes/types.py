@@ -3,21 +3,13 @@
 
 from beartype import beartype
 from jaxtyping import jaxtyped, Float32, Float64, Int32, Int64, Float, Int
-from typing import (
-    Any,
-    Optional,
-    Union,
-    TypeVar,
-    Generic,
-    Tuple,
-    NamedTuple,
-    TypeVar,
-    Literal,
-)
+from typing import Union
 import torch
 import numpy as np
 import os
 from warnings import warn
+from beartype.typing import Annotated
+from beartype.vale import Is
 
 
 admissile_float_dtypes = ["float32", "float64"]
@@ -28,7 +20,8 @@ if float_dtype in admissile_float_dtypes:
 
 else:
     warn(
-        f"Unknown float dtype {float_dtype}. Possible values are {admissile_float_dtypes}. Using float32 as default."
+        f"Unknown float dtype {float_dtype}. Possible values are"
+        + "{admissile_float_dtypes}. Using float32 as default."
     )
     float_dtype = torch.float32
 
@@ -87,8 +80,6 @@ def convert_inputs(func, parameters=None):
 # Type aliases
 Number = Union[int, float]
 
-from jaxtyping import jaxtyped, Float32, Float64, Int64, Float, Int
-
 correspondance = {
     torch.float32: Float32,
     torch.float64: Float64,
@@ -123,9 +114,17 @@ FloatScalar = JaxFloat[torch.Tensor, ""]
 Int1dTensor = JaxInt[torch.Tensor, "_"]
 
 FloatSequence = Union[
-    Float[torch.Tensor, "_"], Float[np.ndarray, "_"], list[float], list[Number]
+    Float[torch.Tensor, "_"],  # noqa: F821
+    Float[np.ndarray, "_"],  # noqa: F821
+    list[float],
+    list[Number],
 ]
-IntSequence = Union[Int[torch.Tensor, "_"], Int[np.ndarray, "_"], list[int]]
+
+IntSequence = Union[
+    Int[torch.Tensor, "_"],  # noqa: F821
+    Int[np.ndarray, "_"],  # noqa: F821
+    list[int],
+]
 
 DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
@@ -138,12 +137,7 @@ Triangles = JaxInt[torch.Tensor, "_ 3"]
 # Jaxtyping does not provide annotation for sparse tensors
 # Then we use the torch.Tensor type and checks are made at runtime
 # with assert statements
-try:
-    from beartype.typing import Annotated  # Python >= 3.9
-except ImportError:
-    from beartype.typing_extensions import Annotated  # Python < 3.9
 
-from beartype.vale import Is
 
 Landmarks = Annotated[
     torch.Tensor,

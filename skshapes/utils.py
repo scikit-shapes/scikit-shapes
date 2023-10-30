@@ -52,7 +52,8 @@ def scatter(
     """
     if len(torch.unique(index)) != int(index.max() + 1):
         raise RuntimeError(
-            "The index vector should contain consecutive integers between 0 and max(index)."
+            "The index vector should contain consecutive integers between 0"
+            + " and max(index)."
         )
 
     # Pytorch syntax : "amin" instead of "min", "amax" instead of "max"
@@ -76,23 +77,8 @@ def scatter(
     else:
         output = torch.zeros(torch.max(index + 1), dtype=src.dtype)
 
-    try:
-        # Scatter syntax for pytorch >= 1.11
-        output = output.scatter_reduce(
-            index=index, src=src, dim=0, reduce=reduce, include_self=False
-        )
-        return output
-
-    except:
-        try:
-            # Scatter syntax for pytorch == 1.11
-            output = torch.scatter_reduce(
-                input=src, index=index, dim=0, reduce=reduce
-            )
-            return output
-
-        except:
-            # Normally this should not happen, as skshapes requires pytorch >= 1.11
-            raise RuntimeError(
-                f"Cannot define scatter operations, you are using pytorch {torch.__version__}, this should work for pytorch >= 1.11"
-            )
+    # Scatter syntax for pytorch > 1.11
+    output = output.scatter_reduce(
+        index=index, src=src, dim=0, reduce=reduce, include_self=False
+    )
+    return output

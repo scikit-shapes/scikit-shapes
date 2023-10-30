@@ -4,12 +4,11 @@ import torch
 from ..types import (
     typecheck,
     Points,
-    Optional,
     Triangles,
     Number,
-    Literal,
     polydata_type,
 )
+from typing import Optional, Literal
 from .squared_distances import squared_distances
 from .constant_kernel import constant_1_kernel
 from .linear_operator import LinearOperator

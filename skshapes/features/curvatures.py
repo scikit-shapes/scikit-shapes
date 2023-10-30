@@ -9,16 +9,13 @@ from ..types import (
     typecheck,
     float_dtype,
     Points,
-    Optional,
     Triangles,
     Number,
     Float1dTensor,
     Float2dTensor,
     FloatTensor,
-    Tuple,
-    Union,
 )
-
+from typing import Optional
 from .normals import smooth_normals, tangent_vectors
 from .structure_tensors import structure_tensors
 

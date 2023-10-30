@@ -1,7 +1,8 @@
 """Registration between two shapes."""
 
 from ..optimization import Optimizer
-from ..types import typecheck, Union, shape_type, float_dtype
+from ..types import typecheck, shape_type, float_dtype
+from typing import Union
 from ..loss import Loss
 from ..morphing import Model
 import torch

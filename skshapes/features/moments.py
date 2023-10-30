@@ -6,10 +6,9 @@ from ..types import (
     Float2dTensor,
     Double2dTensor,
     Number,
-    Literal,
     Union,
-    Optional,
 )
+from typing import Literal, Optional
 
 
 def symmetric_sum(a, b):
