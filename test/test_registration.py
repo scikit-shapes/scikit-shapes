@@ -24,7 +24,7 @@ def test_registration_cpu():
         0.8 * sks.loss.L2Loss() + 2 * sks.loss.OptimalTransportLoss(),
     ]
     models = [
-        sks.morphing.ElasticMetric(),
+        sks.morphing.VectorFieldDeformation(),
         sks.morphing.RigidMotion(),
         sks.morphing.KernelDeformation(),
     ]
@@ -68,7 +68,7 @@ def test_registration_device():
     models = [
         sks.RigidMotion(n_steps=n_steps),
         sks.KernelDeformation(n_steps=n_steps),
-        sks.ElasticMetric(n_steps=n_steps),
+        sks.VectorFieldDeformation(n_steps=n_steps),
     ]
     loss = sks.OptimalTransportLoss()
     optimizer = sks.LBFGS()

@@ -1,23 +1,56 @@
+""" Vector field deformation model.
+
+This module contains the implementation of the vector field deformation model.
+This model is described by a sequence of speed vectors, which are summed
+to obtain the sequence of points of the morphed shape. The morphing is
+regularized by a Riemannian metric on the shape space.
+"""
+
 import torch
-
 from .basemodel import BaseModel
-
 from ..types import (
     typecheck,
     Float3dTensor,
     FloatScalar,
     Edges,
+    Triangles,
     polydata_type,
     convert_inputs,
 )
-
 from .utils import MorphingOutput
+from typing import Optional
 
 
-class ElasticMetric(BaseModel):
+class ElasticMetric():
+    def __init__(self) -> None:
+        pass
+
+    def __call__(
+            self,
+            points_sequence: Float3dTensor,
+            velocities_sequence: Float3dTensor,
+            edges: Optional[Edges] = None,
+            triangles: Optional[Triangles] = None,
+    ) -> FloatScalar:
+
+        if edges is None:
+            raise TypeError("This metric requires edges to be defined")
+
+        n_steps = points_sequence.shape[1]
+        e0, e1 = edges[:, 0], edges[:, 1]
+        a1 = (
+            (velocities_sequence[e0] - velocities_sequence[e1])
+            * (points_sequence[e0] - points_sequence[e1])
+        ).sum(dim=2)
+
+        return torch.sum(a1**2) / (2 * n_steps)
+
+
+class VectorFieldDeformation(BaseModel):
     @typecheck
-    def __init__(self, n_steps: int = 1) -> None:
+    def __init__(self, n_steps: int = 1, metric=ElasticMetric()) -> None:
         self.n_steps = n_steps
+        self.metric = metric
 
     @convert_inputs
     @typecheck
@@ -64,8 +97,11 @@ class ElasticMetric(BaseModel):
         regularization = torch.tensor(0.0, device=shape.device)
         if return_regularization:
             regularization = self.metric(
-                newpoints[:, :-1, :], shape.edges, parameter
-            ) / (2 * self.n_steps)
+                points_sequence=newpoints[:, :-1, :],
+                velocities_sequence=parameter,
+                edges=shape.edges,
+                triangles=shape.triangles,
+            )
 
         # Compute the path if needed
         path = None
@@ -82,33 +118,6 @@ class ElasticMetric(BaseModel):
             path=path,
             regularization=regularization,
         )
-
-    @convert_inputs
-    @typecheck
-    def metric(
-        self, points: Float3dTensor, edges: Edges, velocities: Float3dTensor
-    ) -> FloatScalar:
-        """Compute the sum of the norms of a sequence of speed vectors in
-        Riemannian metric with respect to associated points.
-
-        Args:
-            velocity (float3dTensorType (n_points, n_steps, d) ): The sequence
-                of speed vectors ).
-            points (float3dTensorType (n_points, n_steps, d) ): The sequence of
-                points.
-
-        Returns:
-            floatScalarType: The sum of the squared norm of the sequence of
-            speed vectors in the Riemannian metric.
-
-        """
-        e0, e1 = edges[:, 0], edges[:, 1]
-
-        a1 = (
-            (velocities[e0] - velocities[e1]) * (points[e0] - points[e1])
-        ).sum(dim=2)
-
-        return torch.sum(a1**2)
 
     @typecheck
     def parameter_shape(self, shape: polydata_type) -> tuple[int, int, int]:

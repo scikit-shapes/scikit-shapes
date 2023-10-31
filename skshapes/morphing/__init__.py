@@ -1,7 +1,11 @@
-from .elastic_metric import ElasticMetric
+"""
+The :mod:`skshapes.morphing` module gathers deformation models.
+"""
+
+from .vector_field import VectorFieldDeformation
 from .kernel import KernelDeformation
 from .rigid import RigidMotion
 
 from typing import Union
 
-Model = Union[ElasticMetric, RigidMotion, KernelDeformation]
+Model = Union[VectorFieldDeformation, RigidMotion, KernelDeformation]
