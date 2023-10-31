@@ -50,6 +50,12 @@ def scatter(
     This function is a wrapper around the pytorch scatter function. Available
     reduce operations are "sum", "min", "max", "mean".
     """
+    if src.device != index.device:
+        raise RuntimeError(
+            "The src and index tensors must be on the same device."
+        )
+    device = src.device
+
     if len(torch.unique(index)) != int(index.max() + 1):
         raise RuntimeError(
             "The index vector should contain consecutive integers between 0"
@@ -72,10 +78,10 @@ def scatter(
         index = index.expand_as(src)
         output = torch.zeros(
             torch.max(index + 1), *(src[0].shape), dtype=src.dtype
-        )
+        ).to(device)
 
     else:
-        output = torch.zeros(torch.max(index + 1), dtype=src.dtype)
+        output = torch.zeros(torch.max(index + 1), dtype=src.dtype).to(device)
 
     # Scatter syntax for pytorch > 1.11
     output = output.scatter_reduce(

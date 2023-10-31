@@ -1,5 +1,4 @@
 """PolyData class."""
-
 from __future__ import annotations
 
 import pyvista
@@ -29,7 +28,6 @@ from ..types import (
 from typing import Optional, Any, Union
 from .baseshape import BaseShape
 from .utils import DataAttributes
-
 from .edges_extraction import extract_edges
 
 
@@ -46,7 +44,6 @@ class PolyData(BaseShape, polydata_type):
     For all these cases, it is possible to provide landmarks as a sparse tensor
     and device as a string or a torch device ("cpu" by default)
     """
-
     @convert_inputs
     @typecheck
     def __init__(
@@ -863,25 +860,27 @@ class PolyData(BaseShape, polydata_type):
     def point_weights(self) -> Float1dTensor:
         """Return the weights of each point"""
         if self.triangles is not None:
+
+            from ..utils import scatter
             areas = self.triangle_areas / 3
-            # Triangles are stored in a (3, n_triangles) tensor,
+            # Triangles are stored in a (n_triangles, 3) tensor,
             # so we must repeat the areas 3 times, without interleaving.
             areas = areas.repeat(3)
-            return torch.bincount(
-                self.triangles.T.flatten(),
-                weights=areas,
-                minlength=self.n_points,
-            ).to(float_dtype)
+            return scatter(
+                index=self.triangles.flatten(),
+                src=areas,
+                reduce="sum",
+            )
 
         elif self.edges is not None:
             lengths = self.edge_lengths / 2
-            # Edges are stored in a (2, n_edges) tensor,
+            # Edges are stored in a (n_edges, 2) tensor,
             # so we must repeat the lengths 2 times, without interleaving.
             lengths = lengths.repeat(2)
-            return torch.bincount(
-                self.edges.T.flatten(),
-                weights=lengths,
-                minlength=self.n_points,
+            return scatter(
+                index=self.edges.flatten(),
+                src=lengths,
+                reduce="sum",
             )
 
         return torch.ones(self.n_points, dtype=float_dtype, device=self.device)
