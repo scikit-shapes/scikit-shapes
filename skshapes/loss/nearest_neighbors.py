@@ -7,19 +7,35 @@ from .baseloss import BaseLoss
 
 
 class NearestNeighborsLoss(BaseLoss):
+    """Loss based on nearest neighbors for PolyData.
+
+    This class defines a loss corresponding to the nearest neighbors distance
+    between the points of two PolyData objects. More precisely, for each point
+    in the source PolyData, we compute the distance to its nearest neighbor in
+    the target PolyData. The loss is then the average of these distances.
+
+    The distances are computed using the lazy tensor library pykeops :
+    https://www.kernel-operations.io/keops/index.html
+    """
+
     @typecheck
     def __init__(self) -> None:
+        """Initialize the NearestNeighborsLoss class.
+        """
         pass
 
     @typecheck
     def __call__(
         self, source: polydata_type, target: polydata_type
     ) -> FloatScalar:
-        """
+        """Compute the loss.
+
         Args:
-            x (torch.Tensor): the current mesh
+            source (polydata_type): the source shape
+            target (polydata_type): the target shape
+
         Returns:
-            loss (torch.Tensor): the data attachment loss
+            FloatScalar: the loss
         """
         super().__call__(source=source, target=target)
 

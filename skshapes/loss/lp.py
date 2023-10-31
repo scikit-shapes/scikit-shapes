@@ -39,15 +39,26 @@ class LpLoss(BaseLoss):
         Args:
             p (Number, optionnal): the indice of the Lp Norm. Default to 2
         """
-        assert p > 0, "p must be positive"
+        if p <= 0:
+            raise ValueError("p must be positive")
+
         self.p = p
 
     @typecheck
     def __call__(
         self, source: polydata_type, target: polydata_type
     ) -> FloatScalar:
+        """Compute the loss.
+
+        Args:
+            source (polydata_type): the source shape
+            target (polydata_type): the target shape
+
+        Returns:
+            FloatScalar: the loss
+        """
         super().__call__(source=source, target=target)
-        return _norm(x=(source.points - target.points), p=self.p)
+        return torch.norm(source.points - target.points, p=self.p)
 
 
 class L2Loss(BaseLoss):
@@ -56,19 +67,8 @@ class L2Loss(BaseLoss):
     This class defines the L2 loss for PolyData. It is a wrapper around the
     LpLoss class with p=2.
     """
-
-    @typecheck
-    def __init__(self, p: Number = 2) -> None:
-        """Constructor of the L2Loss class."""
-        assert p > 0, "p must be positive"
-        self.p = p
-
-    @typecheck
-    def __call__(
-        self, source: polydata_type, target: polydata_type
-    ) -> FloatScalar:
-        super().__call__(source=source, target=target)
-        return _norm(x=(source.points - target.points), p=2)
+    def __new__(cls) -> LpLoss:
+        return LpLoss(p=2)
 
 
 class LandmarkLoss(BaseLoss):
@@ -89,7 +89,7 @@ class LandmarkLoss(BaseLoss):
 
     @typecheck
     def __init__(self, p: Number = 2) -> None:
-        """Constructor of the LandmarkLoss class.
+        """Initialize the LandmarkLoss class.
 
         Args:
             p (Number, optional): the indice of the Lp Norm. Defaults to 2.
@@ -101,6 +101,15 @@ class LandmarkLoss(BaseLoss):
     def __call__(
         self, source: polydata_type, target: polydata_type
     ) -> FloatScalar:
+        """Compute the loss.
+
+        Args:
+            source (polydata_type): the source shape
+            target (polydata_type): the target shape
+
+        Returns:
+            FloatScalar: the loss
+        """
         super().__call__(source=source, target=target)
         return _norm(
             x=(source.landmark_points - target.landmark_points), p=self.p

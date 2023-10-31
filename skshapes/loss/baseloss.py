@@ -175,4 +175,13 @@ class ProductLoss(BaseLoss):
 
     @typecheck
     def __call__(self, source: shape_type, target: shape_type) -> FloatScalar:
+        """Compute the loss.
+
+        Args:
+            source (shape_type): the source shape
+            target (shape_type): the target shape
+
+        Returns:
+            FloatScalar: the loss
+        """
         return self.scalar * self.loss.__call__(source=source, target=target)
