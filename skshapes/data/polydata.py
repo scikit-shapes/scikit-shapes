@@ -21,6 +21,7 @@ from ..types import (
     Landmarks,
     Float1dTensor,
     Float2dTensor,
+    Int1dTensor,
     IntTensor,
     polydata_type,
     IntSequence,
@@ -157,6 +158,9 @@ class PolyData(BaseShape, polydata_type):
                     size=tuple(mesh.field_data["landmarks_size"]),
                     dtype=float_dtype,
                 )
+                print(landmarks_from_pv)
+                print(landmarks_from_pv.is_sparse)
+                print(landmarks_from_pv.shape[1] == mesh.n_points)
 
         if device is None:
             device = points.device
@@ -673,19 +677,20 @@ class PolyData(BaseShape, polydata_type):
             return indices[values == 1]
 
     @landmark_indices.setter
+    @convert_inputs
     @typecheck
-    def landmark_indices(self, landmarks: IntSequence) -> None:
+    def landmark_indices(self, landmarks: Int1dTensor) -> None:
         """Set the landmarks of the shape. The landmarks should be a list of
         indices."""
 
-        assert torch.max(torch.tensor(landmarks)) < self.n_points
+        assert landmarks.max() < self.n_points
 
         n_landmarks = len(landmarks)
         n_points = self.n_points
 
         indices = torch.zeros((2, n_landmarks), dtype=int_dtype)
         indices[0] = torch.arange(n_landmarks, dtype=int_dtype)
-        indices[1] = torch.tensor(landmarks, dtype=int_dtype)
+        indices[1] = landmarks
 
         values = torch.ones_like(indices[0], dtype=float_dtype)
 

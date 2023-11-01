@@ -53,9 +53,11 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         )
         self.add(self.lpoints_pointcloud)
 
-        text = "Start by selecting landmarks on the reference shape\n"
-        +"Press e to add a vertice\nPress d to delete the last point\n"
-        +"Press z to validate the landmarks and close the window"
+        text = (
+            "Start by selecting landmarks on the reference shape\n"
+            "Press e to add a vertice\nPress d to delete the last point\n"
+            "Press z to validate the landmarks and close the window"
+        )
         self.instructions = vedo.Text2D(
             text, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -82,7 +84,7 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
 
         if evt.keypress == "z" and len(self.lpoints) > 0:
             # Store the landmarks in the shape
-            self.shape.landmarks = self.landmarks
+            self.shape.landmark_indices = torch.tensor(self.landmarks)
             # Close the window
             self.close()
 
@@ -150,9 +152,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         self.reference_vertices = vedo.Points(self.reference.points())
 
         # Instructions corresponding to the "reference" mode
-        text_reference = "Start by selecting landmarks on the reference shape"
-        +"\nPress e to add a vertice\nPress d to delete the last point\n"
-        +"Press z to validate the landmarks"
+        text_reference = (
+            "Start by selecting landmarks on the reference shape"
+            "\nPress e to add a vertice\nPress d to delete the last point\n"
+            "Press z to validate the landmarks"
+        )
         self.instructions_reference = vedo.Text2D(
             text_reference,
             pos="bottom-left",
@@ -166,9 +170,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
 
         # Instructions corresponding to the "other" mode (not displayed at the
         # beginning)
-        text_other = "Now select the same landmarks on the other shapes\n"
-        +"Press e to add a vertice\nPress d to delete the last point\n"
-        +"Press z when you have selected all the landmarks"
+        text_other = (
+            "Now select the same landmarks on the other shapes\n"
+            "Press e to add a vertice\nPress d to delete the last point\n"
+            "Press z when you have selected all the landmarks"
+        )
         self.instructions_other = vedo.Text2D(
             text_other, pos="bottom-left", c="white", bg="green", font="Calco"
         )
@@ -245,7 +251,7 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             else:
                 ls = self.landmarks
                 for i in range(len(ls)):
-                    self.shapes[i].landmarks = ls[i]
+                    self.shapes[i].landmark_indices = torch.tensor(ls[i])
 
                 self.close()
 
