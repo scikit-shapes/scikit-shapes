@@ -49,7 +49,8 @@ class VectorFieldDeformation(BaseModel):
 
         Args:
             shape (polydata_type): shape to morph
-            parameter (Float3dTensor): sequence of speed vectors
+            parameter ((n_points, n_steps, 3) tensor): sequence of speed
+                vectors
             return_path (bool, optional): True if you want to have access to
                 the morphing's sequence of polydatas. Defaults to False.
             return_regularization (bool, optional): True to have access to the

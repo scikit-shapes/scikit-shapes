@@ -1,3 +1,5 @@
+"""This module contains the metrics used in the ElasticMetric class"""
+
 from ..types import (
     typecheck,
     FloatScalar,
@@ -10,11 +12,14 @@ import torch
 
 
 class Metric:
+    """Base class for all metrics used in the ElasticMetric class"""
+
     pass
 
 
 class ElasticMetric:
     def __init__(self) -> None:
+        """Initialize the metric"""
         pass
 
     @typecheck
@@ -25,6 +30,23 @@ class ElasticMetric:
         edges: Optional[Edges] = None,
         triangles: Optional[Triangles] = None,
     ) -> FloatScalar:
+        """Compute the mean velocities' metric along the sequence of points
+
+        Args:
+            points_sequence ((n_points, n_steps, 3) tensor) : sequence of
+                points
+            velocities_sequence ((n_points, n_steps, 3) tensor): sequence of
+                velocities
+            edges (Optional[Edges], optional): edges. Defaults to None.
+            triangles (Optional[Triangles], optional): triangles.
+                Defaults to None.
+
+        Raises:
+            TypeError: This metric requires edges to be specified
+
+        Returns:
+            FloatScalar: the mean velocities' metric
+        """
         if edges is None:
             raise TypeError("This metric requires edges to be defined")
 

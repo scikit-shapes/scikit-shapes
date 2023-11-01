@@ -1,3 +1,5 @@
+"""This module contains the kernels used in the KernelDeformation class"""
+
 from ..types import typecheck, Points, FloatScalar
 from pykeops.torch import LazyTensor
 

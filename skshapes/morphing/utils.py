@@ -1,3 +1,10 @@
+"""This module contains utility functions for morphing
+
+It defines a named tuple MorphingOutput which is used to return the result of
+the morphing algorithms.
+It also defines the integrators used in the kernel deformation model.
+"""
+
 from ..data import Shape
 from typing import NamedTuple, Optional
 import torch
@@ -33,7 +40,7 @@ class EulerIntegrator(Integrator):
         Args:
             p (Points): momentum
             q (Points): position
-            H (_type_): Hamiltonian
+            H (Callable): Hamiltonian
             dt (Number): time step
 
         Returns:

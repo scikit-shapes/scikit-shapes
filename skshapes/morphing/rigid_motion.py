@@ -47,7 +47,7 @@ class RigidMotion(BaseModel):
 
         Args:
             shape (polydata_type): shape to morph
-            parameter (Float2dTensor): rigid motion parameters
+            parameter ((2, 3) tensor) : rigid motion parameters
             return_path (bool, optional): True if you want to have access to
                 the morphing's sequence of polydatas. Defaults to False.
             return_regularization (bool, optional): True to have access to the
