@@ -284,9 +284,7 @@ class PolyData(BaseShape, polydata_type):
         if self.is_triangle_mesh:
             from ..decimation import Decimation
 
-            d = Decimation(
-                target_reduction=target_reduction, n_points=n_points
-            )
+            d = Decimation(target_reduction=target_reduction)
             return d.fit_transform(self)
         else:
             raise NotImplementedError(
