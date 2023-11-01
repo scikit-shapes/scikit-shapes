@@ -30,6 +30,23 @@ def test_scattrer_toy():
         torch.tensor([1, 0.5], dtype=sks.float_dtype),
     )
 
+    # Check that scatter is working whene the index is not consecutive
+
+    index = torch.tensor([0, 1, 3], dtype=sks.int_dtype)
+    assert torch.allclose(
+        scatter(src=src, index=index, reduce="mean"),
+        torch.tensor([1, -1, 0, 0.5], dtype=sks.float_dtype),
+    )
+
+    # Check the min_length parameter of scatter and blank_value != 0
+    index = torch.tensor([0, 1, 1], dtype=sks.int_dtype)
+    assert torch.allclose(
+        scatter(
+            src=src, index=index, reduce="mean", min_length=4, blank_value=2
+        ),
+        torch.tensor([1, -0.25, 2, 2], dtype=sks.float_dtype),
+    )
+
 
 @given(
     n=st.integers(min_value=1, max_value=500),

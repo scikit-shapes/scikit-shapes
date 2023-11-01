@@ -37,10 +37,8 @@ def check_module_annotations(module, template, type):
     # Find the classes in the module
     for name, cl in inspect.getmembers(module):
         if inspect.isclass(cl):
-
             # if cl is a subclass of type
             if issubclass(cl, get_args(type)):
-
                 try:
                     # instantiate the class
                     obj = cl()

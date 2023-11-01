@@ -1,6 +1,12 @@
 import torch
-from .types import NumericalTensor, Int1dTensor, convert_inputs, typecheck
-from typing import Literal
+from .types import (
+    NumericalTensor,
+    Int1dTensor,
+    convert_inputs,
+    typecheck,
+    Number,
+)
+from typing import Literal, Optional
 
 
 def ranges_slices(batch):
@@ -44,11 +50,25 @@ def scatter(
     src: NumericalTensor,
     index: Int1dTensor,
     reduce: Literal["sum", "min", "max", "mean"] = "mean",
+    min_length: Optional[int] = None,
+    blank_value: Number = 0,
 ):
     """Scatter function
 
     This function is a wrapper around the pytorch scatter function. Available
     reduce operations are "sum", "min", "max", "mean".
+
+    Args:
+        src (NumericalTensor): The source tensor.
+        index (Int1dTensor): The indices of the elements to scatter.
+        reduce (Literal["sum", "min", "max", "mean"], optional): The reduce
+            operation to apply. Defaults to "mean".
+        min_length (Optional[int], optional): The minimum length of the output
+            tensor. If None it is set according to the highest index value.
+            Defaults to None.
+        blank_value (Number, optional): The value to set for the elements of
+            the output tensor that are not referenced by the index tensor.
+            Defaults to 0.
     """
     if src.device != index.device:
         raise RuntimeError(
@@ -56,11 +76,17 @@ def scatter(
         )
     device = src.device
 
-    if len(torch.unique(index)) != int(index.max() + 1):
-        raise RuntimeError(
-            "The index vector should contain consecutive integers between 0"
-            + " and max(index)."
-        )
+    if min_length is not None:
+        if index.max() >= min_length:
+            raise RuntimeError(
+                "The min_length parameter must be greater than the maximum"
+                + " index value."
+            )
+
+        length = min_length
+
+    else:
+        length = index.max() + 1
 
     # Pytorch syntax : "amin" instead of "min", "amax" instead of "max"
     if reduce == "min":
@@ -76,12 +102,12 @@ def scatter(
             index = index.unsqueeze(-1)
 
         index = index.expand_as(src)
-        output = torch.zeros(
-            torch.max(index + 1), *(src[0].shape), dtype=src.dtype
+        output = torch.full(
+            (length, *(src[0].shape)), blank_value, dtype=src.dtype
         ).to(device)
 
     else:
-        output = torch.zeros(torch.max(index + 1), dtype=src.dtype).to(device)
+        output = torch.full((length,), blank_value, dtype=src.dtype).to(device)
 
     # Scatter syntax for pytorch > 1.11
     output = output.scatter_reduce(

@@ -30,9 +30,7 @@ def test_decimation_basic():
 
     decimated_sphere2 = sphere.decimate(n_points=15)
 
-    assert torch.allclose(
-        decimated_sphere.points, decimated_sphere2.points
-    )
+    assert torch.allclose(decimated_sphere.points, decimated_sphere2.points)
     assert torch.allclose(
         decimated_sphere.triangles, decimated_sphere2.triangles
     )
@@ -42,9 +40,7 @@ def test_decimation_basic():
     decimated_sphere = decimation.fit_transform(sphere)
     decimated_sphere2 = sphere.decimate(target_reduction=0.9)
 
-    assert torch.allclose(
-        decimated_sphere.points, decimated_sphere2.points
-    )
+    assert torch.allclose(decimated_sphere.points, decimated_sphere2.points)
     assert torch.allclose(
         decimated_sphere.triangles, decimated_sphere2.triangles
     )
