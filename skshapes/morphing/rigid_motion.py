@@ -1,3 +1,9 @@
+"""Rigid motion model.
+
+This module contains the implementation of the rigid motion model. This model
+is described by a translation and a rotation. The morphing is not regularized.
+"""
+
 from .basemodel import BaseModel
 import torch
 
@@ -13,15 +19,15 @@ from .utils import MorphingOutput
 
 
 class RigidMotion(BaseModel):
-    """
-    Rigid motion morphing.
-
-    The parameter is a (2, 3) tensor, where the first row is the rotation
-    axis-angle and the second row is the translation vector.
-    """
+    """Rigid motion morphing."""
 
     @typecheck
     def __init__(self, n_steps: int = 1) -> None:
+        """Initialize the model
+
+        Args:
+            n_steps (int, optional): number of steps. Defaults to 1.
+        """
         self.n_steps = n_steps
         pass
 
@@ -34,6 +40,23 @@ class RigidMotion(BaseModel):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
+        """Morph a shape using the rigid motion model
+
+        The parameter is a (2, 3) tensor, where the first row is the rotation
+        axis-angle and the second row is the translation vector.
+
+        Args:
+            shape (polydata_type): shape to morph
+            parameter (Float2dTensor): rigid motion parameters
+            return_path (bool, optional): True if you want to have access to
+                the morphing's sequence of polydatas. Defaults to False.
+            return_regularization (bool, optional): True to have access to the
+                regularization. Defaults to False.
+
+        Returns:
+            MorphingOutput: a named tuple containing the morphed shape, the
+                regularization and the path if needed.
+        """
         if parameter.device != shape.device:
             parameter = parameter.to(shape.device)
 
@@ -81,6 +104,14 @@ class RigidMotion(BaseModel):
 
     @typecheck
     def parameter_shape(self, shape: shape_type) -> tuple[int, int]:
+        """Return the shape of the parameter
+
+        Args:
+            shape (polydata_type): the shape to morph
+
+        Returns:
+            tuple[int, int]: the shape of the parameter
+        """
         return (2, 3)
 
 
