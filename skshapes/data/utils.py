@@ -52,6 +52,24 @@ class DataAttributes(dict):
     def __getitem__(self, key: Any) -> NumericalTensor:
         return dict.__getitem__(self, key)
 
+    def __repr__(self) -> str:
+        """Representation of the DataAttributes object
+
+        Writes the attributes of the DataAttributes object, their shape and
+        their dtype. Also writes the number of elements of the set and the
+        device on which the attributes are stored.
+
+        Returns:
+            str: the representation of the DataAttributes object
+        """
+        string = "DataAttributes Object with attributes:\n"
+        for key, value in self.items():
+            string += f"- {key}: {value.shape}, {value.dtype}\n"
+
+        string += f"Number of elements: {self._n}\n"
+        string += f"Device: {self._device}\n"
+        return string
+
     @convert_inputs
     @typecheck
     def _check_value(self, value: NumericalTensor) -> NumericalTensor:
