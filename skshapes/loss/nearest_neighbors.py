@@ -20,8 +20,7 @@ class NearestNeighborsLoss(BaseLoss):
 
     @typecheck
     def __init__(self) -> None:
-        """Initialize the NearestNeighborsLoss class.
-        """
+        """Initialize the NearestNeighborsLoss class."""
         pass
 
     @typecheck

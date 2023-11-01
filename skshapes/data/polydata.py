@@ -44,6 +44,7 @@ class PolyData(BaseShape, polydata_type):
     For all these cases, it is possible to provide landmarks as a sparse tensor
     and device as a string or a torch device ("cpu" by default)
     """
+
     @convert_inputs
     @typecheck
     def __init__(
@@ -860,8 +861,8 @@ class PolyData(BaseShape, polydata_type):
     def point_weights(self) -> Float1dTensor:
         """Return the weights of each point"""
         if self.triangles is not None:
-
             from ..utils import scatter
+
             areas = self.triangle_areas / 3
             # Triangles are stored in a (n_triangles, 3) tensor,
             # so we must repeat the areas 3 times, without interleaving.

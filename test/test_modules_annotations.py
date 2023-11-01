@@ -37,34 +37,35 @@ def check_module_annotations(module, template, type):
     # Find the classes in the module
     for name, cl in inspect.getmembers(module):
         if inspect.isclass(cl):
-            # Check that the class is a subclass of the given type
-            assert issubclass(cl, type)
 
-            try:
-                # instantiate the class
-                obj = cl()
-            except TypeError:
-                raise AssertionError(
-                    f"Class {cl} cannot be instantiated with no arguments"
-                )
+            # if cl is a subclass of type
+            if issubclass(cl, get_args(type)):
 
-            print("Inspecting annotations of class {}:".format(name))
-            for method_name in template.keys():
-                print("Method name: {}".format(method_name))
-                # Check that the method is in the class
-                assert hasattr(obj, method_name)
-                annotations = getattr(obj, method_name).__annotations__
-                print("Annotations: {}".format(annotations))
-                print(
-                    "Reference annotations: {}".format(
-                        template[method_name]
+                try:
+                    # instantiate the class
+                    obj = cl()
+                except TypeError:
+                    raise AssertionError(
+                        f"Class {cl} cannot be instantiated with no arguments"
                     )
-                )
-                # Check that the annotations are correct
-                check_annotations(
-                    annotations=annotations,
-                    reference_annotations=template[method_name],
-                )
+
+                print("Inspecting annotations of class {}:".format(name))
+                for method_name in template.keys():
+                    print("Method name: {}".format(method_name))
+                    # Check that the method is in the class
+                    assert hasattr(obj, method_name)
+                    annotations = getattr(obj, method_name).__annotations__
+                    print("Annotations: {}".format(annotations))
+                    print(
+                        "Reference annotations: {}".format(
+                            template[method_name]
+                        )
+                    )
+                    # Check that the annotations are correct
+                    check_annotations(
+                        annotations=annotations,
+                        reference_annotations=template[method_name],
+                    )
 
 
 # Define the templates for the annotations of Loss and Morphing
@@ -91,7 +92,7 @@ def test_losses():
     check_module_annotations(
         module=sks.loss,
         template=loss_template,
-        type=sks.loss.baseloss.BaseLoss,
+        type=sks.Loss,
     )
 
 
@@ -99,5 +100,5 @@ def test_morphing():
     check_module_annotations(
         module=sks.morphing,
         template=morphing_template,
-        type=sks.morphing.basemodel.BaseModel,
+        type=sks.Model,
     )

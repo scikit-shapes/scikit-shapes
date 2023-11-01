@@ -67,6 +67,7 @@ class L2Loss(BaseLoss):
     This class defines the L2 loss for PolyData. It is a wrapper around the
     LpLoss class with p=2.
     """
+
     def __new__(cls) -> LpLoss:
         return LpLoss(p=2)
 

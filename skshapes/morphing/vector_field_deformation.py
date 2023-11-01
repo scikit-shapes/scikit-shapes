@@ -11,44 +11,18 @@ from .basemodel import BaseModel
 from ..types import (
     typecheck,
     Float3dTensor,
-    FloatScalar,
-    Edges,
-    Triangles,
     polydata_type,
     convert_inputs,
 )
 from .utils import MorphingOutput
-from typing import Optional
-
-
-class ElasticMetric():
-    def __init__(self) -> None:
-        pass
-
-    def __call__(
-            self,
-            points_sequence: Float3dTensor,
-            velocities_sequence: Float3dTensor,
-            edges: Optional[Edges] = None,
-            triangles: Optional[Triangles] = None,
-    ) -> FloatScalar:
-
-        if edges is None:
-            raise TypeError("This metric requires edges to be defined")
-
-        n_steps = points_sequence.shape[1]
-        e0, e1 = edges[:, 0], edges[:, 1]
-        a1 = (
-            (velocities_sequence[e0] - velocities_sequence[e1])
-            * (points_sequence[e0] - points_sequence[e1])
-        ).sum(dim=2)
-
-        return torch.sum(a1**2) / (2 * n_steps)
+from .metrics import Metric, ElasticMetric
 
 
 class VectorFieldDeformation(BaseModel):
     @typecheck
-    def __init__(self, n_steps: int = 1, metric=ElasticMetric()) -> None:
+    def __init__(
+        self, n_steps: int = 1, metric: Metric = ElasticMetric()
+    ) -> None:
         self.n_steps = n_steps
         self.metric = metric
 

@@ -16,6 +16,7 @@ class OptimalTransportLoss(BaseLoss):
     (https://www.kernel-operations.io/geomloss/). See the documentation of
     this library for more details. The default loss is the Sinkhorn loss.
     """
+
     @typecheck
     def __init__(self, loss: losses = "sinkhorn", **kwargs) -> None:
         """Initialize the OptimalTransportLoss class.

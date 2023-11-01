@@ -5,63 +5,10 @@ from .basemodel import BaseModel
 from ..types import (
     typecheck,
     Points,
-    FloatScalar,
     polydata_type,
-    Number,
 )
-from .utils import MorphingOutput
-from pykeops.torch import LazyTensor
-
-
-class Kernel:
-    """All cometrics used in spline models should inherit from this class"""
-
-    pass
-
-
-class Integrator:
-    """All hamiltonian integrators used in spline models should inherit from
-    this class"""
-
-    pass
-
-
-class GaussianKernel(Kernel):
-    def __init__(self, sigma=0.1):
-        self.sigma = sigma
-
-    @typecheck
-    def __call__(self, p: Points, q: Points) -> FloatScalar:
-        # Compute the <p, K_q p>
-        from math import sqrt
-
-        q = q / (sqrt(2) * self.sigma)
-
-        Kq = (
-            (-((LazyTensor(q[:, None, :]) - LazyTensor(q[None, :, :])) ** 2))
-            .sum(dim=2)
-            .exp()
-        )  # Symbolic matrix of kernel distances Kq.shape = NxN
-        Kqp = (
-            Kq @ p
-        )  # Matrix-vector product Kq.shape = NxN, shape.shape = Nx3 Kp
-        return (p * Kqp).sum()  # Scalar product <p, Kqp>
-
-
-class EulerIntegrator(Integrator):
-    def __init__(self) -> None:
-        pass
-
-    @typecheck
-    def __call__(
-        self, p: Points, q: Points, H, dt: Number
-    ) -> tuple[Points, Points]:
-        Gp, Gq = torch.autograd.grad(H(p, q), (p, q), create_graph=True)
-
-        pdot, qdot = -Gq, Gp
-        p = p + pdot * dt
-        q = q + qdot * dt
-        return p, q
+from .utils import MorphingOutput, Integrator, EulerIntegrator
+from .kernels import Kernel, GaussianKernel
 
 
 class KernelDeformation(BaseModel):
