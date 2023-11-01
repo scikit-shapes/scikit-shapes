@@ -1,14 +1,4 @@
-"""This module contains the multiscale class."""
-# TODO : add_points_data interface ? Deal with existing data ?
-# TODO : landmark interface ?
-
-
-# Signal management :
-# maintain a dict of signals/policy
-# when the multiscale is initialized, the list corresponds to the signals at
-# the origin ratio
-# when a ratio is added, the signals are propagated to the new ratio
-# when at is called, the signal is propagated to the given ratio
+"""This module contains the generic Multiscale class."""
 
 from __future__ import annotations
 
@@ -30,6 +20,9 @@ class Multiscale:
         **kwargs,
     ) -> Union[MultiscaleTriangleMesh, list[MultiscaleTriangleMesh]]:
         """Create a multiscale object from a shape or a list of shapes.
+
+        Depending on the type of the shape, the corresponding multiscale object
+        is created (multiscale triangle mesh, multiscale point cloud, etc.)
 
         Args:
             shape (Union[shape_type,list[shape_type]]): A shape or a list of

@@ -9,6 +9,15 @@ import torch
 
 
 class Registration:
+    """Registration class
+
+    This class implements the registration between two shapes. It must be
+    initialized with a model, a loss and an optimizer. The registration is
+    performed by calling the fit method with the source and target shapes as
+    arguments. The transform method can then be used to transform a new shape
+    using the learned registration's parameter.
+    """
+
     @typecheck
     def __init__(
         self,
@@ -20,9 +29,25 @@ class Registration:
         n_iter: int = 10,
         verbose: int = 0,
         gpu: bool = True,
-        device: Union[str, torch.device] = "auto",
         **kwargs,
     ) -> None:
+        """Initialize the registration object
+
+        Args:
+            model (Model): a model object (from skshapes.morphing)
+            loss (Loss): a loss object (from skshapes.loss)
+            optimizer (Optimizer): an optimizer object
+                (from skshapes.optimization)
+            regularization (Union[int, float], optional): the regularization
+                parameter for the criterion : loss + regularization * reg.
+                Defaults to 1.
+            n_iter (int, optional): number of iteration for optimization
+                process. Defaults to 10.
+            verbose (int, optional): >1 to print the losses after each
+                optimization loop iteration. Defaults to 0.
+            gpu (bool, optional): do intensive numerical computations on a
+                nvidia gpu with a cuda backend if available. Defaults to True.
+        """
         self.model = model
         self.loss = loss
         self.optimizer = optimizer
@@ -38,8 +63,6 @@ class Registration:
         else:
             self.optim_device = torch.device("cpu")
 
-        self.device = device
-
     @typecheck
     def fit(
         self,
@@ -47,6 +70,17 @@ class Registration:
         source: shape_type,
         target: shape_type,
     ) -> None:
+        """Fit the registration between the source and target shapes
+
+        After calling this method, the registration's parameter can be accessed
+        with the parameter_ attribute, the transformed shape with the
+        transformed_shape_ attribute and the list of successives shapes during
+        the registration process with the path_ attribute.
+
+        Args:
+            source (shape_type): a shape object (from skshapes.shapes)
+            target (shape_type): a shape object (from skshapes.shapes)
+        """
         # Check that the shapes are on the same device
         if source.device != target.device:
             raise ValueError(
@@ -138,6 +172,19 @@ class Registration:
 
     @typecheck
     def transform(self, *, source: shape_type) -> shape_type:
+        """Apply the registration to a new shape
+
+        Args:
+            source (shape_type): the shape to transform
+
+        Returns:
+            shape_type: the transformed shape
+        """
+        if not hasattr(self, "parameter_"):
+            raise ValueError(
+                "The registration must be fitted before calling transform"
+            )
+
         transformed_shape = self.model.morph(
             shape=source, parameter=self.parameter_
         ).morphed_shape
@@ -154,9 +201,7 @@ class Registration:
         source: shape_type,
         target: shape_type,
     ) -> shape_type:
-        # if source.device != self.device:
-        #     source = source.to(self.device)
-        # if target.device != self.device:
-        #     target = target.to(self.device)
+        """Fit the registration and apply it to the source shape"""
+
         self.fit(source=source, target=target)
         return self.transform(source=source)
