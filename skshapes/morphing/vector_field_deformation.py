@@ -19,10 +19,20 @@ from .metrics import Metric, ElasticMetric
 
 
 class VectorFieldDeformation(BaseModel):
+    """Vector field deformation model."""
+
     @typecheck
     def __init__(
         self, n_steps: int = 1, metric: Metric = ElasticMetric()
     ) -> None:
+        """Initialize the model
+
+        Args:
+            n_steps (int, optional): Number of integration steps.
+                Defaults to 1.
+            metric (Metric, optional): Riemannian metric used to regularize
+                the morphing. Defaults to ElasticMetric().
+        """
         self.n_steps = n_steps
         self.metric = metric
 
@@ -35,6 +45,20 @@ class VectorFieldDeformation(BaseModel):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
+        """Morph a shape using the vector field deformation algorithm
+
+        Args:
+            shape (polydata_type): shape to morph
+            parameter (Float3dTensor): sequence of speed vectors
+            return_path (bool, optional): True if you want to have access to
+                the morphing's sequence of polydatas. Defaults to False.
+            return_regularization (bool, optional): True to have access to the
+                regularization. Defaults to False.
+
+        Returns:
+            MorphingOutput: a named tuple containing the morphed shape, the
+                regularization and the path if needed.
+        """
         if parameter.device != shape.device:
             parameter = parameter.to(shape.device)
 
@@ -95,5 +119,13 @@ class VectorFieldDeformation(BaseModel):
 
     @typecheck
     def parameter_shape(self, shape: polydata_type) -> tuple[int, int, int]:
+        """Return the shape of the parameter
+
+        Args:
+            shape (polydata_type): the shape to morph
+
+        Returns:
+            tuple[int, int, int]: the shape of the parameter
+        """
         n_points = shape.points.shape[0]
         return (n_points, self.n_steps, 3)
