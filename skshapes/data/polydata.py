@@ -25,7 +25,7 @@ from ..types import (
     polydata_type,
     IntSequence,
 )
-from typing import Optional, Any, Union
+from typing import Optional, Any, Union, Literal
 from .baseshape import BaseShape
 from .utils import DataAttributes
 from .edges_extraction import extract_edges
@@ -449,6 +449,28 @@ class PolyData(BaseShape, polydata_type):
             ] = self.landmark_points.detach()
 
         return polydata
+
+    def plot(
+        self,
+        backend: Literal["pyvista", "vedo"] = "pyvista",
+        **kwargs,
+    ) -> None:
+        """Plot the shape.
+
+        Available backends are "pyvista" and "vedo". See the documentation of
+        the corresponding plot method for the available arguments:
+        - https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html # noqa: E501
+        - https://vedo.embl.es/docs/vedo/plotter.html#show
+
+        Args:
+            backend ("pyvista" or "vedo", optional): Defaults to "pyvista".
+        """
+
+        if backend == "pyvista":
+            self.to_pyvista().plot(**kwargs)
+
+        elif backend == "vedo":
+            self.to_vedo().show(**kwargs)
 
     #############################
     #### Edges getter/setter ####
