@@ -136,7 +136,7 @@ class Registration:
                 )
 
             parameter = initial_parameter.clone().detach()
-            parameter = parameter.to(self.optim_device)
+            parameter = parameter.to(self.optim_device).to(float_dtype)
         else:
             # if no parameter is provided, initialize it with zeros
             parameter = torch.zeros(
