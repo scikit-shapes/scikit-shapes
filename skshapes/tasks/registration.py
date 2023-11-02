@@ -1,7 +1,13 @@
 """Registration between two shapes."""
 
 from ..optimization import Optimizer
-from ..types import typecheck, shape_type, float_dtype, FloatTensor
+from ..types import (
+    typecheck,
+    convert_inputs,
+    shape_type,
+    float_dtype,
+    FloatTensor,
+)
 from typing import Union, Optional
 from ..loss import Loss
 from ..morphing import Model
@@ -68,6 +74,7 @@ class Registration:
         else:
             self.optim_device = torch.device("cpu")
 
+    @convert_inputs
     @typecheck
     def fit(
         self,
@@ -136,7 +143,7 @@ class Registration:
                 )
 
             parameter = initial_parameter.clone().detach()
-            parameter = parameter.to(self.optim_device).to(float_dtype)
+            parameter = parameter.to(self.optim_device)
         else:
             # if no parameter is provided, initialize it with zeros
             parameter = torch.zeros(
@@ -215,6 +222,7 @@ class Registration:
         else:  # If transformed_shape is on the output device don't copy
             return transformed_shape
 
+    @convert_inputs
     @typecheck
     def fit_transform(
         self,
