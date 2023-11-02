@@ -3,47 +3,118 @@ import pyvista
 import torch
 import pytest
 
-# TODO : for diffeo, integrator = Euler is not the best : add modularity
-# -> runge-kutta 2
+from hypothesis import given, settings
+from hypothesis import strategies as st
+
+list_models = [
+    sks.RigidMotion(),
+    sks.KernelDeformation(),
+    sks.VectorFieldDeformation(),
+]
+list_losses = [
+    sks.L2Loss(),
+    sks.LpLoss(p=1),
+    sks.OptimalTransportLoss(),
+    sks.NearestNeighborsLoss(),
+    sks.LandmarkLoss(),
+]
+
+list_optimizers = [
+    sks.LBFGS(),
+    sks.SGD(),
+    sks.Adam(),
+    sks.Adagrad(),
+]
 
 
-def test_registration_cpu():
+@given(
+    model=st.sampled_from(list_models),
+    loss=st.sampled_from(list_losses),
+    optimizer=st.sampled_from(list_optimizers),
+    n_iter=st.integers(min_value=1, max_value=3),
+    regularization=st.floats(min_value=0, max_value=1),
+    gpu=st.booleans(),
+    verbose=st.booleans(),
+    provide_initial_parameter=st.booleans(),
+)
+@settings(deadline=None, max_examples=5)
+def test_registration_hypothesis(
+    model,
+    loss,
+    optimizer,
+    n_iter,
+    regularization,
+    gpu,
+    verbose,
+    provide_initial_parameter,
+):
+    if (
+        gpu
+        and torch.cuda.is_available()
+        and isinstance(loss, sks.OptimalTransportLoss)
+    ):
+        return None
+
     # Load two meshes
     source = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
     target = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
 
+    source.landmark_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+    target.landmark_indices = [9, 10, 11, 12, 13, 14, 15, 16, 17]
+
     # Few type checks
     assert isinstance(source, sks.data.baseshape.BaseShape)
     assert isinstance(target, sks.PolyData)
-    assert source.landmarks is None
 
-    losses = [
-        sks.loss.NearestNeighborsLoss(),
-        sks.loss.OptimalTransportLoss(),
-        sks.loss.L2Loss(),
-        0.8 * sks.loss.L2Loss() + 2 * sks.loss.OptimalTransportLoss(),
-    ]
-    models = [
-        sks.morphing.VectorFieldDeformation(),
-        sks.morphing.RigidMotion(),
-        sks.morphing.KernelDeformation(),
-    ]
-    regularizations = [0, 0.1]
-    for loss in losses:
-        for model in models:
-            for regularization in regularizations:
-                r = sks.tasks.Registration(
-                    model=model,
-                    loss=loss,
-                    optimizer=sks.LBFGS(),
-                    n_iter=1,
-                    gpu=False,
-                    regularization=regularization,
-                    verbose=1,
-                )
-                print(loss, model)
-                out = r.fit_transform(source=source, target=target)
-                assert out.points.dtype == sks.float_dtype
+    # Initialize the registration object
+    r = sks.Registration(
+        model=model,
+        loss=loss,
+        optimizer=optimizer,
+        n_iter=n_iter,
+        gpu=gpu,
+        regularization=regularization,
+        verbose=verbose,
+    )
+
+    # Check that the registration object is correctly initialized
+    assert r.model == model
+    assert r.loss == loss
+    assert r.optimizer == optimizer
+    assert r.n_iter == n_iter
+    assert r.regularization == regularization
+
+    # If applicable, provide an initial parameter
+    if provide_initial_parameter:
+        initial_parameter = torch.rand(r.model.parameter_shape(shape=source))
+    else:
+        initial_parameter = None
+
+    # Try to transform the source shape without fitting first
+    try:
+        r.transform(source=source)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, fit must be called"
+            + "before transform"
+        )
+
+    # Fit
+    r.fit(source=source, target=target, initial_parameter=initial_parameter)
+
+    # Transform
+    output1 = r.transform(source=source)
+
+    # Fit_transform
+    output2 = r.fit_transform(
+        source=source, target=target, initial_parameter=initial_parameter
+    )
+
+    # Check that the output of transform and fit_transform are the same
+    l2 = sks.L2Loss()
+    assert l2(output1, output2) < 1e-5
 
 
 @pytest.mark.skipif(
