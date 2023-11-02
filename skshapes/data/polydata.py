@@ -158,9 +158,6 @@ class PolyData(BaseShape, polydata_type):
                     size=tuple(mesh.field_data["landmarks_size"]),
                     dtype=float_dtype,
                 )
-                print(landmarks_from_pv)
-                print(landmarks_from_pv.is_sparse)
-                print(landmarks_from_pv.shape[1] == mesh.n_points)
 
         if device is None:
             device = points.device
@@ -679,9 +676,12 @@ class PolyData(BaseShape, polydata_type):
     @landmark_indices.setter
     @convert_inputs
     @typecheck
-    def landmark_indices(self, landmarks: Int1dTensor) -> None:
+    def landmark_indices(self, landmarks: Union[Int1dTensor, list[int]]) -> None:
         """Set the landmarks of the shape. The landmarks should be a list of
         indices."""
+
+        if type(landmarks) is list:
+            landmarks = torch.tensor(landmarks, dtype=int_dtype)
 
         assert landmarks.max() < self.n_points
 
