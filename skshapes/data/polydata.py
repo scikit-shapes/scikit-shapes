@@ -676,7 +676,9 @@ class PolyData(BaseShape, polydata_type):
     @landmark_indices.setter
     @convert_inputs
     @typecheck
-    def landmark_indices(self, landmarks: Union[Int1dTensor, list[int]]) -> None:
+    def landmark_indices(
+        self, landmarks: Union[Int1dTensor, list[int]]
+    ) -> None:
         """Set the landmarks of the shape. The landmarks should be a list of
         indices."""
 

@@ -1,8 +1,8 @@
 """Registration between two shapes."""
 
 from ..optimization import Optimizer
-from ..types import typecheck, shape_type, float_dtype
-from typing import Union
+from ..types import typecheck, shape_type, float_dtype, FloatTensor
+from typing import Union, Optional
 from ..loss import Loss
 from ..morphing import Model
 import torch
@@ -56,9 +56,14 @@ class Registration:
         self.regularization = regularization
 
         if gpu:
-            self.optim_device = torch.device(
-                "cuda" if torch.cuda.is_available() else "cpu"
-            )
+            if torch.cuda.is_available():
+                self.optim_device = torch.device("cuda")
+            else:
+                print(
+                    "Warning : gpu is set to True but no cuda device is "
+                    + "available. The optimization will be performed on cpu."
+                )
+                self.optim_device = torch.device("cpu")
 
         else:
             self.optim_device = torch.device("cpu")
@@ -69,6 +74,7 @@ class Registration:
         *,
         source: shape_type,
         target: shape_type,
+        initial_parameter: Optional[FloatTensor] = None,
     ) -> None:
         """Fit the registration between the source and target shapes
 
@@ -80,6 +86,8 @@ class Registration:
         Args:
             source (shape_type): a shape object (from skshapes.shapes)
             target (shape_type): a shape object (from skshapes.shapes)
+            initial_parameter (FloatTensor, optional): an initial parameter
+                tensor for the optimization process. Defaults to None.
         """
         # Check that the shapes are on the same device
         if source.device != target.device:
@@ -116,12 +124,25 @@ class Registration:
                 + self.regularization * morphing.regularization
             )
 
-        # Initialize the parameter tensor using the template provided by the
-        # model, and set it to be optimized
+        # Initialize the parameter tensor
         parameter_shape = self.model.parameter_shape(shape=source)
-        parameter = torch.zeros(
-            parameter_shape, device=self.optim_device, dtype=float_dtype
-        )
+        if initial_parameter is not None:
+            # if a parameter is provided, check that it has the right shape
+            # and move it to the optimization device
+            if initial_parameter.shape != parameter_shape:
+                raise ValueError(
+                    f"Initial parameter has shape {initial_parameter.shape}"
+                    + f" but the model expects shape {parameter_shape}"
+                )
+
+            parameter = initial_parameter.clone().detach()
+            parameter = parameter.to(self.optim_device)
+        else:
+            # if no parameter is provided, initialize it with zeros
+            parameter = torch.zeros(
+                parameter_shape, device=self.optim_device, dtype=float_dtype
+            )
+
         parameter.requires_grad = True
 
         # Initialize the optimizer
@@ -200,8 +221,11 @@ class Registration:
         *,
         source: shape_type,
         target: shape_type,
+        initial_parameter: Optional[FloatTensor] = None,
     ) -> shape_type:
         """Fit the registration and apply it to the source shape"""
 
-        self.fit(source=source, target=target)
+        self.fit(
+            source=source, target=target, initial_parameter=initial_parameter
+        )
         return self.transform(source=source)
