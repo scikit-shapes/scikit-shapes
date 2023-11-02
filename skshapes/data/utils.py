@@ -1,3 +1,5 @@
+"""This module contains utility functions and classes for the data module."""
+
 from __future__ import annotations
 from functools import lru_cache, partial, update_wrapper
 import functools

@@ -1,6 +1,4 @@
-""" Basic types aliases and utility functions for scikit-shapes. """
-
-
+"""Basic types aliases and utility functions for scikit-shapes."""
 from beartype import beartype
 from jaxtyping import jaxtyped, Float32, Float64, Int32, Int64, Float, Int
 from typing import Union
@@ -29,10 +27,30 @@ int_dtype = torch.int64
 
 
 def typecheck(func):
+    """Runtime checker for function's arguments.
+
+    This is a combination of the beartype and jaxtyping decorators. Jaxtyped
+    allows to use jaxtyping typing hints for arrays/tensors while beartype is a
+    runtime type checker. This decorator allows to use both.
+    """
     return jaxtyped(beartype(func))
 
 
-def _convert_arg(x):
+def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
+    """Convert an array to the right type.
+
+    Depending on the type of the input, it converts the input to the right
+    type (torch.Tensor) and convert the dtype of the tensor to the right one
+    (float32 for float, int64 for int).
+    Args:
+        x (Union[np.ndarray, torch.Tensor]): the input array
+
+    Raises:
+        ValueError: if the input is a complex tensor
+
+    Returns:
+        torch.Tensor: corresponding tensor with the right dtype
+    """
     if isinstance(x, np.ndarray):
         x = torch.from_numpy(x)
 
@@ -48,7 +66,7 @@ def _convert_arg(x):
 
 
 def convert_inputs(func, parameters=None):
-    """A decorator that converts the input to the right type.
+    """Convert a function's inputs to the right type.
 
     It converts the inputs arrays to the right type (torch.Tensor) and
     convert the dtype of the tensor to the right one (float32 for float,
@@ -146,13 +164,15 @@ Landmarks = Annotated[
 
 
 # Types for shapes
-
-
 class polydata_type:
+    """Class for polydata shapes."""
+
     pass
 
 
 class image_type:
+    """Class for image shapes."""
+
     pass
 
 

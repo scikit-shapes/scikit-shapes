@@ -894,7 +894,7 @@ class PolyData(BaseShape, polydata_type):
             # Triangles are stored in a (n_triangles, 3) tensor,
             # so we must repeat the areas 3 times, without interleaving.
             areas = areas.repeat(3)
-            return scatter(
+            unbalanced_weights = scatter(
                 index=self.triangles.flatten(),
                 src=areas,
                 reduce="sum",
@@ -905,10 +905,15 @@ class PolyData(BaseShape, polydata_type):
             # Edges are stored in a (n_edges, 2) tensor,
             # so we must repeat the lengths 2 times, without interleaving.
             lengths = lengths.repeat(2)
-            return scatter(
+            unbalanced_weights = scatter(
                 index=self.edges.flatten(),
                 src=lengths,
                 reduce="sum",
             )
 
-        return torch.ones(self.n_points, dtype=float_dtype, device=self.device)
+        else:
+            unbalanced_weights = torch.ones(
+                self.n_points, dtype=float_dtype, device=self.device
+            )
+
+        return unbalanced_weights

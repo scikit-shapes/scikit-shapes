@@ -1,3 +1,5 @@
+"""This module contains utility functions for the skshapes package."""
+
 import torch
 from .types import (
     NumericalTensor,
@@ -10,7 +12,7 @@ from typing import Literal, Optional
 
 
 def ranges_slices(batch):
-    """Helper function for the diagonal ranges function."""
+    """Helper function for the diagonal ranges function."""  # noqa: D401
     Ns = batch.bincount()
     indices = Ns.cumsum(0)
     ranges = torch.cat((0 * indices[:1], indices))
@@ -27,8 +29,7 @@ def ranges_slices(batch):
 
 
 def diagonal_ranges(batch_x=None, batch_y=None):
-    """Encodes the block-diagonal structure associated to a batch vector."""
-
+    """Encode the block-diagonal structure associated to a batch vector."""
     if batch_x is None and batch_y is None:
         return None  # No batch processing
     elif batch_y is None:
@@ -53,7 +54,7 @@ def scatter(
     min_length: Optional[int] = None,
     blank_value: Number = 0,
 ):
-    """Scatter function
+    """Perform a scatter operation on a tensor.
 
     This function is a wrapper around the pytorch scatter function. Available
     reduce operations are "sum", "min", "max", "mean".
