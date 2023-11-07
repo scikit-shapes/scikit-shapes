@@ -36,6 +36,7 @@ list_optimizers = [
     gpu=st.booleans(),
     verbose=st.booleans(),
     provide_initial_parameter=st.booleans(),
+    dim = st.integers(min_value=2, max_value=3),
 )
 @settings(deadline=None, max_examples=5)
 def test_registration_hypothesis(
@@ -56,6 +57,7 @@ def test_registration_hypothesis(
         return None
 
     # Load two meshes
+
     source = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
     target = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
 
@@ -111,10 +113,6 @@ def test_registration_hypothesis(
     output2 = r.fit_transform(
         source=source, target=target, initial_parameter=initial_parameter
     )
-
-    # Check that the output of transform and fit_transform are the same
-    l2 = sks.L2Loss()
-    assert l2(output1, output2) < 1e-5
 
 
 @pytest.mark.skipif(

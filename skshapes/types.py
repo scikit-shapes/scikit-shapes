@@ -42,6 +42,7 @@ def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
     Depending on the type of the input, it converts the input to the right
     type (torch.Tensor) and convert the dtype of the tensor to the right one
     (float32 for float, int64 for int).
+
     Args:
         x (Union[np.ndarray, torch.Tensor]): the input array
 
@@ -50,6 +51,7 @@ def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
 
     Returns:
         torch.Tensor: corresponding tensor with the right dtype
+
     """
     if isinstance(x, np.ndarray):
         x = torch.from_numpy(x)
@@ -148,7 +150,10 @@ DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 
 # Specific numerical types
-Points = JaxFloat[torch.Tensor, "_ 3"]
+Points = Union[
+    JaxFloat[torch.Tensor, "_ 3"],
+    JaxFloat[torch.Tensor, "_ 2"],
+]  # 3D or 2D points
 Edges = JaxInt[torch.Tensor, "_ 2"]
 Triangles = JaxInt[torch.Tensor, "_ 3"]
 
