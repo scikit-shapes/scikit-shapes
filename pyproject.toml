@@ -2,6 +2,15 @@
 name = "skshapes"
 version = "0.0.1"
 dependencies = [
+    "torch",
+    "numpy",
+    "pykeops",
+    "geomloss",
+    "jaxtyping",
+    "beartype",
+    "pyvista",
+    "vedo",
+    "fast-simplification",
     "mkdocstrings-python",
 ]
 
