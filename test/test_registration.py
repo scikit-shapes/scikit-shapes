@@ -36,7 +36,6 @@ list_optimizers = [
     gpu=st.booleans(),
     verbose=st.booleans(),
     provide_initial_parameter=st.booleans(),
-    dim = st.integers(min_value=2, max_value=3),
 )
 @settings(deadline=None, max_examples=5)
 def test_registration_hypothesis(
