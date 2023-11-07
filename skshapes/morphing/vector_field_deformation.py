@@ -129,4 +129,5 @@ class VectorFieldDeformation(BaseModel):
             tuple[int, int, int]: the shape of the parameter
         """
         n_points = shape.points.shape[0]
-        return (n_points, self.n_steps, 3)
+        dim = shape.dim
+        return (n_points, self.n_steps, dim)

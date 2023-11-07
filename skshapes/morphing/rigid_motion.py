@@ -9,12 +9,13 @@ import torch
 
 from ..types import (
     typecheck,
+    Float1dTensor,
     Float2dTensor,
     polydata_type,
     shape_type,
     convert_inputs,
 )
-
+from typing import Union
 from .utils import MorphingOutput
 
 
@@ -36,7 +37,7 @@ class RigidMotion(BaseModel):
     def morph(
         self,
         shape: polydata_type,
-        parameter: Float2dTensor,
+        parameter: Union[Float2dTensor, Float1dTensor],
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
@@ -60,14 +61,108 @@ class RigidMotion(BaseModel):
         if parameter.device != shape.device:
             parameter = parameter.to(shape.device)
 
-        rotation_angles = parameter[0]
-        matrix = axis_angle_to_matrix(rotation_angles)
+        if shape.dim == 2:
+            return self._morph2d(
+                shape=shape,
+                parameter=parameter,
+                return_path=return_path,
+                return_regularization=return_regularization,
+            )
 
+        elif shape.dim == 3:
+            return self._morph3d(
+                shape=shape,
+                parameter=parameter,
+                return_path=return_path,
+                return_regularization=return_regularization,
+            )
+
+    @convert_inputs
+    @typecheck
+    def _morph3d(
+        self,
+        shape: polydata_type,
+        parameter: Float2dTensor,
+        return_path: bool = False,
+        return_regularization: bool = False,
+    ) -> MorphingOutput:
+        #####
+        rotation_angles = parameter[0]
+        rotation_matrix = axis_angle_to_matrix(rotation_angles)
         translation = parameter[1]
+        center = shape.points.mean(dim=0)
+        newpoints = (
+            (rotation_matrix @ (shape.points - center).T).T
+            + center
+            + translation
+        )
+        #####
+
+        morphed_shape = shape.copy()
+        morphed_shape.points = newpoints
+        regularization = torch.tensor(0.0, device=parameter.device)
+
+        path = None
+        if return_path:
+            if self.n_steps == 1:
+                path = [shape.copy(), morphed_shape.copy()]
+
+            else:
+                path = [shape.copy()]
+                small_rotation_angles = (
+                    1 / self.n_steps
+                ) * rotation_angles
+                small_rotation_matrix = axis_angle_to_matrix(
+                    small_rotation_angles
+                )
+                small_translation = (1 / self.n_steps) * translation
+                for i in range(self.n_steps):
+                    newpoints = (
+                        (
+                            small_rotation_matrix
+                            @ (shape.points - center).T
+                        ).T
+                        + center
+                        + small_translation
+                    )
+                    newshape = shape.copy()
+                    newshape.points = newpoints
+                    path.append(newshape)
+
+        return MorphingOutput(
+            morphed_shape=morphed_shape,
+            regularization=regularization,
+            path=path,
+        )
+
+    @convert_inputs
+    @typecheck
+    def _morph2d(
+        self,
+        shape: polydata_type,
+        parameter: Float1dTensor,
+        return_path: bool = False,
+        return_regularization: bool = False,
+    ) -> MorphingOutput:
+        assert parameter.shape == (3,)
+        theta = parameter[0]
+        translation = parameter[1:]
+
+        # We need to create the rotation matrix on the rigth device
+        # first, then updates its values with the values of the parameter
+        # tensor to let autograd do its job
+        rotation_matrix = torch.zeros((2, 2), device=parameter.device)
+        rotation_matrix[0, 0] = torch.cos(theta)
+        rotation_matrix[0, 1] = -torch.sin(theta)
+        rotation_matrix[1, 0] = torch.sin(theta)
+        rotation_matrix[1, 1] = torch.cos(theta)
+
         center = shape.points.mean(dim=0)
 
         newpoints = (
-            (matrix @ (shape.points - center).T).T + center + translation
+            (rotation_matrix @ (shape.points - center).T).T
+            + center
+            + translation
         )
 
         morphed_shape = shape.copy()
@@ -82,15 +177,21 @@ class RigidMotion(BaseModel):
 
             else:
                 path = [shape.copy()]
+                small_theta = (1 / self.n_steps) * theta
+                small_rotation = torch.tensor(
+                    [
+                        [torch.cos(small_theta), -torch.sin(small_theta)],
+                        [torch.sin(small_theta), torch.cos(small_theta)],
+                    ],
+                    device=parameter.device,
+                )
+                small_translation = (1 / self.n_steps) * translation
                 for i in range(self.n_steps):
-                    local_parameter = ((i + 1) / self.n_steps) * parameter
-                    translation = local_parameter[1]
-                    center = shape.points.mean(dim=0)
-
+                    center = path[-1].points.mean(dim=0)
                     newpoints = (
-                        (matrix @ (shape.points - center).T).T
+                        (small_rotation @ (path[-1].points - center).T).T
                         + center
-                        + translation
+                        + small_translation
                     )
                     newshape = shape.copy()
                     newshape.points = newpoints
@@ -103,7 +204,9 @@ class RigidMotion(BaseModel):
         )
 
     @typecheck
-    def parameter_shape(self, shape: shape_type) -> tuple[int, int]:
+    def parameter_shape(
+        self, shape: shape_type
+    ) -> Union[tuple[int, int], tuple[int]]:
         """Return the shape of the parameter
 
         Args:
@@ -112,7 +215,10 @@ class RigidMotion(BaseModel):
         Returns:
             tuple[int, int]: the shape of the parameter
         """
-        return (2, 3)
+        if shape.dim == 3:
+            return (2, 3)
+        elif shape.dim == 2:
+            return (3,)
 
 
 @convert_inputs
