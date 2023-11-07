@@ -16,12 +16,12 @@ ctypedef cnp.double_t FLOAT_DTYPE_t
 
 def extract_edges(FLOAT_DTYPE_t [:, :] points, INT_DTYPE_t [:, :] triangles):
 
-    assert points.shape[1] == 3
+    # assert points.shape[1] == 3
     assert triangles.shape[0] == 3, "Triangles must be a 3xn_triangles array"
 
     # if needed convert to contiguous arrays
     # this is important for reading the data in C++
-    points = np.ascontiguousarray(points, dtype=FLOAT_DTYPE)
+    # points = np.ascontiguousarray(points, dtype=FLOAT_DTYPE)
     triangles = np.ascontiguousarray(triangles, dtype=INT_DTYPE)
 
     cdef int n_points = points.shape[0]

@@ -27,6 +27,7 @@ from ..types import (
     IntSequence,
 )
 from typing import Optional, Any, Union, Literal
+from warnings import warn
 from .baseshape import BaseShape
 from .utils import DataAttributes
 from .edges_extraction import extract_edges
@@ -97,26 +98,19 @@ class PolyData(BaseShape, polydata_type):
             if cleaned_mesh.n_points != mesh.n_points:
                 mesh = cleaned_mesh
                 if landmarks is not None:
-                    print(
-                        "Warning: Mesh has been cleaned."
-                        + " Landmarks are ignored."
-                    )
+                    warn("Mesh has been cleaned. Landmarks are ignored.")
                     landmarks = None
 
                 if point_data is not None:
-                    print(
-                        "Warning: Mesh has been cleaned."
-                        + " Point_data are ignored."
-                    )
+                    warn("Mesh has been cleaned. Point_data are ignored.")
                     point_data = None
 
-                if len(mesh.point_data) > 0:
-                    print(
-                        "Warning: Mesh has been cleaned. Point_data from"
-                        + " original shape are ignored."
-                    )
-
-            points = torch.from_numpy(mesh.points).to(float_dtype)
+            # If the mesh is 2D, in pyvista it is a 3D mesh with z=0
+            # We remove the z coordinate
+            if np.allclose(mesh.points[:, 2], 0):
+                points = torch.from_numpy(mesh.points[:, :2]).to(float_dtype)
+            else:
+                points = torch.from_numpy(mesh.points).to(float_dtype)
 
             if mesh.is_all_triangles:
                 triangles = mesh.faces.reshape(-1, 4)[:, 1:]
@@ -357,6 +351,9 @@ class PolyData(BaseShape, polydata_type):
         else:
             mesh = vedo.Mesh(self.points.detach().cpu().numpy())
 
+        if self.dim == 2:
+            mesh = mesh.wireframe().color("black")
+
         # Add the point data if any
         if len(self.point_data) > 0:
             point_data_dict = self.point_data.to_numpy_dict()
@@ -390,6 +387,17 @@ class PolyData(BaseShape, polydata_type):
     def to_pyvista(self) -> pyvista.PolyData:
         """Convert the shape to a PyVista PolyData."""
 
+        if self.dim == 3:
+            points = self._points.detach().cpu().numpy()
+        else:
+            points = np.concatenate(
+                [
+                    self._points.detach().cpu().numpy(),
+                    np.zeros((self.n_points, 1)),
+                ],
+                axis=1,
+            )
+
         if self._triangles is not None:
             np_triangles = self._triangles.detach().cpu().numpy()
             faces = np.concatenate(
@@ -399,9 +407,7 @@ class PolyData(BaseShape, polydata_type):
                 ],
                 axis=1,
             )
-            polydata = pyvista.PolyData(
-                self._points.detach().cpu().numpy(), faces=faces
-            )
+            polydata = pyvista.PolyData(points, faces=faces)
 
         elif self._edges is not None:
             np_edges = self._edges.detach().cpu().numpy()
@@ -409,12 +415,10 @@ class PolyData(BaseShape, polydata_type):
                 [np.ones((self.n_edges, 1), dtype=np.int64) * 2, np_edges],
                 axis=1,
             )
-            polydata = pyvista.PolyData(
-                self._points.detach().cpu().numpy(), lines=lines
-            )
+            polydata = pyvista.PolyData(points, lines=lines)
 
         else:
-            polydata = pyvista.PolyData(self._points.detach().cpu().numpy())
+            polydata = pyvista.PolyData(points)
 
         # Add the point data if any
         if len(self.point_data) > 0:
@@ -764,6 +768,12 @@ class PolyData(BaseShape, polydata_type):
     ##########################
     @property
     @typecheck
+    def dim(self) -> int:
+        """Get the dimension of the shape."""
+        return self._points.shape[1]
+
+    @property
+    @typecheck
     def n_points(self) -> int:
         return self._points.shape[0]
 
@@ -887,9 +897,9 @@ class PolyData(BaseShape, polydata_type):
     @typecheck
     def point_weights(self) -> Float1dTensor:
         """Return the weights of each point"""
-        if self.triangles is not None:
-            from ..utils import scatter
+        from ..utils import scatter
 
+        if self.triangles is not None:
             areas = self.triangle_areas / 3
             # Triangles are stored in a (n_triangles, 3) tensor,
             # so we must repeat the areas 3 times, without interleaving.

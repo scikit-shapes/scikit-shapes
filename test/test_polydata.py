@@ -113,6 +113,29 @@ def test_polydata_creation():
         raise AssertionError("Assigning edges should delete triangles")
 
 
+def test_polydata_creation_2d():
+    points = torch.tensor([[0, 0], [0, 1], [1, 0]], dtype=torch.float64)
+    triangles = torch.tensor([[0, 1, 2]], dtype=torch.int32)
+
+    flat_triangle = sks.PolyData(points=points, triangles=triangles)
+    assert flat_triangle.dim == 2
+    assert flat_triangle.n_triangles == 1
+    assert flat_triangle.n_edges == 3
+
+    # to_pyvista creates a z-coordinate equal to 0
+    pv_mesh = flat_triangle.to_pyvista()
+    assert pv_mesh.points.shape == (3, 3)
+    assert np.allclose(pv_mesh.points[:, 2], 0)
+    mesh_back = sks.PolyData(pv_mesh)
+    assert mesh_back.dim == 2
+
+    vedo_mesh = flat_triangle.to_vedo()
+    assert vedo_mesh.points().shape == (3, 3)
+    assert np.allclose(vedo_mesh.points()[:, 2], 0)
+    mesh_back = sks.PolyData(vedo_mesh)
+    assert mesh_back.dim == 2
+
+
 def test_interaction_with_pyvista():
     # Import/export from/to pyvista
     from pyvista.examples import load_sphere
