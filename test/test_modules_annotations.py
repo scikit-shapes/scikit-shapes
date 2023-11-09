@@ -27,7 +27,7 @@ def check_module_annotations(module, template, type):
     the template are in the class, and finally we check that the
     annotations of the methods are correct.
 
-    Args:
+    Parameters
         module : the module to check
         template (dict): a dictionary of the form
                             {method_name: {annotation_name: annotation_type}}

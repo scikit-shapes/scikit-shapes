@@ -1,9 +1,12 @@
+"""Distance matrix task."""
 import torch
 import numpy as np
 from .registration import Registration
 
 
 class DistanceMatrix:
+    """Distance matrix task."""
+
     def __init__(
         self,
         *,
@@ -16,6 +19,7 @@ class DistanceMatrix:
         device="auto",
         **kwargs,
     ) -> None:
+        """Initialize the distance matrix task."""
         if device == "auto":
             device = torch.device(
                 "cuda" if torch.cuda.is_available() else "cpu"
@@ -39,6 +43,7 @@ class DistanceMatrix:
         *,
         shapes,
     ) -> None:
+        """Fit the distance matrix task."""
         # Make copies of the shapes and move them to the device
         shapes = [shape.copy().to(self.device) for shape in shapes]
         n = len(shapes)
@@ -60,5 +65,6 @@ class DistanceMatrix:
         *,
         shapes,
     ) -> np.ndarray:
+        """Fit the distance matrix task and return the distance matrix."""
         self.fit(shapes=shapes)
         return self.distance_matrix

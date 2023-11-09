@@ -1,40 +1,45 @@
-"""This module contains the kernels used in the KernelDeformation class"""
+"""Kernels used in the KernelDeformation class."""
 
 from ..types import typecheck, Points, FloatScalar
 from pykeops.torch import LazyTensor
 
 
 class Kernel:
-    """All KernelDeformation's kernels should inherit from this class"""
+    """Base class for kernels."""
 
     pass
 
 
 class GaussianKernel(Kernel):
-    """A Gaussian kernel for spline models"""
+    """Gaussian kernel for spline models."""
 
     def __init__(self, sigma=0.1):
-        """Initialize the kernel
+        """Initialize the kernel.
 
-        Args:
-            sigma (float, optional): bandwidth parameter. Defaults to 0.1.
+        Parameters
+        ----------
+        sigma
+            Bandwidth parameter.
         """
         self.sigma = sigma
 
     @typecheck
     def __call__(self, p: Points, q: Points) -> FloatScalar:
-        """Compute the scalar product <p, K_q p> where K_q is the Gaussian
-        kernel matrix with bandwidth sigma and points q.
+        """Compute the scalar product <p, K_q p>.
 
+        Parameters
+        ----------
+        p
+            The momentum.
+        q
+            The points.
 
-        Args:
-            p (Points): tensor of points (momentum)
-            q (Points): tensor of points (position)
+        Returns
+        -------
+        FloatScalar
+            The scalar product <p, K_q p>.
 
-        Returns:
-            FloatScalar: scalar product <p, K_q p>
         """
-        # Compute the <p, K_q p>
         from math import sqrt
 
         q = q / (sqrt(2) * self.sigma)

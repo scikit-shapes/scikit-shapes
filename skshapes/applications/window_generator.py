@@ -7,7 +7,7 @@ from vedo import Plotter
 class WindowGenerator(Qt.QMainWindow):
     """A window with custom widgets: buttons, checkboxes, vedoPlotter...
 
-    Args:
+    Parameters
         widgets (list): A list of dictionaries, each dictionary should have the
         following keys:
             - type: The type of the widget, can be one of: "CheckBox",

@@ -32,6 +32,16 @@ def typecheck(func):
     This is a combination of the beartype and jaxtyping decorators. Jaxtyped
     allows to use jaxtyping typing hints for arrays/tensors while beartype is a
     runtime type checker. This decorator allows to use both.
+
+    Parameters
+    ----------
+    func : callable
+        the function to decorate
+
+    Returns
+    -------
+    callable
+        the decorated function
     """
     return jaxtyped(beartype(func))
 
@@ -43,14 +53,20 @@ def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
     type (torch.Tensor) and convert the dtype of the tensor to the right one
     (float32 for float, int64 for int).
 
-    Args:
-        x (Union[np.ndarray, torch.Tensor]): the input array
+    Parameters
+    ----------
+    x : Union[np.ndarray, torch.Tensor])
+        the input array
 
-    Raises:
-        ValueError: if the input is a complex tensor
+    Raises
+    ------
+    ValueError
+        if the input is a complex tensor
 
-    Returns:
-        torch.Tensor: corresponding tensor with the right dtype
+    Returns
+    -------
+    torch.Tensor
+        corresponding tensor with the right dtype
 
     """
     if isinstance(x, np.ndarray):
@@ -150,9 +166,12 @@ DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 
 # Specific numerical types
+Points2d = JaxFloat[torch.Tensor, "_ 2"]
+Points3d = JaxFloat[torch.Tensor, "_ 3"]
+
 Points = Union[
-    JaxFloat[torch.Tensor, "_ 3"],
-    JaxFloat[torch.Tensor, "_ 2"],
+    Points2d,
+    Points3d,
 ]  # 3D or 2D points
 Edges = JaxInt[torch.Tensor, "_ 2"]
 Triangles = JaxInt[torch.Tensor, "_ 3"]

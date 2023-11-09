@@ -2,6 +2,7 @@ import torch
 from torch.profiler import profile, ProfilerActivity
 import vedo as vd
 import skshapes as sks
+from skshapes.types import polydata_type
 from typing import Optional, Literal
 import sys
 
@@ -126,3 +127,7 @@ def profiler():
         ),
     )
     return myprof
+
+
+def create_2d_polydata() -> tuple[polydata_type, polydata_type]:
+    """Generate two 2D shapes: a circle and a line"""

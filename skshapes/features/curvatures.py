@@ -56,7 +56,7 @@ def smooth_curvatures(
     "Efficient curvature estimation for oriented point clouds",
     Cao, Li, Sun, Assadi, Zhang, 2019.
 
-    Args:
+    Parameters
         vertices (Tensor): (N,3) coordinates of the points or mesh vertices.
         triangles (integer Tensor, optional): (3,T) mesh connectivity. Defaults to None.
         scales (list of floats, optional): list of (S,) smoothing scales. Defaults to [1.].

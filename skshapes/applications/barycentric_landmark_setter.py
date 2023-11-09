@@ -14,7 +14,7 @@ class BarycentricLandmarkSetter(vedo.Plotter):
     This version allows to select landmarks that are barycentric coordinates of
     the vertices of the mesh.
 
-    Args:
+    Parameters
         meshes (list[vedo.Mesh]): The meshes on which the landmarks are
             selected.
         **kwargs: Keyword arguments passed to the vedo.Plotter constructor.

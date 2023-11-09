@@ -62,7 +62,7 @@ class PolyData(BaseShape, polydata_type):
     ) -> None:
         """Initialize a PolyData object.
 
-        Args:
+        Parameters
             points (Points): the points of the shape.
             edges (Optional[Edges], optional): the edges of the shape. Defaults
                 to None.
@@ -292,7 +292,7 @@ class PolyData(BaseShape, polydata_type):
         Format accepted by PyVista are supported (.ply, .stl, .vtk)
         see: https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/pointset.py#L439-L1283  # noqa: E501
 
-        Args:
+        Parameters
             path (str): the path where to save the shape.
         """
 
@@ -465,7 +465,7 @@ class PolyData(BaseShape, polydata_type):
         - https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html # noqa: E501
         - https://vedo.embl.es/docs/vedo/plotter.html#show
 
-        Args:
+        Parameters
             backend ("pyvista" or "vedo", optional): Defaults to "pyvista".
         """
 
@@ -710,7 +710,7 @@ class PolyData(BaseShape, polydata_type):
     def add_landmarks(self, indices: Union[IntSequence, int]) -> None:
         """Add vertices landmarks to the shape.
 
-        Args:
+        Parameters
             indices (Union[IntSequence, int]): the indices of the vertices to
             landmark.
         """
@@ -927,3 +927,30 @@ class PolyData(BaseShape, polydata_type):
             )
 
         return unbalanced_weights
+
+    @typecheck
+    def bounding_grid(self, N: int = 10) -> polydata_type:
+        pv_shape = self.to_pyvista()
+        # Get the bounds of the mesh
+        xmin, xmax, ymin, ymax, zmin, zmax = pv_shape.bounds
+        origin = (xmin, ymin, zmin)
+        spacing = (
+            (xmax - xmin) / (N - 1),
+            (ymax - ymin) / (N - 1),
+            (zmax - zmin) / (N - 1),
+        )
+
+        # Create the grid
+        grid = pyvista.ImageData(
+            dimensions=(N, N, N),
+            spacing=spacing,
+            origin=origin,
+        ).extract_all_edges()  # Extract the edges of the grid to keep the wireframe
+
+        return PolyData(grid)
+
+    @property
+    @typecheck
+    def control_points(self) -> Points:
+        """Return the control points of the shape"""
+        return self.bounding_grid(N=10).points

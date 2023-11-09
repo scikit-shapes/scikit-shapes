@@ -1,6 +1,8 @@
 [flake8]
 ignore = E741, E241, E203, W503, E266
-exclude = *__init__.py
+exclude = *__init__.py,
+; extend-ignore = D
+docstring-convention=numpy
 
 ; E741 : ambiguous variable name ("l")
 ; E241 : multiple spaces after ',' or ':'

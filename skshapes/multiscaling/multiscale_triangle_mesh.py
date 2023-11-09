@@ -35,7 +35,7 @@ class MultiscaleTriangleMesh:
         """Initialize a multiscale object
 
 
-        Args:
+        Parameters
             shape (Shape): the shape to be multiscaled (will be reffered to as
                 ratio 1)
             ratios (Sequence of floats): the ratios at which the shape is
@@ -114,7 +114,7 @@ class MultiscaleTriangleMesh:
     def add_ratio(self, ratio: float) -> None:
         """Add a ratio to the multiscale object and update the signals.
 
-        Args:
+        Parameters
             ratio (float): ratio to be added
         """
         assert 0 < ratio < 1, "ratio must be between 0 and 1"
@@ -137,7 +137,7 @@ class MultiscaleTriangleMesh:
 
         If the ratio does not exist, the closest ratio is returned.
 
-        Args:
+        Parameters
             ratio (Number): the ratio at which the shape is returned
 
         Returns:
@@ -196,7 +196,7 @@ class MultiscaleTriangleMesh:
         >>> M.add_signal(key="signal", at=0.5)
         >>> M.at(0.1)["signal"].shape[0] == M.at(0.1).n_points # True
 
-        Args:
+        Parameters
             key (str): _description_
             signal (Optional[NumericalTensor], optional): _description_.
                 Defaults to None.
@@ -357,7 +357,7 @@ class MultiscaleTriangleMesh:
         tensor is the index of the corresponding point at the low resolution
         ratio.
 
-        Args:
+        Parameters
             fine_ratio (Number): the ratio of the high resolution shape
             coarse_ratio (Number): the ratio of the low resolution shape
 
@@ -406,7 +406,7 @@ class MultiscaleTriangleMesh:
         A reduce operation is applied to the scatter. The available reduce
         operations are "sum", "min", "max", "mean".
 
-        Args:
+        Parameters
             signal (NumericalTensor): the signal to be propagated
             fine_ratio (Number): the ratio of the high resolution shape
             coarse_ratio (Number): the ratio of the low resolution shape
@@ -451,7 +451,7 @@ class MultiscaleTriangleMesh:
         - "mesh_convolution" : the signal is smoothed using the mesh
             convolution operator
 
-        Args:
+        Parameters
             signal (NumericalTensor): the signal to be propagated
             coarse_ratio (Number): the ratio of the low resolution shape
             fine_ratio (Number): the ratio of the high resolution shape
@@ -534,7 +534,7 @@ def edge_smoothing(
 ) -> NumericalTensor:
     """Smooth a signal on a triangle mesh by edge smoothing.
 
-    Args:
+    Parameters
         signal (NumericalTensor): the signal to be smoothed
         shape (polydata_type): the triangle mesh on which the signal is defined
         weight_by_length (bool, optional): Defaults to False.

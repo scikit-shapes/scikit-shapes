@@ -7,7 +7,7 @@ from typing import Union
 class LandmarkSetter:
     """Initialize a landmark setter for a polydata or a list of polydatas.
 
-    Args:
+    Parameters
         vedo (_type_): _description_
     """
 
@@ -32,7 +32,7 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
     """A landmark setter that allows the user to select landmarks on a single
     polydata.
 
-    Args:
+    Parameters
         shape (sks.Polydata): the polydata on which the landmarks are selected.
     """
 
@@ -106,7 +106,7 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
     """A LandmarkSetter is a vedo application that allows the user to select
     landmarks on a set of polydatas.
 
-    Args:
+    Parameters
         shapes (list[sks.PolyData]): The shapes on which the landmarks are
             selected.
         **kwargs: Keyword arguments passed to the vedo.Plotter constructor.

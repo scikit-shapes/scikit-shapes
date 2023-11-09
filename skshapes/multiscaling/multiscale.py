@@ -24,7 +24,7 @@ class Multiscale:
         Depending on the type of the shape, the corresponding multiscale object
         is created (multiscale triangle mesh, multiscale point cloud, etc.)
 
-        Args:
+        Parameters
             shape (Union[shape_type,list[shape_type]]): A shape or a list of
                 shapes.
             correspondence (bool, optional): Wether the shapes of the list

@@ -24,9 +24,10 @@ class RigidMotion(BaseModel):
 
     @typecheck
     def __init__(self, n_steps: int = 1) -> None:
-        """Initialize the model
+        """Initialize the model.
 
-        Args:
+        Parameters
+        ----------
             n_steps (int, optional): number of steps. Defaults to 1.
         """
         self.n_steps = n_steps
@@ -41,22 +42,32 @@ class RigidMotion(BaseModel):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
-        """Morph a shape using the rigid motion model
+        """Morph a shape using the rigid motion model.
 
-        The parameter is a (2, 3) tensor, where the first row is the rotation
-        axis-angle and the second row is the translation vector.
+        If the data is 3D The parameter must be  a (2, 3) tensor, where the
+        first row is the axis-angle rotations and the second row is the
+        translation vector.
 
-        Args:
-            shape (polydata_type): shape to morph
-            parameter ((2, 3) tensor) : rigid motion parameters
-            return_path (bool, optional): True if you want to have access to
-                the morphing's sequence of polydatas. Defaults to False.
-            return_regularization (bool, optional): True to have access to the
-                regularization. Defaults to False.
+        If the data is 2D, the parameter must be a (3,) tensor, where the first
+        element is the rotation angle and the two last elements are the
+        translation vector.
 
-        Returns:
-            MorphingOutput: a named tuple containing the morphed shape, the
-                regularization and the path if needed.
+        Parameters
+        ----------
+        shape
+            The shape to morph.
+        parameter
+            The rigid motion parameter.
+        return_path
+            True if you want to have access to the sequence of polydatas.
+        return_regularization
+            True to have access to the regularization.
+
+        Returns
+        -------
+        MorphingOutput
+            A named tuple containing the morphed shape, the regularization and
+            the path if needed.
         """
         if parameter.device != shape.device:
             parameter = parameter.to(shape.device)
@@ -86,7 +97,7 @@ class RigidMotion(BaseModel):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
-        #####
+        """Morphing for 3D shapes."""
         rotation_angles = parameter[0]
         rotation_matrix = axis_angle_to_matrix(rotation_angles)
         translation = parameter[1]
@@ -96,7 +107,6 @@ class RigidMotion(BaseModel):
             + center
             + translation
         )
-        #####
 
         morphed_shape = shape.copy()
         morphed_shape.points = newpoints
@@ -109,19 +119,14 @@ class RigidMotion(BaseModel):
 
             else:
                 path = [shape.copy()]
-                small_rotation_angles = (
-                    1 / self.n_steps
-                ) * rotation_angles
+                small_rotation_angles = (1 / self.n_steps) * rotation_angles
                 small_rotation_matrix = axis_angle_to_matrix(
                     small_rotation_angles
                 )
                 small_translation = (1 / self.n_steps) * translation
                 for i in range(self.n_steps):
                     newpoints = (
-                        (
-                            small_rotation_matrix
-                            @ (shape.points - center).T
-                        ).T
+                        (small_rotation_matrix @ (shape.points - center).T).T
                         + center
                         + small_translation
                     )
@@ -144,14 +149,17 @@ class RigidMotion(BaseModel):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
+        """Morphing for 2D shapes."""
         assert parameter.shape == (3,)
         theta = parameter[0]
         translation = parameter[1:]
 
-        # We need to create the rotation matrix on the rigth device
+        # We need to create the rotation matrix on the right device
         # first, then updates its values with the values of the parameter
         # tensor to let autograd do its job
-        rotation_matrix = torch.zeros((2, 2), device=parameter.device)
+        rotation_matrix = torch.zeros(
+            (2, 2), device=parameter.device, dtype=parameter.dtype
+        )
         rotation_matrix[0, 0] = torch.cos(theta)
         rotation_matrix[0, 1] = -torch.sin(theta)
         rotation_matrix[1, 0] = torch.sin(theta)
@@ -177,7 +185,7 @@ class RigidMotion(BaseModel):
 
             else:
                 path = [shape.copy()]
-                small_theta = (1 / self.n_steps) * theta
+                small_theta = (1 / (self.n_steps)) * theta
                 small_rotation = torch.tensor(
                     [
                         [torch.cos(small_theta), -torch.sin(small_theta)],
@@ -185,7 +193,7 @@ class RigidMotion(BaseModel):
                     ],
                     device=parameter.device,
                 )
-                small_translation = (1 / self.n_steps) * translation
+                small_translation = (1 / (self.n_steps)) * translation
                 for i in range(self.n_steps):
                     center = path[-1].points.mean(dim=0)
                     newpoints = (
@@ -207,13 +215,17 @@ class RigidMotion(BaseModel):
     def parameter_shape(
         self, shape: shape_type
     ) -> Union[tuple[int, int], tuple[int]]:
-        """Return the shape of the parameter
+        """Return the shape of the parameter.
 
-        Args:
-            shape (polydata_type): the shape to morph
+        Parameters
+        ----------
+        shape
+            The shape to morph.
 
-        Returns:
-            tuple[int, int]: the shape of the parameter
+        Returns
+        -------
+        Union[tuple[int, int]
+            The shape of the parameter.
         """
         if shape.dim == 3:
             return (2, 3)
@@ -227,14 +239,17 @@ def axis_angle_to_quaternion(axis_angle: torch.Tensor) -> torch.Tensor:
     """
     Convert rotations given as axis/angle to quaternions.
 
-    Args:
-        axis_angle: Rotations given as a vector in axis angle form,
-            as a tensor of shape (..., 3), where the magnitude is
-            the angle turned anticlockwise in radians around the
-            vector's direction.
+    Parameters
+    ----------
+    axis_angle
+        Rotations given as a vector in axis angle form, as a tensor of shape
+        (..., 3), where the magnitude is the angle turned anticlockwise in
+        radians around the vector's direction.
 
-    Returns:
-        quaternions with real part first, as tensor of shape (..., 4).
+    Returns
+    -------
+    torch.Tensor
+        Quaternions with real part first, as tensor of shape (..., 4).
     """
     angles = torch.norm(axis_angle, p=2, dim=-1, keepdim=True)
     half_angles = angles * 0.5
@@ -262,11 +277,13 @@ def quaternion_to_matrix(quaternions: torch.Tensor) -> torch.Tensor:
     """
     Convert rotations given as quaternions to rotation matrices.
 
-    Args:
-        quaternions: quaternions with real part first,
-            as tensor of shape (..., 4).
+    Parameters
+    ----------
+    quaternions
+        Quaternions with real part first, as tensor of shape (..., 4).
 
-    Returns:
+    Returns
+    -------
         Rotation matrices as tensor of shape (..., 3, 3).
     """
     r, i, j, k = torch.unbind(quaternions, -1)
@@ -292,4 +309,18 @@ def quaternion_to_matrix(quaternions: torch.Tensor) -> torch.Tensor:
 @convert_inputs
 @typecheck
 def axis_angle_to_matrix(axis_angle: torch.Tensor) -> torch.Tensor:
+    """Convert rotations given as axis/angle to rotation matrices.
+
+    Parameters
+    ----------
+    axis_angle
+        Rotations given as a vector in axis angle form, as a tensor of shape
+        (..., 3), where the magnitude is the angle turned anticlockwise in
+        radians around the vector's direction.
+
+    Returns
+    -------
+    torch.Tensor
+        Rotation matrices as tensor of shape (..., 3, 3).
+    """
     return quaternion_to_matrix(axis_angle_to_quaternion(axis_angle))

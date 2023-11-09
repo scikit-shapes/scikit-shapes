@@ -8,7 +8,7 @@ from ..types import typecheck, Points, Triangles, Number
 def structure_tensors(*, points: Points, scale=1.0, ranges=None):
     """Compute the structure tensors of a point cloud.
 
-    Args:
+    Parameters
         points (Tensor): (N, 3) coordinates of the points or mesh vertices.
         scale (float, optional): smoothing scale. Defaults to 1.
 

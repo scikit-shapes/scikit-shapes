@@ -1,4 +1,4 @@
-""" Vector field deformation model.
+"""Vector field deformation model.
 
 This module contains the implementation of the vector field deformation model.
 This model is described by a sequence of speed vectors, which are summed
@@ -25,13 +25,15 @@ class VectorFieldDeformation(BaseModel):
     def __init__(
         self, n_steps: int = 1, metric: Metric = ElasticMetric()
     ) -> None:
-        """Initialize the model
+        """Initialize the model.
 
-        Args:
-            n_steps (int, optional): Number of integration steps.
-                Defaults to 1.
-            metric (Metric, optional): Riemannian metric used to regularize
-                the morphing. Defaults to ElasticMetric().
+        Parameters
+        ----------
+        n_steps
+            Number of integration steps.
+        metric
+            Riemannian metric used to regularize the morphing.
+
         """
         self.n_steps = n_steps
         self.metric = metric
@@ -45,20 +47,25 @@ class VectorFieldDeformation(BaseModel):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
-        """Morph a shape using the vector field deformation algorithm
+        """Morph a shape.
 
-        Args:
-            shape (polydata_type): shape to morph
-            parameter ((n_points, n_steps, 3) tensor): sequence of speed
-                vectors
-            return_path (bool, optional): True if you want to have access to
-                the morphing's sequence of polydatas. Defaults to False.
-            return_regularization (bool, optional): True to have access to the
-                regularization. Defaults to False.
+        Parameters
+        ----------
+        shape
+            The shape to morph.
+        parameter
+            Sequence of velocity vectors.
+        return_path
+            True if you want to have access to the morphing's sequence of
+            polydatas.
+        return_regularization
+            True to have access to the regularization.
 
-        Returns:
-            MorphingOutput: a named tuple containing the morphed shape, the
-                regularization and the path if needed.
+        Returns
+        -------
+        MorphingOutput
+            A named tuple containing the morphed shape, the regularization and
+            the path if requested.
         """
         if parameter.device != shape.device:
             parameter = parameter.to(shape.device)
@@ -120,13 +127,17 @@ class VectorFieldDeformation(BaseModel):
 
     @typecheck
     def parameter_shape(self, shape: polydata_type) -> tuple[int, int, int]:
-        """Return the shape of the parameter
+        """Return the shape of the parameter.
 
-        Args:
-            shape (polydata_type): the shape to morph
+        Parameters
+        ----------
+        shape
+            The shape to morph.
 
-        Returns:
-            tuple[int, int, int]: the shape of the parameter
+        Returns
+        -------
+            The shape of the parameter.
+
         """
         n_points = shape.points.shape[0]
         dim = shape.dim

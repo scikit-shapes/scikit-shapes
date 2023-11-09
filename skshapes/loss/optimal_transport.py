@@ -24,11 +24,14 @@ class OptimalTransportLoss(BaseLoss):
         For mor details on the arguments, see the documentation of geomloss:
         https://www.kernel-operations.io/geomloss/api/pytorch-api.html
 
-        Args:
-            loss (str, optional): The loss function to compute. Supported
-                values are "sinkhorn", "hausdorff", "energy", "gaussian" and
-                "laplacian". Defaults to "sinkhorn".
-            **kwargs: additional arguments passed to the geomloss.SamplesLoss
+        Parameters
+        ----------
+        loss
+            The loss function to compute. Supported values are "sinkhorn",
+            "hausdorff", "energy", "gaussian" and "laplacian".
+        **kwargs
+            additional arguments passed to the geomloss.SamplesLoss object.
+
         """
         self.kwargs = kwargs
         self.loss = loss
@@ -44,19 +47,25 @@ class OptimalTransportLoss(BaseLoss):
         converted to WeightedPoints objects, and then the loss is computed
         using the geomloss library.
 
-        Args:
-            source (polydata_type): the source shape
-            target (polydata_type): the target shape
+        Parameters
+        ----------
+        source
+            the source shape
+        target
+            the target shape
 
-        Returns:
-            FloatScalar: the loss
+        Returns
+        -------
+            the loss
         """
         super().__call__(source=source, target=target)
         target_points = target.points
         target_weights = target.point_weights
+        target_weights = target_weights / target_weights.sum()
 
         source_points = source.points
         source_weights = source.point_weights
+        source_weights = source_weights / source_weights.sum()
 
         Loss = SamplesLoss(loss=self.loss, **self.kwargs)
         return Loss(

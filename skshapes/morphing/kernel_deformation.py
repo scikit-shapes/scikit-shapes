@@ -1,4 +1,4 @@
-"""This module implements the kernel deformation morphing algorithm.
+"""Kernel deformation morphing algorithm.
 
 This algorithm decribes the morphing as a deformation of the ambiant space.
 The parameter is a vector field, which is referred to as the momentum. This
@@ -17,12 +17,13 @@ from ..types import (
     Points,
     polydata_type,
 )
+from typing import Optional, Literal
 from .utils import MorphingOutput, Integrator, EulerIntegrator
 from .kernels import Kernel, GaussianKernel
 
 
 class KernelDeformation(BaseModel):
-    """Kernel deformation morphing algorithm"""
+    """Kernel deformation morphing algorithm."""
 
     @typecheck
     def __init__(
@@ -30,21 +31,25 @@ class KernelDeformation(BaseModel):
         n_steps: int = 1,
         integrator: Integrator = EulerIntegrator(),
         kernel: Kernel = GaussianKernel(),
+        control_points: Optional[Literal["grid"]] = None,
+        n_grid: int = 10,
         **kwargs,
     ) -> None:
-        """Initialize the model
+        """Class constructor.
 
-        Args:
-            n_steps (int, optional): Number of integration steps.
-                Defaults to 1.
-            integrator (Integrator, optional): Hamiltonian integrator.
-                Defaults to EulerIntegrator().
-            kernel (Kernel, optional): Kernel used to smooth the momentum.
-                Defaults to GaussianKernel().
+        Parameters
+        ----------
+        n_steps
+            Number of integration steps.
+        integrator
+            Hamiltonian integrator.
+        kernel
+            Kernel used to smooth the momentum.
         """
         self.integrator = integrator
         self.cometric = kernel
         self.n_steps = n_steps
+        self.control_points = control_points
 
     @typecheck
     def morph(
@@ -54,19 +59,24 @@ class KernelDeformation(BaseModel):
         return_path: bool = False,
         return_regularization: bool = False,
     ) -> MorphingOutput:
-        """Morph a shape using the kernel deformation algorithm
+        """Morph a shape using the kernel deformation algorithm.
 
-        Args:
-            shape (polydata_type): the shape to morph
-            parameter (Points): the momentum
-            return_path (bool, optional): True if you want to have access to
-                the morphing's sequence of polydatas. Defaults to False.
-            return_regularization (bool, optional): True to have access to the
-                regularization. Defaults to False.
+        Parameters
+        ----------
+        shape
+            The shape to morph.
+        parameter
+            The momentum.
+        return_path
+            True if you want to have access to the sequence of polydatas.
+        return_regularization
+            True to have access to the regularization.
 
-        Returns:
-            MorphingOutput: a named tuple containing the morphed shape, the
-                regularization and the path if needed.
+        Returns
+        -------
+        MorphingOutput
+            A named tuple containing the morphed shape, the regularization and
+            the path if needed.
         """
         if parameter.device != shape.device:
             p = parameter.to(shape.device)
@@ -109,12 +119,22 @@ class KernelDeformation(BaseModel):
 
     @typecheck
     def parameter_shape(self, shape: polydata_type) -> tuple[int, int]:
-        """Return the shape of the parameter
+        """Return the shape of the parameter.
 
-        Args:
-            shape (polydata_type): the shape to morph
+        Parameters
+        ----------
+        shape
+            The shape to morph.
 
-        Returns:
-            tuple[int, int]: the shape of the parameter
+        Returns
+        -------
+        tuple[int, int]
+            The shape of the parameter.
         """
-        return shape.points.shape
+        if self.control_points is None:
+            return shape.points.shape
+
+        elif shape.dim == 2:
+            return (self.n_grid**2, 2)
+        elif shape.dim == 3:
+            return (self.n_grid**3, 3)

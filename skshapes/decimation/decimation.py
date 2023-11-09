@@ -44,7 +44,7 @@ class Decimation:
         the desired number of points in lox-resulution mesh and choose between
         vtk and sks implementations.
 
-        Args:
+        Parameters
             target_reduction (float, optional): The target reduction of the
                 number of points in the low-resolution mesh. Must be between
                 0 and1. Defaults to None.
@@ -79,7 +79,7 @@ class Decimation:
         """
         Fit the decimation algorithm to a mesh.
 
-        Args:
+        Parameters
             mesh (PolyData): The mesh to fit the decimation object to.
         """
 
@@ -120,7 +120,7 @@ class Decimation:
     ) -> PolyData:
         """
         Transform a mesh using the decimation algorithm.
-        Args:
+        Parameters
             mesh (PolyData): The mesh to transform.
             target_reduction (float, optional): The target reduction of the
                 number of points in the low-resolution mesh. Must be between 0

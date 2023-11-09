@@ -1,4 +1,4 @@
-"""This module contains utility functions for morphing
+"""Utility functions for morphing.
 
 It defines a named tuple MorphingOutput which is used to return the result of
 the morphing algorithms.
@@ -12,41 +12,49 @@ from ..types import typecheck, FloatScalar, Number, Points
 
 
 class MorphingOutput(NamedTuple):
+    """Named tuple containing the result of the morphing algorithms."""
+
     morphed_shape: Optional[Shape] = None
     regularization: Optional[FloatScalar] = None
     path: Optional[list[Shape]] = None
 
 
 class Integrator:
-    """All hamiltonian integrators used in spline models should inherit from
-    this class"""
+    """Base class for integrators."""
 
     pass
 
 
 class EulerIntegrator(Integrator):
-    """A basic Euler integrator for Hamiltonian systems"""
+    """A basic Euler integrator for Hamiltonian systems."""
 
     def __init__(self) -> None:
-        """Initialize the integrator"""
+        """Initialize the integrator."""
         pass
 
     @typecheck
     def __call__(
         self, p: Points, q: Points, H, dt: Number
     ) -> tuple[Points, Points]:
-        """Update the position and momentum using the Euler integrator
+        """Update the position and momentum using the Euler integrator.
 
-        Args:
-            p (Points): momentum
-            q (Points): position
-            H (Callable): Hamiltonian
-            dt (Number): time step
+        Parameters
+        ----------
+        p
+            The momentum.
+        q
+            The position.
+        H
+            The Hamiltonian function.
+        dt
+            The time step.
 
-        Returns:
-            tuple[Points, Points]: (momentum, position)
+        Returns
+        -------
+        tuple[Points, Points]
+            (momentum, position)
+
         """
-
         Gp, Gq = torch.autograd.grad(H(p, q), (p, q), create_graph=True)
 
         pdot, qdot = -Gq, Gp

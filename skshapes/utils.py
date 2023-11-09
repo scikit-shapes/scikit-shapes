@@ -1,4 +1,4 @@
-"""This module contains utility functions for the skshapes package."""
+"""Utility functions for the skshapes package."""
 
 import torch
 from .types import (
@@ -54,22 +54,26 @@ def scatter(
     min_length: Optional[int] = None,
     blank_value: Number = 0,
 ):
-    """Perform a scatter operation on a tensor.
+    """Scatter operation on a tensor.
 
     This function is a wrapper around the pytorch scatter function. Available
-    reduce operations are "sum", "min", "max", "mean".
+    reduce operations are "sum", "min", "max", "mean". It is compatible with
+    automatic differentiation.
 
-    Args:
-        src (NumericalTensor): The source tensor.
-        index (Int1dTensor): The indices of the elements to scatter.
-        reduce (Literal["sum", "min", "max", "mean"], optional): The reduce
-            operation to apply. Defaults to "mean".
-        min_length (Optional[int], optional): The minimum length of the output
-            tensor. If None it is set according to the highest index value.
-            Defaults to None.
-        blank_value (Number, optional): The value to set for the elements of
-            the output tensor that are not referenced by the index tensor.
-            Defaults to 0.
+    Parameters
+    ----------
+    src
+        The source tensor.
+    index
+        The indices of the elements to scatter.
+    reduce
+        The reduce operation to apply. Defaults to "mean".
+    min_length
+        The minimum length of the output tensor. If None it is set according to
+        the highest index value.
+    blank_value
+        The value to set for the elements of the output tensor that are not
+        referenced by the index tensor.
     """
     if src.device != index.device:
         raise RuntimeError(

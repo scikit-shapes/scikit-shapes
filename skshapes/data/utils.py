@@ -1,4 +1,4 @@
-"""This module contains utility functions and classes for the data module."""
+"""Utility functions and classes for the data module."""
 
 from __future__ import annotations
 from functools import lru_cache, partial, update_wrapper
@@ -39,7 +39,7 @@ class DataAttributes(dict):
             where i is the minimum integer such that "attribute_{i}" is not
             already in the dictionary
 
-    Args:
+    Parameters
         n (int): The number of elements of the set
         device (torch.device): The device on which the attributes should be
                                 stored
@@ -127,7 +127,7 @@ class DataAttributes(dict):
     ) -> DataAttributes:
         """Create a DataAttributes object from a dictionary of attributes
 
-        Args:
+        Parameters
             attributes (dict[str, Union[FloatTensor, IntTensor]]): The
                                         dictionary of attributes
 
@@ -179,7 +179,7 @@ class DataAttributes(dict):
         """Create a DataAttributes object from a pyvista.DataSetAttributes
             object
 
-        Args:
+        Parameters
             attributes (pyvista.DataSetAttributes): The
                 pyvista.DataSetAttributes object
 

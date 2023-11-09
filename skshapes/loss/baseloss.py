@@ -25,11 +25,12 @@ class BaseLoss:
 
     @typecheck
     def __init__(self) -> None:
-        """Constructor of the BaseLoss class.
+        """Class constructor.
 
-        Raises:
-            NotImplementedError: this class is abstract and should not be
-            instantiated
+        Raises
+        ------
+        NotImplementedError
+            this class is abstract and should not be instantiated
         """
         raise NotImplementedError(
             "BaseLoss is an abstract class and should not be instantiated"
@@ -37,17 +38,20 @@ class BaseLoss:
 
     @typecheck
     def __add__(self, other: BaseLoss) -> BaseLoss:
-        """Addition of two losses
+        """Addition of two losses.
 
-        Args:
-            self (Loss): the first loss to add
-            other (Loss): the other loss to add to self
+        Parameters
+        ----------
+        other
+            the loss to add to self
 
-        Returns:
-            SumLoss: a new loss which __call__ method is the sum of the two
-            __call__ methods
+        Returns
+        -------
+        BaseLoss
+            a new loss which __call__ method is the sum of the two __call__
+            methods
+
         """
-
         loss1 = self
         loss2 = other
 
@@ -55,14 +59,18 @@ class BaseLoss:
 
     @typecheck
     def __rmul__(self, scalar: Number) -> BaseLoss:
-        """(Right) multiplication of a loss by a scalar
+        """(Right) multiplication of a loss by a scalar.
 
-        Args:
-            scalar (Number): the scalar to multiply the loss by
+        Parameters
+        ----------
+        scalar
+            the scalar to multiply the loss by
 
-        Returns:
-            Loss: a new loss which __call__ method is the product of the
-            scalar and the self.__call__ method
+        Returns
+        -------
+        Loss
+            a new loss which __call__ method is the product of the scalar and
+            the self.__call__ method
         """
         loss = self
         return ProductLoss(loss=loss, scalar=scalar)
@@ -71,6 +79,21 @@ class BaseLoss:
     def __call__(
         self, source: shape_type, target: shape_type, **kwargs: Any
     ) -> Any:
+        """Assert that the source and target shapes are on the same device.
+
+        Parameters
+        ----------
+        source
+            source shape
+        target
+            target shape
+
+        Raises
+        ------
+        ValueError
+            if the source and target shapes are not on the same device
+
+        """
         if source.device != target.device:
             raise ValueError(
                 "Source and target shapes must be on the same device, found"
@@ -89,7 +112,7 @@ class EmptyLoss(BaseLoss):
 
     @typecheck
     def __init__(self) -> None:
-        """Constructor of the EmptyLoss class."""
+        """Class constructor."""
         pass
 
     @typecheck
@@ -118,15 +141,15 @@ class SumLoss(BaseLoss):
     def __init__(
         self, loss1: BaseLoss = EmptyLoss(), loss2: BaseLoss = EmptyLoss()
     ) -> None:
-        """Constructor of the SumLoss class.
+        """Class constructor.
 
         It saves the two losses as attributes of the class.
 
-        Args:
-            loss1 (Loss, optional). Defaults to EmptyLoss().
-            loss2 (Loss, optional). Defaults to EmptyLoss().
+        Parameters
+        ----------
+        loss1
+        loss2
         """
-
         self.loss1 = loss1
         self.loss2 = loss2
 
@@ -136,14 +159,19 @@ class SumLoss(BaseLoss):
 
         It returns the sum of the two losses.
 
-        Args:
-            source (shape_type): further restrictions on the source shape's
-                type can be imposed by the added losses
-            target (shape_type): further restrictions on the target shape's
-                type can be imposed by the added losses
+        Parameters
+        ----------
+        source
+            further restrictions on the source shape's type can be imposed by
+            the added losses
+        target
+            further restrictions on the target shape's type can be imposed by
+            the added losses
 
-        Returns:
-            FloatScalar: the sum of the two losses
+        Returns
+        -------
+        FloatScalar
+            the sum of the two losses
         """
         return self.loss1.__call__(
             source=source, target=target
@@ -162,13 +190,16 @@ class ProductLoss(BaseLoss):
     def __init__(
         self, loss: BaseLoss = EmptyLoss(), scalar: Number = 1.0
     ) -> None:
-        """Constructor of the ProductLoss class.
+        """Class constructor.
 
         It saves the loss and the scalar as attributes of the class.
 
-        Args:
-            loss (Loss, optional). Defaults to EmptyLoss().
-            scalar (Number, optional). Defaults to 1.0.
+        Parameters
+        ----------
+        loss
+            loss function to be multiplied by the scalar
+        scalar
+            scalar to multiply the loss by
         """
         self.loss = loss
         self.scalar = scalar
@@ -177,11 +208,16 @@ class ProductLoss(BaseLoss):
     def __call__(self, source: shape_type, target: shape_type) -> FloatScalar:
         """Compute the loss.
 
-        Args:
-            source (shape_type): the source shape
-            target (shape_type): the target shape
+        Parameters
+        ----------
+        source
+            the source shape
+        target
+            the target shape
 
-        Returns:
-            FloatScalar: the loss
+        Returns
+        -------
+        FloatScalar
+            the loss
         """
         return self.scalar * self.loss.__call__(source=source, target=target)

@@ -1,6 +1,6 @@
 """Registration between two shapes."""
 
-from ..optimization import Optimizer
+from ..optimization import Optimizer, LBFGS
 from ..types import (
     typecheck,
     convert_inputs,
@@ -15,7 +15,7 @@ import torch
 
 
 class Registration:
-    """Registration class
+    """Registration class.
 
     This class implements the registration between two shapes. It must be
     initialized with a model, a loss and an optimizer. The registration is
@@ -30,29 +30,33 @@ class Registration:
         *,
         model: Model,
         loss: Loss,
-        optimizer: Optimizer,
+        optimizer: Optimizer = LBFGS(),
         regularization: Union[int, float] = 1,
         n_iter: int = 10,
         verbose: int = 0,
         gpu: bool = True,
         **kwargs,
     ) -> None:
-        """Initialize the registration object
+        """Initialize the registration object.
 
-        Args:
-            model (Model): a model object (from skshapes.morphing)
-            loss (Loss): a loss object (from skshapes.loss)
-            optimizer (Optimizer): an optimizer object
-                (from skshapes.optimization)
-            regularization (Union[int, float], optional): the regularization
-                parameter for the criterion : loss + regularization * reg.
-                Defaults to 1.
-            n_iter (int, optional): number of iteration for optimization
-                process. Defaults to 10.
-            verbose (int, optional): >1 to print the losses after each
-                optimization loop iteration. Defaults to 0.
-            gpu (bool, optional): do intensive numerical computations on a
-                nvidia gpu with a cuda backend if available. Defaults to True.
+        Parameters
+        ----------
+        model
+            a model object (from skshapes.morphing)
+        loss
+            a loss object (from skshapes.loss)
+        optimizer
+            an optimizer object (from skshapes.optimization)
+        regularization
+            the regularization parameter for the criterion :
+            loss + regularization * reg.
+        n_iter
+            number of iteration for optimization process.
+        verbose
+            positive to print the losses after each optimization loop iteration
+        gpu:
+            do intensive numerical computations on a nvidia gpu with a cuda
+            backend if available.
         """
         self.model = model
         self.loss = loss
@@ -83,18 +87,27 @@ class Registration:
         target: shape_type,
         initial_parameter: Optional[FloatTensor] = None,
     ) -> None:
-        """Fit the registration between the source and target shapes
+        """Fit the registration between the source and target shapes.
 
         After calling this method, the registration's parameter can be accessed
         with the parameter_ attribute, the transformed shape with the
         transformed_shape_ attribute and the list of successives shapes during
         the registration process with the path_ attribute.
 
-        Args:
-            source (shape_type): a shape object (from skshapes.shapes)
-            target (shape_type): a shape object (from skshapes.shapes)
-            initial_parameter (FloatTensor, optional): an initial parameter
-                tensor for the optimization process. Defaults to None.
+        Parameters
+        ----------
+        source : shape_object
+            a shape object (from skshapes.shapes)
+        target
+            a shape object (from skshapes.shapes)
+        initial_parameter
+            an initial parameter tensor for the optimization process.
+            Defaults to None.
+
+        Raises
+        ------
+        ValueError
+            if the source and target shapes are not on the same device.
         """
         # Check that the shapes are on the same device
         if source.device != target.device:
@@ -126,10 +139,16 @@ class Registration:
                 return_regularization=return_regularization,
             )
 
-            return (
-                self.loss(source=morphing.morphed_shape, target=target)
-                + self.regularization * morphing.regularization
-            )
+            loss = self.loss(source=morphing.morphed_shape, target=target)
+            total_loss = loss + self.regularization * morphing.regularization
+
+            if self.verbose > 0:
+                self.current_loss = loss.clone().detach()
+                self.current_regularization = (
+                    morphing.regularization.clone().detach()
+                )
+
+            return total_loss
 
         # Initialize the parameter tensor
         parameter_shape = self.model.parameter_shape(shape=source)
@@ -162,11 +181,22 @@ class Registration:
             loss_value.backward()
             return loss_value
 
+        if self.verbose > 0:
+            loss_value = loss_fn(parameter)
+            print(f"Initial loss : {loss_fn(parameter):.2e}")
+            print(f"    fidelity = {self.current_loss:.2e}")
+            print(f"    regularization = {self.current_regularization:.2e}")
+
         # Run the optimization
         for i in range(self.n_iter):
             loss_value = optimizer.step(closure)
             if self.verbose > 0:
-                print(f"Loss value at iteration {i} : {loss_value}")
+                loss_value = loss_fn(parameter)
+                print(f"Loss after {i+1} iteration(s) : {loss_value:.2e}")
+                print(f"    fidelity = {self.current_loss:.2e}")
+                print(
+                    f"    regularization = {self.current_regularization:.2e}"
+                )
 
         # Store the device type of the parameter (useful for testing purposes)
         self.internal_parameter_device_type = parameter.device.type
@@ -200,13 +230,17 @@ class Registration:
 
     @typecheck
     def transform(self, *, source: shape_type) -> shape_type:
-        """Apply the registration to a new shape
+        """Apply the registration to a new shape.
 
-        Args:
-            source (shape_type): the shape to transform
+        Parameters
+        ----------
+        source
+            the shape to transform.
 
-        Returns:
-            shape_type: the transformed shape
+        Returns
+        -------
+        shape_type
+            the transformed shape.
         """
         if not hasattr(self, "parameter_"):
             raise ValueError(
@@ -231,8 +265,7 @@ class Registration:
         target: shape_type,
         initial_parameter: Optional[FloatTensor] = None,
     ) -> shape_type:
-        """Fit the registration and apply it to the source shape"""
-
+        """Fit the registration and apply it to the source shape."""
         self.fit(
             source=source, target=target, initial_parameter=initial_parameter
         )

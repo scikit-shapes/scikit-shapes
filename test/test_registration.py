@@ -36,6 +36,7 @@ list_optimizers = [
     gpu=st.booleans(),
     verbose=st.booleans(),
     provide_initial_parameter=st.booleans(),
+    dim=st.integers(min_value=2, max_value=3),
 )
 @settings(deadline=None, max_examples=5)
 def test_registration_hypothesis(
@@ -47,6 +48,7 @@ def test_registration_hypothesis(
     gpu,
     verbose,
     provide_initial_parameter,
+    dim,
 ):
     if (
         gpu
@@ -57,8 +59,15 @@ def test_registration_hypothesis(
 
     # Load two meshes
 
-    source = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
-    target = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
+    if dim == 3:
+        source = sks.Sphere().decimate(target_reduction=0.95)
+        target = sks.Sphere().decimate(target_reduction=0.95)
+    else:
+        source = sks.Circle(n_points=20)
+        target = sks.Circle(n_points=20)
+
+    assert source.dim == target.dim
+    assert source.dim == dim
 
     source.landmark_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     target.landmark_indices = [9, 10, 11, 12, 13, 14, 15, 16, 17]
@@ -106,10 +115,10 @@ def test_registration_hypothesis(
     r.fit(source=source, target=target, initial_parameter=initial_parameter)
 
     # Transform
-    output1 = r.transform(source=source)
+    r.transform(source=source)
 
     # Fit_transform
-    output2 = r.fit_transform(
+    r.fit_transform(
         source=source, target=target, initial_parameter=initial_parameter
     )
 

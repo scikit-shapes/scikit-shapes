@@ -127,7 +127,7 @@ def smooth_normals(
     If more than one scale is provided, normal fields are computed in parallel
     and returned in a single 3D tensor.
 
-    Args:
+    Parameters
         vertices (Tensor): (N,3) coordinates of mesh vertices or 3D points.
         triangles (integer Tensor, optional): (3,T) mesh connectivity. Defaults to None.
         scale (list of floats, optional): (S,) radii of the Gaussian smoothing windows. Defaults to [1.].
@@ -206,7 +206,7 @@ def tangent_vectors(normals):
     This routine assumes that the 3D "normal" vectors are normalized.
     It is based on the 2017 paper from Pixar, "Building an orthonormal basis, revisited".
 
-    Args:
+    Parameters
         normals (Tensor): (N,3) or (N,S,3) normals `n_i`, i.e. unit-norm 3D vectors.
 
     Returns:

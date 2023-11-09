@@ -5,20 +5,6 @@ from ..types import typecheck, FloatScalar, Number, polydata_type
 from .baseloss import BaseLoss
 
 
-@typecheck
-def _norm(x: torch.Tensor, p: Number) -> FloatScalar:
-    """Compute the Lp norm of a tensor.
-
-    Args:
-        x (torch.Tensor): the tensor to compute the norm of
-        p (Number): the indice of the Lp norm
-
-    Returns:
-        FloatScalar: the Lp norm of x
-    """
-    return torch.norm(x, p=p)
-
-
 class LpLoss(BaseLoss):
     """Lp loss for PolyData.
 
@@ -34,10 +20,12 @@ class LpLoss(BaseLoss):
 
     @typecheck
     def __init__(self, p: Number = 2) -> None:
-        """Constructor of the LpLoss class.
+        """Class constructor.
 
-        Args:
-            p (Number, optionnal): the indice of the Lp Norm. Default to 2
+        Parameters
+        ----------
+        p
+            the indice of the Lp Norm. Default to 2
         """
         if p <= 0:
             raise ValueError("p must be positive")
@@ -50,12 +38,17 @@ class LpLoss(BaseLoss):
     ) -> FloatScalar:
         """Compute the loss.
 
-        Args:
-            source (polydata_type): the source shape
-            target (polydata_type): the target shape
+        Parameters
+        ----------
+        source
+            the source shape
+        target
+            the target shape
 
-        Returns:
-            FloatScalar: the loss
+        Returns
+        -------
+        FloatScalar
+            the loss
         """
         super().__call__(source=source, target=target)
         return torch.norm(source.points - target.points, p=self.p)
@@ -69,6 +62,13 @@ class L2Loss(BaseLoss):
     """
 
     def __new__(cls) -> LpLoss:
+        """Create a new instance of the LpLoss class with p=2.
+
+        Returns
+        -------
+        LpLoss
+            the LpLoss class with p=2
+        """
         return LpLoss(p=2)
 
 
@@ -92,8 +92,10 @@ class LandmarkLoss(BaseLoss):
     def __init__(self, p: Number = 2) -> None:
         """Initialize the LandmarkLoss class.
 
-        Args:
-            p (Number, optional): the indice of the Lp Norm. Defaults to 2.
+        Parameters
+        ----------
+        p
+            the indice of the Lp Norm. Defaults to 2.
         """
         assert p > 0, "p must be positive"
         self.p = p
@@ -104,14 +106,19 @@ class LandmarkLoss(BaseLoss):
     ) -> FloatScalar:
         """Compute the loss.
 
-        Args:
-            source (polydata_type): the source shape
-            target (polydata_type): the target shape
+        Parameters
+        ----------
+        source
+            the source shape
+        target
+            the target shape
 
-        Returns:
-            FloatScalar: the loss
+        Returns
+        -------
+        FloatScalar
+            the loss
         """
         super().__call__(source=source, target=target)
-        return _norm(
-            x=(source.landmark_points - target.landmark_points), p=self.p
+        return torch.norm(
+            (source.landmark_points - target.landmark_points), p=self.p
         )

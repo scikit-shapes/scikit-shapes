@@ -29,12 +29,16 @@ class NearestNeighborsLoss(BaseLoss):
     ) -> FloatScalar:
         """Compute the loss.
 
-        Args:
-            source (polydata_type): the source shape
-            target (polydata_type): the target shape
+        Parameters
+        ----------
+        source
+            the source shape
+        target
+            the target shape
 
-        Returns:
-            FloatScalar: the loss
+        Returns
+        -------
+            the loss
         """
         super().__call__(source=source, target=target)
 
