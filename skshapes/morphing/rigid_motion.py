@@ -28,7 +28,8 @@ class RigidMotion(BaseModel):
 
         Parameters
         ----------
-            n_steps (int, optional): number of steps. Defaults to 1.
+        n_steps
+            Number of steps.
         """
         self.n_steps = n_steps
         pass
