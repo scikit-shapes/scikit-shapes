@@ -18,7 +18,22 @@ Scikit-shapes is a python package for the analysis of 2D and 3D shape data. It g
 
 - efficient : skshapes relies mostly on pyTorch and pyKeOps for computations. It allows to speed-up numerical intensive part of the analysis with parallelization on CPU or GPU.
 
-ajouter bout de code
+```python
+import skshapes as sks
+
+shape1 = sks.read("data/shape1.vtk")
+shape2 = sks.read("data/shape2.vtk")
+
+registration = sks.Registration(
+
+    model = sks.KernelDeformation(n_steps=5, kernel="gaussian", blur=0.5)
+    loss = sks.NearestNeighborLoss()
+)
+
+registration.fit(source=shape1, target=shape2)
+transformed_shape = registration.transform(source=shape1)
+
+```
 
 
 ### Interoperability and modularity
@@ -30,6 +45,13 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 
 - scikit-learn : when it make sense, we follow the sklearn syntax (`.fit()`, `.transform()`, `.fit_transform()`) for transformers class.
 - ...
+
+## Build documentation
+
+```bash
+pip install -r build_doc_requirements.txt
+mkdocs serve
+```
 
 ## Contributing
 
