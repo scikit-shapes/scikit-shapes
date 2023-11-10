@@ -32,22 +32,27 @@ class MultiscaleTriangleMesh:
         coarse_to_fine_policy: Optional[dict] = None,
         decimation_module: Optional[Decimation] = None,
     ) -> None:
-        """Initialize a multiscale object
-
+        """Initialize a multiscale object.
 
         Parameters
-            shape (Shape): the shape to be multiscaled (will be reffered to as
-                ratio 1)
-            ratios (Sequence of floats): the ratios at which the shape is
-                multiscaled
-            n_points (Sequence of ints): the (approximative) number of points
-                at each ratio
-            fine_to_coarse_policy (dict, optional): the policy for downscaling.
-                Defaults to None.
-            coarse_to_fine_policy (dict, optional): the policy for upscaling.
-                Defaults to None.
-            decimation_module (Decimation, optional): if not None, the
-                decimation module to be used. Defaults to None.
+        ----------
+        shape
+            The shape to be multiscaled (will be reffered to as ratio 1).
+        ratios
+            The ratios of points at which the shape is multiscaled.
+        n_points
+            The (approximative) number of points at each ratio.
+        fine_to_coarse_policy
+            The global policy for downscaling.
+        coarse_to_fine_policy
+            The policy for upscaling.
+        decimation_module
+            If not None, the decimation module to be used.
+
+        Raises
+        ------
+        ValueError
+            If the shape is not a triangle mesh.
         """
         if not shape.is_triangle_mesh():
             raise ValueError(
@@ -115,7 +120,9 @@ class MultiscaleTriangleMesh:
         """Add a ratio to the multiscale object and update the signals.
 
         Parameters
-            ratio (float): ratio to be added
+        ----------
+        ratio
+            The ratio to be added.
         """
         assert 0 < ratio < 1, "ratio must be between 0 and 1"
         if ratio in self.shapes.keys():
@@ -138,10 +145,14 @@ class MultiscaleTriangleMesh:
         If the ratio does not exist, the closest ratio is returned.
 
         Parameters
-            ratio (Number): the ratio at which the shape is returned
+        ----------
+        ratio
+            The ratio at which the shape is returned.
 
-        Returns:
-            Shape: the shape at the given ratio
+        Returns
+        -------
+        polydata_type
+            The shape decimated at the given ratio.
         """
         available_ratios = list(self.shapes.keys())
         # find closest ratio
@@ -150,7 +161,7 @@ class MultiscaleTriangleMesh:
 
     @typecheck
     def __getitem__(self, ratio: Number) -> polydata_type:
-        """Return the shape at a given ratio.        self.update_signals()"""
+        """Return the shape at a given ratio."""
         return self.at(ratio)
 
     @property
@@ -190,26 +201,23 @@ class MultiscaleTriangleMesh:
         If a new ratio is added to the multiscale instance after the adding of
         the signal with add_ratio, all the signals are updated.
 
-        Example :
-        >>> M = sks.Multiscale(shape, ratios=[0.5, 0.1])
-        >>> signal = torch.rand(M.at(0.5).n_points)
-        >>> M.add_signal(key="signal", at=0.5)
-        >>> M.at(0.1)["signal"].shape[0] == M.at(0.1).n_points # True
 
         Parameters
-            key (str): _description_
-            signal (Optional[NumericalTensor], optional): _description_.
-                Defaults to None.
-            at (Number, optional): _description_. Defaults to 1.
-            fine_to_coarse_policy (Optional[dict], optional): _description_.
-                Defaults to None.
-            coarse_to_fine_policy (Optional[dict], optional): _description_.
-                Defaults to None.
+        ----------
+        key
+            If the signal is not specified, the key of the signal in the
+            point_data of the shape at from_ratio.
+        signal
+            The signal to be added. Must be specified if key is not specified,
+            and must have the same number of points as the shape at ratio `at`.
+        at
+            The ratio at which the signal is added.
+        fine_to_coarse_policy
+            The policy for downscaling the signal.
+        coarse_to_fine_policy
+            The policy for upscaling the signal.
 
-        Raises:
-            ValueError: _description_
         """
-
         if from_ratio is None and from_n_points is None:
             raise ValueError(
                 "You must specify either from_ratio or from_n_points"
@@ -287,10 +295,14 @@ class MultiscaleTriangleMesh:
         fine_to_coarse_policy: Optional[dict] = None,
         coarse_to_fine_policy: Optional[dict] = None,
     ) -> None:
-        """Propagate a signal from the origin ratio to the available ratios
-        following the propagation policy.
-        """
+        """Propagate a signal.
 
+        This function propagates a signal from the origin ratio to the
+        available ratios following the propagation policy.
+
+        It is not meant to be called directly, but through the propagate
+        function.
+        """
         self.signals[signal_name]["available_ratios"] = []
 
         if fine_to_coarse_policy is None:
@@ -358,13 +370,17 @@ class MultiscaleTriangleMesh:
         ratio.
 
         Parameters
-            fine_ratio (Number): the ratio of the high resolution shape
-            coarse_ratio (Number): the ratio of the low resolution shape
+        ----------
+        fine_ratio
+            The ratio of the high resolution shape.
+        coarse_ratio
+            The ratio of the low resolution shape.
 
-        Returns:
-            Int1dTensor: the indice mapping from high to low resolution
+        Returns
+        -------
+        Int1dTensor
+            The indice mapping from high to low resolution.
         """
-
         assert (
             fine_ratio >= coarse_ratio
         ), "fine_ratio must be greater than coarse_ratio"
@@ -407,13 +423,20 @@ class MultiscaleTriangleMesh:
         operations are "sum", "min", "max", "mean".
 
         Parameters
-            signal (NumericalTensor): the signal to be propagated
-            fine_ratio (Number): the ratio of the high resolution shape
-            coarse_ratio (Number): the ratio of the low resolution shape
-            reduce (str, optional): the reduce option. Defaults to "sum".
+        ----------
+        signal
+            The signal to be propagated.
+        fine_ratio
+            The ratio of the high resolution shape.
+        coarse_ratio
+            The ratio of the low resolution shape.
+        reduce
+            The reduce option. Defaults to "sum".
 
-        Returns:
-            NumericalTensor: the signal at the low resolution ratio
+        Returns
+        -------
+        NumericalTensor
+            The signal at the low resolution ratio.
         """
         assert (
             signal.shape[0] == self.at(fine_ratio).n_points
@@ -452,14 +475,20 @@ class MultiscaleTriangleMesh:
             convolution operator
 
         Parameters
-            signal (NumericalTensor): the signal to be propagated
-            coarse_ratio (Number): the ratio of the low resolution shape
-            fine_ratio (Number): the ratio of the high resolution shape
-            smoothing (str, optional): the smoothing option.
-                Defaults to "constant".
+        ----------
+        signal
+            The signal to be propagated.
+        coarse_ratio
+            The ratio of the low resolution shape.
+        fine_ratio
+            The ratio of the high resolution shape.
+        smoothing
+            The smoothing option.
 
-        Returns:
-            NumericalTensor: the signal at the high resolution ratio
+        Returns
+        -------
+        NumericalTensor
+            The signal at the high resolution ratio.
         """
         assert (
             signal.shape[0] == self.at(coarse_ratio).n_points
@@ -493,6 +522,24 @@ class MultiscaleTriangleMesh:
     @convert_inputs
     @typecheck
     def signal_convolution(self, signal, signal_ratio, target_ratio, **kwargs):
+        """Convolve a signal between two ratios.
+
+        Parameters
+        ----------
+        signal
+            The signal to be convolved.
+        signal_ratio
+            The ratio of the signal.
+        target_ratio
+            The ratio of the target shape.
+        kwargs
+            The kwargs to be passed to the point convolution.
+
+        Returns
+        -------
+        NumericalTensor
+            The convolved signal.
+        """
         source = self.at(signal_ratio)
         target = self.at(target_ratio)
 
@@ -535,14 +582,20 @@ def edge_smoothing(
     """Smooth a signal on a triangle mesh by edge smoothing.
 
     Parameters
-        signal (NumericalTensor): the signal to be smoothed
-        shape (polydata_type): the triangle mesh on which the signal is defined
-        weight_by_length (bool, optional): Defaults to False.
-        n_smoothing_steps (int, optional): the number of smoothing operations
-            to apply. Defaults to 1.
+    ----------
+    signal
+        The signal to be smoothed.
+    shape
+        The triangle mesh on which the signal is defined.
+    weight_by_length
+        Wetether to weight the smoothing by the length of the edges.
+    n_smoothing_steps
+        The number of repetition of smoothing operation.
 
-    Returns:
-        NumericalTensor: the smoothed signal
+    Returns
+    -------
+    NumericalTensor
+        The smoothed signal.
     """
     assert signal.shape[0] == shape.n_points
     assert n_smoothing_steps >= 1, "n_smoothing_steps must be positive"

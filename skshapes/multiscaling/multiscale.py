@@ -1,4 +1,4 @@
-"""This module contains the generic Multiscale class."""
+"""Generic Multiscale class."""
 
 from __future__ import annotations
 
@@ -12,6 +12,8 @@ from ..decimation import Decimation
 
 
 class Multiscale:
+    """Generic multiscale class."""
+
     @typecheck
     def __new__(
         cls,
@@ -19,19 +21,23 @@ class Multiscale:
         correspondence: bool = False,
         **kwargs,
     ) -> Union[MultiscaleTriangleMesh, list[MultiscaleTriangleMesh]]:
-        """Create a multiscale object from a shape or a list of shapes.
+        """Multiscale object from a shape or a list of shapes.
 
         Depending on the type of the shape, the corresponding multiscale object
         is created (multiscale triangle mesh, multiscale point cloud, etc.)
 
         Parameters
-            shape (Union[shape_type,list[shape_type]]): A shape or a list of
-                shapes.
-            correspondence (bool, optional): Wether the shapes of the list
-                should be considered to be in correspondence or not.
+        ----------
+        shape
+            A shape or a list of shapes.
+        correspondence
+          Wether the shapes of the list should be considered to be in pointwise
+          correspondence or not.
 
-        Returns:
-            Union[MultiscaleTriangleMesh,list[MultiscaleTriangleMesh]]
+        Returns
+        -------
+        Union[MultiscaleTriangleMesh,list[MultiscaleTriangleMesh]]
+            A multiscale object or a list of multiscale objects.
         """
         if isinstance(shape, list) and not correspondence:
             # if no correspondence, do nothing more than call the constructor
