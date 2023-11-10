@@ -1,3 +1,5 @@
+"""Implicit quadrics."""
+
 import torch
 import numpy as np
 from pykeops.torch import LazyTensor
@@ -5,7 +7,8 @@ from pykeops.torch import LazyTensor
 from ..utils import diagonal_ranges
 from ..types import typecheck, Points, Float1dTensor, Number
 from typing import Optional
-from .normals import smooth_normals, tangent_vectors
+
+# from .normals import smooth_normals, tangent_vectors
 
 
 def normalize_point_cloud(
@@ -13,7 +16,7 @@ def normalize_point_cloud(
     points: Points,
     weights: Float1dTensor,
 ):
-    """Normalizes a point cloud to ensure numerical stability."""
+    """Point cloud normalization for numerical stability."""
     assert points.shape[0] == weights.shape[0]
 
     # Center:
@@ -45,13 +48,14 @@ def implicit_quadrics(
 
     The main reference for this function is the following paper:
 
-    Gabriel Taubin, "Estimation of Planar Curves, Surfaces and Nonplanar Space Curves
-    Defined by Implicit Equations, with Applications to Edge and Range Image Segmentation",
+    Gabriel Taubin, "Estimation of Planar Curves, Surfaces and Nonplanar Space
+    Curves Defined by Implicit Equations, with Applications to Edge and Range
+    Image Segmentation",
     IEEE Trans. PAMI, Vol. 13, 1991, pp1115-1138.
     http://mesh.brown.edu/taubin/pdfs/Taubin-pami91.pdf
 
     See also this StackOverflow answer for a full discussion:
-    https://scicomp.stackexchange.com/questions/26105/fitting-implicit-surfaces-to-oriented-point-sets
+    https://scicomp.stackexchange.com/questions/26105/fitting-implicit-surfaces-to-oriented-point-sets # noqa E501
     """
     # TODO: actually support batch processing...
     ranges = diagonal_ranges(batch)
@@ -67,18 +71,21 @@ def implicit_quadrics(
     # Normalize the weights to sum up to 1:
     weights = weights / weights.sum()
 
-    # As explained in Section IX, we normalize the point cloud to ensure numerical stability:
+    # As explained in Section IX, we normalize the point cloud to ensure
+    # numerical stability:
     points, sigma, mean_point = normalize_point_cloud(
         points=points, weights=weights
     )
-    # points is now a (weighted) point cloud centered at the origin, with a unit variance.
-    # sigma and mean_point are the scaling and translation factors.
+    # points is now a (weighted) point cloud centered at the origin, with a
+    # unit variance. sigma and mean_point are the scaling and translation
+    # factors.
 
     scale = scale / sigma
 
-    # Compute the features of order 0, 1 and 2: ------------------------------------------
+    # Compute the features of order 0, 1 and 2: -------------------------------
     # X = [x^2, y^2, z^2, xy, xz, yz, x, y, z, 1]
-    # (this is easier to implement in PyTorch than the order at the start of Sec. VIII)
+    # (this is easier to implement in PyTorch than the order at the start of
+    # Sec. VIII)
     x = points[:, 0:1]  # (q, 1)
     y = points[:, 1:2]  # (q, 1)
     z = points[:, 2:3]  # (q, 1)
@@ -102,7 +109,7 @@ def implicit_quadrics(
     XXt = X.view(q, 10, 1) * X.view(q, 1, 10)  # (q, 10, 10)
     assert XXt.shape == (q, 10, 10)
 
-    # Compute the constraint matrices ----------------------------------------------------
+    # Compute the constraint matrices -----------------------------------------
     # Gradients wrt. x, y, z:
     DX_x = torch.cat([2 * x, o, o, y, z, o, i, o, o, o], dim=1)
     DX_y = torch.cat([o, 2 * y, o, x, o, z, o, i, o, o], dim=1)
@@ -119,7 +126,7 @@ def implicit_quadrics(
     )
     assert DXDXt.shape == (q, 10, 10)
 
-    # Create the symbolic window matrix --------------------------------------------------
+    # Create the symbolic window matrix ---------------------------------------
     # Encode as symbolic tensors:
     # Points:
     x_i = LazyTensor(points.view(q, 1, 3) / (np.sqrt(2) * scale))
@@ -134,14 +141,14 @@ def implicit_quadrics(
     window_ij.ranges = ranges
     assert window_ij.shape == (q, q)
 
-    # Compute the weighted covariance matrices -------------------------------------------
+    # Compute the weighted covariance matrices --------------------------------
     MD_i = (window_ij @ XXt.view(q, 10 * 10)).view(q, 10, 10)
     assert MD_i.shape == (q, 10, 10)
 
     ND_i = (window_ij @ DXDXt.view(q, 10 * 10)).view(q, 10, 10)
     assert ND_i.shape == (q, 10, 10)
 
-    # Solve the generalized eigenvalue problem (Sec. VII) --------------------------------
+    # Solve the generalized eigenvalue problem (Sec. VII) ---------------------
     # Add a small ridge regression:
     for k in range(10):
         ND_i[:, k, k] += reg
@@ -151,11 +158,11 @@ def implicit_quadrics(
     assert eigenvalues.shape == (q, 1)
     assert F.shape == (q, 10), "F.shape = {}".format(F.shape)
 
-    # For each point i, F[i, :] now contains the coefficients of the optimal quadric
-    # for a window of scale "scale" centered at points[i, :].
+    # For each point i, F[i, :] now contains the coefficients of the optimal
+    # quadric for a window of scale "scale" centered at points[i, :].
     # a x^2 + b y^2 + c z^2 + d xy + e xz + f yz + g x + h y + i z + j = 0
-    # We now need to convert these coefficients to the standard form of a quadric
-    # as a 4x4 matrix Q_i:
+    # We now need to convert these coefficients to the standard form of a
+    # quadric as a 4x4 matrix Q_i:
     # Q_i = [[a, d/2, e/2, g/2],
     #        [d/2, b, f/2, h/2],
     #        [e/2, f/2, c, i/2],

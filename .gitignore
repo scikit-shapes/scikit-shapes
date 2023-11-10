@@ -172,3 +172,6 @@ example.ipynb
 
 # Tensorboard
 *runs/
+
+# Gallery
+docs/generated/

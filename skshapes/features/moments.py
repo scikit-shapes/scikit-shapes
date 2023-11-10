@@ -1,3 +1,5 @@
+"""Moments for point clouds."""
+
 import torch
 from ..types import (
     typecheck,
@@ -12,7 +14,7 @@ from typing import Literal, Optional
 
 
 def symmetric_sum(a, b):
-    """Implements the symmetric terms that appear in the tensor expansion of (a+b)^n."""
+    """Symmetric terms that appear in the tensor expansion of (a+b)^n."""
     N = a.shape[0]
     D = a.shape[1]
 
@@ -135,7 +137,7 @@ def _point_moments(
                 N, D, D, D
             )  # (N, D, D, D)
         else:
-            # Use recursion (-> cache) to compute Conv @ X, Conv @ XX, Conv @ X^3
+            # Use recursion (cache) to compute Conv @ X, Conv @ XX, Conv @ X^3
             Xm = recursion(k=1)  # (N, D)
             mom_2 = recursion(k=2)  # (N, D, D)
             moments = recursion(k=3)  # (N, D, D, D)
@@ -159,7 +161,8 @@ def _point_moments(
             )
             moments = (Conv @ XXXX.view(N, D * D * D * D)).view(N, D, D, D, D)
         else:
-            # Use recursion (-> cache) for Conv @ X, Conv @ XX, Conv @ X^3, Conv @ X^4
+            # Use recursion (cache)
+            # for Conv @ X, Conv @ XX, Conv @ X^3, Conv @ X^4
             Xm = recursion(k=1)
             mom_2 = recursion(k=2)
             mom_3 = recursion(k=3)

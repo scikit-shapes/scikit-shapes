@@ -1,19 +1,29 @@
-import torch
+"""Structure tensors of a point cloud."""
+
+# import torch
 from pykeops.torch import LazyTensor
 
-from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Triangles, Number
+# from ..utils import diagonal_ranges
+from ..types import typecheck, Points, Number, FloatTensor
 
 
-def structure_tensors(*, points: Points, scale=1.0, ranges=None):
+@typecheck
+def structure_tensors(
+    *, points: Points, scale: Number = 1.0, ranges=None
+) -> FloatTensor:
     """Compute the structure tensors of a point cloud.
 
     Parameters
-        points (Tensor): (N, 3) coordinates of the points or mesh vertices.
-        scale (float, optional): smoothing scale. Defaults to 1.
+    ----------
+    points
+        Coordinates of the points or mesh vertices.
+    scale
+        Smoothing scale.
 
-    Returns:
-        (Tensor): (N, 3, 3) tensor of structure tensors.
+    Returns
+    -------
+    FloatTensor
+        Tensor of structure tensors.
     """
     # Number of points:
     N = points.shape[0]

@@ -1,0 +1,7 @@
+mkdocs
+mkdocs-material
+mkdocs-gallery
+mkdocs-gen-files
+mkdocs-literate-nav
+mkdocstrings-python
+pytkdocs[numpy-style]

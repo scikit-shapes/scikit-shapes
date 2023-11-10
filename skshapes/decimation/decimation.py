@@ -1,3 +1,5 @@
+"""Decimation module."""
+
 import numpy as np
 from ..data import PolyData
 import torch
@@ -7,13 +9,15 @@ import fast_simplification
 
 
 class Decimation:
-    """
+    """Decimation class.
+
     This class implements the quadric decimation algorithm. The goal of
-    decimation is to reduce the number of points of a mesh while preserving its
-    shape.
+    decimation is to reduce the number of points of a triangular mesh while
+    preserving the global aspect of the shape.
 
-    Usage examples :
-
+    Examples
+    --------
+    ```python
     # assume that pose1 and pose2 are two meshes with the same connectivity:
 
     pose1, pose2 = sks.PolyData("data/pose1.vtk","data/pose2.vtk")
@@ -30,6 +34,7 @@ class Decimation:
         assert pose1_decimated.landmarks is not None
     if pose2.landmarks is not None:
         assert pose2_decimated.landmarks is not None
+    ```
     """
 
     @typecheck
@@ -39,19 +44,21 @@ class Decimation:
         target_reduction: Optional[float] = None,
         n_points: Optional[int] = None,
     ) -> None:
-        """
+        """Class constructor.
+
         Initialize the quadric decimation algorithm with a target reduction or
-        the desired number of points in lox-resulution mesh and choose between
-        vtk and sks implementations.
+        the desired number for decimated mesh.
 
         Parameters
-            target_reduction (float, optional): The target reduction of the
-                number of points in the low-resolution mesh. Must be between
-                0 and1. Defaults to None.
-            n_points (int, optional): The desired number of points in the
-                low-resolution mesh. Defaults to None.
+        ----------
+        target_reduction
+            The target rate of triangles to delete during decimation. Must
+            be between 0 and 1.
+        n_points
+            The desired number of points in the decimated mesh.
 
-        Raises:
+        Raises
+        ------
             ValueError: If both target_reduction and n_points are provided or
             if none of them is provided.
         """
@@ -76,13 +83,19 @@ class Decimation:
 
     @typecheck
     def fit(self, mesh: PolyData) -> None:
-        """
-        Fit the decimation algorithm to a mesh.
+        """Fit the decimation algorithm to a mesh.
 
         Parameters
-            mesh (PolyData): The mesh to fit the decimation object to.
-        """
+        ----------
+        mesh
+            The mesh to fit the decimation object to.
 
+        Raises
+        ------
+        ValueError
+            If the mesh is not triangular.
+
+        """
         if hasattr(self, "n_points"):
             self.target_reduction = 1 - self.n_points / mesh.n_points
 
@@ -118,17 +131,36 @@ class Decimation:
     def transform(
         self, mesh: PolyData, target_reduction: Optional[float] = 1
     ) -> PolyData:
-        """
-        Transform a mesh using the decimation algorithm.
+        """Transform a mesh using the decimation algorithm.
+
+        The decimation must have been fitted to a mesh before calling this
+        method. The mesh to decimate could be:
+        - the same mesh as the one used to fit the decimation object
+        - a mesh with the same connectivity as the one used to fit the
+            decimation object (same number of points and same triangles)
+
         Parameters
-            mesh (PolyData): The mesh to transform.
-            target_reduction (float, optional): The target reduction of the
-                number of points in the low-resolution mesh. Must be between 0
-                and 1. Defaults to 1. If the target_reduction is greater than
-                the target_reduction used to fit the decimation object, the
-                decimation will be applied with the target_reduction used to
-                fit the decimation object. Defaults to 1.
+        ----------
+        mesh
+            The mesh to transform.
+        target_reduction
+            The target reduction to apply to the mesh.
+
+        Raises
+        ------
+        ValueError
+            If the decimation object has not been fitted yet.
+            If the number of points or the triangles structure of the mesh to
+            decimate is not the same as the mesh using to fit.
+
+        Returns
+        -------
+        PolyData
+            The decimated mesh.
         """
+        if self.collapses_ is None:
+            raise ValueError("The decimation object has not been fitted yet.")
+
         assert (
             0 <= target_reduction <= 1
         ), "The target reduction must be between 0 and 1"
@@ -205,18 +237,14 @@ class Decimation:
 
     @typecheck
     def fit_transform(self, mesh: PolyData) -> PolyData:
-        """
-        Decimate and return decimated mesh.
-        """
+        """Decimate and return decimated mesh."""
         self.fit(mesh)
         return self.transform(mesh)
 
     @typecheck
     @property
     def collapses(self):
-        """
-        Returns the collapses of the decimation algorithm.
-        """
+        """Returns the collapses of the decimation algorithm."""
         if hasattr(self, "collapses_"):
             return self.collapses_
         else:
@@ -225,9 +253,7 @@ class Decimation:
     @typecheck
     @property
     def indice_mapping(self):
-        """
-        Returns the indice mapping of the decimation algorithm.
-        """
+        """Returns the indice mapping of the decimation algorithm."""
         if hasattr(self, "indice_mapping_"):
             return self.indice_mapping_
         else:
@@ -236,9 +262,7 @@ class Decimation:
     @typecheck
     @property
     def actual_reduction(self):
-        """
-        Returns the actual reduction of the decimation algorithm.
-        """
+        """Returns the actual reduction of the decimation algorithm."""
         if hasattr(self, "actual_reduction_"):
             return self.actual_reduction_
         else:
@@ -247,9 +271,7 @@ class Decimation:
     @typecheck
     @property
     def ref_mesh(self):
-        """
-        Returns the reference mesh of the decimation algorithm.
-        """
+        """Returns the reference mesh of the decimation algorithm."""
         if hasattr(self, "ref_mesh_"):
             return self.ref_mesh_
         else:

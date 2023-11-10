@@ -1,3 +1,5 @@
+"""Point normals and tangent vectors."""
+
 import torch
 from pykeops.torch import LazyTensor
 import torch.nn.functional as F
@@ -58,7 +60,8 @@ def _point_normals(
         print("Hi")
         n = F.normalize(n, p=2, dim=-1)
         # n_e = n[self.edges[0]] + n[self.edges[1]]
-        # The backward of torch.index_select is much faster than that of indexing:
+        # The backward of torch.index_select is much faster than that of
+        # indexing:
         n_e = torch.index_select(n, 0, self.edges[0]) + torch.index_select(
             n, 0, self.edges[1]
         )
@@ -108,18 +111,18 @@ def smooth_normals(
     scale=[1.0],
     batch=None,
     normals: Optional[Points] = None,
-):
-    """Returns a smooth field of normals, possibly at different scales.
+) -> FloatTensor:
+    """Smooth field of normals, possibly at different scales.
 
     points, triangles or normals, scale(s)  ->      normals
     (N, 3),    (3, T) or (N,3),      (S,)   ->  (N, 3) or (N, S, 3)
 
     Simply put - if `triangles` are provided:
       1. Normals are first computed for every triangle using simple 3D geometry
-         and are weighted according to surface area.
-      2. The normal at any given vertex is then computed as the weighted average
-         of the normals of all triangles in a neighborhood specified
-         by Gaussian windows whose radii are given in the list of "scales".
+        and are weighted according to surface area.
+      2. The normal at any given vertex is then computed as the weighted
+        average of the normals of all triangles in a neighborhood specified
+        by Gaussian windows whose radii are given in the list of "scales".
 
     If `normals` are provided instead, we simply smooth the discrete vector
     field using Gaussian windows whose radii are given in the list of "scales".
@@ -128,16 +131,24 @@ def smooth_normals(
     and returned in a single 3D tensor.
 
     Parameters
-        vertices (Tensor): (N,3) coordinates of mesh vertices or 3D points.
-        triangles (integer Tensor, optional): (3,T) mesh connectivity. Defaults to None.
-        scale (list of floats, optional): (S,) radii of the Gaussian smoothing windows. Defaults to [1.].
-        batch (integer Tensor, optional): batch vector, as in PyTorch_geometric. Defaults to None.
-        normals (Tensor, optional): (N,3) raw normals vectors on the vertices. Defaults to None.
+    ----------
+    vertices
+        (N,3) coordinates of mesh vertices or 3D points.
+    triangles
+        (3,T) mesh connectivity. Defaults to None.
+    scale
+        (S,) radii of the Gaussian smoothing windows.
+    batch
+        batch vector, as in PyTorch_geometric. Defaults to None.
+    normals
+        (N,3) raw normals vectors on the vertices. Defaults to None.
 
-    Returns:
-        (Tensor): (N,3) or (N,S,3) point normals.
+    Returns
+    -------
+    FloatTensor
+        (N,3) or (N,S,3) point normals.
+
     """
-
     # Single- or Multi-scale mode:
     if hasattr(scale, "__len__"):
         scales, single_scale = scale, False
@@ -175,7 +186,7 @@ def smooth_normals(
     v_j = LazyTensor(V[None, :, :])  # (1, M, 3)
     s = LazyTensor(scales[None, None, :])  # (1, 1, S)
 
-    D_ij = ((x_i - y_j) ** 2).sum(-1)  #  (N, M, 1)
+    D_ij = ((x_i - y_j) ** 2).sum(-1)  # (N, M, 1)
     K_ij = (-D_ij / (2 * s**2)).exp()  # (N, M, S)
 
     # Support for heterogeneous batch processing:
@@ -197,21 +208,29 @@ def smooth_normals(
     return normals  # , areas
 
 
-def tangent_vectors(normals):
-    """Returns a pair of vector fields u and v to complete the orthonormal basis [n,u,v].
+def tangent_vectors(normals) -> FloatTensor:
+    """Compute tangent vectors to a normal vector field.
+
+    Returns a pair of vector fields u and v to complete the orthonormal basis
+    [n,u,v].
 
           normals        ->             uv
     (N, 3) or (N, S, 3)  ->  (N, 2, 3) or (N, S, 2, 3)
 
     This routine assumes that the 3D "normal" vectors are normalized.
-    It is based on the 2017 paper from Pixar, "Building an orthonormal basis, revisited".
+    It is based on the 2017 paper from Pixar,
+    "Building an orthonormal basis, revisited".
 
     Parameters
-        normals (Tensor): (N,3) or (N,S,3) normals `n_i`, i.e. unit-norm 3D vectors.
+    ----------
+    normals
+        (N,3) or (N,S,3) normals `n_i`, i.e. unit-norm 3D vectors.
 
-    Returns:
-        (Tensor): (N,2,3) or (N,S,2,3) unit vectors `u_i` and `v_i` to complete
-            the tangent coordinate systems `[n_i,u_i,v_i].
+    Returns
+    -------
+    FloatTensor
+        (N,2,3) or (N,S,2,3) unit vectors `u_i` and `v_i` to complete
+        the tangent coordinate systems `[n_i,u_i,v_i].
     """
     x, y, z = normals[..., 0], normals[..., 1], normals[..., 2]
     s = (2 * (z >= 0)) - 1.0  # = z.sign(), but =1. if z=0.

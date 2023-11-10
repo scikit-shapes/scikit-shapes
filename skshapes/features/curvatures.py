@@ -1,7 +1,9 @@
+"""Curvature estimators for point clouds and triangular meshes."""
+
 import numpy as np
 import torch
 from pykeops.torch import LazyTensor
-
+import colorsys
 from typing import NamedTuple
 
 from ..utils import diagonal_ranges
@@ -29,8 +31,8 @@ def smooth_curvatures(
     batch=None,
     normals: Optional[Points] = None,
     reg: Number = 0.01,
-):
-    """Returns a collection of mean (H) and Gauss (K) curvatures at different scales.
+) -> FloatTensor:
+    """Mean (H) and Gauss (K) curvatures at different scales.
 
     points, faces, scales  ->  (H_1, K_1, ..., H_S, K_S)
     (N, 3), (3, N), (S,)   ->         (N, S*2)
@@ -57,17 +59,26 @@ def smooth_curvatures(
     Cao, Li, Sun, Assadi, Zhang, 2019.
 
     Parameters
-        vertices (Tensor): (N,3) coordinates of the points or mesh vertices.
-        triangles (integer Tensor, optional): (3,T) mesh connectivity. Defaults to None.
-        scales (list of floats, optional): list of (S,) smoothing scales. Defaults to [1.].
-        batch (integer Tensor, optional): batch vector, as in PyTorch_geometric. Defaults to None.
-        normals (Tensor, optional): (N,3) field of "raw" unit normals. Defaults to None.
-        reg (float, optional): small amount of Tikhonov/ridge regularization
-            in the estimation of the shape operator. Defaults to .01.
+    ----------
+    vertices
+        (N,3) coordinates of the points or mesh vertices.
+    triangles
+        (3,T) mesh connectivity.
+    scales
+        List of (S,) smoothing scales. Defaults to [1.].
+    batch
+        Batch vector, as in PyTorch_geometric
+    normals
+        (N,3) field of "raw" unit normals.
+    reg
+        Small amount of Tikhonov/ridge regularization in the estimation of the
+        shape operator.
 
-    Returns:
-        (Tensor): (N, S*2) tensor of mean and Gauss curvatures computed for
-            every point at the required scales.
+    Returns
+    -------
+    FloatTensor
+        (N, S*2) tensor of mean and Gauss curvatures computed for every point
+        at the required scales.
     """
     # Number of points, number of scales:
     N, S = vertices.shape[0], len(scales)
@@ -91,7 +102,7 @@ def smooth_curvatures(
 
     for s, scale in enumerate(scales):
         # Extract the relevant descriptors at the current scale:
-        normals = normals_s[:, s, :].contiguous()  #  (N, 3)
+        normals = normals_s[:, s, :].contiguous()  # (N, 3)
         uv = uv_s[:, s, :, :].contiguous()  # (N, 2, 3)
 
         # Encode as symbolic tensors:
@@ -119,7 +130,7 @@ def smooth_curvatures(
 
         # Covariances, with a scale-dependent weight:
         PPt_PQt_ij = P_ij.tensorprod(PQ_ij)  # (N, N, 2*(2+2))
-        PPt_PQt_ij = window_ij * PPt_PQt_ij  #  (N, N, 2*(2+2))
+        PPt_PQt_ij = window_ij * PPt_PQt_ij  # (N, N, 2*(2+2))
 
         # Reduction - with batch support:
         PPt_PQt_ij.ranges = ranges
@@ -160,7 +171,8 @@ def smooth_curvatures_2(
     batch=None,
     normals: Optional[Points] = None,
     reg: Number = 0.01,
-):
+) -> dict[FloatTensor]:
+    """Curvature as a dictionary of tensors for mean and Gauss."""
     # Number of points:
     N = points.shape[0]
     ranges = diagonal_ranges(batch)
@@ -227,7 +239,7 @@ def smooth_curvatures_2(
 
     # Covariances, with a scale-dependent weight:
     RRt_RNt_ij = R_ij.tensorprod(R_N_ij)  # (N, N, 4*(4+1))
-    RRt_RNt_ij = window_ij * RRt_RNt_ij  #  (N, N, 4*(4+1))
+    RRt_RNt_ij = window_ij * RRt_RNt_ij  # (N, N, 4*(4+1))
 
     # Reduction - with batch support:
     RRt_RNt_ij.ranges = ranges
@@ -262,6 +274,8 @@ def smooth_curvatures_2(
 
 
 class QuadraticCoefficients(NamedTuple):
+    """Class to store the coefficients of a quadratic approximation."""
+
     coefficients: Float2dTensor
     nuv: dict
     r2: Float1dTensor
@@ -274,8 +288,7 @@ def _point_quadratic_coefficients(
     scale: Optional[Number] = None,
     **kwargs,
 ) -> QuadraticCoefficients:
-    """Returns the point-wise principal curvatures."""
-
+    """Point-wise principal curvatures."""
     # nuv are arranged row-wise!
     N = self.n_points
     nuv = self.point_frames(scale=scale, **kwargs)
@@ -447,6 +460,8 @@ def _point_quadratic_fits(
 
 
 class PrincipalCurvatures(NamedTuple):
+    """Class to store the principal curvatures."""
+
     kmax: Float1dTensor
     kmin: Float1dTensor
 
@@ -458,7 +473,7 @@ def _point_principal_curvatures(
     scale: Optional[Number] = None,
     **kwargs,
 ) -> PrincipalCurvatures:
-    """Returns the point-wise principal curvatures.
+    """Point-wise principal curvatures.
 
     We rely on the formulas detailed in Example 4.2 of
     Curvature formulas for implicit curves and surfaces, Goldman, 2005.
@@ -486,8 +501,10 @@ def _point_principal_curvatures(
 
     # In the local tangent frame centered on the local average Xm,
     # our quadratic approximation reads:
-    # n = f(u, v) = .5 * (a * u**2 + 2 * b * u * v +  c * v**2) +  d * u +  e * v + f
-    #             =      c0 * u**2 +    c1 * u * v + c2 * v**2  + c3 * u + c4 * v + c5
+    # n = f(u, v) = .5 * (a * u**2 + 2 * b * u * v +  c * v**2) +  d * u
+    #                                                           +  e * v + f
+    #             =      c0 * u**2 +    c1 * u * v + c2 * v**2  + c3 * u
+    #                                                           + c4 * v + c5
     a, b, c = 2 * coefs[:, 0], coefs[:, 1], 2 * coefs[:, 2]
     d, e = coefs[:, 3], coefs[:, 4]
 
@@ -524,7 +541,7 @@ def _point_principal_curvatures(
 
 @typecheck
 def _point_shape_indices(self, **kwargs) -> Float1dTensor:
-    """Returns the point-wise shape index, estimated at a given scale.
+    """Point-wise shape index, estimated at a given scale.
 
     For reference, see:
     "Surface shape and curvature scales", Koenderink and van Doorn, 1992.
@@ -533,7 +550,8 @@ def _point_shape_indices(self, **kwargs) -> Float1dTensor:
     si = (2 / np.pi) * torch.atan((kmax + kmin) / (kmax - kmin))
 
     if self.triangles is None:
-        # If we cannot orient the surface, the shape index is only defined up to a sign:
+        # If we cannot orient the surface, the shape index is only defined up
+        # to a sign:
         si = si.abs()
 
     return si
@@ -541,16 +559,13 @@ def _point_shape_indices(self, **kwargs) -> Float1dTensor:
 
 @typecheck
 def _point_curvedness(self, **kwargs) -> Float1dTensor:
-    """Returns the point-wise curvedness, estimated at a given scale.
+    """Point-wise curvedness, estimated at a given scale.
 
     For reference, see:
     "Surface shape and curvature scales", Koenderink and van Doorn, 1992.
     """
     kmax, kmin = self.point_principal_curvatures(**kwargs)
     return ((kmax**2 + kmin**2) / 2).sqrt()
-
-
-import colorsys
 
 
 @typecheck
