@@ -31,8 +31,8 @@ class Multiscale:
         shape
             A shape or a list of shapes.
         correspondence
-          Wether the shapes of the list should be considered to be in pointwise
-          correspondence or not.
+            Wether the shapes of the list should be considered to be in pointwise
+            correspondence or not.
 
         Returns
         -------

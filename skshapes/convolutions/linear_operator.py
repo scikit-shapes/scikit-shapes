@@ -11,10 +11,10 @@ class LinearOperator:
         ----------
         matrix
             The matrix to wrap.
-        input_scaling, optional
-            _description_, by default None
-        output_scaling, optional
-            _description_, by default None
+        input_scaling
+            _description_
+        output_scaling
+            _description_
         """
         M, N = matrix.shape
         assert matrix.shape == (M, N)

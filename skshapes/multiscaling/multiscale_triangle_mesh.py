@@ -209,8 +209,9 @@ class MultiscaleTriangleMesh:
             point_data of the shape at from_ratio.
         signal
             The signal to be added. Must be specified if key is not specified,
-            and must have the same number of points as the shape at ratio `at`.
-        at
+            and must have the same number of points as the shape at ratio
+            `from_ratio`.
+        from_ratio
             The ratio at which the signal is added.
         fine_to_coarse_policy
             The policy for downscaling the signal.
