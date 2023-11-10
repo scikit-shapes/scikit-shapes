@@ -1,3 +1,5 @@
+"""Landmark setter application."""
+
 import vedo
 import torch
 from ..types import typecheck, polydata_type
@@ -5,16 +7,27 @@ from typing import Union
 
 
 class LandmarkSetter:
-    """Initialize a landmark setter for a polydata or a list of polydatas.
+    """Landmark setter for a PolyData or a list of PolyData.
 
-    Parameters
-        vedo (_type_): _description_
+    It could be used to select landmarks on a single shape or on a set of
+    shapes.
+
+    If a list is provided, the first shape is considered as the reference shape
+    and the landmarks are selected on this shape. Then, the same landmarks must
+    be selected on the other shapes.
     """
 
     @typecheck
     def __init__(
         self, shapes: Union[list[polydata_type], polydata_type]
     ) -> None:
+        """Class constructor.
+
+        Parameters
+        ----------
+        shapes
+            The shapes or list of shapes on which the landmarks are selected.
+        """
         super().__init__()
 
         if hasattr(shapes, "__iter__") and len(shapes) > 1:
@@ -25,15 +38,17 @@ class LandmarkSetter:
             self.landmarks_setter = LandmarkSetterSingleMesh(shapes)
 
     def start(self):
+        """Start the landmark setter."""
         self.landmarks_setter.start()
 
 
 class LandmarkSetterSingleMesh(vedo.Plotter):
-    """A landmark setter that allows the user to select landmarks on a single
-    polydata.
+    """Single PolyData landmark setter.
 
     Parameters
-        shape (sks.Polydata): the polydata on which the landmarks are selected.
+    ----------
+    shape
+        The PolyData on which the landmarks are selected.
     """
 
     def __init__(self, shape: polydata_type) -> None:
@@ -66,8 +81,10 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         self.add_callback("KeyPress", self._key_press)
 
     def _key_press(self, evt):
-        """The _key_press method is called when the user presses a key. It is
-        used to add or delete landmarks and update the display."""
+        """React to a key press.
+
+        It is used to add or delete landmarks and update the display.
+        """
         if evt.keypress == "e":
             if evt.picked3d is not None:
                 pt = vedo.Points(self.actor.points()).closest_point(
@@ -97,23 +114,28 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         self.render()
 
     def start(self):
-        self
+        """Start the landmark setter."""
         self.reset_camera()
         self.show(interactive=True)
 
 
 class LandmarkSetterMultipleMeshes(vedo.Plotter):
-    """A LandmarkSetter is a vedo application that allows the user to select
-    landmarks on a set of polydatas.
+    """Multiple PolyData landmark setter.
 
-    Parameters
-        shapes (list[sks.PolyData]): The shapes on which the landmarks are
-            selected.
-        **kwargs: Keyword arguments passed to the vedo.Plotter constructor.
+    The same number of landmarks must be selected on each shape, and the
+    landmarks must be selected in the same order on each shape, in order
+    to use the landmarks for registration between these.
     """
 
     @typecheck
     def __init__(self, shapes: list[polydata_type]) -> None:
+        """Class constructor.
+
+        Parameters
+        ----------
+        shapes
+            The list of PolyData on which the landmarks are selected.
+        """
         super().__init__(N=2, sharecam=False)
 
         # The landmarks (list of indices) are stored in a list of lists of
@@ -190,7 +212,9 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         self.show(interactive=True, resetcam=False)
 
     def _done(self):
-        """The _done method is called when the user presses the 's' key.
+        """Move to the next mode or close the window.
+
+        The _done method is called when the user presses the 's' key.
         If the current mode is 'reference', it stores information about the
             number of landmarks to be set on the other shapes and switches to
             'others' mode.
@@ -198,7 +222,6 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             current shape and switches to the next shape. If no other shape is
             left, it closes the window.
         """
-
         if self.mode == "reference":
             self.n_landmarks = len(self.reference_lpoints)
             self.mode = "others"
@@ -256,10 +279,12 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
                 self.close()
 
     def _update(self):
-        """The _update method update the display of the landmarks with the
-        right color depending on the current mode and the current state of the
-        landmarks selection."""
+        """Update the plot.
 
+        The _update method update the display of the landmarks with the
+        right color depending on the current mode and the current state of the
+        landmarks selection.
+        """
         if self.mode == "reference":
             self.at(0).remove(self.reference_lpoints_pointcloud)
             self.reference_lpoints_pointcloud = (
@@ -294,9 +319,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             self.at(1).add(self.other_lpoints_pointcloud)
 
     def _key_press(self, evt):
-        """The _key_press method is called when the user presses a key. It is
-        used to add or delete landmarks."""
+        """React to a key press.
 
+        The _key_press method is called when the user presses a key. It is
+        used to add or delete landmarks.
+        """
         if self.mode == "reference" and evt.actor == self.reference:
             if evt.keypress == "e":
                 if evt.picked3d is not None:
@@ -352,8 +379,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
 
 @typecheck
 def closest_vertex(points, point):
-    """Given a list of vertices and a point, return the indice of the closest
-    vertex."""
+    """Clostest vertex computation.
+
+    Given a list of vertices and a point, return the indice of the closest
+    vertex.
+    """
     # Compute the vectors from the point to the vertices
     vertices = torch.tensor(points)
     point = torch.tensor(point)

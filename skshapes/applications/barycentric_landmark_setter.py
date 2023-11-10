@@ -1,3 +1,10 @@
+"""Landmark setter with barycentric coordinates.
+
+!! Not useable at the moment.
+"""
+
+# flake8: noqa
+
 import vedo
 import numpy as np
 import torch
