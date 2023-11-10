@@ -28,14 +28,12 @@ from ..types import (
 )
 from typing import Optional, Any, Union, Literal
 from warnings import warn
-from .baseshape import BaseShape
 from .utils import DataAttributes
 from .edges_extraction import extract_edges
 
 
-class PolyData(BaseShape, polydata_type):
+class PolyData(polydata_type):
     """A polygonal data object. It is composed of points, edges and triangles.
-
 
     Three types of objects can be provided to initialize a PolyData object:
     - a vedo mesh
@@ -60,27 +58,27 @@ class PolyData(BaseShape, polydata_type):
         point_data: Optional[DataAttributes] = None,
         cache_size: Optional[int] = None,
     ) -> None:
-        """Initialize a PolyData object.
+        """Class constructor.
 
         Parameters
-            points (Points): the points of the shape.
-            edges (Optional[Edges], optional): the edges of the shape. Defaults
-                to None.
-            triangles (Optional[Triangles], optional): the triangles of the
-                shape. Defaults to None.
-            device (Optional[Union[str, torch.device]], optional): the device
-                on which the shape is stored. Defaults to "cpu".
-            landmarks (Optional[Landmarks], optional): _description_.
-                Defaults to None.
-            point_data (Optional[DataAttributes], optional): _description_.
-                Defaults to None.
-            cache_size (Optional[int], optional): Size of the cache for
-                memoized properties.
-                Defaults to None (= no cache limit).
-                Use a smaller value if you intend to e.g. compute point
-                curvatures at many different scales.
+        ----------
+        points
+            The points of the shape.
+        edges
+            The edges of the shape.
+        triangles
+            The triangles of the shape.
+        device
+            The device on which the shape is stored.
+        landmarks
+            The landmarks of the shape.
+        point_data
+            The point data of the shape.
+        cache_size
+            Size of the cache for memoized properties. Defaults to None (= no
+            cache limit). Use a smaller value if you intend to e.g. compute
+            point curvatures at many different scales.
         """
-
         # If the user provides a pyvista mesh, we extract the points, edges and
         # triangles from it
         # If the user provides a path to a mesh, we read it with pyvista and
@@ -257,7 +255,26 @@ class PolyData(BaseShape, polydata_type):
         target_reduction: Optional[float] = None,
         n_points: Optional[Number] = None,
     ) -> PolyData:
-        """Decimate the shape using the Quadric Decimation algorithm."""
+        """Decimation of the shape.
+
+        Parameters
+        ----------
+        target_reduction
+            The target reduction ratio.
+        n_points
+            The number of points to keep.
+
+        Raises
+        ------
+        ValueError
+            If both target_reduction and n_points are provided.
+            If none of target_reduction and n_points are provided.
+
+        Returns
+        -------
+        PolyData
+            The decimated shape.
+        """
         if target_reduction is None and n_points is None:
             raise ValueError(
                 "Either target_reduction or n_points must be provided."
@@ -288,14 +305,16 @@ class PolyData(BaseShape, polydata_type):
 
     @typecheck
     def save(self, filename: str) -> None:
-        """Save the shape at the specified location.
+        """Save the shape to a file.
+
         Format accepted by PyVista are supported (.ply, .stl, .vtk)
         see: https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/pointset.py#L439-L1283  # noqa: E501
 
         Parameters
-            path (str): the path where to save the shape.
+        ----------
+        path
+            The path where to save the shape.
         """
-
         mesh = self.to_pyvista()
         mesh.save(filename)
 
@@ -306,7 +325,18 @@ class PolyData(BaseShape, polydata_type):
     def copy(
         self, device: Optional[Union[str, torch.device]] = None
     ) -> PolyData:
-        """Return a copy of the shape"""
+        """Copy the shape.
+
+        Parameters
+        ----------
+        device
+            The device on which the copy is stored.
+
+        Returns
+        -------
+        PolyData
+            The copy of the shape.
+        """
         if device is None:
             device = self.device
 
@@ -324,7 +354,7 @@ class PolyData(BaseShape, polydata_type):
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> PolyData:
-        """Return a copy of the shape on the specified device"""
+        """Copy the shape on a given device."""
         return self.copy(device=device)
 
     ###########################
@@ -332,8 +362,7 @@ class PolyData(BaseShape, polydata_type):
     ###########################
     @typecheck
     def to_vedo(self) -> vedo.Mesh:
-        """Convert the shape to a vedo Mesh."""
-
+        """Vedo Mesh converter."""
         if self._triangles is not None:
             mesh = vedo.Mesh(
                 [
@@ -385,8 +414,7 @@ class PolyData(BaseShape, polydata_type):
     ###########################
     @typecheck
     def to_pyvista(self) -> pyvista.PolyData:
-        """Convert the shape to a PyVista PolyData."""
-
+        """Pyvista PolyData converter."""
         if self.dim == 3:
             points = self._points.detach().cpu().numpy()
         else:
@@ -466,9 +494,10 @@ class PolyData(BaseShape, polydata_type):
         - https://vedo.embl.es/docs/vedo/plotter.html#show
 
         Parameters
-            backend ("pyvista" or "vedo", optional): Defaults to "pyvista".
+        ----------
+        backend
+            Which backend to use for plotting.
         """
-
         if backend == "pyvista":
             self.to_pyvista().plot(**kwargs)
 
@@ -481,6 +510,15 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def edges(self) -> Optional[Edges]:
+        """Edges getter.
+
+        Returns
+        -------
+        Optional[Edges]
+            The edges of the shape. If the shape is a triangle mesh, the edges
+            are computed from the triangles. If the shape is not a triangle
+            mesh, the edges are directly returned.
+        """
         if self._edges is not None:
             return self._edges
 
@@ -517,6 +555,7 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def triangles(self) -> Optional[Triangles]:
+        """Triangles getter."""
         return self._triangles
 
     @triangles.setter
@@ -540,12 +579,26 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def points(self) -> Points:
+        """Points getter."""
         return self._points
 
     @points.setter
     @convert_inputs
     @typecheck
     def points(self, points: Points) -> None:
+        """Points setter.
+
+        Parameters
+        ----------
+        points
+            The new points of the shape.
+
+        Raises
+        ------
+        ValueError
+            If the new number of points is different from the actuam number of
+            points in the shape.
+        """
         if points.shape[0] != self.n_points:
             raise ValueError("The number of points cannot be changed.")
 
@@ -558,11 +611,19 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def device(self) -> Union[str, torch.device]:
+        """Device getter."""
         return self._device
 
     @device.setter
     @typecheck
     def device(self, device: Union[str, torch.device]) -> None:
+        """Device setter.
+
+        Parameters
+        ----------
+        device
+            The device on which the shape should be stored.
+        """
         for attr in dir(self):
             if attr.startswith("_"):
                 if type(getattr(self, attr)) == torch.Tensor:
@@ -575,11 +636,19 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def point_data(self) -> DataAttributes:
+        """Point data getter."""
         return self._point_data
 
     @point_data.setter
     @typecheck
     def point_data(self, point_data_dict: dict) -> None:
+        """Point data setter.
+
+        Parameters
+        ----------
+        point_data_dict
+            The new point data of the shape.
+        """
         if not isinstance(point_data_dict, DataAttributes):
             # Convert the point_data to a DataAttributes object
             # the from_dict method will check that the point_data are valid
@@ -622,7 +691,6 @@ class PolyData(BaseShape, polydata_type):
 
         If no landmarks are defined, returns None.
         """
-
         return self._landmarks
 
     @property
@@ -638,11 +706,11 @@ class PolyData(BaseShape, polydata_type):
     @convert_inputs
     @typecheck
     def landmarks(self, landmarks: Landmarks) -> None:
-        """Set the landmarks of the shape. The landmarks should be a sparse
-        tensor of shape (n_landmarks, n_points) (barycentric coordinates) or a
-        list of indices.
-        """
+        """Landmarks setter.
 
+        The landmarks should be a sparse tensor of shape
+        (n_landmarks, n_points) (barycentric coordinates).
+        """
         assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
         assert landmarks.dtype == float_dtype
         self._landmarks = landmarks.clone().to(self.device)
@@ -650,7 +718,7 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def landmark_points(self) -> Optional[Points]:
-        """Return the landmarks in 3D coordinates."""
+        """Landmarks in spatial coordinates."""
         if self.landmarks is None:
             return None
         else:
@@ -659,11 +727,19 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def landmark_indices(self) -> Optional[IntTensor]:
-        """Return the indices of the landmarks.
+        """Indices of the landmarks.
 
-        If no landmarks are defined, returns None.
-        Raises an error if the landmarks are not indices (there are defined in
-        barycentric coordinates).
+        Raises
+        ------
+        ValueError
+            If the landmarks are not indices (there are defined in barycentric
+            coordinates).
+
+        Returns
+        -------
+        Optional[IntTensor]
+            The indices of the landmarks. None if no landmarks are defined.
+
         """
         if self.landmarks is None:
             return None
@@ -683,9 +759,14 @@ class PolyData(BaseShape, polydata_type):
     def landmark_indices(
         self, landmarks: Union[Int1dTensor, list[int]]
     ) -> None:
-        """Set the landmarks of the shape. The landmarks should be a list of
-        indices."""
+        """Landmarks setter with indices list.
 
+        Parameters
+        ----------
+        landmarks
+            The indices of the landmarks.
+
+        """
         if type(landmarks) is list:
             landmarks = torch.tensor(landmarks, dtype=int_dtype)
 
@@ -711,8 +792,9 @@ class PolyData(BaseShape, polydata_type):
         """Add vertices landmarks to the shape.
 
         Parameters
-            indices (Union[IntSequence, int]): the indices of the vertices to
-            landmark.
+        ----------
+        indices
+            The indices of the vertices to add to the landmarks.
         """
         if not hasattr(indices, "__iter__"):
             self.add_landmarks([indices])
@@ -769,17 +851,19 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def dim(self) -> int:
-        """Get the dimension of the shape."""
+        """Dimension of the shape getter."""
         return self._points.shape[1]
 
     @property
     @typecheck
     def n_points(self) -> int:
+        """Number of points getter."""
         return self._points.shape[0]
 
     @property
     @typecheck
     def n_edges(self) -> int:
+        """Number of edges getter."""
         edges = self.edges
         if edges is not None:
             return edges.shape[0]
@@ -789,6 +873,7 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def n_triangles(self) -> int:
+        """Number of triangles getter."""
         if self._triangles is not None:
             return self._triangles.shape[0]
         else:
@@ -797,7 +882,10 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def mean_point(self) -> Points:
-        """Returns the mean point of the shape as a (N_batch, 3) tensor."""
+        """Mean point of the shape.
+
+        Return the mean point as a (N_batch, 3) tensor.
+        """
         # TODO: add support for batch vectors
         # TODO: add support for point weights
         return self._points.mean(dim=0, keepdim=True)
@@ -805,8 +893,11 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def standard_deviation(self) -> Float1dTensor:
-        """Returns the standard deviation (radius) of the shape as a (N_batch,)
-        tensor."""
+        """Standard deviation of the shape.
+
+        Returns the standard deviation (radius) of the shape as a (N_batch,)
+        tensor.
+        """
         # TODO: add support for batch vectors
         # TODO: add support for point weights
         return (
@@ -820,8 +911,7 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def edge_centers(self) -> Points:
-        """Return the center of each edge"""
-
+        """Center of each edge."""
         # Raise an error if edges are not defined
         if self.edges is None:
             raise ValueError("Edges cannot be computed")
@@ -833,8 +923,7 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def edge_lengths(self) -> Float1dTensor:
-        """Return the length of each edge"""
-
+        """Length of each edge."""
         # Raise an error if edges are not defined
         if self.edges is None:
             raise ValueError("Edges cannot be computed")
@@ -846,8 +935,7 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def triangle_centers(self) -> Points:
-        """Return the center of the triangles"""
-
+        """Center of the triangles."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
             raise ValueError("Triangles are not defined")
@@ -861,8 +949,7 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def triangle_areas(self) -> Float1dTensor:
-        """Return the area of each triangle"""
-
+        """Area of each triangle."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
             raise ValueError("Triangles are not defined")
@@ -876,8 +963,7 @@ class PolyData(BaseShape, polydata_type):
     @property
     @typecheck
     def triangle_normals(self) -> Float2dTensor:
-        """Return the normal of each triangle"""
-
+        """Normal of each triangle."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
             raise ValueError("Triangles are not defined")
@@ -891,12 +977,13 @@ class PolyData(BaseShape, polydata_type):
 
     @typecheck
     def is_triangle_mesh(self) -> bool:
+        """Check if the shape is triangular."""
         return self._triangles is not None
 
     @property
     @typecheck
     def point_weights(self) -> Float1dTensor:
-        """Return the weights of each point"""
+        """Point weights."""
         from ..utils import scatter
 
         if self.triangles is not None:
@@ -930,6 +1017,21 @@ class PolyData(BaseShape, polydata_type):
 
     @typecheck
     def bounding_grid(self, N: int = 10) -> polydata_type:
+        """Bounding grid of the shape.
+
+        Compute a bounding grid of the shape. The grid is a PolyData with
+        points and edges representing a regular grid enclosing the shape.
+
+        Parameters
+        ----------
+        N
+            The number of points on each axis of the grid.
+
+        Returns
+        -------
+        PolyData
+            The bounding grid of the shape.
+        """
         pv_shape = self.to_pyvista()
         # Get the bounds of the mesh
         xmin, xmax, ymin, ymax, zmin, zmax = pv_shape.bounds
@@ -945,12 +1047,12 @@ class PolyData(BaseShape, polydata_type):
             dimensions=(N, N, N),
             spacing=spacing,
             origin=origin,
-        ).extract_all_edges()  # Extract the edges of the grid to keep the wireframe
+        ).extract_all_edges()  # Extract the grid as wireframe mesh
 
         return PolyData(grid)
 
     @property
     @typecheck
     def control_points(self) -> Points:
-        """Return the control points of the shape"""
+        """Control points of the shape."""
         return self.bounding_grid(N=10).points

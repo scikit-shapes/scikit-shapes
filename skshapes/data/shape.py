@@ -1,2 +1,0 @@
-class BaseShape:
-    pass

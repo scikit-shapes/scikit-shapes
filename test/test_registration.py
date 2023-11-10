@@ -73,7 +73,7 @@ def test_registration_hypothesis(
     target.landmark_indices = [9, 10, 11, 12, 13, 14, 15, 16, 17]
 
     # Few type checks
-    assert isinstance(source, sks.data.baseshape.BaseShape)
+    assert isinstance(source, sks.PolyData)
     assert isinstance(target, sks.PolyData)
 
     # Initialize the registration object

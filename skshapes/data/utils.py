@@ -1,7 +1,7 @@
 """Utility functions and classes for the data module."""
 
 from __future__ import annotations
-from functools import lru_cache, partial, update_wrapper
+from functools import lru_cache, partial, update_wrapper, cached_property
 import functools
 import weakref
 
@@ -21,7 +21,9 @@ import numpy as np
 
 
 class DataAttributes(dict):
-    """This class is a dictionary aimed to store attributes associated to a
+    """DataAttributes class.
+
+    This class is a dictionary aimed to store attributes associated to a
     data structure (e.g. a set of points, a set of triangles, etc.)
     When a new attribute is added to the dictionary, it is checked that its
     size is compatible with the size of the data structure.
@@ -30,7 +32,6 @@ class DataAttributes(dict):
     torch.Tensor and on the same device, doing the necessary conversions if
     needed.
 
-
     There are two ways to add an attribute to the dictionary:
         - With an explicit name, using the __setitem__ method (e.g.
             A["attribute"] = attribute)
@@ -38,31 +39,54 @@ class DataAttributes(dict):
             A.append(attribute)) which will automatically set "attribute_{i}"
             where i is the minimum integer such that "attribute_{i}" is not
             already in the dictionary
-
-    Parameters
-        n (int): The number of elements of the set
-        device (torch.device): The device on which the attributes should be
-                                stored
     """
 
     @typecheck
     def __init__(self, *, n: int, device: Union[str, torch.device]) -> None:
+        """Class constructor.
+
+        Parameters
+        ----------
+        n
+            The number of elements of the set.
+        device
+            The device on which the attributes should be stored.
+        """
         self._n = n
         self._device = device
 
     @typecheck
     def __getitem__(self, key: Any) -> NumericalTensor:
+        """Get an attribute from the DataAttributes object.
+
+        Parameters
+        ----------
+        key
+            The key of the attribute to get.
+
+        Raises
+        ------
+        KeyError
+            If the key is not in the DataAttributes object.
+
+        Returns
+        -------
+        NumericalTensor
+            The attribute.
+        """
         return dict.__getitem__(self, key)
 
     def __repr__(self) -> str:
-        """Representation of the DataAttributes object
+        """Representation of the DataAttributes object.
 
-        Writes the attributes of the DataAttributes object, their shape and
-        their dtype. Also writes the number of elements of the set and the
+        Writes the attributes of the DataAttribute object, its shape and
+        its dtype. Also writes the number of elements of the set and the
         device on which the attributes are stored.
 
-        Returns:
-            str: the representation of the DataAttributes object
+        Returns
+        -------
+        str
+            The representation of the DataAttributes object.
         """
         string = "DataAttributes Object with attributes:\n"
         for key, value in self.items():
@@ -91,12 +115,31 @@ class DataAttributes(dict):
     def __setitem__(
         self, key: Any, value: Union[NumericalTensor, NumericalArray]
     ) -> None:
+        """Set an attribute of the DataAttributes object.
+
+        Parameters
+        ----------
+        key
+            The key of the attribute to set.
+        value
+            The value of the attribute to set.
+        """
         value = self._check_value(value)
         dict.__setitem__(self, key, value)
 
     @convert_inputs
     @typecheck
     def append(self, value: Union[FloatTensor, IntTensor]) -> None:
+        """Append an attribute to the DataAttributes object.
+
+        The key of the attribute will be "attribute_{i}" where i is the minimum
+        integer such that "attribute_{i}" is not already in the dictionary.
+
+        Parameters
+        ----------
+        value
+            The value of the attribute to append.
+        """
         value = self._check_value(value)
         i = 0
         while f"attribute_{i}" in self.keys():
@@ -106,6 +149,13 @@ class DataAttributes(dict):
 
     @typecheck
     def clone(self) -> DataAttributes:
+        """Clone the DataAttributes object.
+
+        Returns
+        -------
+        DataAttributes
+            The cloned DataAttributes object.
+        """
         clone = DataAttributes(n=self._n, device=self._device)
         for key, value in self.items():
             clone[key] = value.clone()
@@ -113,6 +163,18 @@ class DataAttributes(dict):
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> DataAttributes:
+        """Make a copy of the DataAttributes object on a new device.
+
+        Parameters
+        ----------
+        device
+            The device on which the copy should be made.
+
+        Returns
+        -------
+        DataAttributes
+            The copy of the DataAttributes object on the new device.
+        """
         clone = DataAttributes(n=self._n, device=device)
         for key, value in self.items():
             clone[key] = value.to(device)
@@ -125,15 +187,7 @@ class DataAttributes(dict):
         attributes: dict[Any, Union[NumericalTensor, NumericalArray]],
         device: Optional[Union[str, torch.device]] = None,
     ) -> DataAttributes:
-        """Create a DataAttributes object from a dictionary of attributes
-
-        Parameters
-            attributes (dict[str, Union[FloatTensor, IntTensor]]): The
-                                        dictionary of attributes
-
-        Returns:
-            DataAttributes: The DataAttributes object
-        """
+        """From dictionnary constructor."""
         if len(attributes) == 0:
             raise ValueError(
                 "The dictionary of attributes should not be empty to"
@@ -176,16 +230,7 @@ class DataAttributes(dict):
         attributes: pyvista.DataSetAttributes,
         device: Optional[Union[str, torch.device]] = None,
     ) -> DataAttributes:
-        """Create a DataAttributes object from a pyvista.DataSetAttributes
-            object
-
-        Parameters
-            attributes (pyvista.DataSetAttributes): The
-                pyvista.DataSetAttributes object
-
-        Returns:
-            DataAttributes: The DataAttributes object
-        """
+        """From pyvista.DataSetAttributes constructor."""
         # First, convert the pyvista.DataSetAttributes object to a dictionary
         dict_attributes = {}
 
@@ -203,9 +248,7 @@ class DataAttributes(dict):
 
     @typecheck
     def to_numpy_dict(self) -> dict[Any, NumericalArray]:
-        """Converts the DataAttributes object to a dictionary of numpy
-        arrays"""
-
+        """Cast as dictionnary of numpy arrays."""
         d = dict(self)
         for key, value in d.items():
             d[key] = value.detach().cpu().numpy()
@@ -215,11 +258,22 @@ class DataAttributes(dict):
     @property
     @typecheck
     def n(self) -> int:
+        """Number of elements of the set getter."""
         return self._n
 
     @n.setter
     @typecheck
     def n(self, n: Any) -> None:
+        """Setter for the number of elements.
+
+        This setter is not meant to be used, as it would change the number of
+        elements of the set after the creation of the DataAttributes object.
+
+        Raises
+        ------
+        ValueError
+            If this setter is called.
+        """
         raise ValueError(
             "You cannot change the number of elements of the set after the"
             + " creation of the DataAttributes object"
@@ -228,11 +282,23 @@ class DataAttributes(dict):
     @property
     @typecheck
     def device(self) -> Union[str, torch.device]:
+        """Device getter."""
         return self._device
 
     @device.setter
     @typecheck
     def device(self, device: Any) -> None:
+        """Device cannot be changed with the setter.
+
+        If you want to change the device of the DataAttributes object, use
+        .to(device) to make a copy of the DataAttributes object on the new
+        device.
+
+        Raises
+        ------
+        ValueError
+            If this setter is called.
+        """
         raise ValueError(
             "You cannot change the device of the set after the creation of the"
             + " DataAttributes object, use .to(device) to make a copy of the"
@@ -240,30 +306,9 @@ class DataAttributes(dict):
         )
 
 
-if False:
-
-    class cached_property(object):
-        """
-        A property that is only computed once per instance and then replaces
-        itself
-        with an ordinary attribute. Deleting the attribute resets the property.
-        """
-
-        def __init__(self, func):
-            self.__doc__ = getattr(func, "__doc__")
-            self.func = func
-
-        def __get__(self, obj, cls):
-            if obj is None:
-                return self
-            value = obj.__dict__[self.func.__name__] = self.func(obj)
-            return value
-
-else:
-    from functools import cached_property
-
-
 def cached_method(*lru_args, **lru_kwargs):
+    """Least-recently-used cache decorator for instance methods."""
+
     def decorator(func):
         @functools.wraps(func)
         def wrapped_func(self, *args, **kwargs):
