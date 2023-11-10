@@ -1,7 +1,7 @@
+"""Mesh convolution kernel."""
+
 from ..types import (
     typecheck,
-    NumericalTensor,
-    polydata_type,
     float_dtype,
 )
 
@@ -14,16 +14,18 @@ def _mesh_convolution(
     self,
     weight_by_length: bool = False,
 ) -> LinearOperator:
-    """Creates a convolution kernel on a triangle mesh or a wireframe polydata as a (N, N) operator.
+    """Convolution kernel on a triangle mesh or a wireframe PolyData.
 
     Parameters
-        weight_by_length (bool, optional): If True, the convolution kernel is
-            weighted by the length of the edges. Defaults to False.
+    ----------
+    weight_by_length
+        If True, the convolution kernel is weighted by the length of the edges.
 
-    Returns:
-        LinearOperator: A (N, N) convolution kernel.
+    Returns
+    -------
+    LinearOperator
+        A (N, N) convolution kernel.
     """
-
     n_edges = self.n_edges
     n_points = self.n_points
     edges = self.edges

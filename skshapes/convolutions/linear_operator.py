@@ -1,7 +1,21 @@
+"""Linear operators with scaling."""
+
+
 class LinearOperator:
     """A simple wrapper for scaled linear operators."""
 
     def __init__(self, matrix, input_scaling=None, output_scaling=None):
+        """Class constructor.
+
+        Parameters
+        ----------
+        matrix
+            The matrix to wrap.
+        input_scaling, optional
+            _description_, by default None
+        output_scaling, optional
+            _description_, by default None
+        """
         M, N = matrix.shape
         assert matrix.shape == (M, N)
         assert input_scaling is None or input_scaling.shape == (N,)
@@ -12,6 +26,13 @@ class LinearOperator:
         self.output_scaling = output_scaling
 
     def __matmul__(self, other):
+        """Matrix multiplication with a vector or matrix.
+
+        Parameters
+        ----------
+        other
+            The vector or matrix to multiply with.
+        """
         assert other.shape[0] == self.matrix.shape[1]
         i_s = self.input_scaling if self.input_scaling is not None else 1
         o_s = self.output_scaling if self.output_scaling is not None else 1
@@ -38,6 +59,7 @@ class LinearOperator:
 
     @property
     def T(self):
+        """Transpose the kernel."""
         return LinearOperator(
             self.matrix.T,
             input_scaling=self.output_scaling,
@@ -46,4 +68,5 @@ class LinearOperator:
 
     @property
     def shape(self):
+        """Shape of the kernel."""
         return self.matrix.shape

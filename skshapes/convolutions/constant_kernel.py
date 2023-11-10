@@ -1,12 +1,21 @@
-import torch
-from ..types import typecheck, Points, Triangles, Number
-from typing import Optional, Literal
+"""Constant kernel class."""
+
+from ..types import typecheck
 
 
 class Constant1Kernel:
     """A summation operator that stands for torch.ones(N, N)."""
 
     def __init__(self, points, target_points=None):
+        """Kernel constructor.
+
+        Parameters
+        ----------
+        points
+            The points in the source space.
+        target_points
+            The points in the target space.
+        """
         if target_points is None:
             target_points = points
 
@@ -19,6 +28,13 @@ class Constant1Kernel:
         self.shape = (M, N)
 
     def __matmul__(self, other):
+        """Matrix multiplication with a vector or matrix.
+
+        Parameters
+        ----------
+        other
+            The vector or matrix to multiply with.
+        """
         assert len(other.shape) in (1, 2)
         assert other.shape[0] == self.shape[1]
         sums = other.sum(dim=0, keepdim=True)
@@ -34,6 +50,7 @@ class Constant1Kernel:
 
     @property
     def T(self):
+        """Returns the transpose of the kernel."""
         return self
 
 
@@ -41,7 +58,7 @@ class Constant1Kernel:
 def constant_1_kernel(
     *, points, target_points=None, **kwargs
 ) -> Constant1Kernel:
-    """Returns the (N, N) matrix of squared distances between points.
+    """(N, N) matrix of squared distances between points.
 
     For geodesic kernels, we may want to stick to connected components?
     """

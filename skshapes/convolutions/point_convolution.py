@@ -1,10 +1,9 @@
+"""Point convolutions kernel."""
+
 import numpy as np
-import torch
 
 from ..types import (
     typecheck,
-    Points,
-    Triangles,
     Number,
     polydata_type,
 )
@@ -27,9 +26,36 @@ def _point_convolution(
     dtype: Optional[Literal["float", "double"]] = None,
     target: Optional[polydata_type] = None,
 ) -> LinearOperator:
-    """Creates a convolution kernel on a PolyData as a (N, N) linear operator if no target is provided,
-    or as a (M, N) linear operator if a target is provided"""
+    """Convolution kernel on a PolyData.
 
+    Creates a convolution kernel on a PolyData as a (N, N) linear operatorif no
+    target is provided, or as a (M, N) linear operator if a target is provided.
+
+    Parameters
+    ----------
+    kernel
+        The kernel to use.
+    scale
+        The scale of the kernel.
+    window
+        The type of window to use.
+    cutoff
+        The cutoff value for the window.
+    geodesic
+        Whether to use geodesic distances.
+    normalize
+        Whether to normalize the kernel.
+    dtype
+        The data type of the kernel.
+    target
+        The target PolyData.
+
+    Returns
+    -------
+    LinearOperator
+        A (N, N) or (M, N) convolution kernel.
+
+    """
     if target is None:
         target = self
 
@@ -59,8 +85,9 @@ def _point_convolution(
 
     else:
         if kernel == "gaussian":
-            # Divisions are expensive: whenever possible, it's best to scale the points
-            # ahead of time instead of scaling the distances for every pair of points.
+            # Divisions are expensive: whenever possible, it's best to scale
+            # the points ahead of time instead of scaling the distances for
+            # every pair of points.
             sqrt_2 = 1.41421356237
             X = X / (sqrt_2 * scale)
             Y = Y / (sqrt_2 * scale)
@@ -84,8 +111,8 @@ def _point_convolution(
             Y = Y / scale
             # For dense computations, users may specify a cutoff as a kernel
             # value below which the kernel is assumed to be zero.
-            # For the uniform kernel, this just means discarding pairs of points
-            # which are at distance > 1 (after rescaling).
+            # For the uniform kernel, this just means discarding pairs of
+            # points which are at distance > 1 (after rescaling).
             if window is None and cutoff is not None:
                 backend_args["cutoff"] = 1.01  # To be on the safe side...
 

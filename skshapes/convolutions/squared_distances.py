@@ -1,19 +1,17 @@
+"""Squared distances between points."""
+
 import numpy as np
 import torch
 from pykeops.torch import LazyTensor
 from pykeops.torch.cluster import (
     grid_cluster,
     cluster_ranges_centroids,
-    sort_clusters,
     from_matrix,
 )
 
 
-from ..utils import diagonal_ranges
 from ..types import (
     typecheck,
-    Points,
-    Triangles,
     Number,
 )
 from typing import Optional, Literal
@@ -21,6 +19,8 @@ from collections.abc import Callable
 
 
 class KeOpsSquaredDistances:
+    """Squared distances between points using KeOps."""
+
     def __init__(
         self,
         *,
@@ -29,6 +29,19 @@ class KeOpsSquaredDistances:
         kernel: Optional[Callable] = None,
         target_points=None,
     ):
+        """Kernel constructor.
+
+        Parameters
+        ----------
+        points
+            The points in the source space.
+        cutoff
+            The cutoff value for the window.
+        kernel
+            The kernel to use.
+        target_points
+            The points in the target space.
+        """
         if target_points is None:
             target_points = points
 
@@ -48,7 +61,8 @@ class KeOpsSquaredDistances:
         else:
             if M != N or not torch.allclose(points, target_points):
                 raise NotImplementedError(
-                    "Cutoff argument is not available yet when computing convolutions between different point clouds."
+                    "Cutoff argument is not available yet when computing"
+                    + "convolutions between different point clouds."
                 )
 
             bin_size = 1.5
@@ -60,8 +74,8 @@ class KeOpsSquaredDistances:
                 points, point_labels
             )
 
-            # To fit the block-sparse structure of our kernel, we will need to sort
-            # the points to make clusters contiguous in memory.
+            # To fit the block-sparse structure of our kernel, we will need to
+            # sort the points to make clusters contiguous in memory.
             sorted_labels, perm = torch.sort(point_labels.view(-1))
             sorted_points = points[perm]
             # Invert the permutation
@@ -77,7 +91,9 @@ class KeOpsSquaredDistances:
             cutoff_distance = np.sqrt(cutoff) + np.sqrt(D) * bin_size
             keep = D2_c < cutoff_distance**2
             print(
-                f"Cutoff distance: {cutoff_distance:.2f} sigma, keep {(100.* keep).mean():.2f}% of a {keep.shape[0]:,}^2 cluster matrix"
+                f"Cutoff distance: {cutoff_distance:.2f} sigma, "
+                + f"keep {(100.* keep).mean():.2f}% of a"
+                + f"{keep.shape[0]:,}^2 cluster matrix"
             )
             ranges = from_matrix(x_ranges, x_ranges, keep)
 
@@ -91,6 +107,18 @@ class KeOpsSquaredDistances:
         self.K_ij.ranges = ranges
 
     def __matmul__(self, other):
+        """Matrix multiplication with a vector or matrix.
+
+        Parameters
+        ----------
+        other
+            The vector or matrix to multiply with.
+
+        Returns
+        -------
+        torch.Tensor
+            The result of the matrix multiplication.
+        """
         assert len(other.shape) in (1, 2)
         assert other.shape[0] == self.shape[1]
 
@@ -114,6 +142,7 @@ class KeOpsSquaredDistances:
 
     @property
     def T(self):
+        """Transpose of the kernel."""
         return self
 
 
@@ -127,15 +156,30 @@ def squared_distances(
     kernel: Optional[Callable] = None,
     target_points=None,
 ):
-    """Returns the matrix of squared distances between points.
+    """Matrix of squared distances between points.
 
     If source_points is not None, then the (N, M) matrix of squared distances
     between points (in rows) and source_points (in columns) is returned.
 
     Else, the (N, N) matrix of squared distances between points is returned.
 
-    """
+    Parameters
+    ----------
+    points
+        The points in the target space.
+    window
+        The type of window to use.
+    cutoff
+        The cutoff value for the window.
+    geodesic
+        Whether to use geodesic distances.
+    kernel
+        The kernel to use.
+    target_points
+        The points in the source space. If None, then the points in the target
+        space are used.
 
+    """
     if target_points is None:
         target_points = points
 
