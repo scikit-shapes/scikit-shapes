@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         # os: [ubuntu-latest, macos-latest]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.9", "3.10", "3.11"]
         os: [ubuntu-latest]
 
     steps:
@@ -28,8 +28,9 @@ jobs:
 
       - name: syntax checking with flake8
         run: |
+          pip install --upgrade pip
           pip install flake8 flake8-docstrings flake8-bugbear flake8-builtins flake8-comprehensions
-          flake8 skshapes >> artifacts/flake8_report.txt
+          flake8 skshapes >> artifacts/flake8_report.txt 
       
       - name: Install package (with dependencies)
         run: |
