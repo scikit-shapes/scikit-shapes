@@ -27,7 +27,7 @@ def smooth_curvatures(
     *,
     vertices: Points,
     triangles: Optional[Triangles] = None,
-    scales=[1.0],
+    scales=None,
     batch=None,
     normals: Optional[Points] = None,
     reg: Number = 0.01,
@@ -80,6 +80,10 @@ def smooth_curvatures(
         (N, S*2) tensor of mean and Gauss curvatures computed for every point
         at the required scales.
     """
+    # Default value for the scales:
+    if scales is None:
+        scales = [1.0]
+
     # Number of points, number of scales:
     N, S = vertices.shape[0], len(scales)
     ranges = diagonal_ranges(batch)
@@ -294,12 +298,12 @@ def _point_quadratic_coefficients(
     nuv = self.point_frames(scale=scale, **kwargs)
     assert nuv.shape == (N, 3, 3)
 
-    nuv = dict(
-        n=nuv[:, 0, :].contiguous(),  # (N, 3)
-        u=nuv[:, 1, :].contiguous(),  # (N, 3)
-        v=nuv[:, 2, :].contiguous(),  # (N, 3)
-    )
-    for key, value in nuv.items():
+    nuv = {
+        "n": nuv[:, 0, :].contiguous(),  # (N, 3)
+        "u": nuv[:, 1, :].contiguous(),  # (N, 3)
+        "v": nuv[:, 2, :].contiguous(),  # (N, 3)
+    }
+    for _, value in nuv.items():
         assert value.shape == (N, 3)
 
     # Recover the local moments of order 1, 2, 3, 4:

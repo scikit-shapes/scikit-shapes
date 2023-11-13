@@ -77,7 +77,7 @@ def _point_convolution(
         Y = Y.double()
         weights_j = weights_j.double()
 
-    backend_args = dict(window=window, cutoff=cutoff, geodesic=geodesic)
+    backend_args = {"window": window, "cutoff": cutoff, "geodesic": geodesic}
 
     if scale is None:
         # scale = +infinity, the kernel is always equal to 1

@@ -29,8 +29,8 @@ class KernelDeformation(BaseModel):
     def __init__(
         self,
         n_steps: int = 1,
-        integrator: Integrator = EulerIntegrator(),
-        kernel: Kernel = GaussianKernel(),
+        integrator: Optional[Integrator] = None,
+        kernel: Optional[Kernel] = None,
         control_points: Optional[Literal["grid"]] = None,
         n_grid: int = 10,
         **kwargs,
@@ -46,6 +46,11 @@ class KernelDeformation(BaseModel):
         kernel
             Kernel used to smooth the momentum.
         """
+        if integrator is None:
+            integrator = EulerIntegrator()
+        if kernel is None:
+            kernel = GaussianKernel()
+
         self.integrator = integrator
         self.cometric = kernel
         self.n_steps = n_steps

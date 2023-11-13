@@ -75,9 +75,9 @@ class MultiscaleTriangleMesh:
             ), "n_points must be between 0 and n_points"
             ratios = [1 - (npts / shape.n_points) for npts in n_points]
 
-        self.shapes = dict()
-        self.mappings_from_origin = dict()
-        self.signals = dict()
+        self.shapes = {}
+        self.mappings_from_origin = {}
+        self.signals = {}
 
         self.coarse_to_fine_policy = (
             coarse_to_fine_policy
@@ -554,7 +554,7 @@ class MultiscaleTriangleMesh:
         point_convolution_args = (
             source._point_convolution.__annotations__.keys()
         )
-        convolutions_kwargs = dict()
+        convolutions_kwargs = {}
         for arg in kwargs:
             if arg in point_convolution_args:
                 convolutions_kwargs[arg] = kwargs[arg]

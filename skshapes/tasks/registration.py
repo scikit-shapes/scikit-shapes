@@ -30,7 +30,7 @@ class Registration:
         *,
         model: Model,
         loss: Loss,
-        optimizer: Optimizer = LBFGS(),
+        optimizer: Optional[Optimizer] = None,
         regularization: Union[int, float] = 1,
         n_iter: int = 10,
         verbose: int = 0,
@@ -58,6 +58,9 @@ class Registration:
             do intensive numerical computations on a nvidia gpu with a cuda
             backend if available.
         """
+        if optimizer is None:
+            optimizer = LBFGS()
+
         self.model = model
         self.loss = loss
         self.optimizer = optimizer

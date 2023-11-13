@@ -125,7 +125,7 @@ class RigidMotion(BaseModel):
                     small_rotation_angles
                 )
                 small_translation = (1 / self.n_steps) * translation
-                for i in range(self.n_steps):
+                for _ in range(self.n_steps):
                     newpoints = (
                         (small_rotation_matrix @ (shape.points - center).T).T
                         + center
@@ -195,7 +195,7 @@ class RigidMotion(BaseModel):
                     device=parameter.device,
                 )
                 small_translation = (1 / (self.n_steps)) * translation
-                for i in range(self.n_steps):
+                for _ in range(self.n_steps):
                     center = path[-1].points.mean(dim=0)
                     newpoints = (
                         (small_rotation @ (path[-1].points - center).T).T

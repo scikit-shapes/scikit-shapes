@@ -16,6 +16,7 @@ from ..types import (
 )
 from .utils import MorphingOutput
 from .metrics import Metric, ElasticMetric
+from typing import Optional
 
 
 class VectorFieldDeformation(BaseModel):
@@ -23,7 +24,7 @@ class VectorFieldDeformation(BaseModel):
 
     @typecheck
     def __init__(
-        self, n_steps: int = 1, metric: Metric = ElasticMetric()
+        self, n_steps: int = 1, metric: Optional[Metric] = None
     ) -> None:
         """Initialize the model.
 
@@ -35,6 +36,9 @@ class VectorFieldDeformation(BaseModel):
             Riemannian metric used to regularize the morphing.
 
         """
+        if metric is None:
+            metric = ElasticMetric()
+
         self.n_steps = n_steps
         self.metric = metric
 

@@ -8,7 +8,7 @@ from ..types import (
     float_dtype,
     shape_type,
 )
-from typing import Any
+from typing import Any, Optional
 import torch
 
 
@@ -139,7 +139,9 @@ class SumLoss(BaseLoss):
 
     @typecheck
     def __init__(
-        self, loss1: BaseLoss = EmptyLoss(), loss2: BaseLoss = EmptyLoss()
+        self,
+        loss1: Optional[BaseLoss] = None,
+        loss2: Optional[BaseLoss] = None,
     ) -> None:
         """Class constructor.
 
@@ -150,6 +152,11 @@ class SumLoss(BaseLoss):
         loss1
         loss2
         """
+        if loss1 is None:
+            loss1 = EmptyLoss()
+        if loss2 is None:
+            loss2 = EmptyLoss()
+
         self.loss1 = loss1
         self.loss2 = loss2
 
@@ -188,7 +195,7 @@ class ProductLoss(BaseLoss):
 
     @typecheck
     def __init__(
-        self, loss: BaseLoss = EmptyLoss(), scalar: Number = 1.0
+        self, loss: Optional[BaseLoss] = None, scalar: Number = 1.0
     ) -> None:
         """Class constructor.
 
@@ -201,6 +208,8 @@ class ProductLoss(BaseLoss):
         scalar
             scalar to multiply the loss by
         """
+        if loss is None:
+            loss = EmptyLoss()
         self.loss = loss
         self.scalar = scalar
 

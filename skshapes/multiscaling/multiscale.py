@@ -77,20 +77,20 @@ class Multiscale:
 
                 # check that all shapes are triangle meshes and share the same
                 # topology
-                if not all([s.is_triangle_mesh for s in shape]):
+                if not all(s.is_triangle_mesh for s in shape):
                     raise ValueError(
                         "All shapes must be triangle meshes to be decimated"
                         + " in correspondence"
                     )
 
-                if not all([s.n_points == shape[0].n_points for s in shape]):
+                if not all(s.n_points == shape[0].n_points for s in shape):
                     raise ValueError(
                         "All shapes must have the same number of points to be"
                         + " decimated in correspondence"
                     )
 
                 if not all(
-                    [s.n_triangles == shape[0].n_triangles for s in shape]
+                    s.n_triangles == shape[0].n_triangles for s in shape
                 ):
                     raise ValueError(
                         "All shapes must have the same number of triangles to"

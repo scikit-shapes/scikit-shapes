@@ -108,7 +108,7 @@ def smooth_normals(
     *,
     vertices: Points,
     triangles: Optional[Triangles] = None,
-    scale=[1.0],
+    scale=None,
     batch=None,
     normals: Optional[Points] = None,
 ) -> FloatTensor:
@@ -149,6 +149,9 @@ def smooth_normals(
         (N,3) or (N,S,3) point normals.
 
     """
+    if scale is None:
+        scale = [0.1]
+
     # Single- or Multi-scale mode:
     if hasattr(scale, "__len__"):
         scales, single_scale = scale, False
