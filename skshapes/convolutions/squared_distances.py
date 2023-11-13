@@ -92,7 +92,7 @@ class KeOpsSquaredDistances:
             keep = D2_c < cutoff_distance**2
             print(
                 f"Cutoff distance: {cutoff_distance:.2f} sigma, "
-                + f"keep {(100.* keep).mean():.2f}% of a"
+                + f"keep {(100. * keep).mean():.2f}% of a"
                 + f"{keep.shape[0]:,}^2 cluster matrix"
             )
             ranges = from_matrix(x_ranges, x_ranges, keep)

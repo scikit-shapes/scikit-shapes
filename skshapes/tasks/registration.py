@@ -195,7 +195,7 @@ class Registration:
             loss_value = optimizer.step(closure)
             if self.verbose > 0:
                 loss_value = loss_fn(parameter)
-                print(f"Loss after {i+1} iteration(s) : {loss_value:.2e}")
+                print(f"Loss after {i + 1} iteration(s) : {loss_value:.2e}")
                 print(f"    fidelity = {self.current_loss:.2e}")
                 print(
                     f"    regularization = {self.current_regularization:.2e}"
