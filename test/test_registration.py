@@ -50,13 +50,6 @@ def test_registration_hypothesis(
     provide_initial_parameter,
     dim,
 ):
-    if (
-        gpu
-        and torch.cuda.is_available()
-        and isinstance(loss, sks.OptimalTransportLoss)
-    ):
-        return None
-
     # Load two meshes
 
     if dim == 3:

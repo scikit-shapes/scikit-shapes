@@ -107,6 +107,7 @@ def test_convolution_functional(
     normalize: bool,
     dim: int,
 ):
+
     # Sample two point clouds
     X = torch.rand(N, 3).to(sks.float_dtype)
     Y = torch.rand(M, 3).to(sks.float_dtype)
@@ -122,14 +123,14 @@ def test_convolution_functional(
     assert polydata_y.points.dtype == sks.float_dtype
 
     # Compute the squared distances between the two point clouds
-    yi = Y.view(M, 1, 3)
-    xj = X.view(1, N, 3)
+    yi = Y.view(M, 1, 3) / scale
+    xj = X.view(1, N, 3) / scale
     squared_distances = ((yi - xj) ** 2).sum(-1)
 
     if kernel == "gaussian":
-        kernel_torch = (-squared_distances / (2 * scale**2)).exp()
+        kernel_torch = (-squared_distances / 2).exp()
     elif kernel == "uniform":
-        kernel_torch = 1.0 * ((squared_distances / (scale**2)) <= 1)
+        kernel_torch = 1.0 * ((squared_distances) <= 1)
 
     kernel_torch = kernel_torch.to(sks.float_dtype)
     # assert kernel_torch.dtype == sks.float_dtype
