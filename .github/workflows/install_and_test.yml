@@ -45,6 +45,10 @@ jobs:
           export SKSHAPES_FLOAT_DTYPE=float32
           pytest . --cov=skshapes --cov-report=html
           cp -r htmlcov artifacts/
+
+      # https://github.com/pyvista/setup-headless-display-action
+      - name: Setup headless display
+        uses: pyvista/setup-headless-display-action@v2
       
       - name : build docs
         run: |
