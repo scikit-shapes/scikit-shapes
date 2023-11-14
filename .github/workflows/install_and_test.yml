@@ -46,6 +46,11 @@ jobs:
           pytest . --cov=skshapes --cov-report=html
           cp -r htmlcov artifacts/
       
+      - name : build docs
+        run: |
+          pip install -r docs/requirements.txt
+          mkdocs build
+      
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:

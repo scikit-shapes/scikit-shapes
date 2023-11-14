@@ -49,7 +49,7 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 ## Build documentation
 
 ```bash
-pip install -r build_doc_requirements.txt
+pip install -r docs/requirements.txt
 mkdocs serve
 ```
 
