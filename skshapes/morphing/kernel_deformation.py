@@ -45,6 +45,14 @@ class KernelDeformation(BaseModel):
             Hamiltonian integrator.
         kernel
             Kernel used to smooth the momentum.
+        control_points
+            If None, the control points are the points of the shape. If "grid",
+            the control points are a regular grid enclosing the shape, with
+            `n_grid` points per side.
+        n_grid
+            Number of points per side of the grid if `control_points` is
+            "grid".
+
         """
         if integrator is None:
             integrator = EulerIntegrator()
@@ -55,6 +63,7 @@ class KernelDeformation(BaseModel):
         self.cometric = kernel
         self.n_steps = n_steps
         self.control_points = control_points
+        self.n_grid = n_grid
 
     @typecheck
     def morph(
@@ -89,7 +98,11 @@ class KernelDeformation(BaseModel):
             p = parameter
         p.requires_grad = True
 
-        q = shape.points.clone()
+        if self.control_points is None:
+            q = shape.points.clone()
+        elif self.control_points == "grid":
+            points = shape.points.clone()
+            q = shape.bounding_grid(N=self.n_grid).points.clone()
         q.requires_grad = True
 
         # Compute the regularization
@@ -99,7 +112,8 @@ class KernelDeformation(BaseModel):
 
         # Define the hamiltonian
         def H(p, q):
-            return self.cometric(p, q) / 2
+            K = self.cometric.operator(q, q)
+            return torch.sum(p * (K @ p)) / 2
 
         dt = 1 / self.n_steps  # Time step
 
@@ -110,11 +124,20 @@ class KernelDeformation(BaseModel):
 
         for i in range(self.n_steps):
             p, q = self.integrator(p, q, H, dt)
+            if self.control_points is None:
+                # Update the points
+                # no control points -> q = shape.points
+                points = q.clone()
+            elif self.control_points == "grid":
+                # Update the points
+                K = self.cometric.operator(points, q)
+                points = points + (K @ p)
+
             if return_path:
-                path[i + 1].points = q.clone()
+                path[i + 1].points = points
 
         morphed_shape = shape.copy()
-        morphed_shape.points = q
+        morphed_shape.points = points
 
         return MorphingOutput(
             morphed_shape=morphed_shape,
@@ -139,7 +162,8 @@ class KernelDeformation(BaseModel):
         if self.control_points is None:
             return shape.points.shape
 
-        elif shape.dim == 2:
-            return (self.n_grid**2, 2)
-        elif shape.dim == 3:
-            return (self.n_grid**3, 3)
+        elif self.control_points == "grid":
+            if shape.dim == 2:
+                return (self.n_grid**2, 2)
+            elif shape.dim == 3:
+                return (self.n_grid**3, 3)

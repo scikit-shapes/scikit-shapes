@@ -107,7 +107,6 @@ def test_convolution_functional(
     normalize: bool,
     dim: int,
 ):
-
     # Sample two point clouds
     X = torch.rand(N, 3).to(sks.float_dtype)
     Y = torch.rand(M, 3).to(sks.float_dtype)

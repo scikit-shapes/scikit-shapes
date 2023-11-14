@@ -186,3 +186,32 @@ def test_registration_device():
             pass
         else:
             raise AssertionError("Should have raised an error")
+
+
+def test_lddmm_control_points():
+    mesh1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
+    mesh2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
+
+    # Define the model
+    model = sks.KernelDeformation(
+        n_steps=5,
+        kernel=sks.GaussianKernel(sigma=0.5),
+        control_points="grid",
+        n_grid=5,
+    )
+
+    loss = sks.OptimalTransportLoss()
+    optimizer = sks.LBFGS()
+
+    registration = sks.Registration(
+        model=model,
+        loss=loss,
+        optimizer=optimizer,
+        n_iter=10,
+        lr=0.1,
+        regularization=0.1,
+        gpu=False,
+        verbose=True,
+    )
+
+    registration.fit(source=mesh1, target=mesh2)
