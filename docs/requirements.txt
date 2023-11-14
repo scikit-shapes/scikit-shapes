@@ -1,7 +1,6 @@
 mkdocs
 mkdocs-material
-# mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@main
-mkdocs-gallery
+mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@main
 mkdocs-gen-files
 mkdocs-literate-nav
 mkdocstrings-python
