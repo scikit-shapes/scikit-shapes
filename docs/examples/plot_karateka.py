@@ -10,7 +10,7 @@ import importlib
 import skshapes as sks
 from utils_karateka import load_data, plot_karatekas, plot_path
 
-pykeops_nvrtc = importlib.import_module("pykeops_nvrtc")
+# pykeops_nvrtc = importlib.import_module("pykeops_nvrtc")
 # If this fails, use:
 # https://github.com/Louis-Pujol/mkdocs-gallery
 # See https://github.com/smarie/mkdocs-gallery/pull/82
