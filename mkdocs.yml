@@ -1,9 +1,13 @@
 site_name: Scikit-Shapes
 repo_url: https://github.com/scikit-shapes/scikit-shapes
 
+
+
 theme:
   name: material
   features:
+    - source_repository: 'https://github.com/scikit-shapes/scikit-shapes'
+    - source_branch: 'main'
     - navigation.sections
     - toc.follow
     - navigation.top
@@ -50,6 +54,9 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          rendering:
+            show_source: true
+            members_order: source
           options:
             docstring_style: numpy
             docstring_section_table: list

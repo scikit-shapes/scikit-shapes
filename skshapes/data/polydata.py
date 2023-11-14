@@ -312,7 +312,7 @@ class PolyData(polydata_type):
 
         Parameters
         ----------
-        path
+        filename
             The path where to save the shape.
         """
         mesh = self.to_pyvista()
@@ -711,7 +711,8 @@ class PolyData(polydata_type):
         The landmarks should be a sparse tensor of shape
         (n_landmarks, n_points) (barycentric coordinates).
         """
-        assert landmarks.is_sparse and landmarks.shape[1] == self.n_points
+        assert landmarks.is_sparse
+        assert landmarks.shape[1] == self.n_points
         assert landmarks.dtype == float_dtype
         self._landmarks = landmarks.clone().to(self.device)
 
