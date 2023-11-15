@@ -6,7 +6,6 @@ Make the karateka moves
 # %%
 # Useful imports
 
-import importlib
 import skshapes as sks
 from utils_karateka import load_data, plot_karatekas, plot_path
 
