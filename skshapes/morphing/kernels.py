@@ -49,6 +49,7 @@ class GaussianKernel(Kernel):
 
         Returns
         -------
+        LinearOperator
             The operator K_q0^q1.
 
         """

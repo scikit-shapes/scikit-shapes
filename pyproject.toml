@@ -17,5 +17,26 @@ dependencies = [
 requires = ["numpy", "cython", "setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[project.optional-dependencies]
+dev = [
+    "black",
+    "flake8",
+    "flake8-docstrings",
+    "flake8-bugbear",
+    "flake8-builtins",
+    "flake8-comprehensions",
+    "flake8-annotations",
+    "pytest",
+    "pytest-cov",
+    "hypothesis",
+    "mkdocs",
+    "mkdocs-material",
+    "mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@main",
+    "mkdocs-gen-files",
+    "mkdocs-literate-nav",
+    "mkdocstrings-python",
+    "pytkdocs[numpy-style]",
+]
+
 [tool.black]
 line-length = 79
