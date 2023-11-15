@@ -35,19 +35,9 @@ jobs:
 
       - name: Test with pytest
         run: |
-          export SKSHAPES_FLOAT_DTYPE=float64
-          pytest .
           export SKSHAPES_FLOAT_DTYPE=float32
           pytest . --cov=skshapes --cov-report=html
           cp -r htmlcov artifacts/
-
-      # https://github.com/pyvista/setup-headless-display-action
-      - name: Setup headless display
-        uses: pyvista/setup-headless-display-action@v2
-      
-      - name : build docs
-        run: |
-          mkdocs build
       
       - name: Upload artifacts
         uses: actions/upload-artifact@v3

@@ -1,0 +1,34 @@
+name: Build documentation
+
+on:
+  push:
+    paths:
+    - docs
+    - examples
+    
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+        
+      - name: Install package (with dependencies for linting, testing and building doc)
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev]
+
+        # https://github.com/pyvista/setup-headless-display-action
+      - name: Setup headless display
+        uses: pyvista/setup-headless-display-action@v2
+        
+      - name : build docs
+        run: |
+          mkdocs build
