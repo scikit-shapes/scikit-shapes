@@ -18,28 +18,23 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-      # - name: Install dependencies
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          cache: 'pip'
+
       - name : Create artifacts directory
         run: |
           mkdir -p artifacts/
+      
+      - name: Install package (with dependencies for linting, testing and building doc)
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev]
 
       - name: syntax checking with flake8
         run: |
-          pip install --upgrade pip
-          pip install flake8 flake8-docstrings flake8-bugbear flake8-builtins flake8-comprehensions flake8-annotations
           flake8 skshapes
-      
-      - name: Install package (with dependencies)
-        run: |
-          pip install -e .
-
 
       - name: Test with pytest
         run: |
-          pip install pytest hypothesis pytest-cov
           export SKSHAPES_FLOAT_DTYPE=float64
           pytest .
           export SKSHAPES_FLOAT_DTYPE=float32
@@ -52,7 +47,6 @@ jobs:
       
       - name : build docs
         run: |
-          pip install -r docs/requirements.txt
           mkdocs build
       
       - name: Upload artifacts
