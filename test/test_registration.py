@@ -192,12 +192,11 @@ def test_lddmm_control_points():
     mesh1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
     mesh2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
 
+    mesh1.control_points = mesh1.bounding_grid(N=5, offset=0.25)
+
     # Define the model
     model = sks.KernelDeformation(
-        n_steps=5,
-        kernel=sks.GaussianKernel(sigma=0.5),
-        control_points="grid",
-        n_grid=5,
+        n_steps=5, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
     )
 
     loss = sks.OptimalTransportLoss()
@@ -215,3 +214,5 @@ def test_lddmm_control_points():
     )
 
     registration.fit(source=mesh1, target=mesh2)
+
+    assert registration.parameter_.shape == mesh1.control_points.points.shape

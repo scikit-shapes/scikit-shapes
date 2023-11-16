@@ -1017,7 +1017,9 @@ class PolyData(polydata_type):
         return unbalanced_weights
 
     @typecheck
-    def bounding_grid(self, N: int = 10) -> polydata_type:
+    def bounding_grid(
+        self, N: int = 10, offset: float = 0.05
+    ) -> polydata_type:
         """Bounding grid of the shape.
 
         Compute a bounding grid of the shape. The grid is a PolyData with
@@ -1027,6 +1029,10 @@ class PolyData(polydata_type):
         ----------
         N
             The number of points on each axis of the grid.
+        offset
+            The offset of the grid with respect to the shape. If offset=0, the
+            grid is exactly the bounding box of the shape. If offset=1, the
+            grid is the bounding box of the shape dilated by a factor 2.
 
         Returns
         -------
@@ -1036,11 +1042,15 @@ class PolyData(polydata_type):
         pv_shape = self.to_pyvista()
         # Get the bounds of the mesh
         xmin, xmax, ymin, ymax, zmin, zmax = pv_shape.bounds
-        origin = (xmin, ymin, zmin)
         spacing = (
-            (xmax - xmin) / (N - 1),
-            (ymax - ymin) / (N - 1),
-            (zmax - zmin) / (N - 1),
+            (1 + 2 * offset) * (xmax - xmin) / (N - 1),
+            (1 + 2 * offset) * (ymax - ymin) / (N - 1),
+            (1 + 2 * offset) * (zmax - zmin) / (N - 1),
+        )
+        origin = (
+            xmin - offset * (xmax - xmin),
+            ymin - offset * (ymax - ymin),
+            zmin - offset * (zmax - zmin),
         )
 
         # Create the grid
@@ -1054,6 +1064,16 @@ class PolyData(polydata_type):
 
     @property
     @typecheck
-    def control_points(self) -> Points:
+    def control_points(self) -> Optional[polydata_type]:
         """Control points of the shape."""
-        return self.bounding_grid(N=10).points
+        if hasattr(self, "_control_points"):
+            return self._control_points
+        else:
+            return None
+
+    @control_points.setter
+    @convert_inputs
+    @typecheck
+    def control_points(self, control_points: Optional[polydata_type]) -> None:
+        """Set the control points of the shape."""
+        self._control_points = control_points
