@@ -118,19 +118,29 @@ class KernelDeformation(BaseModel):
         else:
             path = [shape.copy() for _ in range(self.n_steps + 1)]
 
-        for i in range(self.n_steps):
-            p, q = self.integrator(p, q, H, dt)
-            if not self.control_points or shape.control_points is None:
-                # Update the points
-                # no control points -> q = shape.points
-                points = q.clone()
-            else:
-                # Update the points
-                K = self.cometric.operator(points, q)
-                points = points + (K @ p)
-
+        if self.n_steps == 1:
+            # If there is only one step, we can compute the transormation
+            # directly without using the integrator as we do not need p_1
+            K = self.cometric.operator(shape.points, q)
+            points = shape.points + dt * (K @ p)
             if return_path:
-                path[i + 1].points = points
+                path[1].points = points
+
+        else:
+            for i in range(self.n_steps):
+                if not self.control_points or shape.control_points is None:
+                    # Update the points
+                    # no control points -> q = shape.points
+                    p, q = self.integrator(p, q, H, dt)
+                    points = q.clone()
+                else:
+                    # Update the points
+                    K = self.cometric.operator(points, q)
+                    points = points + dt * (K @ p)
+                    p, q = self.integrator(p, q, H, dt)
+
+                if return_path:
+                    path[i + 1].points = points
 
         morphed_shape = shape.copy()
         morphed_shape.points = points
