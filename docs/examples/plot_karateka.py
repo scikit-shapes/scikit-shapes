@@ -7,7 +7,15 @@ Make the karateka moves
 # Useful imports
 
 import skshapes as sks
-from utils_karateka import load_data, plot_karatekas, plot_path
+from utils_karateka import *
+
+kwargs = {
+    'loss': sks.L2Loss(),
+    'optimizer': sks.LBFGS(),
+    'n_iter': 5,
+    'gpu': False,
+    'verbose': True,
+}
 
 # pykeops_nvrtc = importlib.import_module("pykeops_nvrtc")
 # https://github.com/Louis-Pujol/mkdocs-gallery
@@ -20,116 +28,67 @@ source, target = load_data()
 plot_karatekas()
 
 # %%
-# Register with no regularization
+# Register with an extrinsic deformation
 
-n_steps = 10
-loss = sks.L2Loss()
-model = sks.IntrinsicDeformation(n_steps=n_steps)
-optimizer = sks.LBFGS()
-n_iter = 5
-regularization = 0
+source.control_points = source.bounding_grid(N=25, offset=0.15)
 
-registration = sks.Registration(
-    model=model,
-    loss=loss,
-    optimizer=optimizer,
-    gpu=False,
-    n_iter=n_iter,
-    verbose=True,
-    regularization=regularization,
-)
-
-registration.fit(source=source, target=target)
-
-# %%
-# Visualize the registration path
-
-path = registration.path_
-plot_path(path=path)
-
-# %%
-# Register with regularization = 100
-
-n_steps = 10
-loss = sks.L2Loss()
-model = sks.IntrinsicDeformation(n_steps=n_steps)
-optimizer = sks.LBFGS()
-n_iter = 5
-regularization = 100
-
-registration = sks.Registration(
-    model=model,
-    loss=loss,
-    optimizer=optimizer,
-    gpu=False,
-    n_iter=n_iter,
-    verbose=True,
-    regularization=regularization,
-)
-
-registration.fit(source=source, target=target)
-
-# %%
-# Visualize the registration path
-
-path = registration.path_
-plot_path(path=path)
-
-# %%
-# Register with regularization = 1000
-
-n_steps = 10
-loss = sks.L2Loss()
-model = sks.IntrinsicDeformation(n_steps=n_steps)
-optimizer = sks.LBFGS()
-n_iter = 5
-regularization = 1000
-
-registration = sks.Registration(
-    model=model,
-    loss=loss,
-    optimizer=optimizer,
-    gpu=False,
-    n_iter=n_iter,
-    verbose=True,
-    regularization=regularization,
-)
-
-registration.fit(source=source, target=target)
-
-# %%
-# Visualize the registration path
-
-path = registration.path_
-plot_path(path=path)
-
-# %%
-# Register with regularization = 1000
-
-n_steps = 2
-loss = sks.L2Loss()
 model = sks.ExtrinsicDeformation(
-    n_steps=n_steps,
-    kernel=sks.GaussianKernel(sigma=1),
+    kernel=sks.GaussianKernel(sigma=1.0),
+    control_points=True
 )
-optimizer = sks.LBFGS()
-n_iter = 5
-regularization = 0.1
 
 registration = sks.Registration(
     model=model,
-    loss=loss,
-    optimizer=optimizer,
-    gpu=False,
-    n_iter=n_iter,
-    verbose=True,
-    regularization=regularization,
+    regularization=0.1,
+    **kwargs
 )
 
 registration.fit(source=source, target=target)
 
 # %%
-# Visualize the registration path
+# Visualize the deformation
 
-path = registration.path_
-plot_path(path=path)
+plot_extrinsic_deformation(source=source, target=target, registration=registration)
+
+# %%
+# Register with en intrinsic deformation (small regularization)
+
+model = sks.IntrinsicDeformation(
+    n_steps=8,
+)
+
+registration = sks.Registration(
+    model=model,
+    regularization=.0001,
+    **kwargs
+)
+
+registration.fit(source=source, target=target)
+
+
+# %%
+# Visualize the deformation
+
+plot_intrinsic_deformation(source=source, target=target, registration=registration)
+
+
+# %%
+# Register with en intrinsic deformation (with regularization)
+
+model = sks.IntrinsicDeformation(
+    n_steps=8,
+)
+
+registration = sks.Registration(
+    model=model,
+    regularization=100,
+    **kwargs
+)
+
+registration.fit(source=source, target=target)
+
+
+# %%
+# Visualize the deformation
+
+plot_intrinsic_deformation(source=source, target=target, registration=registration)
