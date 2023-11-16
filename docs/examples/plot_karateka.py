@@ -24,7 +24,7 @@ plot_karatekas()
 
 n_steps = 10
 loss = sks.L2Loss()
-model = sks.VectorFieldDeformation(n_steps=n_steps)
+model = sks.IntrinsicDeformation(n_steps=n_steps)
 optimizer = sks.LBFGS()
 n_iter = 5
 regularization = 0
@@ -52,7 +52,7 @@ plot_path(path=path)
 
 n_steps = 10
 loss = sks.L2Loss()
-model = sks.VectorFieldDeformation(n_steps=n_steps)
+model = sks.IntrinsicDeformation(n_steps=n_steps)
 optimizer = sks.LBFGS()
 n_iter = 5
 regularization = 100
@@ -80,7 +80,7 @@ plot_path(path=path)
 
 n_steps = 10
 loss = sks.L2Loss()
-model = sks.VectorFieldDeformation(n_steps=n_steps)
+model = sks.IntrinsicDeformation(n_steps=n_steps)
 optimizer = sks.LBFGS()
 n_iter = 5
 regularization = 1000
@@ -108,11 +108,9 @@ plot_path(path=path)
 
 n_steps = 2
 loss = sks.L2Loss()
-model = sks.KernelDeformation(
+model = sks.ExtrinsicDeformation(
     n_steps=n_steps,
     kernel=sks.GaussianKernel(sigma=1),
-    control_points="grid",
-    n_grid=5,
 )
 optimizer = sks.LBFGS()
 n_iter = 5

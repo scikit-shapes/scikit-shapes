@@ -22,7 +22,7 @@ from .utils import MorphingOutput, Integrator, EulerIntegrator
 from .kernels import Kernel, GaussianKernel
 
 
-class KernelDeformation(BaseModel):
+class ExtrinsicDeformation(BaseModel):
     """Kernel deformation morphing algorithm."""
 
     @typecheck

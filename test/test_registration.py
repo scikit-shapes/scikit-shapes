@@ -8,8 +8,8 @@ from hypothesis import strategies as st
 
 list_models = [
     sks.RigidMotion(),
-    sks.KernelDeformation(),
-    sks.VectorFieldDeformation(),
+    sks.ExtrinsicDeformation(),
+    sks.IntrinsicDeformation(),
 ]
 list_losses = [
     sks.L2Loss(),
@@ -137,8 +137,8 @@ def test_registration_device():
     n_steps = 2
     models = [
         sks.RigidMotion(n_steps=n_steps),
-        sks.KernelDeformation(n_steps=n_steps),
-        sks.VectorFieldDeformation(n_steps=n_steps),
+        sks.ExtrinsicDeformation(n_steps=n_steps),
+        sks.IntrinsicDeformation(n_steps=n_steps),
     ]
     loss = sks.OptimalTransportLoss()
     optimizer = sks.LBFGS()
@@ -195,7 +195,7 @@ def test_lddmm_control_points():
     mesh1.control_points = mesh1.bounding_grid(N=5, offset=0.25)
 
     # Define the model
-    model = sks.KernelDeformation(
+    model = sks.ExtrinsicDeformation(
         n_steps=5, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
     )
 

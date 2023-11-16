@@ -19,7 +19,7 @@ from .metrics import Metric, ElasticMetric
 from typing import Optional
 
 
-class VectorFieldDeformation(BaseModel):
+class IntrinsicDeformation(BaseModel):
     """Vector field deformation model."""
 
     @typecheck

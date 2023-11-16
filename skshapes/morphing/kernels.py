@@ -1,4 +1,4 @@
-"""Kernels used in the KernelDeformation class."""
+"""Kernels used in the ExtrinsicDeformation class."""
 
 from math import sqrt
 from typing import Optional
