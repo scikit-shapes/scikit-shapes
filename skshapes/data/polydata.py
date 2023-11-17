@@ -357,7 +357,6 @@ class PolyData(polydata_type):
             kwargs["control_points"] = self.control_points.copy()
 
         return PolyData(**kwargs, device=self.device)
-    
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> PolyData:
