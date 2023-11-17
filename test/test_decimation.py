@@ -45,6 +45,29 @@ def test_decimation_basic():
         decimated_sphere.triangles, decimated_sphere2.triangles
     )
 
+    # Some errors
+    mesh = sks.Sphere()
+
+    try:
+        mesh.decimate(n_points=10, target_reduction=0.9)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised a ValueError as both"
+            + " n_points and target_reduction are specified"
+        )
+
+    try:
+        mesh.decimate()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised a ValueError as neither"
+            + " n_points or target_reduction are specified"
+        )
+
 
 def test_decimation_landmarks():
     mesh = sks.PolyData(pyvista.Sphere())

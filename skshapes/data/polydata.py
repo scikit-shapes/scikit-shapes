@@ -53,7 +53,7 @@ class PolyData(polydata_type):
         *,
         edges: Optional[Edges] = None,
         triangles: Optional[Triangles] = None,
-        device: Union[str, torch.device] = "cpu",
+        device: Optional[Union[str, torch.device]] = None,
         landmarks: Optional[Union[Landmarks, IntSequence]] = None,
         control_points: Optional[polydata_type] = None,
         point_data: Optional[DataAttributes] = None,
@@ -70,7 +70,8 @@ class PolyData(polydata_type):
         triangles
             The triangles of the shape.
         device
-            The device on which the shape is stored.
+            The device on which the shape is stored. If None it is inferred
+            from the points.
         landmarks
             The landmarks of the shape.
         control_points
@@ -96,6 +97,7 @@ class PolyData(polydata_type):
             # Now, mesh is a pyvista mesh
 
             cleaned_mesh = mesh.clean()
+
             if cleaned_mesh.n_points != mesh.n_points:
                 mesh = cleaned_mesh
                 if (
@@ -131,6 +133,12 @@ class PolyData(polydata_type):
                 triangles = torch.from_numpy(triangles.copy())
                 edges = None
 
+            elif len(cleaned_mesh.faces) > 0 and len(cleaned_mesh.lines) > 0:
+                raise ValueError(
+                    "The mesh you try to convert to PolyData has both"
+                    + " triangles and edges. This is not supported."
+                )
+
             elif mesh.triangulate().is_all_triangles:
                 triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:]
                 triangles = torch.from_numpy(triangles.copy())
@@ -138,6 +146,11 @@ class PolyData(polydata_type):
 
             elif len(mesh.lines) > 0:
                 edges = mesh.lines.reshape(-1, 3)[:, 1:]
+                edges = torch.from_numpy(edges.copy())
+                triangles = None
+
+            elif len(cleaned_mesh.faces) == 0 and len(cleaned_mesh.lines) > 0:
+                edges = cleaned_mesh.lines.reshape(-1, 3)[:, 1:]
                 edges = torch.from_numpy(edges.copy())
                 triangles = None
 
@@ -387,51 +400,7 @@ class PolyData(polydata_type):
     @typecheck
     def to_vedo(self) -> vedo.Mesh:
         """Vedo Mesh converter."""
-        if self._triangles is not None:
-            mesh = vedo.Mesh(
-                [
-                    self.points.detach().cpu().numpy(),
-                    self.triangles.detach().cpu().numpy(),
-                ]
-            )
-        elif self._edges is not None:
-            mesh = vedo.Mesh(
-                [
-                    self.points.detach().cpu().numpy(),
-                    self.edges.detach().cpu().numpy(),
-                ]
-            )
-        else:
-            mesh = vedo.Mesh(self.points.detach().cpu().numpy())
-
-        if self.dim == 2:
-            mesh = mesh.wireframe().color("black")
-
-        # Add the point data if any
-        if len(self.point_data) > 0:
-            point_data_dict = self.point_data.to_numpy_dict()
-            for key in point_data_dict:
-                if len(point_data_dict[key].shape) <= 2:
-                    # If the data is 1D or 2D, we add it as a point data
-                    mesh.pointdata[key] = point_data_dict[key]
-                else:
-                    # If the data is 3D or more, we must be careful
-                    # because vedo does not support 3D or more point data
-                    shape = point_data_dict[key].shape
-                    mesh.pointdata[key] = point_data_dict[key].reshape(
-                        shape[0], -1
-                    )
-                    mesh.metadata[str(key) + "_shape"] = shape
-
-        # Add the landmarks if any
-        if hasattr(self, "_landmarks") and self.landmarks is not None:
-            coalesced_landmarks = self.landmarks.coalesce()
-            mesh.metadata["landmarks_values"] = coalesced_landmarks.values()
-            mesh.metadata["landmarks_indices"] = coalesced_landmarks.indices()
-            mesh.metadata["landmarks_size"] = coalesced_landmarks.size()
-            mesh.metadata["landmark_points"] = self.landmark_points.detach()
-
-        return mesh
+        return vedo.Mesh(self.to_pyvista())
 
     ###########################
     #### PyVista interface ####
@@ -831,7 +800,7 @@ class PolyData(polydata_type):
 
         else:
             if self.landmarks is None:
-                self.landmarks = indices
+                self.landmark_indices = indices
 
             else:
                 new_indices = torch.tensor(
@@ -976,14 +945,7 @@ class PolyData(polydata_type):
     def triangle_areas(self) -> Float1dTensor:
         """Area of each triangle."""
         # Raise an error if triangles are not defined
-        if self.triangles is None:
-            raise ValueError("Triangles are not defined")
-
-        A = self.points[self.triangles[:, 0]]
-        B = self.points[self.triangles[:, 1]]
-        C = self.points[self.triangles[:, 2]]
-
-        return torch.cross(B - A, C - A).norm(dim=1) / 2
+        return self.triangle_normals.norm(dim=1) / 2
 
     @property
     @typecheck
@@ -996,6 +958,13 @@ class PolyData(polydata_type):
         A = self.points[self.triangles[:, 0]]
         B = self.points[self.triangles[:, 1]]
         C = self.points[self.triangles[:, 2]]
+
+        if self.dim == 2:
+            # Add a zero z coordinate to the points to compute the
+            # cross product
+            A = torch.cat((A, torch.zeros_like(A[:, 0]).view(-1, 1)), dim=1)
+            B = torch.cat((B, torch.zeros_like(B[:, 0]).view(-1, 1)), dim=1)
+            C = torch.cat((C, torch.zeros_like(C[:, 0]).view(-1, 1)), dim=1)
 
         # TODO: Normalize?
         return torch.cross(B - A, C - A)
@@ -1090,10 +1059,7 @@ class PolyData(polydata_type):
     @typecheck
     def control_points(self) -> Optional[polydata_type]:
         """Control points of the shape."""
-        if hasattr(self, "_control_points"):
-            return self._control_points
-        else:
-            return None
+        return self._control_points
 
     @control_points.setter
     @convert_inputs
