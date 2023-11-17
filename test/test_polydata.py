@@ -173,6 +173,15 @@ def test_interaction_with_pyvista():
     assert cube2.is_all_triangles
     assert np.allclose(cube.points, cube2.points)
 
+    # Importing a point cloud from pyvsita
+    n = 100
+    points = np.random.rand(n, 3)
+    polydata = pyvista.PolyData(points)
+    mesh = sks.PolyData(polydata)
+    assert mesh.n_points == n
+    assert mesh.n_triangles == 0
+    assert mesh.n_edges == 0
+
 
 def test_mesh_cleaning():
     # Example of a mesh with duplicated points
@@ -278,9 +287,8 @@ def test_point_data():
 def test_point_data2():
     # Load a pyvista.PolyData and add an attribute
     pv_mesh = pyvista.Sphere()
-    # The attribute is matrix valued
-    pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 3)
-
+    # The attribute has 4 dims
+    pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 2)
     # Convert it to a skshapes.PolyData
     sks_mesh = sks.PolyData(pv_mesh)
 
@@ -323,6 +331,23 @@ def test_point_data2():
     assert np.allclose(
         sks_again.point_data["curvature"].numpy(),
         pv_mesh.point_data["curvature"],
+    )
+
+    # Check that signal can be transferred back and forth with pyvista
+    # and vedo if ndims is high
+    sks_mesh["many_dims_signal"] = torch.rand(sks_mesh.n_points, 2, 2, 2, 2)
+
+    to_pv = sks_mesh.to_pyvista()
+    to_vedo = sks_mesh.to_vedo()
+
+    back_from_pv = sks.PolyData(to_pv)
+    back_from_vedo = sks.PolyData(to_vedo)
+
+    assert torch.allclose(
+        back_from_pv["many_dims_signal"], sks_mesh["many_dims_signal"]
+    )
+    assert torch.allclose(
+        back_from_vedo["many_dims_signal"], sks_mesh["many_dims_signal"]
     )
 
 
@@ -446,6 +471,33 @@ def test_point_data_cuda():
 
     assert sks_mesh_cuda.point_data["color"].device.type == "cuda"
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"
+
+
+def test_clean_polydata():
+    sphere = sks.Sphere()
+    landmarks = torch.tensor([0, 1, 2, 3, 4, 5])
+    signal = torch.rand(sphere.n_points)
+
+    sphere.landmark_indices = landmarks
+    sphere["signal"] = signal
+
+    sphere_pv = sphere.to_pyvista()
+
+    sphere_back = sks.PolyData(sphere_pv)
+    assert torch.allclose(sphere_back.landmark_indices, landmarks)
+    assert torch.allclose(sphere_back["signal"], signal)
+
+    # Add a point not conected to the mesh
+    import numpy as np
+
+    sphere_pv_notclean = sphere_pv.copy()
+    sphere_pv_notclean.points = np.concatenate([sphere_pv.points, [[0, 0, 0]]])
+
+    # Assert that has the mesh must be cleaned
+    # landmarks and signal are ignored
+    sphere_back2 = sks.PolyData(sphere_pv_notclean)
+    assert sphere_back2.landmark_indices is None
+    assert len(sphere_back2.point_data) == 0
 
 
 @pytest.mark.skipif(

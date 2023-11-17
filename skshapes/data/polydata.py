@@ -98,12 +98,25 @@ class PolyData(polydata_type):
             cleaned_mesh = mesh.clean()
             if cleaned_mesh.n_points != mesh.n_points:
                 mesh = cleaned_mesh
-                if landmarks is not None:
-                    warn("Mesh has been cleaned. Landmarks are ignored.")
+                if (
+                    landmarks is not None
+                    or "landmarks_indices" in mesh.field_data
+                ):
+                    warn(
+                        "Mesh has been cleaned and points were removed."
+                        + " Landmarks are ignored."
+                    )
+                    for i in mesh.field_data.keys():
+                        if i.startswith("landmarks"):
+                            mesh.field_data.remove(i)
                     landmarks = None
 
-                if point_data is not None:
-                    warn("Mesh has been cleaned. Point_data are ignored.")
+                if point_data is not None or len(mesh.point_data) > 0:
+                    warn(
+                        "Mesh has been cleaned and points were removed."
+                        + " Points data are ignored."
+                    )
+                    mesh.point_data.clear()
                     point_data = None
 
             # If the mesh is 2D, in pyvista it is a 3D mesh with z=0
@@ -138,9 +151,8 @@ class PolyData(polydata_type):
                 )
                 for key in point_data.keys():
                     if str(key) + "_shape" in mesh.field_data:
-                        point_data[key] = point_data[key].reshape(
-                            mesh.field_data[str(key) + "_shape"]
-                        )
+                        shape = tuple(mesh.field_data[str(key) + "_shape"])
+                        point_data[key] = point_data[key].reshape(shape)
 
             if (
                 ("landmarks_values" in mesh.field_data)
@@ -406,7 +418,7 @@ class PolyData(polydata_type):
                     # If the data is 3D or more, we must be careful
                     # because vedo does not support 3D or more point data
                     shape = point_data_dict[key].shape
-                    mesh.pointdata["data"] = point_data_dict[key].reshape(
+                    mesh.pointdata[key] = point_data_dict[key].reshape(
                         shape[0], -1
                     )
                     mesh.metadata[str(key) + "_shape"] = shape
