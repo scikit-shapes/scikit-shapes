@@ -435,7 +435,7 @@ def test_point_data_cuda():
     assert sks_mesh_cuda.device.type == "cuda"
     assert sks_mesh_cuda.point_data.device.type == "cuda"
 
-    # If a new attribute is added  to the mesh, it is automatically moved to
+    # If a new attribute is added to the mesh, it is automatically moved to
     # the same device as the mesh
     color = torch.rand(sks_mesh_cuda.n_points, 3).cpu()
     sks_mesh_cuda.point_data["color"] = color
@@ -453,6 +453,60 @@ def test_point_data_cuda():
 )
 def test_gpu():
     cube = sks.PolyData(_cube())
+
     cube_gpu = cube.to("cuda")
 
     assert cube_gpu.points.device == torch.Tensor().cuda().device
+
+    # Assert that copying a mesh that is on the gpu results in a mesh on the
+    # gpu
+    cube_gpu_copy = cube_gpu.copy()
+    assert cube_gpu_copy.points.device == torch.Tensor().cuda().device
+
+
+def test_control_points():
+    mesh = sks.Circle()
+    grid = mesh.bounding_grid(N=5)
+
+    mesh.control_points = grid
+    # No copy is done
+    assert mesh.control_points is grid
+
+    # But if a copy of the mesh is done, the control points are copied
+    mesh_copy = mesh.copy()
+    assert mesh_copy.control_points is not grid
+
+
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Cuda is required for this test"
+)
+def test_control_points_device():
+    # mesh on cpu and control points on gpu -> should raise an error
+    mesh = sks.Sphere().to("cpu")
+    grid = mesh.bounding_grid(N=5)
+    # grid = grid.to("cuda:0")
+    grid.device = "cuda"
+    try:
+        mesh.control_points = grid
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the control points"
+            + " should be on the same device as the mesh"
+        )
+
+    # mesh on cpu and control points on cpu -> should not raise an error
+    grid2 = grid.to("cpu")
+    mesh.control_points = grid2
+    loss = sks.L2Loss()
+    assert loss(mesh.control_points, grid2) < 1e-10
+
+    # copy
+    mesh_gpu = mesh.to("cuda")
+    assert mesh_gpu.points.device.type == "cuda"
+    assert mesh_gpu.control_points.device.type == "cuda"
+
+    mesh.device = "cuda"
+    assert mesh.points.device.type == "cuda"
+    assert mesh.control_points.device.type == "cuda"

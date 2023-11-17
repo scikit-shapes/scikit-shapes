@@ -55,6 +55,7 @@ class PolyData(polydata_type):
         triangles: Optional[Triangles] = None,
         device: Union[str, torch.device] = "cpu",
         landmarks: Optional[Union[Landmarks, IntSequence]] = None,
+        control_points: Optional[polydata_type] = None,
         point_data: Optional[DataAttributes] = None,
         cache_size: Optional[int] = None,
     ) -> None:
@@ -72,6 +73,8 @@ class PolyData(polydata_type):
             The device on which the shape is stored.
         landmarks
             The landmarks of the shape.
+        control_points
+            The control points of the shape.
         point_data
             The point data of the shape.
         cache_size
@@ -154,8 +157,6 @@ class PolyData(polydata_type):
         if device is None:
             device = points.device
 
-        self._device = torch.device(device)
-
         # We don't call the setters here because the setter of points is meant
         # to be used when the shape is modified in order to check the validity
         # of the new points
@@ -193,6 +194,11 @@ class PolyData(polydata_type):
         else:
             self._landmarks = None
 
+        if control_points is not None:
+            self._control_points = control_points
+        else:
+            self._control_points = None
+
         # Initialize the point_data if it was not done before
         if point_data is None:
             self._point_data = DataAttributes(
@@ -207,6 +213,8 @@ class PolyData(polydata_type):
                 point_data = point_data.to(self.device)
 
             self._point_data = point_data
+
+        self.device = device
 
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
@@ -322,9 +330,7 @@ class PolyData(polydata_type):
     #### Copy functions #####
     #########################
     @typecheck
-    def copy(
-        self, device: Optional[Union[str, torch.device]] = None
-    ) -> PolyData:
+    def copy(self) -> PolyData:
         """Copy the shape.
 
         Parameters
@@ -337,10 +343,7 @@ class PolyData(polydata_type):
         PolyData
             The copy of the shape.
         """
-        if device is None:
-            device = self.device
-
-        kwargs = {"points": self._points.clone(), "device": device}
+        kwargs = {"points": self._points.clone()}
 
         if self._triangles is not None:
             kwargs["triangles"] = self._triangles.clone()
@@ -350,12 +353,21 @@ class PolyData(polydata_type):
             kwargs["landmarks"] = self._landmarks.clone()
         if self._point_data is not None:
             kwargs["point_data"] = self._point_data.clone()
-        return PolyData(**kwargs)
+        if self._control_points is not None:
+            kwargs["control_points"] = self.control_points.copy()
+
+        return PolyData(**kwargs, device=self.device)
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> PolyData:
         """Copy the shape on a given device."""
-        return self.copy(device=device)
+        torch_device = torch.Tensor().to(device).device
+        if self.device == torch_device:
+            return self
+        else:
+            copy = self.copy()
+            copy.device = device
+            return copy
 
     ###########################
     #### Vedo interface #######
@@ -610,9 +622,9 @@ class PolyData(polydata_type):
     ##############################
     @property
     @typecheck
-    def device(self) -> Union[str, torch.device]:
+    def device(self) -> torch.device:
         """Device getter."""
-        return self._device
+        return self.points.device
 
     @device.setter
     @typecheck
@@ -626,9 +638,14 @@ class PolyData(polydata_type):
         """
         for attr in dir(self):
             if attr.startswith("_"):
-                if type(getattr(self, attr)) == torch.Tensor:
-                    setattr(self, attr, getattr(self, attr).to(device))
-        self._device = device
+                attribute = getattr(self, attr)
+                if isinstance(attribute, torch.Tensor):
+                    setattr(self, attr, attribute.to(device))
+
+        if self._point_data is not None:
+            self._point_data = self._point_data.to(device)
+        if self._control_points is not None:
+            self._control_points = self._control_points.to(device)
 
     ################################
     #### point_data getter/setter ##
@@ -834,10 +851,6 @@ class PolyData(polydata_type):
 
                 indices = torch.cat((old_indices, new_indices), dim=1)
                 values = torch.concat((old_values, new_values))
-
-                print(indices)
-                print(values)
-                print((n_landmarks, n_points))
 
                 self.landmarks = torch.sparse_coo_tensor(
                     indices=indices,
@@ -1075,5 +1088,27 @@ class PolyData(polydata_type):
     @convert_inputs
     @typecheck
     def control_points(self, control_points: Optional[polydata_type]) -> None:
-        """Set the control points of the shape."""
+        """Set the control points of the shape.
+
+        The control points are a PolyData object. The principal use case of
+        control points is in [`ExtrinsicDeformation`][skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation] # noqa: E501
+
+        Parameters
+        ----------
+        control_points
+            PolyData representing the control points.
+
+        Raises
+        ------
+        ValueError
+            If `self.device != control_points.device`.
+
+        """
+        if self.device != control_points.device:
+            raise ValueError(
+                "Controls points must be on the same device as"
+                + " the corresponding PolyData, found "
+                + f"{control_points.device} for control points"
+                + f" and {self.device} for the PolyData."
+            )
         self._control_points = control_points

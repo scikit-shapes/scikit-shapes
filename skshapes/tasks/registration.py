@@ -70,16 +70,16 @@ class Registration:
 
         if gpu:
             if torch.cuda.is_available():
-                self.optim_device = torch.device("cuda")
+                self.optim_device = "cuda"
             else:
                 print(
                     "Warning : gpu is set to True but no cuda device is "
                     + "available. The optimization will be performed on cpu."
                 )
-                self.optim_device = torch.device("cpu")
+                self.optim_device = "cpu"
 
         else:
-            self.optim_device = torch.device("cpu")
+            self.optim_device = "cpu"
 
     @convert_inputs
     @typecheck

@@ -53,6 +53,7 @@ class DataAttributes(dict):
             The device on which the attributes should be stored.
         """
         self._n = n
+        device = torch.Tensor().to(device).device
         self._device = device
 
     @typecheck
@@ -163,12 +164,12 @@ class DataAttributes(dict):
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> DataAttributes:
-        """Make a copy of the DataAttributes object on a new device.
+        """Move the DataAttributes object on a given device.
 
         Parameters
         ----------
         device
-            The device on which the copy should be made.
+            The device on which the object should be made.
 
         Returns
         -------
