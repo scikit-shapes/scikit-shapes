@@ -357,6 +357,7 @@ class PolyData(polydata_type):
             kwargs["control_points"] = self.control_points.copy()
 
         return PolyData(**kwargs, device=self.device)
+    
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> PolyData:
@@ -847,7 +848,6 @@ class PolyData(polydata_type):
                 )
 
                 n_landmarks = self.n_landmarks + n_new_landmarks
-                n_points = self.n_points
 
                 indices = torch.cat((old_indices, new_indices), dim=1)
                 values = torch.concat((old_values, new_values))
