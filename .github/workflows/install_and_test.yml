@@ -36,7 +36,7 @@ jobs:
       - name: Test with pytest
         run: |
           export SKSHAPES_FLOAT_DTYPE=float32
-          pytest . --cov=skshapes --cov-report=html
+          pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html test/
           cp -r htmlcov artifacts/
       
       - name: Upload artifacts
