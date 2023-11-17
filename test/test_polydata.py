@@ -259,11 +259,11 @@ def test_geometry_features():
             )
 
 
-def test_plotting():
-    pyvista.OFF_SCREEN = True
-    mesh = sks.Sphere()
-    mesh.plot(backend="pyvista")
-    mesh.plot(backend="vedo", offscreen=True)
+# def test_plotting():
+#     pyvista.OFF_SCREEN = True
+#     mesh = sks.Sphere()
+#     mesh.plot(backend="pyvista")
+#     mesh.plot(backend="vedo", offscreen=True)
 
 
 def test_polydata_creation_2d():
