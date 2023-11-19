@@ -69,7 +69,9 @@ def create_shape(
         shape = sks.PolyData(points=points)
 
     else:
-        shape = sks.PolyData(file_name).decimate(n_points=n_points)
+        shape = sks.PolyData(file_name)
+        if n_points is not None:
+            shape = shape.decimate(n_points=n_points)
         print("Loaded shape with {:,} points".format(shape.n_points))
 
     shape.points = shape.points + offset * torch.randn(1, 3).to(

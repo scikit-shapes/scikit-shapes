@@ -262,8 +262,14 @@ if __name__ == "__main__":
             n_points=5e3,
             highlight=0,
         ),
+        dict(
+            file_name="~/data/fleur_brains/sub-sub-026_fusion_align_smooth_200.vtk",
+            scale=0.2,
+            n_points=None,
+            highlight=0,
+        ),
     ]
-    shapes = shapes[:-1]
+    shapes = shapes[-1:]
     mode = ["display", "profile"][0]
 
     if mode == "display":

@@ -28,6 +28,7 @@ class KeOpsSquaredDistances:
         cutoff: Optional[Number] = None,
         kernel: Optional[Callable] = None,
         target_points=None,
+        max_clusters=10000,
     ):
         """Kernel constructor.
 
@@ -65,7 +66,10 @@ class KeOpsSquaredDistances:
                     + "convolutions between different point clouds."
                 )
 
-            bin_size = 1.5
+            diameter = ((points.max(0).values - points.min(0).values)**2).sum(-1).sqrt()
+            
+
+            bin_size = max(1.5, diameter / (max_clusters ** (1/D)))
             # Put points into bins of size 1
             point_labels = grid_cluster(points, bin_size)
 
@@ -92,7 +96,7 @@ class KeOpsSquaredDistances:
             keep = D2_c < cutoff_distance**2
             print(
                 f"Cutoff distance: {cutoff_distance:.2f} sigma, "
-                + f"keep {(100. * keep).mean():.2f}% of a"
+                + f"keep {(100. * keep).mean():.2f}% of a "
                 + f"{keep.shape[0]:,}^2 cluster matrix"
             )
             ranges = from_matrix(x_ranges, x_ranges, keep)

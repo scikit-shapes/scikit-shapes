@@ -23,7 +23,12 @@ def _point_normals(
             )
 
         tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
-        n = torch.zeros_like(self.points)
+
+
+        norms = (tri_n**2).sum(-1).sqrt()
+        print("tri", norms.min(), norms.max())
+
+        n = 1e-8 * torch.ones_like(self.points)
         # TODO: instead of distributing to the vertices equally, we should
         #       distribute according to the angles of the triangles.
         for k in range(3):
@@ -34,6 +39,10 @@ def _point_normals(
                 src=tri_n,
                 reduce="sum",
             )
+
+        
+        norms = (n**2).sum(-1).sqrt()
+        print("n", norms.min(), norms.max())
 
     else:
         # Get a smooth field of normals via the Structure Tensor:
@@ -46,7 +55,11 @@ def _point_normals(
 
         # Orient the normals according to the triangles, if any:
         if self.triangles is not None:
+            print("Hi")
             n_0 = self.point_normals(scale=None, **kwargs)
+
+            norms = (n_0**2).sum(-1).sqrt()
+            print(norms.min(), norms.max())
             assert n_0.shape == (self.n_points, 3)
 
         else:
