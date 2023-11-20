@@ -137,7 +137,7 @@ if __name__ == "__main__":
         fig3D = vd.Plotter(shape=(2, 2), axes=1)
 
         if highlight is None:
-            highlight = shape.points[:,1].argmin()
+            highlight = shape.points[:, 1].argmin()
 
         for i, s in enumerate(scales):
             Xm = shape.point_moments(order=1, scale=s)
@@ -182,12 +182,17 @@ if __name__ == "__main__":
             elif args.color == "curvedness":
                 shape_ = (
                     shape_.clone()
-                    .cmap("viridis", curvedness, vmin=0, vmax=1.2 * torch.quantile(curvedness, 0.9))
+                    .cmap(
+                        "viridis",
+                        curvedness,
+                        vmin=0,
+                        vmax=1.2 * torch.quantile(curvedness, 0.9),
+                    )
                     .add_scalarbar()
                 )
-            
+
             shape_ = shape_.alpha(args.alpha)
-            #vd.file_io.write(shape_, f"shape_{i}.vtk")
+            # vd.file_io.write(shape_, f"shape_{i}.vtk")
 
             # Compute a bounding box for the shape:
             bounding_box = shape_.bounds()
