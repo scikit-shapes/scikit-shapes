@@ -125,13 +125,10 @@ def display_curvatures_old(*, function: callable, scale=1):
     plt.close()
 
 
-
 if __name__ == "__main__":
-
     import argparse
     from pprint import pprint
     import glob
-    
 
     def display_curvatures(*, scale=1, highlight=0, **kwargs):
         shape = create_shape(**kwargs)
@@ -187,14 +184,27 @@ if __name__ == "__main__":
                     .add_scalarbar()
                 )
 
-            # Plot a curvature diagram as in "Generation of tubular and membranous 
+            # Plot a curvature diagram as in "Generation of tubular and membranous
             # shape textures with curvature functionals", Anna Song, 2021.
             # Compute the quantiles of the curvature distribution:
             quantiles = torch.Tensor([0.1, 0.90])
             qmaxmin, qmaxmax = torch.quantile(kmax, quantiles)
             qminmin, qminmax = torch.quantile(kmin, quantiles)
-            Kscale = 1.2 * float(max(abs(qmaxmax), abs(qmaxmin), abs(qminmax), abs(qminmin)))
-            curvature_diagram = vd.pyplot.histogram(kmax, kmin, xlim=[-Kscale, Kscale], ylim=[-Kscale, Kscale], bins=(50,50), scalarbar=False).scale(30 / Kscale).shift(80, 0, 0)
+            Kscale = 1.2 * float(
+                max(abs(qmaxmax), abs(qmaxmin), abs(qminmax), abs(qminmin))
+            )
+            curvature_diagram = (
+                vd.pyplot.histogram(
+                    kmax,
+                    kmin,
+                    xlim=[-Kscale, Kscale],
+                    ylim=[-Kscale, Kscale],
+                    bins=(50, 50),
+                    scalarbar=False,
+                )
+                .scale(30 / Kscale)
+                .shift(80, 0, 0)
+            )
 
             fig3D.at(i).show(
                 shape_,
@@ -210,7 +220,6 @@ if __name__ == "__main__":
             ).parallel_projection()
 
         fig3D.interactive()
-
 
     shapes = [
         dict(
@@ -276,7 +285,6 @@ if __name__ == "__main__":
         ),
     ]
 
-
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
@@ -326,7 +334,6 @@ if __name__ == "__main__":
             for source in sources
         ]
     pprint(shapes)
-
 
     if args.mode == "display":
         for s in shapes:

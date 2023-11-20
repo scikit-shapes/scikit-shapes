@@ -66,10 +66,13 @@ class KeOpsSquaredDistances:
                     + "convolutions between different point clouds."
                 )
 
-            diameter = ((points.max(0).values - points.min(0).values)**2).sum(-1).sqrt()
-            
+            diameter = (
+                ((points.max(0).values - points.min(0).values) ** 2)
+                .sum(-1)
+                .sqrt()
+            )
 
-            bin_size = max(1.5, diameter / (max_clusters ** (1/D)))
+            bin_size = max(1.5, diameter / (max_clusters ** (1 / D)))
             # Put points into bins of size 1
             point_labels = grid_cluster(points, bin_size)
 

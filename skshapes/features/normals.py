@@ -39,7 +39,7 @@ def _point_normals(
             # tri_n is (T, 3) float
             n.scatter_reduce_(
                 dim=0,
-                index=self.triangles[:,k].view(-1, 1).repeat(1, 3),
+                index=self.triangles[:, k].view(-1, 1).repeat(1, 3),
                 src=tri_n,
                 reduce="sum",
             )
