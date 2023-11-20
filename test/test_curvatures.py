@@ -130,11 +130,14 @@ if __name__ == "__main__":
     from pprint import pprint
     import glob
 
-    def display_curvatures(*, scale=1, highlight=0, **kwargs):
+    def display_curvatures(*, scale=1, highlight=None, **kwargs):
         shape = create_shape(**kwargs)
         scales = [scale, 2 * scale, 5 * scale, 10 * scale]
 
         fig3D = vd.Plotter(shape=(2, 2), axes=1)
+
+        if highlight is None:
+            highlight = shape.points[:,1].argmin()
 
         for i, s in enumerate(scales):
             Xm = shape.point_moments(order=1, scale=s)
@@ -174,15 +177,22 @@ if __name__ == "__main__":
             else:
                 shape_ = shape.to_vedo()
 
-            if True:
+            if args.color == "curvatures":
                 shape_.pointcolors = shape.point_curvature_colors(scale=s)
-            else:
+            elif args.color == "curvedness":
                 shape_ = (
                     shape_.clone()
-                    .alpha(0.5)
-                    .cmap("viridis", curvedness, vmin=0)
+                    .cmap("viridis", curvedness, vmin=0, vmax=1.2 * torch.quantile(curvedness, 0.9))
                     .add_scalarbar()
                 )
+            
+            shape_ = shape_.alpha(args.alpha)
+            #vd.file_io.write(shape_, f"shape_{i}.vtk")
+
+            # Compute a bounding box for the shape:
+            bounding_box = shape_.bounds()
+            graph_size = 0.5 * (bounding_box[1] - bounding_box[0])
+            offset = bounding_box[1] + 1.2 * graph_size
 
             # Plot a curvature diagram as in "Generation of tubular and membranous
             # shape textures with curvature functionals", Anna Song, 2021.
@@ -199,11 +209,11 @@ if __name__ == "__main__":
                     kmin,
                     xlim=[-Kscale, Kscale],
                     ylim=[-Kscale, Kscale],
-                    bins=(50, 50),
+                    bins=(51, 51),
                     scalarbar=False,
                 )
-                .scale(30 / Kscale)
-                .shift(80, 0, 0)
+                .scale(graph_size / Kscale)
+                .shift(offset, 0, 0)
             )
 
             fig3D.at(i).show(
@@ -296,7 +306,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--highlight",
         type=int,
-        default=0,
+        default=None,
         help="Index of the point to highlight.",
     )
     parser.add_argument(
@@ -316,6 +326,18 @@ if __name__ == "__main__":
         nargs="*",
         default=None,
         help="Shape to load.",
+    )
+    parser.add_argument(
+        "--alpha",
+        type=float,
+        default=1,
+        help="Transparency.",
+    )
+    parser.add_argument(
+        "--color",
+        choices=["curvatures", "curvedness"],
+        default="curvatures",
+        help="Color code for the curvature.",
     )
 
     args = parser.parse_args()
