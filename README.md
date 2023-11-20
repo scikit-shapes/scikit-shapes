@@ -26,7 +26,7 @@ shape2 = sks.read("data/shape2.vtk")
 
 registration = sks.Registration(
 
-    model = sks.KernelDeformation(n_steps=5, kernel="gaussian", blur=0.5)
+    model = sks.ExtrinsicDeformation(n_steps=5, kernel="gaussian", blur=0.5)
     loss = sks.NearestNeighborLoss()
 )
 
@@ -46,11 +46,32 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 - scikit-learn : when it make sense, we follow the sklearn syntax (`.fit()`, `.transform()`, `.fit_transform()`) for transformers class.
 - ...
 
-## Build documentation
+## Installation
 
+Install only the package :
 ```bash
-pip install -r docs/requirements.txt
+pip install -e .
+```
+
+Install the package + dev dependencies :
+```bash
+pip install -e .[dev]
+```
+then:
+- build and serve documentation :
+```bash
 mkdocs serve
+```
+
+- test and show code coverage :
+```bash
+pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html test/
+firefox htmlcov/index.html
+```
+- lint and syntax check
+```bash
+black .
+flake8 skshapes
 ```
 
 ## Contributing
