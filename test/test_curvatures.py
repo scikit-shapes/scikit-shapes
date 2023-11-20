@@ -125,75 +125,93 @@ def display_curvatures_old(*, function: callable, scale=1):
     plt.close()
 
 
-def display_curvatures(*, scale=1, highlight=0, **kwargs):
-    shape = create_shape(**kwargs)
-    scales = [scale, 2 * scale, 5 * scale, 10 * scale]
-
-    plt = vd.Plotter(shape=(2, 2), axes=1)
-
-    for i, s in enumerate(scales):
-        Xm = shape.point_moments(order=1, scale=s)
-        curvedness = shape.point_curvedness(scale=s)
-        r2 = shape.point_quadratic_coefficients(scale=s).r2
-        kmax, kmin = shape.point_principal_curvatures(scale=s)
-        print(
-            f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]},"
-            + f" R2: {r2[highlight]}"
-        )
-        quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
-        assert quadratic_fit.shape == (3, 3, 3)
-
-        n_samples = 5000
-        uv1 = s * torch.randn(n_samples, 3, device=shape.device)
-        uv1[:, 2] = 1
-        local_fit = (
-            quadratic_fit.view(1, 3, 3, 3)
-            * uv1.view(-1, 1, 3, 1)
-            * uv1.view(-1, 1, 1, 3)
-        ).sum(dim=(2, 3))
-        assert local_fit.shape == (n_samples, 3)
-
-        reference_point = vd.Points(
-            shape.points[highlight].view(1, 3), c="red", r=10
-        )
-        local_average = vd.Points(Xm[highlight].view(1, 3), c="blue", r=10)
-        local_fit = vd.Points(local_fit, c=(235, 158, 52), r=5)
-
-        # Our surface points:
-        if shape.triangles is None:
-            shape_ = vd.Points(
-                shape.points,
-                c=(0.5, 0.5, 0.5),
-                r=60 / (shape.n_points ** (1 / 3)),
-            )
-        else:
-            shape_ = shape.to_vedo()
-
-        if True:
-            shape_.pointcolors = shape.point_curvature_colors(scale=s)
-        else:
-            shape_ = (
-                shape_.clone()
-                .alpha(0.5)
-                .cmap("viridis", curvedness, vmin=0)
-                .add_scalarbar()
-            )
-
-        plt.at(i).show(
-            shape_,
-            reference_point,
-            local_average,
-            local_fit.clone().alpha(0.5),
-            vd.Text2D(
-                f"Scale {s:.2f}\ncurvedness and local fit around point 0",
-                pos="top-middle",
-            ),
-            bg=(0.5, 0.5, 0.5),
-        )
-    plt.interactive()
-
 
 if __name__ == "__main__":
+
+    import argparse
+    from pprint import pprint
+    import glob
+    
+
+    def display_curvatures(*, scale=1, highlight=0, **kwargs):
+        shape = create_shape(**kwargs)
+        scales = [scale, 2 * scale, 5 * scale, 10 * scale]
+
+        fig3D = vd.Plotter(shape=(2, 2), axes=1)
+
+        for i, s in enumerate(scales):
+            Xm = shape.point_moments(order=1, scale=s)
+            curvedness = shape.point_curvedness(scale=s)
+            r2 = shape.point_quadratic_coefficients(scale=s).r2
+            kmax, kmin = shape.point_principal_curvatures(scale=s)
+            print(
+                f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]},"
+                + f" R2: {r2[highlight]}"
+            )
+            quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
+            assert quadratic_fit.shape == (3, 3, 3)
+
+            n_samples = 5000
+            uv1 = s * torch.randn(n_samples, 3, device=shape.device)
+            uv1[:, 2] = 1
+            local_fit = (
+                quadratic_fit.view(1, 3, 3, 3)
+                * uv1.view(-1, 1, 3, 1)
+                * uv1.view(-1, 1, 1, 3)
+            ).sum(dim=(2, 3))
+            assert local_fit.shape == (n_samples, 3)
+
+            reference_point = vd.Points(
+                shape.points[highlight].view(1, 3), c="red", r=10
+            )
+            local_average = vd.Points(Xm[highlight].view(1, 3), c="blue", r=10)
+            local_fit = vd.Points(local_fit, c=(235, 158, 52), r=5)
+
+            # Our surface points:
+            if shape.triangles is None:
+                shape_ = vd.Points(
+                    shape.points,
+                    c=(0.5, 0.5, 0.5),
+                    r=60 / (shape.n_points ** (1 / 3)),
+                )
+            else:
+                shape_ = shape.to_vedo()
+
+            if True:
+                shape_.pointcolors = shape.point_curvature_colors(scale=s)
+            else:
+                shape_ = (
+                    shape_.clone()
+                    .alpha(0.5)
+                    .cmap("viridis", curvedness, vmin=0)
+                    .add_scalarbar()
+                )
+
+            # Plot a curvature diagram as in "Generation of tubular and membranous 
+            # shape textures with curvature functionals", Anna Song, 2021.
+            # Compute the quantiles of the curvature distribution:
+            quantiles = torch.Tensor([0.1, 0.90])
+            qmaxmin, qmaxmax = torch.quantile(kmax, quantiles)
+            qminmin, qminmax = torch.quantile(kmin, quantiles)
+            Kscale = 1.2 * float(max(abs(qmaxmax), abs(qmaxmin), abs(qminmax), abs(qminmin)))
+            curvature_diagram = vd.pyplot.histogram(kmax, kmin, xlim=[-Kscale, Kscale], ylim=[-Kscale, Kscale], bins=(50,50), scalarbar=False).scale(30 / Kscale).shift(80, 0, 0)
+
+            fig3D.at(i).show(
+                shape_,
+                reference_point,
+                local_average,
+                local_fit.clone().alpha(0.5),
+                curvature_diagram,
+                vd.Text2D(
+                    f"Scale {s:.2f}\ncurvedness and local fit around point 0",
+                    pos="top-middle",
+                ),
+                bg=(0.5, 0.5, 0.5),
+            ).parallel_projection()
+
+        fig3D.interactive()
+
+
     shapes = [
         dict(
             shape="sphere",
@@ -256,28 +274,66 @@ if __name__ == "__main__":
             noise=0.0001,
             highlight=0 if False else int(31**2 / 2),
         ),
-        dict(
-            file_name="~/data/PN1.stl",
-            scale=2.0,
-            n_points=5e3,
-            highlight=0,
-        ),
-        dict(
-            file_name="~/data/fleur_brains/sub-sub-026_fusion_align_smooth_200.vtk",
-            scale=0.2,
-            n_points=None,
-            highlight=0,
-        ),
     ]
-    shapes = shapes[-1:]
-    mode = ["display", "profile"][0]
 
-    if mode == "display":
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--scale",
+        type=float,
+        default=1,
+        help="Scale of the curvature estimation.",
+    )
+    parser.add_argument(
+        "--highlight",
+        type=int,
+        default=0,
+        help="Index of the point to highlight.",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["display", "profile"],
+        default="display",
+        help="Whether to display the results or profile the code.",
+    )
+    parser.add_argument(
+        "--n_points",
+        type=int,
+        default=None,
+        help="Number of points in the point cloud.",
+    )
+    parser.add_argument(
+        "source",
+        nargs="*",
+        default=None,
+        help="Shape to load.",
+    )
+
+    args = parser.parse_args()
+
+    if args.source:
+        sources = [glob.glob(s) for s in args.source]
+        sources = [item for sublist in sources for item in sublist]
+
+        shapes = [
+            dict(
+                file_name=source,
+                scale=args.scale,
+                n_points=args.n_points,
+                highlight=args.highlight,
+            )
+            for source in sources
+        ]
+    pprint(shapes)
+
+
+    if args.mode == "display":
         for s in shapes:
             display_curvatures(**s)
             print("")
 
-    elif mode == "profile":
+    elif args.mode == "profile":
         from .utils import profiler
 
         myprof = profiler()

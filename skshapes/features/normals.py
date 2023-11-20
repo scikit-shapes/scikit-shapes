@@ -24,25 +24,25 @@ def _point_normals(
 
         tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
 
-
-        norms = (tri_n**2).sum(-1).sqrt()
-        print("tri", norms.min(), norms.max())
-
-        n = 1e-8 * torch.ones_like(self.points)
+        n = torch.zeros_like(self.points)
         # TODO: instead of distributing to the vertices equally, we should
         #       distribute according to the angles of the triangles.
+        T = self.triangles.shape[0]
+        assert self.triangles.shape == (T, 3)
+        assert tri_n.shape == (T, 3)
+
         for k in range(3):
             # n[self.triangles[k, i]] += tri_n[i]
+            #
+            # n is (N, 3) float
+            # self.triangles is (T, 3) int
+            # tri_n is (T, 3) float
             n.scatter_reduce_(
                 dim=0,
-                index=self.triangles[k].view(-1, 1),
+                index=self.triangles[:,k].view(-1, 1).repeat(1, 3),
                 src=tri_n,
                 reduce="sum",
             )
-
-        
-        norms = (n**2).sum(-1).sqrt()
-        print("n", norms.min(), norms.max())
 
     else:
         # Get a smooth field of normals via the Structure Tensor:
@@ -55,11 +55,8 @@ def _point_normals(
 
         # Orient the normals according to the triangles, if any:
         if self.triangles is not None:
-            print("Hi")
             n_0 = self.point_normals(scale=None, **kwargs)
 
-            norms = (n_0**2).sum(-1).sqrt()
-            print(norms.min(), norms.max())
             assert n_0.shape == (self.n_points, 3)
 
         else:
@@ -70,7 +67,6 @@ def _point_normals(
 
     # Try to enforce some consistency...
     if False and self.edges is not None:
-        print("Hi")
         n = F.normalize(n, p=2, dim=-1)
         # n_e = n[self.edges[0]] + n[self.edges[1]]
         # The backward of torch.index_select is much faster than that of
