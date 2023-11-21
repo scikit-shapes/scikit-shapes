@@ -128,6 +128,7 @@ def display_curvatures_old(*, function: callable, scale=1):
 if __name__ == "__main__":
     import argparse
     from pprint import pprint
+    import os
     import glob
 
     def display_curvatures(*, scale=1, highlight=None, **kwargs):
@@ -192,7 +193,13 @@ if __name__ == "__main__":
                 )
 
             shape_ = shape_.alpha(args.alpha)
-            # vd.file_io.write(shape_, f"shape_{i}.vtk")
+
+            if args.output:
+                print(args.output)
+                os.makedirs(args.output, exist_ok=True)
+                vd.file_io.write(
+                    shape_, f"{args.output}/shape{SHAPE_ID}_scale{s:.3e}.vtk"
+                )
 
             # Compute a bounding box for the shape:
             bounding_box = shape_.bounds()
@@ -333,6 +340,12 @@ if __name__ == "__main__":
         help="Shape to load.",
     )
     parser.add_argument(
+        "--output",
+        type=str,
+        default="",
+        help="Folder where outputs should be saved.",
+    )
+    parser.add_argument(
         "--alpha",
         type=float,
         default=1,
@@ -363,7 +376,7 @@ if __name__ == "__main__":
     pprint(shapes)
 
     if args.mode == "display":
-        for s in shapes:
+        for SHAPE_ID, s in enumerate(shapes, start=1):
             display_curvatures(**s)
             print("")
 
