@@ -358,11 +358,6 @@ class PolyData(polydata_type):
     def copy(self) -> PolyData:
         """Copy the shape.
 
-        Parameters
-        ----------
-        device
-            The device on which the copy is stored.
-
         Returns
         -------
         PolyData
@@ -1081,7 +1076,7 @@ class PolyData(polydata_type):
             If `self.device != control_points.device`.
 
         """
-        if self.device != control_points.device:
+        if control_points is not None and self.device != control_points.device:
             raise ValueError(
                 "Controls points must be on the same device as"
                 + " the corresponding PolyData, found "
