@@ -154,7 +154,7 @@ class MultiscaleTriangleMesh:
         polydata_type
             The shape decimated at the given ratio.
         """
-        available_ratios = list(self.shapes.keys())
+        available_ratios = self.ratios
         # find closest ratio
         closest_ratio = min(available_ratios, key=lambda x: abs(x - ratio))
         return self.shapes[closest_ratio]
@@ -163,13 +163,6 @@ class MultiscaleTriangleMesh:
     def __getitem__(self, ratio: Number) -> polydata_type:
         """Return the shape at a given ratio."""
         return self.at(ratio)
-
-    @property
-    def available_ratios(self):
-        """Return the available ratios (decreasing order)."""
-        available_ratios = list(self.shapes.keys())
-        available_ratios.sort()
-        return available_ratios[::-1]
 
     @convert_inputs
     @typecheck

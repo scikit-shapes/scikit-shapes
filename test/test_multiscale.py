@@ -30,7 +30,7 @@ def test_scattrer_toy():
         torch.tensor([1, 0.5], dtype=sks.float_dtype),
     )
 
-    # Check that scatter is working whene the index is not consecutive
+    # Check that scatter is working when the indices are not consecutive
 
     index = torch.tensor([0, 1, 3], dtype=sks.int_dtype)
     assert torch.allclose(
@@ -89,7 +89,11 @@ def test_scatter_multidim(n, n_dim):
         assert torch.allclose(output, output_multidim.view(-1))
 
 
-def test_multiscale():
+@given(
+    init_type=st.sampled_from(["ratios", "n_points"]),
+)
+@settings(deadline=None)
+def test_multiscale(init_type):
     """Test the multiscale class for triangle meshes.
 
     This test is based on the bunny example from pyvista.examples (~34K points)
@@ -102,16 +106,16 @@ def test_multiscale():
     # Load a triangle mesh (~34k points)
     mesh = sks.PolyData(examples.download_bunny())
 
-    # Pick 10 random ratios
-    ratios = torch.rand(10)
-
-    # Create the multiscale object
-    M = sks.Multiscale(mesh, ratios=ratios)
-
-    # Print the number of points at each ratio
-    for ratio in torch.sort(ratios)[0]:
-        print(f"ratio : {ratio}, n_points = {M.at(float(ratio)).n_points}")
-    print(f"ratio : {1}, n_points = {M.at(1).n_points}")
+    if init_type == "ratios":
+        # Pick 10 random ratios
+        ratios = torch.rand(10)
+        # Create the multiscale object
+        M = sks.Multiscale(mesh, ratios=ratios)
+    elif init_type == "n_points":
+        # Pick 10 random n_points
+        n_points = torch.randint(1, mesh.n_points, (10,))
+        # Create the multiscale object
+        M = sks.Multiscale(mesh, n_points=n_points)
 
     # Pick a 2 random ratios
     r = torch.rand(2)
@@ -215,13 +219,17 @@ def test_multiscale():
     assert signal_out.shape[0] == M.at(coarse_ratio).n_points
 
 
-def test_multiscale_signal_api():
+@given(
+    smoothing=st.sampled_from(["mesh_convolution"]),
+)
+@settings(deadline=None)
+def test_multiscale_signal_api(smoothing):
     """Test the multiscale signal API"""
 
     mesh = sks.PolyData(examples.download_bunny())
     ratios = [0.01, 0.1, 0.5, 1]
 
-    coarse_to_fine_policy = {"smoothing": "constant"}
+    coarse_to_fine_policy = {"smoothing": smoothing}
     fine_to_coarse_policy = {"reduce": "mean"}
 
     M = sks.Multiscale(mesh, ratios=ratios)
