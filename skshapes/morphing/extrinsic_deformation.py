@@ -16,9 +16,10 @@ from ..types import (
     typecheck,
     Points,
     polydata_type,
+    MorphingOutput,
 )
 from typing import Optional
-from .utils import MorphingOutput, Integrator, EulerIntegrator
+from .utils import Integrator, EulerIntegrator
 from .kernels import Kernel, GaussianKernel
 
 

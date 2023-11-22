@@ -1,7 +1,7 @@
 """Basic types aliases and utility functions for scikit-shapes."""
 from beartype import beartype
 from jaxtyping import jaxtyped, Float32, Float64, Int32, Int64, Float, Int
-from typing import Union
+from typing import Union, Optional, NamedTuple
 import torch
 import numpy as np
 import os
@@ -201,3 +201,12 @@ class image_type:
 
 
 shape_type = Union[polydata_type, image_type]
+
+
+class MorphingOutput(NamedTuple):
+    """Named tuple containing the result of the morphing algorithms."""
+
+    morphed_shape: Optional[shape_type] = None
+    regularization: Optional[FloatScalar] = None
+    path: Optional[list[shape_type]] = None
+    path_length: Optional[FloatScalar] = None

@@ -1,22 +1,7 @@
-"""Utility functions for morphing.
+"""Utility functions for morphing."""
 
-It defines a named tuple MorphingOutput which is used to return the result of
-the morphing algorithms.
-It also defines the integrators used in the kernel deformation model.
-"""
-
-from ..data import Shape
-from typing import NamedTuple, Optional
 import torch
-from ..types import typecheck, FloatScalar, Number, Points
-
-
-class MorphingOutput(NamedTuple):
-    """Named tuple containing the result of the morphing algorithms."""
-
-    morphed_shape: Optional[Shape] = None
-    regularization: Optional[FloatScalar] = None
-    path: Optional[list[Shape]] = None
+from ..types import typecheck, Number, Points
 
 
 class Integrator:

@@ -13,8 +13,8 @@ from ..types import (
     Float3dTensor,
     polydata_type,
     convert_inputs,
+    MorphingOutput,
 )
-from .utils import MorphingOutput
 from .metrics import Metric, ElasticMetric
 from typing import Optional
 

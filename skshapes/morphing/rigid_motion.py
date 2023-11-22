@@ -6,6 +6,7 @@ is described by a translation and a rotation. The morphing is not regularized.
 
 from .basemodel import BaseModel
 import torch
+from typing import Union
 
 from ..types import (
     typecheck,
@@ -14,9 +15,8 @@ from ..types import (
     polydata_type,
     shape_type,
     convert_inputs,
+    MorphingOutput,
 )
-from typing import Union
-from .utils import MorphingOutput
 
 
 class RigidMotion(BaseModel):
