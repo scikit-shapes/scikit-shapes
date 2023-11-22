@@ -8,7 +8,7 @@ from ..types import (
     float_dtype,
     FloatTensor,
 )
-from typing import Union, Optional
+from typing import Union, Optional, get_args
 from ..loss import Loss
 from ..morphing import Model
 import torch
@@ -214,22 +214,32 @@ class Registration:
             return_regularization=True,
         )
 
+        # Automatically add attributes with final values of the morphing
+        for attr in dir(morphing):
+            if not attr.startswith("_") and attr not in ["count", "index"]:
+                print(f"{attr}: {getattr(morphing, attr)}")
+
+                attribute_name = attr + "_"
+                attribute_value = getattr(morphing, attr)
+
+                if isinstance(attribute_value, torch.Tensor):
+                    attribute_value = attribute_value.detach().to(
+                        self.output_device
+                    )
+
+                if isinstance(attribute_value, get_args(shape_type)):
+                    attribute_value = attribute_value.to(self.output_device)
+                if isinstance(attribute_value, list) and all(
+                    isinstance(s, get_args(shape_type))
+                    for s in attribute_value
+                ):
+                    attribute_value = [
+                        s.to(self.output_device) for s in attribute_value
+                    ]
+
+                setattr(self, attribute_name, attribute_value)
+
         self.loss_ = loss_value.detach().to(self.output_device)
-        self.regularization_ = morphing.regularization.to(self.output_device)
-        self.transformed_shape_ = morphing.morphed_shape
-        self.path_ = morphing.path
-
-        # If needed : move the transformed shape and the path to the output
-        # device
-        if self.transformed_shape_.device != self.output_device:
-            self.transformed_shape_ = self.transformed_shape_.to(
-                self.output_device
-            )
-            self.path_ = [s.to(self.output_device) for s in self.path_]
-
-        self.transformed_shape_.points
-        for s in self.path_:
-            s.points
 
     @typecheck
     def transform(self, *, source: shape_type) -> shape_type:
@@ -245,19 +255,12 @@ class Registration:
         shape_type
             the transformed shape.
         """
-        if not hasattr(self, "parameter_"):
+        if not hasattr(self, "morphed_shape_"):
             raise ValueError(
                 "The registration must be fitted before calling transform"
             )
 
-        transformed_shape = self.model.morph(
-            shape=source, parameter=self.parameter_
-        ).morphed_shape
-
-        if transformed_shape.device != self.output_device:
-            return transformed_shape.to(self.output_device)
-        else:  # If transformed_shape is on the output device don't copy
-            return transformed_shape
+        return self.morphed_shape_
 
     @convert_inputs
     @typecheck

@@ -1,7 +1,7 @@
 """Basic types aliases and utility functions for scikit-shapes."""
 from beartype import beartype
 from jaxtyping import jaxtyped, Float32, Float64, Int32, Int64, Float, Int
-from typing import Union, Optional, NamedTuple
+from typing import Union, Optional
 import torch
 import numpy as np
 import os
@@ -203,10 +203,42 @@ class image_type:
 shape_type = Union[polydata_type, image_type]
 
 
-class MorphingOutput(NamedTuple):
-    """Named tuple containing the result of the morphing algorithms."""
+class MorphingOutput:
+    """Class containing the result of the morphing algorithms.
 
-    morphed_shape: Optional[shape_type] = None
-    regularization: Optional[FloatScalar] = None
-    path: Optional[list[shape_type]] = None
-    path_length: Optional[FloatScalar] = None
+    It acts as a container for the result of the morphing algorithms. It
+    contains the morphed shape, the regularization parameter (if any), the path
+    (if any), the path length (if any) and eventually other attributes.
+
+    Parameters
+    ----------
+    morphed_shape
+        the morphed shape
+    regularization
+        the regularization parameter
+    path
+        the path (list of shapes)
+    path_length
+        the length of the path
+    kwargs
+        other attributes (if any)
+
+    """
+
+    def __init__(
+        self,
+        morphed_shape: Optional[shape_type] = None,
+        regularization: Optional[FloatScalar] = None,
+        path: Optional[list[shape_type]] = None,
+        path_length: Optional[FloatScalar] = None,
+        **kwargs,
+    ) -> None:
+        # Define the attributes (common to all morphing algorithms)
+        self.morphed_shape = morphed_shape
+        self.regularization = regularization
+        self.path = path
+        self.path_length = path_length
+
+        # Eventually add other attributes
+        for key, value in kwargs.items():
+            setattr(self, key, value)
