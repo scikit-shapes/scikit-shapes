@@ -113,6 +113,80 @@ def convert_inputs(func, parameters=None):
     return wrapper
 
 
+def one_and_only_one(parameters=None):
+    """Check that one and only one of the parameters is not None.
+
+    Parameters
+    ----------
+    func : callable
+        the function to decorate
+    parameters : list[str], optional
+        the list of parameters to check, by default None
+
+    Returns
+    -------
+    callable
+        the decorated function
+
+    Raises
+    ------
+    ValueError
+        if more than one parameter is not None
+
+    Examples
+    --------
+    >>> @one_and_only_one(["a", "b"])
+    >>> def func(a=None, b=None):
+    >>>     pass
+    >>> func(a=1)
+    >>> func(b=1)
+    >>> func(a=1, b=1)
+    ValueError: Only one of the parameters a, b must be not None
+
+    """
+
+    def decorator(func):
+        """Actual decorator."""
+
+        def wrapper(*args, **kwargs):
+            """Actual wrapper.
+
+            Returns
+            -------
+            callable
+                the decorated function
+
+            Raises
+            ------
+            ValueError
+                if more than of the parameters list is not None
+            """
+            # Check that only one of the parameters is not None
+            not_none = 0
+            for i, arg in enumerate(args):
+                var_name = func.__code__.co_varnames[i]
+                if var_name in parameters and arg is not None:
+                    not_none += 1
+
+            for key, value in kwargs.items():
+                if key in parameters and value is not None:
+                    not_none += 1
+
+            if not_none != 1:
+                raise ValueError(
+                    f"One and only one of the parameters {parameters} must be"
+                    " not None"
+                )
+
+            return func(*args, **kwargs)
+
+        # Copy annotations (if not, beartype does not work)
+        wrapper.__annotations__ = func.__annotations__
+        return wrapper
+
+    return decorator
+
+
 # Type aliases
 Number = Union[int, float]
 

@@ -28,6 +28,7 @@ class MultiscaleTriangleMesh:
         *,
         ratios: Optional[FloatSequence] = None,
         n_points: Optional[IntSequence] = None,
+        scales: Optional[FloatSequence] = None,
         fine_to_coarse_policy: Optional[dict] = None,
         coarse_to_fine_policy: Optional[dict] = None,
         decimation_module: Optional[Decimation] = None,
