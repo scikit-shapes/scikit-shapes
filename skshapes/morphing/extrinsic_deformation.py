@@ -90,9 +90,11 @@ class ExtrinsicDeformation(BaseModel):
             the path if needed.
         """
         if parameter.device != shape.device:
-            p = parameter.to(shape.device)
-        else:
-            p = parameter
+            raise ValueError(
+                "The shape and the parameter must be on the same device."
+            )
+
+        p = parameter
         p.requires_grad = True
 
         if self.control_points is False or shape.control_points is None:

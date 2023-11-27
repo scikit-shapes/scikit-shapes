@@ -33,6 +33,10 @@ nav:
     - Installation: installation.md
     - Tutorial: tutorial.md
     - Examples: generated/gallery
+    - PolyData: getstarted/polydata.md
+    - Registration: getstarted/registration.md
+    - Losses: getstarted/loss.md
+    - Deformation models: getstarted/deformations.md
   - API Reference:
     - skshapes: reference/
   - About:

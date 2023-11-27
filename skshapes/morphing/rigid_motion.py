@@ -71,7 +71,9 @@ class RigidMotion(BaseModel):
             the path if needed.
         """
         if parameter.device != shape.device:
-            parameter = parameter.to(shape.device)
+            raise ValueError(
+                "The shape and the parameter must be on the same device."
+            )
 
         if shape.dim == 2:
             return self._morph2d(
@@ -135,11 +137,18 @@ class RigidMotion(BaseModel):
                     newshape.points = newpoints
                     path.append(newshape)
 
-        return MorphingOutput(
+        output = MorphingOutput(
             morphed_shape=morphed_shape,
             regularization=regularization,
             path=path,
         )
+
+        # Add some attributes to the output related to the rigid motion
+        output.rotation_angles = rotation_angles
+        output.rotation_matrix = rotation_matrix
+        output.translation = translation
+
+        return output
 
     @convert_inputs
     @typecheck
@@ -206,11 +215,18 @@ class RigidMotion(BaseModel):
                     newshape.points = newpoints
                     path.append(newshape)
 
-        return MorphingOutput(
+        output = MorphingOutput(
             morphed_shape=morphed_shape,
             regularization=regularization,
             path=path,
         )
+
+        # Add some attributes to the output related to the rigid motion
+        output.rotation_angle = theta
+        output.rotation_matrix = rotation_matrix
+        output.translation = translation
+
+        return output
 
     @typecheck
     def parameter_shape(
