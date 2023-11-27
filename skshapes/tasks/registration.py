@@ -5,7 +5,6 @@ from ..types import (
     typecheck,
     convert_inputs,
     shape_type,
-    float_dtype,
     FloatTensor,
 )
 from typing import Union, Optional, get_args
@@ -168,9 +167,7 @@ class Registration:
             parameter = parameter.to(self.optim_device)
         else:
             # if no parameter is provided, initialize it with zeros
-            parameter = torch.zeros(
-                parameter_shape, device=self.optim_device, dtype=float_dtype
-            )
+            parameter = self.model.inital_parameter(shape=source)
 
         parameter.requires_grad = True
 
@@ -217,8 +214,6 @@ class Registration:
         # Automatically add attributes with final values of the morphing
         for attr in dir(morphing):
             if not attr.startswith("_") and attr not in ["count", "index"]:
-                print(f"{attr}: {getattr(morphing, attr)}")
-
                 attribute_name = attr + "_"
                 attribute_value = getattr(morphing, attr)
 
