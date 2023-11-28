@@ -7,13 +7,12 @@ import weakref
 
 from collections.abc import Callable
 from ..types import (
-    typecheck,
-    convert_inputs,
     FloatTensor,
     IntTensor,
     NumericalTensor,
     NumericalArray,
 )
+from ..input_validation import typecheck, convert_inputs
 from typing import Optional, TypeVar, Union, Any
 import torch
 import pyvista

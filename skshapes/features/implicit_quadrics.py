@@ -5,7 +5,8 @@ import numpy as np
 from pykeops.torch import LazyTensor
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Float1dTensor, Number
+from ..types import Points, Float1dTensor, Number
+from ..input_validation import typecheck
 from typing import Optional
 
 # from .normals import smooth_normals, tangent_vectors

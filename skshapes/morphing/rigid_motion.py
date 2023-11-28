@@ -9,14 +9,13 @@ import torch
 from typing import Union
 
 from ..types import (
-    typecheck,
     Float1dTensor,
     Float2dTensor,
     polydata_type,
     shape_type,
-    convert_inputs,
     MorphingOutput,
 )
+from ..input_validation import typecheck, convert_inputs
 
 
 class RigidMotion(BaseModel):

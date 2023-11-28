@@ -13,11 +13,11 @@ from __future__ import annotations
 import torch
 from .basemodel import BaseModel
 from ..types import (
-    typecheck,
     Points,
     polydata_type,
     MorphingOutput,
 )
+from ..input_validation import typecheck
 from typing import Optional
 from .utils import Integrator, EulerIntegrator
 from .kernels import Kernel, GaussianKernel

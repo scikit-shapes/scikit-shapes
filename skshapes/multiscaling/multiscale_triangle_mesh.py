@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 from ..types import (
-    typecheck,
-    convert_inputs,
     FloatSequence,
     IntSequence,
     Int1dTensor,
@@ -12,6 +10,7 @@ from ..types import (
     Number,
     polydata_type,
 )
+from ..input_validation import typecheck, convert_inputs, one_and_only_one
 from typing import Literal, Union, Optional
 from ..utils import scatter
 import torch
@@ -21,6 +20,7 @@ from ..decimation import Decimation
 class MultiscaleTriangleMesh:
     """A class to handle multiscale data."""
 
+    @one_and_only_one(["ratios", "n_points", "scales"])
     @typecheck
     def __init__(
         self,

@@ -4,10 +4,9 @@ import torch
 from .types import (
     NumericalTensor,
     Int1dTensor,
-    convert_inputs,
-    typecheck,
     Number,
 )
+from .input_validation import typecheck, convert_inputs
 from typing import Literal, Optional
 
 

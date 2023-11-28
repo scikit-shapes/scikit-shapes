@@ -11,6 +11,7 @@ from .optimization import *
 from .multiscaling import *
 from .decimation import *
 from .tasks import *
+from .input_validation import *
 
 __all__ = [
     "types",
@@ -24,4 +25,5 @@ __all__ = [
     "multiscaling",
     "decimation",
     "tasks",
+    "input_validation",
 ]

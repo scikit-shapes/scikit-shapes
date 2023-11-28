@@ -9,8 +9,6 @@ import numpy as np
 import functools
 
 from ..types import (
-    convert_inputs,
-    typecheck,
     float_dtype,
     int_dtype,
     Number,
@@ -26,6 +24,7 @@ from ..types import (
     polydata_type,
     IntSequence,
 )
+from ..input_validation import typecheck, convert_inputs
 from typing import Optional, Any, Union, Literal
 from warnings import warn
 from .utils import DataAttributes

@@ -1,7 +1,8 @@
 """Utility functions for morphing."""
 
 import torch
-from ..types import typecheck, Number, Points
+from ..types import Number, Points
+from ..input_validation import typecheck
 
 
 class Integrator:

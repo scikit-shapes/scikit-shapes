@@ -9,7 +9,8 @@ import vedo
 import numpy as np
 import torch
 
-from ..types import typecheck, list, float_dtype, int_dtype
+from ..types import float_dtype, int_dtype
+from ..input_validation import typecheck
 from ..data import PolyData
 
 

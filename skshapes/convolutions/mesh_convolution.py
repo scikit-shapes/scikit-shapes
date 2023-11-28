@@ -1,9 +1,7 @@
 """Mesh convolution kernel."""
 
-from ..types import (
-    typecheck,
-    float_dtype,
-)
+from ..types import float_dtype
+from ..input_validation import typecheck
 
 import torch
 from .linear_operator import LinearOperator

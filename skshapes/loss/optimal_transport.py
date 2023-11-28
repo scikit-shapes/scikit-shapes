@@ -1,7 +1,8 @@
 """Losses based on optimal transport for Polydata."""
 
 from geomloss import SamplesLoss
-from ..types import typecheck, FloatScalar, polydata_type
+from ..types import FloatScalar, polydata_type
+from ..input_validation import typecheck
 from typing import Literal
 from .baseloss import BaseLoss
 
