@@ -1,6 +1,8 @@
 # Scikit-Shapes
 Shape processing in Python.
 
+![](docs/animation.gif)
+
 ## Presentation
 
 Scikit-shapes is a python package for the analysis of 2D and 3D shape data. It gathers tools for:
