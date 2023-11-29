@@ -1,23 +1,24 @@
-# scikit-shapes
+# Scikit-Shapes
 Shape processing in Python.
 
-### Presentation
+## Presentation
+
 Scikit-shapes is a python package for the analysis of 2D and 3D shape data. It gathers tools for:
 
-- Compute features for shapes such as curvature
-- Preprocess shapes with downscaling or landmarks setting
-- Register shapes with or without landmarks
-- Population Analysis : distance matrices
+- Compute **features** for shapes such as curvature
+- **Preprocess** shapes with downscaling or landmarks setting
+- **Register** shapes with or without landmarks
+- **Population Analysis** : distance matrices
 
-### Philosophy
+## Philosophy
 
-Scikit-shapes is thinked to be intuitive and user-friendly, while allowing 
+Scikit-shapes is thinked to be intuitive and user-friendly, our am is to provide a library that is
+- **Task-oriented**: basic objects are high-level tasks, such as `Registration` or `Multiscaling`. The mathematical details as loss function, deformation model, are defined as hyperparameters.
+- **Modular**: workflows can be designed following a plug-and-play approach, allowing comparison accross different methods for the same task. In addition, it is possible to implement new modules such as deformation model or loss function and integrate them in existing pipelines.
+- **Efficient**: skshapes relies mostly on pyTorch and pyKeOps for computations. It allows to speed-up numerical intensive part of the analysis with parallelization on CPU or GPU.
+- **Interoperable**: 
 
-- task-oriented : basic objects are high-level tasks, such as `Registration` or `Multiscaling`. The methematical details as loss function, deformation model, are defined as hyperparameters. (Mettre un diagramme pour registration)
-
-- modular : workflows can be designed following a plug-and-play approach, allowing comparison accross different methods for the same task. In addition, it is possible to implement new modules such as deformation model or loss function and integrate them in existing pipelines.
-
-- efficient : skshapes relies mostly on pyTorch and pyKeOps for computations. It allows to speed-up numerical intensive part of the analysis with parallelization on CPU or GPU.
+Here is a code snippet illustrating how a registration model is build by combining a loss function and a deformation model:
 
 ```python
 import skshapes as sks
@@ -38,38 +39,34 @@ transformed_shape = registration.transform(source=shape1)
 ```
 
 
-### Interoperability and modularity
+## Connection to other open-source projects
 
 Scikit-shapes relies on other open-source software, our main dependencies are :
-- PyTorch and KeOps : skshapes uses pytorch tensors as basic array structure and take benefits of the pytorch ecosystem to let the possibility to accelerate computation on GPU
-- PyVista and Vedo : skshapes relies on PyVista for data loading and visualization, and on vedo for creating interactive visualization. Skshapes objects are exportable to vedo or pyvista through `.to_vedo()` and `.to_pyvista()` methods
-- Jaxtyping and Beartype : scikit-shapes is a runtime type checked library. Types are documented with annotations and error are raised if a function is called with a wrong argument's type. This prevents silent errors due to common mistakes such as bad numerical type. Our runtime type checking engine is build around Beartype and annotations for numerical arrays are based on Jaxtyping
+- [PyTorch]() and [KeOps]() : skshapes uses pytorch tensors as basic array structure and take benefits of the pytorch ecosystem to let the possibility to accelerate computations on GPU.
+- [PyVista]() and [Vedo]() : skshapes relies on PyVista for data loading and visualization, and on vedo for creating interactive visualization. Skshapes objects are exportable to vedo or pyvista through `.to_vedo()` and `.to_pyvista()` methods.
+- [Jaxtyping]() and [Beartype]() : scikit-shapes is a runtime type checked library. Types are documented with annotations and error are raised if a function is called with a wrong argument's type. This prevents silent errors due to common mistakes such as bad numerical type. Our runtime type checking engine is build around Beartype and annotations for numerical arrays are based on Jaxtyping.
 
-arguments of skshapes methods and functions are checked at runtime using beartype. This leads to clear error messages to diagnosis tensor format error like passing a tensor with the wrong dtype or the wrong number of dimension...
+# Installation
 
 
-## Installation
-
-### From source
+## From source (library only)
 
 To install scikit-shapes directly from the source code, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
 
 ```bash
 pip install .
 ```
+## From source (for developers)
 
-If you also want to install the developpers tools, run the following 
-
+To install scikit-shapes as well as developpers dependencies, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
 ```bash
 pip install -e .[dev]
 ```
-
 Then, you will have the possibility to interactively edit the code, run the linting tool and syntax checker, run the tests and build the documentation. From scikit-shapes directory, use the following commands :
-
 ```bash
-# Lint with black
+# Lint
 black .
-# Check syntax
+# Check syntax 
 flake8 skshapes
 # Run tests and show code coverage
 pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html test/
@@ -77,7 +74,6 @@ firefox htmlcov/index.html
 # Build documentation
 mkdocs serve
 ```
-
 
 ## Contributing
 
