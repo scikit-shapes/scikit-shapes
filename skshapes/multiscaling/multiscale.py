@@ -7,6 +7,7 @@ from typing import Union, Optional
 from ..types import (
     Number,
     shape_type,
+    FloatTensor,
 )
 from ..input_validation import typecheck, one_and_only_one
 from .multiscale_triangle_mesh import MultiscaleTriangleMesh
@@ -39,7 +40,6 @@ class MultiscaleGeneric:
 
         if shape.is_triangle_mesh():
             decimation_module = Decimation(n_points=min_n_points)
-            print("Decimation module created")
 
         else:
             raise NotImplementedError(
@@ -105,7 +105,7 @@ class MultiscaleGeneric:
         ratio: Optional[float] = None,
         n_points: Optional[int] = None,
         scale: Optional[Number] = None,
-    ) -> None:
+    ) -> shape_type:
         """Get the shape at a given ratio, number of points or scale."""
         if ratio is not None:
             n_points = int(ratio * self.shape.n_points)
@@ -117,6 +117,31 @@ class MultiscaleGeneric:
         n_points = min(available_n_points, key=lambda x: abs(x - n_points))
 
         return self.shapes[n_points]
+
+    @one_and_only_one(parameters=["ratio", "n_points", "scale"])
+    @typecheck
+    def propagate(
+        self,
+    ) -> None:
+        """Propagate the shape to the other scales."""
+        raise NotImplementedError("This function is not implemented yet")
+
+    def _signal_from_one_scale_to_another(
+        self,
+        *,
+        source_n_points: int,
+        target_n_points: int,
+        source_signal: FloatTensor,
+    ) -> FloatTensor:
+        """Propagate a signal from one scale to another."""
+        raise NotImplementedError("This function is not implemented yet")
+
+        if source_n_points == target_n_points:
+            return source_signal
+        elif source_n_points < target_n_points:
+            pass
+        else:
+            pass
 
 
 class Multiscale:
