@@ -37,9 +37,9 @@ nav:
       - MultiScale: user_guide/data_structures/multiscale.md
       - MultiShape: user_guide/data_structures/multishape.md
     - Registration:
-      - Registration: user_guide/registrations/registration.md
-      - Loss functions: user_guide/registrations/losses.md
-      - Deformation models: user_guide/registrations/deformations.md
+      - Registration: user_guide/registration/registration.md
+      - Loss functions: user_guide/registration/losses.md
+      - Deformation models: user_guide/registration/deformations.md
   - Examples: generated/gallery
   - API Reference:
     - skshapes: reference/
