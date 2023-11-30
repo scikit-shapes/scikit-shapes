@@ -29,20 +29,23 @@ theme:
 
 nav:
   - Home: index.md
-  - Getting Started:
-    - Installation: installation.md
-    - Tutorial: tutorial.md
-    - Examples: generated/gallery
-    - PolyData: getstarted/polydata.md
-    - Registration: getstarted/registration.md
-    - Losses: getstarted/loss.md
-    - Deformation models: getstarted/deformations.md
+  - Installation: installation.md
+  - User Guide:
+    - Data Structures:
+      - PolyData: user_guide/data_structures/polydata.md
+      - Images: user_guide/data_structures/images.md
+      - MultiScale: user_guide/data_structures/multiscale.md
+      - MultiShape: user_guide/data_structures/multishape.md
+    - Registration:
+      - Registration: user_guide/registrations/registration.md
+      - Loss functions: user_guide/registrations/losses.md
+      - Deformation models: user_guide/registrations/deformations.md
+  - Examples: generated/gallery
   - API Reference:
     - skshapes: reference/
-  - About:
-    - About: about.md
-    - Contributing: contributing.md
-    - License: license.md
+  - Contributing: contributing.md
+  - About: about.md
+  - License: license.md
 
 plugins:
   - search
