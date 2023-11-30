@@ -253,8 +253,12 @@ class Registration:
             raise ValueError(
                 "The registration must be fitted before calling transform"
             )
-
-        return self.morphed_shape_
+        return self.model.morph(
+            shape=source,
+            parameter=self.parameter_,
+            return_path=True,
+            return_regularization=True,
+        ).morphed_shape
 
     @convert_inputs
     @typecheck
