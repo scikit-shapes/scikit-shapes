@@ -88,7 +88,7 @@ class PolyData(polydata_type):
         # extract the points, edges and triangles from it
         if type(points) in [vedo.Mesh, pyvista.PolyData, str]:
             if type(points) is vedo.Mesh:
-                mesh = pyvista.PolyData(points.polydata())
+                mesh = pyvista.PolyData(points.dataset)
             elif type(points) is str:
                 mesh = pyvista.read(points)
             elif type(points) is PyvistaPolyData:
