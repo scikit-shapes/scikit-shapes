@@ -2,11 +2,10 @@
 
 from ..optimization import Optimizer, LBFGS
 from ..types import (
-    typecheck,
-    convert_inputs,
     shape_type,
     FloatTensor,
 )
+from ..input_validation import typecheck, convert_inputs
 from typing import Union, Optional, get_args
 from ..loss import Loss
 from ..morphing import Model
@@ -254,8 +253,12 @@ class Registration:
             raise ValueError(
                 "The registration must be fitted before calling transform"
             )
-
-        return self.morphed_shape_
+        return self.model.morph(
+            shape=source,
+            parameter=self.parameter_,
+            return_path=True,
+            return_regularization=True,
+        ).morphed_shape
 
     @convert_inputs
     @typecheck
