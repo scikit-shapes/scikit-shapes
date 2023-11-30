@@ -1,6 +1,7 @@
 """Converters for arguments."""
 
 from typing import Union
+from functools import wraps
 import torch
 import numpy as np
 from ..types import float_dtype, int_dtype
@@ -50,12 +51,34 @@ def convert_inputs(func, parameters=None):
     convert the dtype of the tensor to the right one (float32 for float,
     int64 for int), before calling the function.
 
+    If used in combination with the typecheck decorator, it must be called
+    first :
+    ```python
+    import skshapes as sks
+    import numpy as np
+
+    @sks.convert_inputs
+    @sks.typecheck
+    def foo(a: NumericalTensor) -> NumericalTensor:
+        return a
+
+    foo(np.zeros(10)) # OK
+
+    @sks.typecheck
+    @sks.convert_inputs
+    def bar(a: NumericalTensor) -> NumericalTensor:
+        return a
+
+    bar(np.zeros(10)) # Beartype error
+    ```
+
     TODO: so far, it only works with numpy arrays and torch tensors.
     Is it relevant to add support for lists and tuples ? -> must be careful
     on which arguments are converted (only the ones that are supposed to be
     converted to torch.Tensor).
     """
 
+    @wraps(func)
     def wrapper(*args, **kwargs):
         # Convert args and kwargs to torch.Tensor
         # and convert the dtype to the right one
@@ -68,6 +91,4 @@ def convert_inputs(func, parameters=None):
 
         return func(*new_args, **kwargs)
 
-    # Copy annotations (if not, beartype does not work)
-    wrapper.__annotations__ = func.__annotations__
     return wrapper

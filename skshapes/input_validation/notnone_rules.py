@@ -19,8 +19,7 @@ Decorators already implemented:
 - `one_and_only_one` : one and only one of the parameters must be not None
 - `no_more_than_one` : no more than one of the parameters must be not None
 """
-
-from .typechecking import typecheck
+from functools import wraps
 
 
 def generator_notnone_rule(rule):
@@ -45,12 +44,11 @@ def generator_notnone_rule(rule):
         boolean arguments to determine if typecheck must be applied
     """
 
-    def ruler(parameters, check_types=True):
+    def ruler(parameters):
         def decorator(func):
             """Actual decorator."""
-            if check_types:
-                func = typecheck(func)
 
+            @wraps(func)
             def wrapper(*args, **kwargs):
                 """Actual wrapper.
 
@@ -102,15 +100,13 @@ def rule_no_more_than_one(not_none: int, parameters: list[str]) -> None:
         )
 
 
-def one_and_only_one(parameters, check_types=True):
+def one_and_only_one(parameters):
     """Checker for only one not None parameter.
 
     Parameters
     ----------
     parameters : list[str]
         the list of parameters to check
-    check_types : bool, optional
-        if True, check the types of the arguments, by default True
 
     Returns
     -------
@@ -133,20 +129,16 @@ def one_and_only_one(parameters, check_types=True):
     ValueError: Only one of the parameters a, b must be not None
 
     """
-    return generator_notnone_rule(rule_one_and_only_one)(
-        parameters, check_types
-    )
+    return generator_notnone_rule(rule_one_and_only_one)(parameters)
 
 
-def no_more_than_one(parameters, check_types=True):
+def no_more_than_one(parameters):
     """Checker for less than one not None parameter.
 
     Parameters
     ----------
     parameters : list[str]
         the list of parameters to check
-    check_types : bool, optional
-        if True, check the types of the arguments, by default True
 
     Returns
     -------
@@ -170,6 +162,4 @@ def no_more_than_one(parameters, check_types=True):
     ValueError: No more than one of the parameters a, b must be not None
 
     """
-    return generator_notnone_rule(rule_no_more_than_one)(
-        parameters, check_types
-    )
+    return generator_notnone_rule(rule_no_more_than_one)(parameters)

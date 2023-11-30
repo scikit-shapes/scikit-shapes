@@ -35,9 +35,9 @@ shape_3 = MultiResolution(
     upsampling="auto",
 )
 
-shape_4 = Shape("fine.vtk", landmarks=landmarks, controls=controls).multiresolution(
-    scales=[0.01, 0.1, 0.5]
-)
+shape_4 = Shape(
+    "fine.vtk", landmarks=landmarks, controls=controls
+).multiresolution(scales=[0.01, 0.1, 0.5])
 
 # fine_to_medium = a linear operator of shape (n_medium, n_fine)
 # it should support "@" and ".shape"

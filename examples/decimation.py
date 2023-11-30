@@ -58,7 +58,9 @@ b = Browser(
     ]
     + [
         low_resolutions[rate].to_vedo()
-        + vedo.pointcloud.Points(low_resolutions[rate].landmark_points.cpu().numpy())
+        + vedo.pointcloud.Points(
+            low_resolutions[rate].landmark_points.cpu().numpy()
+        )
         .c("red")
         .ps(10)
         .render_points_as_spheres()

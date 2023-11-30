@@ -5,7 +5,9 @@ import torch
 
 
 def stripify(signal, n_strips=5):
-    signal = (signal - torch.min(signal)) / (torch.max(signal) - torch.min(signal))
+    signal = (signal - torch.min(signal)) / (
+        torch.max(signal) - torch.min(signal)
+    )
     signal *= n_strips
     signal = signal.floor() % 2
     return signal
@@ -37,7 +39,13 @@ cpos = [
 
 
 mesh = sks.PolyData(examples.download_louis_louvre())  # Load a mesh
-ratios = [1, 0.5, 0.1, 0.05, 0.01]  # Define the ratios at which the mesh will be scaled
+ratios = [
+    1,
+    0.5,
+    0.1,
+    0.05,
+    0.01,
+]  # Define the ratios at which the mesh will be scaled
 fine_to_coarse_policy = {
     "reduce": "mean",
     "pass_through_all_scales": True,
@@ -47,7 +55,9 @@ M = sks.Multiscale(
     mesh, ratios=ratios, fine_to_coarse_policy=fine_to_coarse_policy
 )  # Create the multiscale object
 
-mesh["signal"] = stripify(mesh.points[:, 0], n_strips=8)  # Define a signal on the mesh
+mesh["signal"] = stripify(
+    mesh.points[:, 0], n_strips=8
+)  # Define a signal on the mesh
 M.propagate(
     key="signal", from_ratio=1, to_ratio="all"
 )  # add the signal to the multiscale object
