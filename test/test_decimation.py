@@ -62,6 +62,15 @@ def test_decimation_basic():
         decimated_sphere4.points, decimated_sphere2.points
     )  # same points
 
+    # Assert that the number of points is different when we use a different
+    # ratio in the transform method
+    decimated_sphere5 = decimation.transform(
+        sphere,
+        ratio=2 * (1 - target_reduction),
+    )
+
+    assert decimated_sphere5.n_points != decimated_sphere4.n_points
+
     # Some errors
     mesh = sks.Sphere()
 

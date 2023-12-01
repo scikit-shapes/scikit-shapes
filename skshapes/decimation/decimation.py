@@ -174,7 +174,7 @@ class Decimation:
         PolyData
             The decimated mesh.
         """
-        if target_reduction is None and n_points is None:
+        if target_reduction is None and n_points is None and ratio is None:
             # default, target_reduction is the same as in __init__
             target_reduction = self.target_reduction
 
