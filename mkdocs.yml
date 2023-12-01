@@ -35,7 +35,6 @@ nav:
       - PolyData: user_guide/data_structures/polydata.md
       - Images: user_guide/data_structures/images.md
       - MultiScale: user_guide/data_structures/multiscale.md
-      - MultiShape: user_guide/data_structures/multishape.md
     - Registration:
       - Registration: user_guide/registration/registration.md
       - Loss functions: user_guide/registration/loss.md
