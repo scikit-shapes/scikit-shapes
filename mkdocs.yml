@@ -1,8 +1,6 @@
 site_name: Scikit-Shapes
 repo_url: https://github.com/scikit-shapes/scikit-shapes
 
-
-
 theme:
   name: material
   features:
@@ -52,6 +50,7 @@ plugins:
         examples_dirs: docs/examples          # path to your example scripts
         gallery_dirs: docs/generated/gallery
         ignore_pattern: utils*
+        conf_script: docs/gallery_conf.py
   - gen-files:
       scripts:
       - docs/gen_ref_nav.py

@@ -61,13 +61,35 @@ shape = sks.PolyData("mesh.vtk")
 - from vedo.Mesh or pyvista.Polydata
 ```python
 import pyvista.examples
-# Load a pyvista PolyData from pyvista examples gallery
+# Load a pyvista PolyData from pyvista examples
 bunny_pyvista = pyvista.examples.download_bunny()
-# Convert it to scikit-shapes PolyData
+# Cast it as a scikit-shapes PolyData
 bunny_sks = sks.PolyData(bunny_pyvista)
 
 import vedo
+from vedo import dataurl
+# Load a vedo Mesh from vedoexamples
+pot = vedo.Mesh(dataurl+"teapot.vtk").shrink(0.75)
+# Cast it as a scikit-shapes PolyData
+pot_sks = sks.PolyData(pot)
 ```
+
+## Features
+
+- Some features can be computed : `edges_length`, `triangle_normals`, ...
+- More complex features as `curvature`, `convolution`...
+
+In addition to those features, you can add your own signals. The only restriction is that these signals must be defined point-wise
+```python
+import skshapes as sks
+import torch
+
+shape = sks.Circle
+n_points = shape.n_points
+
+shape["rnd_signal"] = torch.rand(n_points)
+```
+Note that the only restriction on the signal's shape is that the first dimension matches the number of points. There is no restriction about the number of dimensions and shapes as `(n_points, 2)`, `(n_points, 3, 3)` or `(n_points, 1, 2, 3, 4)` are valid.
 
 ## Landmarks
 
@@ -76,21 +98,6 @@ Landmarks are distinguished vertices. The main utility of defining landmarks is 
 Landmarks are represented as a sparse `torch.tensor`
 
 Landmarks can be set following 
-
-## Signals, or point data
-
-Signals refered to quantities that can be defined
-
-- triangle-wise : normals, centers, areas
-- edge-wise : edge centers, lenghts
-- point-wise : 
-
-The modules features and curvatures gather other signals that are available in scikit-shapes.
-
-You can also define your own pointwise signals
-```python
-mesh["my_signal"] = torch.rand(mesh.n_points, 3)
-```
 
 ## Control points
 

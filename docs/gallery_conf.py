@@ -4,7 +4,6 @@ import numpy as np
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True
 pyvista.OFF_SCREEN = True
-scraper_pv = pyvista._get_sg_image_scraper()
 
 # Optional - set parameters like theme or window size
 # pyvista.set_plot_theme('document')
@@ -16,5 +15,5 @@ extensions = [
 ]
 
 conf = {
-    "image_scrapers": ("matplotlib", scraper_pv),
+    "image_scrapers": ("pyvista",),
 }

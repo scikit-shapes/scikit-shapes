@@ -38,20 +38,33 @@ tensor([1., 2.])
 
 ## Choosing a Loss function
 
-Some losses requires that `source` and `target` fulfill certains conditions
+A loss function is a way to quantify the difference between two shapes. In scikit-shapes a loss functiion is represented by a class that can be intialized with some hyperparameters
+```python
+import skshapes as sks
+l1_loss = sks.LpLoss(p=1)
+```
+Linear combination of loss function are valid loss functions:
+```python
+import skshapes as sks
+custom_loss = 2 * sks.LandmarkLoss() + sks.NearestNeighborsLoss()
+```
+Some losses requires that `source` and `target` fulfill certains conditions:
 
 - for polydatas
 
 | Loss function          | Description                          | Restrictions                                            |
 | ---------------------- | ------------------------------------ | ------------------------------------------------------- |
+| `LpLoss`               | Lp loss for vertices                 | `source` and `target` must be in correspondance         |
 | `L2Loss`               | L2 loss for vertices                 | `source` and `target` must be in correspondance         |
-| `LandmarkLoss`         | L2 loss for landmarks                | `source` and `target` must have corresponding landmarks |
+| `LandmarkLoss`         | Lp loss for landmarks                | `source` and `target` must have corresponding landmarks |
 | `NearestNeighborsLoss` | Nearest neighbors distance           | NA                                                      |
 
 - for images 
 
 | Loss function          | Description                          | Restrictions                                            |
 | ---------------------- | ------------------------------------ | ------------------------------------------------------- |
+
+
 
 ## Choosing a Registration model
 
