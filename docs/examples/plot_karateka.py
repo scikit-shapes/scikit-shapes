@@ -7,7 +7,10 @@ Make the karateka moves
 # Useful imports
 
 import sys
-print(sys.path)
+import pykeops
+
+sys.path.append(pykeops.get_build_folder())
+
 import skshapes as sks
 from utils_karateka import *
 
@@ -18,8 +21,7 @@ kwargs = {
     "gpu": False,
     "verbose": True,
 }
-import pykeops
-print(pykeops.config.sys.path)
+
 
 # pykeops_nvrtc = importlib.import_module("pykeops_nvrtc")
 # https://github.com/Louis-Pujol/mkdocs-gallery
@@ -30,7 +32,6 @@ print(pykeops.config.sys.path)
 
 source, target = load_data()
 plot_karatekas()
-print(sys.path)
 
 # %%
 # Register with an extrinsic deformation

@@ -38,7 +38,7 @@ nav:
       - MultiShape: user_guide/data_structures/multishape.md
     - Registration:
       - Registration: user_guide/registration/registration.md
-      - Loss functions: user_guide/registration/losses.md
+      - Loss functions: user_guide/registration/loss.md
       - Deformation models: user_guide/registration/deformations.md
   - Examples: generated/gallery
   - API Reference:
