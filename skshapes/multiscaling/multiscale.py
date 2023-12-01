@@ -22,7 +22,7 @@ class MultiscaleGeneric:
     def __init__(
         self,
         shape: shape_type,
-        ratios: Optional[list[float]] = None,
+        ratios: Optional[list[Number]] = None,
         n_points: Optional[list[int]] = None,
         scales: Optional[list[Number]] = None,
         decimation_module=None,
@@ -31,10 +31,10 @@ class MultiscaleGeneric:
 
         self.shape = shape
 
-        if n_points is not None:
+        if ratios is not None:
             pass
-        elif ratios is not None:
-            n_points = [int(r * shape.n_points) for r in ratios]
+        elif n_points is not None:
+            ratios = [n / shape.n_points for n in n_points]
         elif scales is not None:
             raise NotImplementedError("Scales are not implemented yet")
 
@@ -51,17 +51,17 @@ class MultiscaleGeneric:
 
         self.shapes = {}
         self.mappings_from_origin = {}
-        self.shapes[shape.n_points] = shape
+        self.shapes[1] = shape
 
-        for n in n_points:
-            self.append(n_points=n)
+        for r in ratios:
+            self.append(ratio=r)
 
     @one_and_only_one(parameters=["ratio", "n_points", "scale"])
     @typecheck
     def append(
         self,
         *,
-        ratio: Optional[float] = None,
+        ratio: Optional[Number] = None,
         n_points: Optional[int] = None,
         scale: Optional[Number] = None,
     ) -> None:
@@ -80,8 +80,8 @@ class MultiscaleGeneric:
             The target scale.
 
         """
-        if ratio is not None:
-            n_points = int(ratio * self.shape.n_points)
+        if n_points is not None:
+            ratio = n_points / self.shape.n_points
         elif scale is not None:
             raise NotImplementedError("Scales are not implemented yet")
 
@@ -90,11 +90,11 @@ class MultiscaleGeneric:
             pass
         else:
             new_shape = self._decimation_module.transform(
-                self.shape, n_points=n_points
+                self.shape, ratio=ratio
             )
-            self.shapes[n_points] = new_shape
+            self.shapes[ratio] = new_shape
             self.mappings_from_origin[
-                n_points
+                ratio
             ] = self._decimation_module.indice_mapping
 
     @one_and_only_one(parameters=["ratio", "n_points", "scale"])
@@ -102,26 +102,30 @@ class MultiscaleGeneric:
     def at(
         self,
         *,
-        ratio: Optional[float] = None,
+        ratio: Optional[Number] = None,
         n_points: Optional[int] = None,
         scale: Optional[Number] = None,
     ) -> shape_type:
         """Get the shape at a given ratio, number of points or scale."""
-        if ratio is not None:
-            n_points = int(ratio * self.shape.n_points)
+        if n_points is not None:
+            ratio = n_points / self.shape.n_points
         elif scale is not None:
             raise NotImplementedError("Scales are not implemented yet")
 
         # find clostest n_points
-        available_n_points = self.shapes.keys()
-        n_points = min(available_n_points, key=lambda x: abs(x - n_points))
+        available_ratios = self.shapes.keys()
+        ratio = min(available_ratios, key=lambda x: abs(x - ratio))
 
-        return self.shapes[n_points]
+        return self.shapes[ratio]
 
-    @one_and_only_one(parameters=["ratio", "n_points", "scale"])
+    @one_and_only_one(parameters=["from_ratio", "from_n_points", "from_scale"])
     @typecheck
     def propagate(
+        signal_name: str,
         self,
+        from_scale: Optional[Number] = None,
+        from_ratio: Optional[Number] = None,
+        from_n_points: Optional[int] = None,
     ) -> None:
         """Propagate the shape to the other scales."""
         raise NotImplementedError("This function is not implemented yet")
