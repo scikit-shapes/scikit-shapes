@@ -1,7 +1,15 @@
+"""
+Multiscaling and signal propagation
+===================================
+
+"""
+
+
 import skshapes as sks
 import pyvista as pv
 from pyvista import examples
 import torch
+import matplotlib.pyplot as plt
 
 
 def stripify(signal, n_strips=5):
@@ -20,7 +28,7 @@ def show(M, signal_name, revert=False, cpos=None):
             p.subplot(0, len(ratios) - i - 1)
         else:
             p.subplot(0, i)
-        mesh_pv = M.at(r).to_pyvista()
+        mesh_pv = M.at(ratio=r).to_pyvista()
         p.add_mesh(mesh_pv, scalars=signal_name)
         if cpos is not None:
             p.camera_position = cpos
@@ -46,44 +54,40 @@ ratios = [
     0.05,
     0.01,
 ]  # Define the ratios at which the mesh will be scaled
-fine_to_coarse_policy = {
-    "reduce": "mean",
-    "pass_through_all_scales": True,
-}  # Define the fine_to_coarse policy
+fine_to_coarse_policy = sks.FineToCoarsePolicy(reduce="mean")
 
-M = sks.Multiscale(
-    mesh, ratios=ratios, fine_to_coarse_policy=fine_to_coarse_policy
-)  # Create the multiscale object
+
+M = sks.Multiscale(mesh, ratios=ratios)  # Create the multiscale object
 
 mesh["signal"] = stripify(
     mesh.points[:, 0], n_strips=8
 )  # Define a signal on the mesh
 M.propagate(
-    key="signal", from_ratio=1, to_ratio="all"
-)  # add the signal to the multiscale object
-# show(M, "signal", revert=False, cpos=cpos) # show the signal at all scales
-
-assert M.at(0.05)["signal"].shape[0] == M.at(0.05).n_points
-
-coarse_signal = M.at(0.01)["signal"]  # Get the coarse signal
-
-
-M.propagate(
-    coarse_signal,
-    key="signal2",
-    from_ratio=0.01,
-    to_ratio="all",
-    coarse_to_fine_policy={"smoothing": "constant"},
+    signal_name="signal",
+    from_ratio=1,
+    fine_to_coarse_policy=fine_to_coarse_policy,
 )
+
+assert M.at(ratio=0.05)["signal"].shape[0] == M.at(ratio=0.05).n_points
+
+coarse_signal = M.at(ratio=0.01)["signal"]  # Get the coarse signal
+M.at(ratio=0.01)[
+    "signal2"
+] = coarse_signal  # Define a new signal on the coarse mesh
+
 M.propagate(
-    coarse_signal,
-    key="signal3",
+    signal_name="signal2",
     from_ratio=0.01,
-    to_ratio="all",
-    coarse_to_fine_policy={
-        "smoothing": "mesh_convolution",
-        "pass_through_all_scales": True,
-    },
+    coarse_to_fine_policy=sks.CoarseToFinePolicy(smoothing="constant"),
+)
+
+M.at(ratio=0.01)[
+    "signal3"
+] = coarse_signal  # Define a new signal on the coarse mesh
+M.propagate(
+    signal_name="signal3",
+    from_ratio=0.01,
+    coarse_to_fine_policy=sks.CoarseToFinePolicy(smoothing="mesh_convolution"),
 )
 
 
@@ -96,17 +100,18 @@ cpos = [
 p = pv.Plotter(shape=(3, len(ratios)))
 for i, r in enumerate(ratios):
     p.subplot(0, i)
-    mesh_pv = M.at(r).to_pyvista()
+    mesh_pv = M.at(ratio=r).to_pyvista()
     p.add_mesh(mesh_pv, scalars="signal")
     p.camera_position = cpos
     p.subplot(1, i)
-    mesh_pv = M.at(r).to_pyvista()
+    mesh_pv = M.at(ratio=r).to_pyvista()
     p.add_mesh(mesh_pv, scalars="signal2")
     p.camera_position = cpos
     p.subplot(2, i)
-    mesh_pv = M.at(r).to_pyvista()
+    mesh_pv = M.at(ratio=r).to_pyvista()
     p.add_mesh(mesh_pv, scalars="signal3")
     p.camera_position = cpos
 p.show()
-
-print(p.camera_position)
+plt.imshow(p.image)
+plt.axis("off")
+plt.show()

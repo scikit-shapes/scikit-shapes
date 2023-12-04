@@ -1,12 +1,13 @@
 """Basic types aliases and utility functions for scikit-shapes."""
-from jaxtyping import Float32, Float64, Int32, Int64, Float, Int
-from typing import Union, Optional
-import torch
-import numpy as np
 import os
 from warnings import warn
+from typing import Union, Optional, NamedTuple, Literal
+from jaxtyping import Float32, Float64, Int32, Int64, Float, Int
+from beartype import beartype
 from beartype.typing import Annotated
 from beartype.vale import Is
+import torch
+import numpy as np
 
 
 admissile_float_dtypes = ["float32", "float64"]
@@ -47,7 +48,7 @@ NumericalArray = Union[FloatArray, IntArray]
 Float1dArray = Float[np.ndarray, "_"]
 Int1dArray = Int[np.ndarray, "_"]
 
-# Numerical types
+# Numerical typestyp
 FloatTensor = JaxFloat[
     torch.Tensor, "..."
 ]  # Only Float32 tensors are FloatTensors
@@ -73,6 +74,12 @@ IntSequence = Union[
     Int[np.ndarray, "_"],  # noqa: F821
     list[int],
 ]
+
+NumberSequence = Union[
+    FloatSequence,
+    IntSequence,
+]
+
 
 DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
@@ -113,6 +120,44 @@ class image_type:
 
 
 shape_type = Union[polydata_type, image_type]
+
+
+@beartype
+class FineToCoarsePolicy(NamedTuple):
+    """Parameters for the fine to coarse propagation scheme.
+
+    Parameters
+    ----------
+    reduce : str, default="mean"
+        The reduction operation to use when propagating the signal from the
+        fine to the coarse resolutions. Possible values are "mean", "max",
+        "min" and "sum".
+    """
+
+    reduce: Literal["mean", "max", "min", "sum"] = "mean"
+
+
+@beartype
+class CoarseToFinePolicy(NamedTuple):
+    """Parameters for the coarse to fine propagation scheme.
+
+    Parameters
+    ----------
+    smoothing : str, default="constant"
+        The smoothing operation to use when propagating the signal from the
+        coarse to the fine resolutions. Possible values are "constant",
+        "point_convolution" and "mesh_convolution".
+    n_smoothing_steps : int, default=1
+        The number of smoothing steps to perform when propagating the signal
+        from the coarse to the fine resolutions.
+    """
+
+    smoothing: Literal[
+        "constant",
+        "point_convolution",
+        "mesh_convolution",
+    ] = "constant"
+    n_smoothing_steps: int = 1
 
 
 class MorphingOutput:
