@@ -60,23 +60,32 @@ for rate in rates:
 # %%
 # Visualize
 
-cpos = [
-    (-12.213091804300387, -47.405946354834505, 4.9647045737122575),
-    (1.606399655342102, 2.120710074901581, 8.925199747085571),
-    (-0.06490518888405027, -0.0615358717058527, 0.9959922956274946),
-]
+cpos = [(11.548847281353684, -19.784217817604652, 8.581378858601008),
+ (1.606399655342102, 2.120710074901581, 8.925199747085571),
+ (-0.021305501811855157, -0.025357814432988603, 0.9994513779267742)]
 
-p = pyvista.Plotter(shape=(1, len(rates) + 1))
-p.subplot(0, 0)
-p.add_mesh(mesh.to_pyvista(), color="tan")
-p.add_points(mesh.landmark_points.numpy(), color="red")
+p = pyvista.Plotter()
+p.add_mesh(mesh.to_pyvista(), color="tan", opacity=0.9)
+p.add_points(
+    mesh.landmark_points.numpy(),
+    color="red",
+    point_size=20,
+    render_points_as_spheres=True,
+    )
 p.camera_position = cpos
-for i, rate in enumerate(rates):
-    p.subplot(0, i + 1)
-    p.add_mesh(low_resolutions[rate].to_pyvista(), color="tan")
-    p.add_points(low_resolutions[rate].landmark_points.numpy(), color="red")
-    p.camera_position = cpos
 p.show()
-plt.imshow(p.image)
-plt.axis("off")
-plt.show()
+
+
+
+# p = pyvista.Plotter(shape=(1, len(rates) + 1))
+# p.subplot(0, 0)
+# p.add_mesh(mesh.to_pyvista(), color="tan")
+# p.add_points(mesh.landmark_points.numpy(), color="red")
+# p.camera_position = cpos
+# for i, rate in enumerate(rates):
+#     p.subplot(0, i + 1)
+#     p.add_mesh(low_resolutions[rate].to_pyvista(), color="tan")
+#     p.add_points(low_resolutions[rate].landmark_points.numpy(), color="red")
+#     p.camera_position = cpos
+# p.show()
+

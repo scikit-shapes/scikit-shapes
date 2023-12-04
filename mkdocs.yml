@@ -47,7 +47,7 @@ nav:
 plugins:
   - search
   - gallery:
-        examples_dirs: docs/examples          # path to your example scripts
+        examples_dirs: examples          # path to your example scripts
         gallery_dirs: docs/generated/gallery
         ignore_pattern: utils*
         conf_script: docs/gallery_conf.py

@@ -39,9 +39,6 @@ plotter.add_mesh(multiscale_bunny.at(ratio=0.005).to_pyvista())
 plotter.add_text(f"N_points={multiscale_bunny.at(ratio=0.005).n_points}")
 plotter.view_xy()
 plotter.show()
-plt.imshow(plotter.image)
-plt.axis("off")
-plt.show()
 
 
 # %%
@@ -59,9 +56,6 @@ plotter.add_mesh(
 )
 plotter.view_xy()
 plotter.show()
-plt.imshow(plotter.image)
-plt.axis("off")
-plt.show()
 
 # %%
 # Propagate the signal to the lower resolutions
@@ -101,9 +95,6 @@ plotter.add_mesh(
 plotter.add_text(f"N_points={multiscale_bunny.at(ratio=0.005).n_points}")
 plotter.view_xy()
 plotter.show()
-plt.imshow(plotter.image)
-plt.axis("off")
-plt.show()
 
 # %%
 # Propagate the signal back to the higher resolutions
@@ -152,9 +143,6 @@ plotter.add_mesh(
 plotter.add_text(f"N_points={multiscale_bunny.at(ratio=0.005).n_points}")
 plotter.view_xy()
 plotter.show()
-plt.imshow(plotter.image)
-plt.axis("off")
-plt.show()
 
 # %% With `smoothing = "mesh_convolution"`
 #
@@ -198,6 +186,3 @@ plotter.add_mesh(
 plotter.add_text(f"N_points={multiscale_bunny.at(ratio=0.005).n_points}")
 plotter.view_xy()
 plotter.show()
-plt.imshow(plotter.image)
-plt.axis("off")
-plt.show()

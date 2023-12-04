@@ -15,5 +15,5 @@ extensions = [
 ]
 
 conf = {
-    "image_scrapers": ("pyvista",),
+    "image_scrapers": ("matplotlib", "pyvista",),
 }

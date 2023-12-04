@@ -112,6 +112,3 @@ for i, r in enumerate(ratios):
     p.add_mesh(mesh_pv, scalars="signal3")
     p.camera_position = cpos
 p.show()
-plt.imshow(p.image)
-plt.axis("off")
-plt.show()
