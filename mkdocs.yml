@@ -6,7 +6,6 @@ theme:
   features:
     - source_repository: 'https://github.com/scikit-shapes/scikit-shapes'
     - source_branch: 'main'
-    - navigation.sections
     - toc.follow
     - navigation.top
     - content.code.copy
