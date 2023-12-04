@@ -32,6 +32,7 @@ dev = [
     "mkdocs",
     "mkdocs-material",
     "mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@example-directory",
+    "imageio",
     "mkdocs-gen-files",
     "mkdocs-literate-nav",
     "mkdocstrings-python",
