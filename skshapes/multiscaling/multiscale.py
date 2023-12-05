@@ -21,7 +21,72 @@ from ..decimation import Decimation
 
 
 class Multiscale:
-    """Generic class for multiscale objects."""
+    """Multiscale representation of a shape.
+
+    This class allows to represent a shape at different scales. The shape is
+    represented at the origin scale and at different coarser scales. The
+    coarser scales can be defined by three different parameters:
+
+    - the ratio of the number of points between the origin scale and the
+        coarser scale,
+    - the number of points of the coarser scale,
+    - the scale of the coarser scale.
+
+    If landmarks are defined on the origin shape, they are propagated to the
+    coarser scales.
+
+    New scales can be added to the multiscale representation by calling the
+    [`append`][skshapes.multiscaling.Multiscale.append] method. The new scale
+    is defined by one of the three parameters described above.
+
+    Existing scales can be retrieved by calling the
+    [`at`][skshapes.multiscaling.Multiscale.at] # noqa E501 method. The scale
+    is defined by one of the three parameters described above.
+
+    Signals defined at any scale can be propagated to the other scales. The
+    propagation is performed in both directions from the origin to the coarser
+    scales and from the origin to the finer scales. The propagation is done by
+    interpolation or smoothing depending on the policies defined by the
+    `fine_to_coarse_policy` and `coarse_to_fine_policy` parameters of the
+    [`propagate`][skshapes.multiscaling.Multiscale.propagate] method.
+
+    Most of the methods of this class can be called with one of the `ratio`,
+    `n_points` or `scale` parameters.
+
+    Parameters
+    ----------
+    shape
+        The shape at the origin scale.
+    ratios
+        The ratios of the coarser scales.
+    n_points
+        The number of points of the coarser scales.
+    scales
+        The scales of the coarser scales.
+    decimation_module
+        The decimation module to use to compute the coarser scales. If not
+        provided, it is defined automatically.
+
+    Raises
+    ------
+    NotImplementedError
+        If the shape is not a triangle mesh.
+    ValueError
+        If none of the `ratios`, `n_points` or `scales` parameters are
+        provided or if more than one of these parameters are provided.
+
+    Examples
+    --------
+    ```python
+    import skshapes as sks
+
+    # load a shape
+    shape = sks.Sphere()
+    ratios = [0.5, 0.25, 0.125]
+    multiscale = sks.Multiscale(shape=shape, ratios=ratios)
+    ```
+
+    """
 
     @one_and_only_one(parameters=["ratios", "n_points", "scales"])
     @typecheck

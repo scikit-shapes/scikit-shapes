@@ -49,13 +49,16 @@ def convert_inputs(func, parameters=None):
 
     It converts the inputs arrays to the right type (torch.Tensor) and
     convert the dtype of the tensor to the right one (float32 for float,
-    int64 for int), before calling the function.
+    int64 for int), before calling the function. It allows to use the
+    function with numpy arrays or torch tensors, but keep in mind that
+    scikit-shapes will always convert the inputs to torch tensors.
 
     If used in combination with the typecheck decorator, it must be called
     first :
     ```python
-    import skshapes as sks
     import numpy as np
+    import skshapes as sks
+    from skshapes.types import NumericalTensor
 
     @sks.convert_inputs
     @sks.typecheck
