@@ -9,12 +9,11 @@ regularized by a Riemannian metric on the shape space.
 import torch
 from .basemodel import BaseModel
 from ..types import (
-    typecheck,
     Float3dTensor,
     polydata_type,
-    convert_inputs,
     MorphingOutput,
 )
+from ..input_validation import typecheck, convert_inputs
 from .metrics import Metric, ElasticMetric
 from typing import Optional
 

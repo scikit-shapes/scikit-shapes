@@ -1,6 +1,6 @@
 """Constant kernel class."""
 
-from ..types import typecheck
+from ..input_validation import typecheck
 
 
 class Constant1Kernel:

@@ -2,7 +2,8 @@
 
 from pykeops.torch import Vi, Vj
 import torch
-from ..types import typecheck, FloatScalar, polydata_type
+from ..types import FloatScalar, polydata_type
+from ..input_validation import typecheck
 from .baseloss import BaseLoss
 
 

@@ -35,15 +35,41 @@ def test_decimation_basic():
         decimated_sphere.triangles, decimated_sphere2.triangles
     )
 
+    target_reduction = 0.9
+
     # test with target_reduction
-    decimation = sks.Decimation(target_reduction=0.9)
+    decimation = sks.Decimation(target_reduction=target_reduction)
     decimated_sphere = decimation.fit_transform(sphere)
-    decimated_sphere2 = sphere.decimate(target_reduction=0.9)
+    decimated_sphere2 = sphere.decimate(target_reduction=target_reduction)
 
     assert torch.allclose(decimated_sphere.points, decimated_sphere2.points)
     assert torch.allclose(
         decimated_sphere.triangles, decimated_sphere2.triangles
     )
+
+    # test with ratio (= 1 - target_reduction)
+    decimated_sphere3 = decimation.transform(
+        sphere, ratio=1 - target_reduction
+    )
+    assert torch.allclose(
+        decimated_sphere3.points, decimated_sphere2.points
+    )  # same points
+
+    # Initialisation with ratio
+    decimation = sks.Decimation(ratio=1 - target_reduction)
+    decimated_sphere4 = decimation.fit_transform(sphere)
+    assert torch.allclose(
+        decimated_sphere4.points, decimated_sphere2.points
+    )  # same points
+
+    # Assert that the number of points is different when we use a different
+    # ratio in the transform method
+    decimated_sphere5 = decimation.transform(
+        sphere,
+        ratio=2 * (1 - target_reduction),
+    )
+
+    assert decimated_sphere5.n_points != decimated_sphere4.n_points
 
     # Some errors
     mesh = sks.Sphere()

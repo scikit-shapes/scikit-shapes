@@ -4,6 +4,21 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 
+def test_mesh_convolution():
+    points = torch.rand(10, 3)
+    pc = sks.PolyData(points=points)
+    try:
+        pc.mesh_convolution()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "mesh_convolution should raise a ValueError"
+            + " if the mesh is not a triangle mesh or a"
+            + " wireframe PolyData."
+        )
+
+
 def test_squared_distance():
     N, M = 2000, 1000
 

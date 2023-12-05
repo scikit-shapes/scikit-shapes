@@ -8,7 +8,6 @@ from typing import NamedTuple
 
 from ..utils import diagonal_ranges
 from ..types import (
-    typecheck,
     float_dtype,
     Points,
     Triangles,
@@ -17,6 +16,7 @@ from ..types import (
     Float2dTensor,
     FloatTensor,
 )
+from ..input_validation import typecheck
 from typing import Optional
 from .normals import smooth_normals, tangent_vectors
 from .structure_tensors import structure_tensors

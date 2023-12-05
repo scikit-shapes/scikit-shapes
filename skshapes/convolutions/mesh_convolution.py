@@ -1,9 +1,7 @@
 """Mesh convolution kernel."""
 
-from ..types import (
-    typecheck,
-    float_dtype,
-)
+from ..types import float_dtype
+from ..input_validation import typecheck
 
 import torch
 from .linear_operator import LinearOperator
@@ -21,11 +19,21 @@ def _mesh_convolution(
     weight_by_length
         If True, the convolution kernel is weighted by the length of the edges.
 
+    Raises
+    ------
+    ValueError
+        If the mesh is not a triangle mesh or a wireframe PolyData.
+
     Returns
     -------
     LinearOperator
         A (N, N) convolution kernel.
     """
+    if self.n_edges == 0:
+        raise ValueError(
+            "Mesh convolution is only defined on triangle meshes or "
+            "wireframe PolyData."
+        )
     n_edges = self.n_edges
     n_points = self.n_points
     edges = self.edges

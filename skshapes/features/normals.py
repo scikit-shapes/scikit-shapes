@@ -5,7 +5,8 @@ from pykeops.torch import LazyTensor
 import torch.nn.functional as F
 
 from ..utils import diagonal_ranges
-from ..types import typecheck, Points, FloatTensor, Triangles, Number
+from ..types import Points, FloatTensor, Triangles, Number
+from ..input_validation import typecheck
 from typing import Optional
 
 

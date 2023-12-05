@@ -2,7 +2,8 @@
 
 import vedo
 import torch
-from ..types import typecheck, polydata_type
+from ..types import polydata_type
+from ..input_validation import typecheck
 from typing import Union
 
 

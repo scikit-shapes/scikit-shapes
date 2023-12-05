@@ -1,14 +1,11 @@
 site_name: Scikit-Shapes
 repo_url: https://github.com/scikit-shapes/scikit-shapes
 
-
-
 theme:
   name: material
   features:
     - source_repository: 'https://github.com/scikit-shapes/scikit-shapes'
     - source_branch: 'main'
-    - navigation.sections
     - toc.follow
     - navigation.top
     - content.code.copy
@@ -29,27 +26,30 @@ theme:
 
 nav:
   - Home: index.md
-  - Getting Started:
-    - Installation: installation.md
-    - Tutorial: tutorial.md
-    - Examples: generated/gallery
-    - PolyData: getstarted/polydata.md
-    - Registration: getstarted/registration.md
-    - Losses: getstarted/loss.md
-    - Deformation models: getstarted/deformations.md
+  - Installation: installation.md
+  - User Guide:
+    - Data Structures:
+      - PolyData: user_guide/data_structures/polydata.md
+      - Images: user_guide/data_structures/images.md
+      - MultiScale: user_guide/data_structures/multiscale.md
+    - Registration:
+      - Registration: user_guide/registration/registration.md
+      - Loss functions: user_guide/registration/loss.md
+      - Deformation models: user_guide/registration/deformations.md
+  - Examples: generated/gallery
   - API Reference:
     - skshapes: reference/
-  - About:
-    - About: about.md
-    - Contributing: contributing.md
-    - License: license.md
+  - Contributing: contributing.md
+  - About: about.md
+  - License: license.md
 
 plugins:
   - search
   - gallery:
-        examples_dirs: docs/examples          # path to your example scripts
+        examples_dirs: examples          # path to your example scripts
         gallery_dirs: docs/generated/gallery
         ignore_pattern: utils*
+        conf_script: docs/gallery_conf.py
   - gen-files:
       scripts:
       - docs/gen_ref_nav.py

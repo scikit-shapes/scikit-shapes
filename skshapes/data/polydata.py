@@ -9,8 +9,6 @@ import numpy as np
 import functools
 
 from ..types import (
-    convert_inputs,
-    typecheck,
     float_dtype,
     int_dtype,
     Number,
@@ -26,6 +24,7 @@ from ..types import (
     polydata_type,
     IntSequence,
 )
+from ..input_validation import typecheck, convert_inputs
 from typing import Optional, Any, Union, Literal
 from warnings import warn
 from .utils import DataAttributes
@@ -89,7 +88,7 @@ class PolyData(polydata_type):
         # extract the points, edges and triangles from it
         if type(points) in [vedo.Mesh, pyvista.PolyData, str]:
             if type(points) is vedo.Mesh:
-                mesh = pyvista.PolyData(points.polydata())
+                mesh = pyvista.PolyData(points.dataset)
             elif type(points) is str:
                 mesh = pyvista.read(points)
             elif type(points) is PyvistaPolyData:

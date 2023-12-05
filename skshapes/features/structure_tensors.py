@@ -4,7 +4,8 @@
 from pykeops.torch import LazyTensor
 
 # from ..utils import diagonal_ranges
-from ..types import typecheck, Points, Number, FloatTensor
+from ..types import Points, Number, FloatTensor
+from ..input_validation import typecheck
 
 
 @typecheck

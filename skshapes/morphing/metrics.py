@@ -1,12 +1,12 @@
 """Metrics used in the ElasticMetric class."""
 
 from ..types import (
-    typecheck,
     FloatScalar,
     Edges,
     Triangles,
     Float3dTensor,
 )
+from ..input_validation import typecheck
 from typing import Optional
 import torch
 

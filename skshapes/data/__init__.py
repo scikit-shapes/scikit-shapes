@@ -1,7 +1,8 @@
 from .polydata import PolyData
 from .image import Image
 from typing import Union
-from ..types import typecheck, polydata_type
+from ..types import polydata_type
+from ..input_validation import typecheck
 from math import pi
 import pyvista
 import torch

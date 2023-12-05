@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 from ..types import (
-    typecheck,
     Number,
     FloatScalar,
     float_dtype,
     shape_type,
 )
+from ..input_validation import typecheck
 from typing import Any, Optional
 import torch
 

@@ -3,7 +3,8 @@
 import numpy as np
 from ..data import PolyData
 import torch
-from ..types import typecheck, float_dtype, int_dtype
+from ..types import float_dtype, int_dtype, Number
+from ..input_validation import typecheck, one_and_only_one, no_more_than_one
 from typing import Optional
 import fast_simplification
 
@@ -37,12 +38,14 @@ class Decimation:
     ```
     """
 
+    @one_and_only_one(parameters=["target_reduction", "n_points", "ratio"])
     @typecheck
     def __init__(
         self,
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[int] = None,
+        ratio: Optional[Number] = None,
     ) -> None:
         """Class constructor.
 
@@ -62,16 +65,6 @@ class Decimation:
             ValueError: If both target_reduction and n_points are provided or
             if none of them is provided.
         """
-        if target_reduction is None and n_points is None:
-            raise ValueError(
-                "Either target_reduction or n_points must be provided."
-            )
-
-        if target_reduction is not None and n_points is not None:
-            raise ValueError(
-                "Only one of target_reduction or n_points must be provided."
-            )
-
         if target_reduction is not None:
             assert (
                 target_reduction > 0 and target_reduction < 1
@@ -80,6 +73,10 @@ class Decimation:
 
         if n_points is not None:
             self.n_points = n_points
+
+        if ratio is not None:
+            assert ratio > 0 and ratio < 1, "The ratio must be between 0 and 1"
+            self.target_reduction = 1 - ratio
 
     @typecheck
     def fit(self, mesh: PolyData) -> None:
@@ -97,11 +94,19 @@ class Decimation:
 
         """
         if hasattr(self, "n_points"):
+            if not (1 <= self.n_points <= mesh.n_points):
+                raise ValueError(
+                    "The n_points must be positive and lower"
+                    + " than the number of points of the mesh"
+                    + " to decimate"
+                )
+
             self.target_reduction = 1 - self.n_points / mesh.n_points
 
-        assert hasattr(
-            mesh, "triangles"
-        ), "Quadric decimation only works for triangular meshes"
+        if not mesh.is_triangle_mesh():
+            raise ValueError(
+                "Quadric decimation only works for triangular" + " meshes"
+            )
 
         points = mesh.points.clone().cpu().numpy().astype(np.float32)
         triangles = mesh.triangles.clone().cpu().numpy().astype(np.int64)
@@ -127,9 +132,15 @@ class Decimation:
         self.ref_mesh_ = mesh
         self.actual_reduction_ = actual_reduction
 
+    @no_more_than_one(parameters=["target_reduction", "n_points", "ratio"])
     @typecheck
     def transform(
-        self, mesh: PolyData, target_reduction: Optional[float] = 1
+        self,
+        mesh: PolyData,
+        *,
+        target_reduction: Optional[float] = None,
+        n_points: Optional[int] = None,
+        ratio: Optional[float] = None,
     ) -> PolyData:
         """Transform a mesh using the decimation algorithm.
 
@@ -145,6 +156,11 @@ class Decimation:
             The mesh to transform.
         target_reduction
             The target reduction to apply to the mesh.
+        n_points
+            The targeted number of points.
+        ratio
+            The ratio of the number of points of the mesh to decimate over the
+            number of points of the mesh used to fit the decimation object.
 
         Raises
         ------
@@ -158,12 +174,33 @@ class Decimation:
         PolyData
             The decimated mesh.
         """
+        if target_reduction is None and n_points is None and ratio is None:
+            # default, target_reduction is the same as in __init__
+            target_reduction = self.target_reduction
+
         if self.collapses_ is None:
             raise ValueError("The decimation object has not been fitted yet.")
 
-        assert (
-            0 <= target_reduction <= 1
-        ), "The target reduction must be between 0 and 1"
+        if target_reduction is not None:
+            if not (0 <= target_reduction <= 1):
+                raise ValueError(
+                    "The target reduction must be between 0 and 1"
+                )
+        elif ratio is not None:
+            if not (0 <= ratio <= 1):
+                raise ValueError("The ratio must be between 0 and 1")
+            target_reduction = 1 - ratio
+
+        elif n_points is not None:
+            if not (1 <= n_points <= self.ref_mesh.n_points):
+                raise ValueError(
+                    "The n_points must be positive and lower"
+                    + " than the number of points of the mesh"
+                    + " to decimate"
+                )
+
+            target_reduction = 1 - n_points / mesh.n_points
+
         if target_reduction > self.target_reduction:
             target_reduction = self.target_reduction
 

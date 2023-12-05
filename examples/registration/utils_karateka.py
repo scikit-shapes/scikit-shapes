@@ -9,13 +9,18 @@ sqrt2 = sqrt(2)
 pyvista.OFF_SCREEN = True
 
 
-cpos1 = [(4.707106828689575, 4.79289323091507, 28.44947380182544),
- (4.707106828689575, 4.79289323091507, 0.0),
- (0.0, 1.0, 0.0)]
+cpos1 = [
+    (4.707106828689575, 4.79289323091507, 28.44947380182544),
+    (4.707106828689575, 4.79289323091507, 0.0),
+    (0.0, 1.0, 0.0),
+]
 
-cpos2 = [(3.2928932309150696, 4.792893171310425, 28.44947390345415),
- (3.2928932309150696, 4.792893171310425, 0.0),
- (0.0, 1.0, 0.0)]
+cpos2 = [
+    (3.2928932309150696, 4.792893171310425, 28.44947390345415),
+    (3.2928932309150696, 4.792893171310425, 0.0),
+    (0.0, 1.0, 0.0),
+]
+
 
 def load_data():
     edges = torch.tensor(
@@ -96,12 +101,12 @@ def plot_karatekas():
     plt.axis("off")
     plt.show()
 
+
 def plot_extrinsic_deformation(
-        source,
-        target,
-        registration,
+    source,
+    target,
+    registration,
 ):
-    
     morphed_shape = registration.transform(source=source)
     control_points = source.control_points
     morphed_cp = registration.transform(source=control_points)
@@ -110,11 +115,11 @@ def plot_extrinsic_deformation(
     regularization = registration.regularization_
     model = registration.model
     loss = registration.loss
-    
+
     initial_loss = loss(source, target)
     final_loss = loss(morphed_shape, target)
 
-    plotter = pyvista.Plotter(shape=(1, 2), border=True)
+    plotter = pyvista.Plotter(shape=(1, 2), border=False)
 
     plotter.subplot(0, 0)
     plotter.add_mesh(
@@ -124,7 +129,11 @@ def plot_extrinsic_deformation(
         control_points.to_pyvista(), show_edges=True, line_width=2, color="r"
     )
     plotter.add_mesh(
-        target.to_pyvista(), show_edges=True, line_width=5, color="b", opacity=0.2
+        target.to_pyvista(),
+        show_edges=True,
+        line_width=5,
+        color="b",
+        opacity=0.2,
     )
     plotter.camera_position = cpos1
     plotter.add_text(f"Initial loss: {initial_loss:.2e}")
@@ -137,33 +146,38 @@ def plot_extrinsic_deformation(
         morphed_cp.to_pyvista(), show_edges=True, line_width=2, color="r"
     )
     plotter.add_mesh(
-        target.to_pyvista(), show_edges=True, line_width=5, color="b", opacity=0.2
+        target.to_pyvista(),
+        show_edges=True,
+        line_width=5,
+        color="b",
+        opacity=0.2,
     )
     plotter.camera_position = cpos2
 
-    plotter.add_text(f"Final loss: {final_loss:.2e}\nRegularization: {regularization:.2e}")
+    plotter.add_text(
+        f"Final loss: {final_loss:.2e}\nRegularization: {regularization:.2e}"
+    )
 
     plotter.show()
     plt.imshow(plotter.image)
     plt.axis("off")
     plt.show()
 
+
 def plot_intrinsic_deformation(
-        source,
-        target,
-        registration,
+    source,
+    target,
+    registration,
 ):
-    
     morphed_shape = registration.transform(source=source)
     path = registration.path_
-
 
     velocities = registration.parameter_
     regularization = registration.regularization_
     model = registration.model
     loss = registration.loss
     n_steps = model.n_steps
-    
+
     initial_loss = loss(source, target)
     final_loss = loss(morphed_shape, target)
 
@@ -172,8 +186,8 @@ def plot_intrinsic_deformation(
         source[f"v_{i}"] = v
 
     source_pv = source.to_pyvista()
-    
-    plotter = pyvista.Plotter(shape=(1, 2), border=True)
+
+    plotter = pyvista.Plotter(shape=(1, 2), border=False)
 
     plotter.subplot(0, 0)
     plotter.camera_position = cpos1
@@ -181,33 +195,46 @@ def plot_intrinsic_deformation(
         source.to_pyvista(), show_edges=True, line_width=5, color="k"
     )
     plotter.add_mesh(
-        target.to_pyvista(), show_edges=True, line_width=5, color="b", opacity=0.2
+        target.to_pyvista(),
+        show_edges=True,
+        line_width=5,
+        color="b",
+        opacity=0.2,
     )
     plotter.add_text(f"Initial loss: {initial_loss:.2e}")
 
     plotter.subplot(0, 1)
     plotter.camera_position = cpos2
     plotter.add_mesh(
-        target.to_pyvista(), show_edges=True, line_width=5, color="b", opacity=0.2
+        target.to_pyvista(),
+        show_edges=True,
+        line_width=5,
+        color="b",
+        opacity=0.2,
     )
     plotter.add_mesh(
-        source.to_pyvista(), show_edges=True, line_width=5, color="k", opacity=0.2
+        source.to_pyvista(),
+        show_edges=True,
+        line_width=5,
+        color="k",
+        opacity=0.2,
     )
     plotter.add_mesh(
         morphed_shape.to_pyvista(), show_edges=True, line_width=5, color="k"
     )
-    
-    for i in range(n_steps):
 
+    for i in range(n_steps):
         mesh = path[i].to_pyvista()
-        mesh["v"] = np.concatenate([source_pv[f"v_{i}"], np.zeros(shape=(source.n_points, 1))], axis=1)
+        mesh["v"] = np.concatenate(
+            [source_pv[f"v_{i}"], np.zeros(shape=(source.n_points, 1))], axis=1
+        )
         mesh.active_vectors_name = "v"
         arrows = mesh.arrows
 
-        plotter.add_mesh(
-            arrows, color="r"
-        )
-    plotter.add_text(f"Final loss: {final_loss:.2e}\nRegularization: {regularization:.2e}")
+        plotter.add_mesh(arrows, color="r")
+    plotter.add_text(
+        f"Final loss: {final_loss:.2e}\nRegularization: {regularization:.2e}"
+    )
     plotter.show()
     plt.imshow(plotter.image)
     plt.axis("off")

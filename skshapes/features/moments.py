@@ -2,7 +2,6 @@
 
 import torch
 from ..types import (
-    typecheck,
     FloatTensor,
     DoubleTensor,
     Float2dTensor,
@@ -10,6 +9,7 @@ from ..types import (
     Number,
     Union,
 )
+from ..input_validation import typecheck
 from typing import Literal, Optional
 
 
