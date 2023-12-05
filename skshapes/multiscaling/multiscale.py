@@ -98,8 +98,6 @@ class Multiscale:
         scales: Optional[NumberSequence] = None,
         decimation_module=None,
     ) -> None:
-        min_n_points = 1
-
         self.shape = shape
 
         if ratios is not None:
@@ -110,6 +108,7 @@ class Multiscale:
             raise NotImplementedError("Scales are not implemented yet")
 
         if shape.is_triangle_mesh():
+            min_n_points = 1
             decimation_module = Decimation(n_points=min_n_points)
 
         else:
@@ -161,8 +160,11 @@ class Multiscale:
             pass
         else:
             new_shape = self._decimation_module.transform(
-                self.shape, ratio=ratio
+                self.shape,
+                ratio=ratio,
             )
+            # TODO : new_shape, indice_mapping =
+            # ...(..., return_indice_mapping=True)
             self.shapes[ratio] = new_shape
             self.mappings_from_origin[
                 ratio

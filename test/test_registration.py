@@ -7,9 +7,9 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 list_models = [
-    sks.RigidMotion(),
-    sks.ExtrinsicDeformation(),
-    sks.IntrinsicDeformation(),
+    sks.RigidMotion,
+    sks.ExtrinsicDeformation,
+    sks.IntrinsicDeformation,
 ]
 list_losses = [
     sks.L2Loss(),
@@ -29,6 +29,7 @@ list_optimizers = [
 
 @given(
     model=st.sampled_from(list_models),
+    n_steps=st.integers(min_value=1, max_value=3),
     loss=st.sampled_from(list_losses),
     optimizer=st.sampled_from(list_optimizers),
     n_iter=st.integers(min_value=1, max_value=3),
@@ -41,6 +42,7 @@ list_optimizers = [
 @settings(deadline=None, max_examples=5)
 def test_registration_hypothesis(
     model,
+    n_steps,
     loss,
     optimizer,
     n_iter,
@@ -70,6 +72,7 @@ def test_registration_hypothesis(
     assert isinstance(target, sks.PolyData)
 
     # Initialize the registration object
+    model = model(n_steps=n_steps)
     r = sks.Registration(
         model=model,
         loss=loss,

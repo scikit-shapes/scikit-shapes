@@ -5,7 +5,7 @@ from ..types import (
     shape_type,
     FloatTensor,
 )
-from ..types import typecheck, convert_inputs
+from ..input_validation import typecheck, convert_inputs
 from typing import Union, Optional, get_args
 from ..loss import Loss
 from ..morphing import Model
