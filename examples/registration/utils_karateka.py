@@ -1,6 +1,5 @@
 import skshapes as sks
 import pyvista
-import matplotlib.pyplot as plt
 import torch
 import numpy as np
 from math import sqrt
@@ -97,9 +96,6 @@ def plot_karatekas():
     plotter.add_text("Target")
 
     plotter.show()
-    plt.imshow(plotter.image)
-    plt.axis("off")
-    plt.show()
 
 
 def plot_extrinsic_deformation(
@@ -159,9 +155,6 @@ def plot_extrinsic_deformation(
     )
 
     plotter.show()
-    plt.imshow(plotter.image)
-    plt.axis("off")
-    plt.show()
 
 
 def plot_intrinsic_deformation(
@@ -236,6 +229,3 @@ def plot_intrinsic_deformation(
         f"Final loss: {final_loss:.2e}\nRegularization: {regularization:.2e}"
     )
     plotter.show()
-    plt.imshow(plotter.image)
-    plt.axis("off")
-    plt.show()
