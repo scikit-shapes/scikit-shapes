@@ -4,6 +4,19 @@ import torch
 import pytest
 
 
+def mesh_decimation_n_points_strict():
+    import pyvista.examples
+
+    mesh = sks.PolyData(pyvista.examples.download_louis_louvre())
+    target_n_points = 50
+    d = sks.Decimation(n_points=1)
+    decimated_mesh_notstrict = d.transform(mesh=mesh, n_points=50)
+    decimated_mesh_strict = d.transform(mesh=mesh, n_points_strict=50)
+
+    assert decimated_mesh_notstrict.n_points != target_n_points
+    assert decimated_mesh_strict.n_points == target_n_points
+
+
 def test_decimation_basic():
     """Assert that the if we fit_transform the decimator from sks on a mesh,
     and then transform a copy of the mesh the result is the same"""

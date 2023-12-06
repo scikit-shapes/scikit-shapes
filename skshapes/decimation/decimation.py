@@ -38,7 +38,9 @@ class Decimation:
     ```
     """
 
-    @one_and_only_one(parameters=["target_reduction", "n_points", "ratio"])
+    @one_and_only_one(
+        parameters=["target_reduction", "n_points", "ratio", "n_points_strict"]
+    )
     @typecheck
     def __init__(
         self,
@@ -132,7 +134,14 @@ class Decimation:
         self.ref_mesh_ = mesh
         self.actual_reduction_ = actual_reduction
 
-    @no_more_than_one(parameters=["target_reduction", "n_points", "ratio"])
+    @no_more_than_one(
+        parameters=[
+            "target_reduction",
+            "n_points",
+            "ratio",
+            "n_points_strict",
+        ]
+    )
     @typecheck
     def transform(
         self,
@@ -140,6 +149,7 @@ class Decimation:
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[int] = None,
+        n_points_strict: Optional[int] = None,
         ratio: Optional[float] = None,
     ) -> PolyData:
         """Transform a mesh using the decimation algorithm.
@@ -157,7 +167,14 @@ class Decimation:
         target_reduction
             The target reduction to apply to the mesh.
         n_points
-            The targeted number of points.
+            The targeted number of points. Fast but it is not guaranteed that
+            the decimation algorithm will exactly reach this number of points.
+            If you want to be sure that the decimation algorithm will reach
+            this number of points, use n_points_strict instead.
+        n_points_strict
+            The targeted number of points. This parameter can lead to a slower
+            decimation algorithm because the algorithm will try to reach this
+            number of points exactly, and this may require many iterations.
         ratio
             The ratio of the number of points of the mesh to decimate over the
             number of points of the mesh used to fit the decimation object.
@@ -174,6 +191,36 @@ class Decimation:
         PolyData
             The decimated mesh.
         """
+        if n_points_strict is not None:
+            # We want to reach the target number of points exactly
+            n_points = n_points_strict
+            done = False
+            max_iter = 10
+            i = 0
+            while not done and i < max_iter:
+                coarse_mesh = self.transform(mesh=mesh, n_points=n_points)
+                if coarse_mesh.n_points == n_points_strict:
+                    # We reached the target number of points
+                    done = True
+                else:
+                    # We did not reach the target number of points
+                    # We increase the target number of points
+                    # before the next iteration
+                    n_points += n_points_strict - coarse_mesh.n_points
+                i += 1
+
+            if not done:
+                # We did not reach the target number of points after max_iter
+                # iterations
+                raise ValueError(
+                    "The decimation algorithm did not reach the target number"
+                    + " of points after "
+                    + str(max_iter)
+                    + " iterations."
+                )
+
+            return coarse_mesh
+
         if target_reduction is None and n_points is None and ratio is None:
             # default, target_reduction is the same as in __init__
             target_reduction = self.target_reduction
