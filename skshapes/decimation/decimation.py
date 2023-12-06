@@ -186,10 +186,13 @@ class Decimation:
                 raise ValueError(
                     "The target reduction must be between 0 and 1"
                 )
+            ratio = 1 - target_reduction
+            n_target_points = int(ratio * self.ref_mesh.n_points)
+
         elif ratio is not None:
             if not (0 <= ratio <= 1):
                 raise ValueError("The ratio must be between 0 and 1")
-            target_reduction = 1 - ratio
+            n_target_points = int(ratio * self.ref_mesh.n_points)
 
         elif n_points is not None:
             if not (1 <= n_points <= self.ref_mesh.n_points):
@@ -198,11 +201,11 @@ class Decimation:
                     + " than the number of points of the mesh"
                     + " to decimate"
                 )
-
-            target_reduction = 1 - n_points / mesh.n_points
-
-        if target_reduction > self.target_reduction:
-            target_reduction = self.target_reduction
+            n_target_points = n_points
+        else:
+            # No target reduction, no n_points, no ratio
+            # We use the same target reduction as in __init__
+            n_target_points = self.ref_mesh.n_points - len(self.collapses_)
 
         if mesh.n_points != self.ref_mesh.n_points:
             raise ValueError(
@@ -225,8 +228,7 @@ class Decimation:
         triangles = mesh.triangles.clone().cpu().numpy().astype(np.int64)
 
         # Compute the number of collapses to apply
-        rate = target_reduction / self.target_reduction
-        n_collapses = int(rate * len(self.collapses))
+        n_collapses = self.ref_mesh.n_points - n_target_points
 
         # Apply the collapses
         (
