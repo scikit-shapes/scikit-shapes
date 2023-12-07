@@ -3,6 +3,19 @@ import pyvista
 import torch
 import pytest
 
+def test_indice_mapping_interface():
+
+    sphere = sks.Sphere()
+    d1 = sks.Decimation(n_points=10)
+    d1.fit(sphere)
+    newsphere1, im1 = d1.transform(sphere, return_indice_mapping=True)
+
+    d2 = sks.Decimation(n_points=10)
+    newsphere2, im2 = d2.fit_transform(sphere, return_indice_mapping=True)
+
+    assert torch.allclose(newsphere1.points, newsphere2.points)
+    assert torch.allclose(im1, im2)
+
 
 def test_mesh_decimation_n_points_strict():
     import pyvista.examples

@@ -159,16 +159,14 @@ class Multiscale:
             # ratio already exists, do nothing
             pass
         else:
-            new_shape = self._decimation_module.transform(
+            new_shape, indice_mapping = self._decimation_module.transform(
                 self.shape,
                 ratio=ratio,
+                return_indice_mapping=True,
             )
-            # TODO : new_shape, indice_mapping =
-            # ...(..., return_indice_mapping=True)
+
             self.shapes[ratio] = new_shape
-            self.mappings_from_origin[
-                ratio
-            ] = self._decimation_module.indice_mapping
+            self.mappings_from_origin[ratio] = indice_mapping
 
     @one_and_only_one(parameters=["ratio", "n_points", "scale"])
     @typecheck

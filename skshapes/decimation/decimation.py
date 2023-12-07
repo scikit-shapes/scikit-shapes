@@ -3,9 +3,9 @@
 import numpy as np
 from ..data import PolyData
 import torch
-from ..types import float_dtype, int_dtype, Number
+from ..types import float_dtype, int_dtype, Number, Int1dTensor, polydata_type
 from ..input_validation import typecheck, one_and_only_one, no_more_than_one
-from typing import Optional
+from typing import Optional, Union
 import fast_simplification
 
 
@@ -38,15 +38,14 @@ class Decimation:
     ```
     """
 
-    @one_and_only_one(
-        parameters=["target_reduction", "n_points", "ratio", "n_points_strict"]
-    )
+    @one_and_only_one(parameters=["target_reduction", "n_points", "ratio"])
     @typecheck
     def __init__(
         self,
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[int] = None,
+        n_points_strict: Optional[int] = None,
         ratio: Optional[Number] = None,
     ) -> None:
         """Class constructor.
@@ -81,7 +80,7 @@ class Decimation:
             self.target_reduction = 1 - ratio
 
     @typecheck
-    def fit(self, mesh: PolyData) -> None:
+    def fit(self, mesh: polydata_type) -> None:
         """Fit the decimation algorithm to a mesh.
 
         Parameters
@@ -145,13 +144,14 @@ class Decimation:
     @typecheck
     def transform(
         self,
-        mesh: PolyData,
+        mesh: polydata_type,
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[int] = None,
         n_points_strict: Optional[int] = None,
         ratio: Optional[float] = None,
-    ) -> PolyData:
+        return_indice_mapping: bool = False,
+    ) -> Union[polydata_type, tuple[polydata_type, Int1dTensor]]:
         """Transform a mesh using the decimation algorithm.
 
         The decimation must have been fitted to a mesh before calling this
@@ -178,6 +178,9 @@ class Decimation:
         ratio
             The ratio of the number of points of the mesh to decimate over the
             number of points of the mesh used to fit the decimation object.
+        return_indice_mapping
+            If True, the indice mapping is returned as well as the decimated
+            mesh.
 
         Raises
         ------
@@ -288,8 +291,6 @@ class Decimation:
             collapses=self.collapses[0:n_collapses],
         )
 
-        self.indice_mapping_ = torch.Tensor(indice_mapping).to(int_dtype)
-
         # If there are landmarks on the mesh, we compute the coordinates of the
         # landmarks in the decimated mesh
         if mesh.landmarks is not None:
@@ -314,18 +315,45 @@ class Decimation:
         else:
             landmarks = None
 
-        return PolyData(
+        # Convert the indice_mapping numpy array to torch tensor
+        indice_mapping = torch.Tensor(indice_mapping).to(int_dtype)
+
+        decimated_mesh = PolyData(
             torch.from_numpy(points).to(float_dtype),
             triangles=torch.from_numpy(triangles).to(int_dtype),
             landmarks=landmarks,
             device=device,
         )
 
+        if not return_indice_mapping:
+            return decimated_mesh
+        else:
+            return decimated_mesh, indice_mapping
+
+    @no_more_than_one(
+        parameters=["target_reduction", "n_points", "ratio", "n_points_strict"]
+    )
     @typecheck
-    def fit_transform(self, mesh: PolyData) -> PolyData:
+    def fit_transform(
+        self,
+        mesh: polydata_type,
+        *,
+        target_reduction: Optional[float] = None,
+        n_points: Optional[int] = None,
+        n_points_strict: Optional[int] = None,
+        ratio: Optional[float] = None,
+        return_indice_mapping: bool = False,
+    ) -> Union[polydata_type, tuple[polydata_type, Int1dTensor]]:
         """Decimate and return decimated mesh."""
         self.fit(mesh)
-        return self.transform(mesh)
+        kwargs = {
+            "target_reduction": target_reduction,
+            "n_points": n_points,
+            "n_points_strict": n_points_strict,
+            "ratio": ratio,
+            "return_indice_mapping": return_indice_mapping,
+        }
+        return self.transform(mesh, **kwargs)
 
     @typecheck
     @property
@@ -333,15 +361,6 @@ class Decimation:
         """Returns the collapses of the decimation algorithm."""
         if hasattr(self, "collapses_"):
             return self.collapses_
-        else:
-            raise ValueError("The decimation object has not been fitted yet.")
-
-    @typecheck
-    @property
-    def indice_mapping(self):
-        """Returns the indice mapping of the decimation algorithm."""
-        if hasattr(self, "indice_mapping_"):
-            return self.indice_mapping_
         else:
             raise ValueError("The decimation object has not been fitted yet.")
 
