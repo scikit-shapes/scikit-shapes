@@ -7,9 +7,9 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 list_models = [
-    sks.RigidMotion(),
-    sks.KernelDeformation(),
-    sks.VectorFieldDeformation(),
+    sks.RigidMotion,
+    sks.ExtrinsicDeformation,
+    sks.IntrinsicDeformation,
 ]
 list_losses = [
     sks.L2Loss(),
@@ -29,6 +29,7 @@ list_optimizers = [
 
 @given(
     model=st.sampled_from(list_models),
+    n_steps=st.integers(min_value=1, max_value=3),
     loss=st.sampled_from(list_losses),
     optimizer=st.sampled_from(list_optimizers),
     n_iter=st.integers(min_value=1, max_value=3),
@@ -41,6 +42,7 @@ list_optimizers = [
 @settings(deadline=None, max_examples=5)
 def test_registration_hypothesis(
     model,
+    n_steps,
     loss,
     optimizer,
     n_iter,
@@ -70,6 +72,7 @@ def test_registration_hypothesis(
     assert isinstance(target, sks.PolyData)
 
     # Initialize the registration object
+    model = model(n_steps=n_steps)
     r = sks.Registration(
         model=model,
         loss=loss,
@@ -137,8 +140,8 @@ def test_registration_device():
     n_steps = 2
     models = [
         sks.RigidMotion(n_steps=n_steps),
-        sks.KernelDeformation(n_steps=n_steps),
-        sks.VectorFieldDeformation(n_steps=n_steps),
+        sks.ExtrinsicDeformation(n_steps=n_steps),
+        sks.IntrinsicDeformation(n_steps=n_steps),
     ]
     loss = sks.OptimalTransportLoss()
     optimizer = sks.LBFGS()
@@ -192,12 +195,11 @@ def test_lddmm_control_points():
     mesh1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
     mesh2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
 
+    mesh1.control_points = mesh1.bounding_grid(N=5, offset=0.25)
+
     # Define the model
-    model = sks.KernelDeformation(
-        n_steps=5,
-        kernel=sks.GaussianKernel(sigma=0.5),
-        control_points="grid",
-        n_grid=5,
+    model = sks.ExtrinsicDeformation(
+        n_steps=5, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
     )
 
     loss = sks.OptimalTransportLoss()
@@ -215,3 +217,5 @@ def test_lddmm_control_points():
     )
 
     registration.fit(source=mesh1, target=mesh2)
+
+    assert registration.parameter_.shape == mesh1.control_points.points.shape

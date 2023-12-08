@@ -1,6 +1,6 @@
 """utility functions for plotting circles"""
 
-import matplotlib.pyplot as plt
+
 import pyvista
 
 pyvista.OFF_SCREEN = True
@@ -12,10 +12,6 @@ def plot1(source, target):
     plotter.add_mesh(target.to_pyvista(), color="blue", label="target")
     plotter.add_legend(bcolor="w", face="line")
     plotter.show()
-    cpos = plotter.camera_position
-    plt.imshow(plotter.image)
-    plt.axis("off")
-    plt.show()
 
 
 def plot2(path, target):
@@ -36,6 +32,3 @@ def plot2(path, target):
         plotter.add_mesh(target.to_pyvista(), color="blue", label="target")
         plotter.camera_position = cpos
     plotter.show()
-    plt.imshow(plotter.image)
-    plt.axis("off")
-    plt.show()

@@ -3,8 +3,9 @@
 import numpy as np
 from ..data import PolyData
 import torch
-from ..types import typecheck, float_dtype, int_dtype
-from typing import Optional
+from ..types import float_dtype, int_dtype, Number, Int1dTensor, polydata_type
+from ..input_validation import typecheck, one_and_only_one, no_more_than_one
+from typing import Optional, Union
 import fast_simplification
 
 
@@ -37,12 +38,15 @@ class Decimation:
     ```
     """
 
+    @one_and_only_one(parameters=["target_reduction", "n_points", "ratio"])
     @typecheck
     def __init__(
         self,
         *,
         target_reduction: Optional[float] = None,
         n_points: Optional[int] = None,
+        n_points_strict: Optional[int] = None,
+        ratio: Optional[Number] = None,
     ) -> None:
         """Class constructor.
 
@@ -62,16 +66,6 @@ class Decimation:
             ValueError: If both target_reduction and n_points are provided or
             if none of them is provided.
         """
-        if target_reduction is None and n_points is None:
-            raise ValueError(
-                "Either target_reduction or n_points must be provided."
-            )
-
-        if target_reduction is not None and n_points is not None:
-            raise ValueError(
-                "Only one of target_reduction or n_points must be provided."
-            )
-
         if target_reduction is not None:
             assert (
                 target_reduction > 0 and target_reduction < 1
@@ -81,8 +75,12 @@ class Decimation:
         if n_points is not None:
             self.n_points = n_points
 
+        if ratio is not None:
+            assert ratio > 0 and ratio < 1, "The ratio must be between 0 and 1"
+            self.target_reduction = 1 - ratio
+
     @typecheck
-    def fit(self, mesh: PolyData) -> None:
+    def fit(self, mesh: polydata_type) -> None:
         """Fit the decimation algorithm to a mesh.
 
         Parameters
@@ -97,11 +95,19 @@ class Decimation:
 
         """
         if hasattr(self, "n_points"):
+            if not (1 <= self.n_points <= mesh.n_points):
+                raise ValueError(
+                    "The n_points must be positive and lower"
+                    + " than the number of points of the mesh"
+                    + " to decimate"
+                )
+
             self.target_reduction = 1 - self.n_points / mesh.n_points
 
-        assert hasattr(
-            mesh, "triangles"
-        ), "Quadric decimation only works for triangular meshes"
+        if not mesh.is_triangle_mesh():
+            raise ValueError(
+                "Quadric decimation only works for triangular" + " meshes"
+            )
 
         points = mesh.points.clone().cpu().numpy().astype(np.float32)
         triangles = mesh.triangles.clone().cpu().numpy().astype(np.int64)
@@ -127,10 +133,25 @@ class Decimation:
         self.ref_mesh_ = mesh
         self.actual_reduction_ = actual_reduction
 
+    @no_more_than_one(
+        parameters=[
+            "target_reduction",
+            "n_points",
+            "ratio",
+            "n_points_strict",
+        ]
+    )
     @typecheck
     def transform(
-        self, mesh: PolyData, target_reduction: Optional[float] = 1
-    ) -> PolyData:
+        self,
+        mesh: polydata_type,
+        *,
+        target_reduction: Optional[float] = None,
+        n_points: Optional[int] = None,
+        n_points_strict: Optional[int] = None,
+        ratio: Optional[float] = None,
+        return_indice_mapping: bool = False,
+    ) -> Union[polydata_type, tuple[polydata_type, Int1dTensor]]:
         """Transform a mesh using the decimation algorithm.
 
         The decimation must have been fitted to a mesh before calling this
@@ -145,6 +166,21 @@ class Decimation:
             The mesh to transform.
         target_reduction
             The target reduction to apply to the mesh.
+        n_points
+            The targeted number of points. Fast but it is not guaranteed that
+            the decimation algorithm will exactly reach this number of points.
+            If you want to be sure that the decimation algorithm will reach
+            this number of points, use n_points_strict instead.
+        n_points_strict
+            The targeted number of points. This parameter can lead to a slower
+            decimation algorithm because the algorithm will try to reach this
+            number of points exactly, and this may require many iterations.
+        ratio
+            The ratio of the number of points of the mesh to decimate over the
+            number of points of the mesh used to fit the decimation object.
+        return_indice_mapping
+            If True, the indice mapping is returned as well as the decimated
+            mesh.
 
         Raises
         ------
@@ -158,14 +194,68 @@ class Decimation:
         PolyData
             The decimated mesh.
         """
+        if n_points_strict is not None:
+            # We want to reach the target number of points exactly
+            n_points = n_points_strict
+            done = False
+            max_iter = 10
+            i = 0
+            while not done and i < max_iter:
+                coarse_mesh = self.transform(mesh=mesh, n_points=n_points)
+                if coarse_mesh.n_points == n_points_strict:
+                    # We reached the target number of points
+                    done = True
+                else:
+                    # We did not reach the target number of points
+                    # We increase the target number of points
+                    # before the next iteration
+                    n_points += n_points_strict - coarse_mesh.n_points
+                i += 1
+
+            if not done:
+                # We did not reach the target number of points after max_iter
+                # iterations
+                raise ValueError(
+                    "The decimation algorithm did not reach the target number"
+                    + " of points after "
+                    + str(max_iter)
+                    + " iterations."
+                )
+
+            return coarse_mesh
+
+        if target_reduction is None and n_points is None and ratio is None:
+            # default, target_reduction is the same as in __init__
+            target_reduction = self.target_reduction
+
         if self.collapses_ is None:
             raise ValueError("The decimation object has not been fitted yet.")
 
-        assert (
-            0 <= target_reduction <= 1
-        ), "The target reduction must be between 0 and 1"
-        if target_reduction > self.target_reduction:
-            target_reduction = self.target_reduction
+        if target_reduction is not None:
+            if not (0 <= target_reduction <= 1):
+                raise ValueError(
+                    "The target reduction must be between 0 and 1"
+                )
+            ratio = 1 - target_reduction
+            n_target_points = int(ratio * self.ref_mesh.n_points)
+
+        elif ratio is not None:
+            if not (0 <= ratio <= 1):
+                raise ValueError("The ratio must be between 0 and 1")
+            n_target_points = int(ratio * self.ref_mesh.n_points)
+
+        elif n_points is not None:
+            if not (1 <= n_points <= self.ref_mesh.n_points):
+                raise ValueError(
+                    "The n_points must be positive and lower"
+                    + " than the number of points of the mesh"
+                    + " to decimate"
+                )
+            n_target_points = n_points
+        else:
+            # No target reduction, no n_points, no ratio
+            # We use the same target reduction as in __init__
+            n_target_points = self.ref_mesh.n_points - len(self.collapses_)
 
         if mesh.n_points != self.ref_mesh.n_points:
             raise ValueError(
@@ -188,8 +278,7 @@ class Decimation:
         triangles = mesh.triangles.clone().cpu().numpy().astype(np.int64)
 
         # Compute the number of collapses to apply
-        rate = target_reduction / self.target_reduction
-        n_collapses = int(rate * len(self.collapses))
+        n_collapses = self.ref_mesh.n_points - n_target_points
 
         # Apply the collapses
         (
@@ -201,8 +290,6 @@ class Decimation:
             triangles=triangles,
             collapses=self.collapses[0:n_collapses],
         )
-
-        self.indice_mapping_ = torch.Tensor(indice_mapping).to(int_dtype)
 
         # If there are landmarks on the mesh, we compute the coordinates of the
         # landmarks in the decimated mesh
@@ -228,18 +315,45 @@ class Decimation:
         else:
             landmarks = None
 
-        return PolyData(
+        # Convert the indice_mapping numpy array to torch tensor
+        indice_mapping = torch.Tensor(indice_mapping).to(int_dtype)
+
+        decimated_mesh = PolyData(
             torch.from_numpy(points).to(float_dtype),
             triangles=torch.from_numpy(triangles).to(int_dtype),
             landmarks=landmarks,
             device=device,
         )
 
+        if not return_indice_mapping:
+            return decimated_mesh
+        else:
+            return decimated_mesh, indice_mapping
+
+    @no_more_than_one(
+        parameters=["target_reduction", "n_points", "ratio", "n_points_strict"]
+    )
     @typecheck
-    def fit_transform(self, mesh: PolyData) -> PolyData:
+    def fit_transform(
+        self,
+        mesh: polydata_type,
+        *,
+        target_reduction: Optional[float] = None,
+        n_points: Optional[int] = None,
+        n_points_strict: Optional[int] = None,
+        ratio: Optional[float] = None,
+        return_indice_mapping: bool = False,
+    ) -> Union[polydata_type, tuple[polydata_type, Int1dTensor]]:
         """Decimate and return decimated mesh."""
         self.fit(mesh)
-        return self.transform(mesh)
+        kwargs = {
+            "target_reduction": target_reduction,
+            "n_points": n_points,
+            "n_points_strict": n_points_strict,
+            "ratio": ratio,
+            "return_indice_mapping": return_indice_mapping,
+        }
+        return self.transform(mesh, **kwargs)
 
     @typecheck
     @property
@@ -247,15 +361,6 @@ class Decimation:
         """Returns the collapses of the decimation algorithm."""
         if hasattr(self, "collapses_"):
             return self.collapses_
-        else:
-            raise ValueError("The decimation object has not been fitted yet.")
-
-    @typecheck
-    @property
-    def indice_mapping(self):
-        """Returns the indice mapping of the decimation algorithm."""
-        if hasattr(self, "indice_mapping_"):
-            return self.indice_mapping_
         else:
             raise ValueError("The decimation object has not been fitted yet.")
 

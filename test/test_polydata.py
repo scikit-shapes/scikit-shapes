@@ -112,6 +112,159 @@ def test_polydata_creation():
     else:
         raise AssertionError("Assigning edges should delete triangles")
 
+    try:
+        triangle.points = torch.rand(triangle.n_points + 1, 3)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the size of the"
+            + " points tensor is not correct"
+        )
+
+    triangle_mesh = sks.Sphere()
+    wireframe_mesh = sks.Circle()
+    pointcloud_mesh = sks.PolyData(torch.rand(10, 3))
+
+    for mesh in [triangle_mesh, wireframe_mesh, pointcloud_mesh]:
+        vedo_mesh = mesh.to_vedo()
+        pv_mesh = mesh.to_pyvista()
+
+        vedo_back = sks.PolyData(vedo_mesh)
+        pv_back = sks.PolyData(pv_mesh)
+
+        assert torch.allclose(vedo_back.points, mesh.points)
+        assert torch.allclose(pv_back.points, mesh.points)
+
+        if mesh.n_edges > 0:
+            assert torch.allclose(vedo_back.edges, mesh.edges)
+            assert torch.allclose(pv_back.edges, mesh.edges)
+
+        if mesh.n_triangles > 0:
+            assert torch.allclose(vedo_back.triangles, mesh.triangles)
+            assert torch.allclose(pv_back.triangles, mesh.triangles)
+
+    mixed_mesh = wireframe_mesh.to_pyvista()
+    # add a triangle to the wireframe mesh
+    mixed_mesh.faces = np.concatenate([mixed_mesh.faces, [3, 0, 1, 2]])
+
+    try:
+        sks.PolyData(mixed_mesh)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the mesh contains"
+            + " both edges and triangles"
+        )
+
+
+def test_geometry_features():
+    square_points = torch.tensor(
+        [[0, 0], [1, 0], [1, 1], [0, 1]], dtype=sks.float_dtype
+    )
+    square_edges = torch.tensor(
+        [[0, 1], [1, 2], [2, 3], [3, 0]], dtype=sks.int_dtype
+    )
+    square = sks.PolyData(points=square_points, edges=square_edges)
+    assert square.n_edges == 4
+    try:
+        square.triangle_centers
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the mesh is not a"
+            + " triangle mesh so triangle_centers cannot be"
+            + " computed"
+        )
+
+    try:
+        square.triangle_normals
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the mesh is not a"
+            + " triangle mesh so triangle_normals cannot be"
+            + " computed"
+        )
+
+    assert torch.allclose(
+        square.point_weights, torch.tensor([1, 1, 1, 1], dtype=sks.float_dtype)
+    )
+
+    assert torch.allclose(
+        square.edge_lengths, torch.tensor([1, 1, 1, 1], dtype=sks.float_dtype)
+    )
+
+    assert torch.allclose(
+        square.edge_centers,
+        torch.tensor(
+            [[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]], dtype=sks.float_dtype
+        ),
+    )
+
+    assert torch.allclose(
+        square.mean_point, torch.tensor([0.5, 0.5], dtype=sks.float_dtype)
+    )
+
+    assert torch.allclose(
+        square.standard_deviation,
+        torch.tensor([0.5, 0.5], dtype=sks.float_dtype).sqrt(),
+    )
+
+    triangle_points = torch.tensor(
+        [[0, 0], [1, 0], [0, 1]], dtype=sks.float_dtype
+    )
+    triangle_triangles = torch.tensor([[0, 1, 2]], dtype=sks.int_dtype)
+
+    triangle = sks.PolyData(
+        points=triangle_points, triangles=triangle_triangles
+    )
+    assert triangle.n_edges == 3
+    assert triangle.n_triangles == 1
+    assert torch.allclose(
+        triangle.triangle_areas, torch.tensor([0.5], dtype=sks.float_dtype)
+    )
+
+    assert torch.allclose(
+        triangle.triangle_centers,
+        torch.tensor([[1 / 3, 1 / 3]], dtype=sks.float_dtype),
+    )
+
+    print(triangle.triangle_normals)
+    assert torch.allclose(
+        triangle.triangle_normals,
+        torch.tensor([[0, 0, 1]], dtype=sks.float_dtype),
+    )
+
+    pointcloud = sks.PolyData(triangle.points)
+
+    for attribute in [
+        "triangle_areas",
+        "triangle_centers",
+        "edge_lengths",
+        "edge_centers",
+    ]:
+        try:
+            getattr(pointcloud, attribute)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(
+                "Should have raised an error, the mesh has"
+                + " no triangles and no edges so"
+                + f" {attribute} cannot be computed"
+            )
+
+
+# def test_plotting():
+#     pyvista.OFF_SCREEN = True
+#     mesh = sks.Sphere()
+#     mesh.plot(backend="pyvista")
+#     mesh.plot(backend="vedo", offscreen=True)
+
 
 def test_polydata_creation_2d():
     points = torch.tensor([[0, 0], [0, 1], [1, 0]], dtype=torch.float64)
@@ -172,6 +325,15 @@ def test_interaction_with_pyvista():
     assert cube2.n_points == 8
     assert cube2.is_all_triangles
     assert np.allclose(cube.points, cube2.points)
+
+    # Importing a point cloud from pyvsita
+    n = 100
+    points = np.random.rand(n, 3)
+    polydata = pyvista.PolyData(points)
+    mesh = sks.PolyData(polydata)
+    assert mesh.n_points == n
+    assert mesh.n_triangles == 0
+    assert mesh.n_edges == 0
 
 
 def test_mesh_cleaning():
@@ -274,13 +436,46 @@ def test_point_data():
             + "not correct"
         )
 
+    dict = {
+        "colors": torch.rand(mesh.n_points + 1, 3),
+    }
+
+    # Try to assign a dict with a wrong size
+    try:
+        mesh.point_data = dict
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the size of the colors tensor is"
+            + "not correct"
+        )
+
+    # Try to get a point_data that does not exist
+    try:
+        mesh.point_data["not_existing"]
+    except KeyError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the point_data does not exist"
+        )
+
+    try:
+        mesh["not_existing"]
+    except KeyError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the point_data does not exist"
+        )
+
 
 def test_point_data2():
     # Load a pyvista.PolyData and add an attribute
     pv_mesh = pyvista.Sphere()
-    # The attribute is matrix valued
-    pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 3)
-
+    # The attribute has 4 dims
+    pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 2)
     # Convert it to a skshapes.PolyData
     sks_mesh = sks.PolyData(pv_mesh)
 
@@ -325,10 +520,33 @@ def test_point_data2():
         pv_mesh.point_data["curvature"],
     )
 
+    # Check that signal can be transferred back and forth with pyvista
+    # and vedo if ndims is high
+    sks_mesh["many_dims_signal"] = torch.rand(sks_mesh.n_points, 2, 2, 2, 2)
+
+    to_pv = sks_mesh.to_pyvista()
+    to_vedo = sks_mesh.to_vedo()
+
+    back_from_pv = sks.PolyData(to_pv)
+    back_from_vedo = sks.PolyData(to_vedo)
+
+    assert torch.allclose(
+        back_from_pv["many_dims_signal"], sks_mesh["many_dims_signal"]
+    )
+    assert torch.allclose(
+        back_from_vedo["many_dims_signal"], sks_mesh["many_dims_signal"]
+    )
+
 
 def test_landmarks_creation():
     mesh1 = sks.Sphere()
     mesh2 = sks.Sphere()
+
+    assert mesh1.n_landmarks == 0
+    assert mesh1.landmark_points == None
+
+    mesh1.add_landmarks(3)
+    assert mesh1.n_landmarks == 1
 
     # Create landmarks with coo sparse tensor
     landmarks_indices = [0, 1, 2, 3]
@@ -369,8 +587,7 @@ def test_landmarks_creation():
 
 def test_landmarks_conservation():
     # Create a mesh and add landmarks
-    mesh = sks.PolyData(pyvista.Sphere())
-    mesh.landmark_indices = [2, 45, 12, 125]
+    mesh = sks.PolyData(pyvista.Sphere(), landmarks=[2, 45, 12, 125])
 
     # Check that the landmarks are preserved sks -> pyvista -> sks
     mesh_pv = mesh.to_pyvista()
@@ -435,7 +652,7 @@ def test_point_data_cuda():
     assert sks_mesh_cuda.device.type == "cuda"
     assert sks_mesh_cuda.point_data.device.type == "cuda"
 
-    # If a new attribute is added  to the mesh, it is automatically moved to
+    # If a new attribute is added to the mesh, it is automatically moved to
     # the same device as the mesh
     color = torch.rand(sks_mesh_cuda.n_points, 3).cpu()
     sks_mesh_cuda.point_data["color"] = color
@@ -448,11 +665,93 @@ def test_point_data_cuda():
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"
 
 
+def test_clean_polydata_signal_and_landmarks():
+    sphere = sks.Sphere()
+    landmarks = torch.tensor([0, 1, 2, 3, 4, 5])
+    signal = torch.rand(sphere.n_points, dtype=sks.float_dtype)
+
+    sphere.landmark_indices = landmarks
+    sphere["signal"] = signal
+
+    sphere_pv = sphere.to_pyvista()
+
+    sphere_back = sks.PolyData(sphere_pv)
+    assert torch.allclose(sphere_back.landmark_indices, landmarks)
+    assert torch.allclose(sphere_back["signal"], signal)
+
+    # Add a point not conected to the mesh
+    import numpy as np
+
+    sphere_pv_notclean = sphere_pv.copy()
+    sphere_pv_notclean.points = np.concatenate([sphere_pv.points, [[0, 0, 0]]])
+
+    # Assert that has the mesh must be cleaned
+    # landmarks and signal are ignored
+    sphere_back2 = sks.PolyData(sphere_pv_notclean)
+    assert sphere_back2.landmark_indices is None
+    assert len(sphere_back2.point_data) == 0
+
+
 @pytest.mark.skipif(
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_gpu():
     cube = sks.PolyData(_cube())
+
     cube_gpu = cube.to("cuda")
 
     assert cube_gpu.points.device == torch.Tensor().cuda().device
+
+    # Assert that copying a mesh that is on the gpu results in a mesh on the
+    # gpu
+    cube_gpu_copy = cube_gpu.copy()
+    assert cube_gpu_copy.points.device == torch.Tensor().cuda().device
+
+
+def test_control_points():
+    mesh = sks.Circle()
+    grid = mesh.bounding_grid(N=5)
+
+    mesh.control_points = grid
+    # No copy is done
+    assert mesh.control_points is grid
+    assert grid.control_points is None
+
+    # But if a copy of the mesh is done, the control points are copied
+    mesh_copy = mesh.copy()
+    assert mesh_copy.control_points is not grid
+
+
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Cuda is required for this test"
+)
+def test_control_points_device():
+    # mesh on cpu and control points on gpu -> should raise an error
+    mesh = sks.Sphere().to("cpu")
+    grid = mesh.bounding_grid(N=5)
+    # grid = grid.to("cuda:0")
+    grid.device = "cuda"
+    try:
+        mesh.control_points = grid
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised an error, the control points"
+            + " should be on the same device as the mesh"
+        )
+
+    # mesh on cpu and control points on cpu -> should not raise an error
+    grid2 = grid.to("cpu")
+    mesh.control_points = grid2
+    loss = sks.L2Loss()
+    assert loss(mesh.control_points, grid2) < 1e-10
+
+    # copy
+    mesh_gpu = mesh.to("cuda")
+    assert mesh_gpu.points.device.type == "cuda"
+    assert mesh_gpu.control_points.device.type == "cuda"
+
+    mesh.device = "cuda"
+    assert mesh.points.device.type == "cuda"
+    assert mesh.control_points.device.type == "cuda"

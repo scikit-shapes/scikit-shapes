@@ -6,17 +6,16 @@ is described by a translation and a rotation. The morphing is not regularized.
 
 from .basemodel import BaseModel
 import torch
+from typing import Union
 
 from ..types import (
-    typecheck,
     Float1dTensor,
     Float2dTensor,
     polydata_type,
     shape_type,
-    convert_inputs,
+    MorphingOutput,
 )
-from typing import Union
-from .utils import MorphingOutput
+from ..input_validation import typecheck, convert_inputs
 
 
 class RigidMotion(BaseModel):
@@ -71,7 +70,9 @@ class RigidMotion(BaseModel):
             the path if needed.
         """
         if parameter.device != shape.device:
-            parameter = parameter.to(shape.device)
+            raise ValueError(
+                "The shape and the parameter must be on the same device."
+            )
 
         if shape.dim == 2:
             return self._morph2d(
@@ -135,11 +136,18 @@ class RigidMotion(BaseModel):
                     newshape.points = newpoints
                     path.append(newshape)
 
-        return MorphingOutput(
+        output = MorphingOutput(
             morphed_shape=morphed_shape,
             regularization=regularization,
             path=path,
         )
+
+        # Add some attributes to the output related to the rigid motion
+        output.rotation_angles = rotation_angles
+        output.rotation_matrix = rotation_matrix
+        output.translation = translation
+
+        return output
 
     @convert_inputs
     @typecheck
@@ -206,11 +214,18 @@ class RigidMotion(BaseModel):
                     newshape.points = newpoints
                     path.append(newshape)
 
-        return MorphingOutput(
+        output = MorphingOutput(
             morphed_shape=morphed_shape,
             regularization=regularization,
             path=path,
         )
+
+        # Add some attributes to the output related to the rigid motion
+        output.rotation_angle = theta
+        output.rotation_matrix = rotation_matrix
+        output.translation = translation
+
+        return output
 
     @typecheck
     def parameter_shape(

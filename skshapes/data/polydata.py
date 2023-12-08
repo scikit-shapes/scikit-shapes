@@ -9,8 +9,6 @@ import numpy as np
 import functools
 
 from ..types import (
-    convert_inputs,
-    typecheck,
     float_dtype,
     int_dtype,
     Number,
@@ -26,6 +24,7 @@ from ..types import (
     polydata_type,
     IntSequence,
 )
+from ..input_validation import typecheck, convert_inputs
 from typing import Optional, Any, Union, Literal
 from warnings import warn
 from .utils import DataAttributes
@@ -53,8 +52,9 @@ class PolyData(polydata_type):
         *,
         edges: Optional[Edges] = None,
         triangles: Optional[Triangles] = None,
-        device: Union[str, torch.device] = "cpu",
+        device: Optional[Union[str, torch.device]] = None,
         landmarks: Optional[Union[Landmarks, IntSequence]] = None,
+        control_points: Optional[polydata_type] = None,
         point_data: Optional[DataAttributes] = None,
         cache_size: Optional[int] = None,
     ) -> None:
@@ -69,9 +69,12 @@ class PolyData(polydata_type):
         triangles
             The triangles of the shape.
         device
-            The device on which the shape is stored.
+            The device on which the shape is stored. If None it is inferred
+            from the points.
         landmarks
             The landmarks of the shape.
+        control_points
+            The control points of the shape.
         point_data
             The point data of the shape.
         cache_size
@@ -85,7 +88,7 @@ class PolyData(polydata_type):
         # extract the points, edges and triangles from it
         if type(points) in [vedo.Mesh, pyvista.PolyData, str]:
             if type(points) is vedo.Mesh:
-                mesh = pyvista.PolyData(points.polydata())
+                mesh = pyvista.PolyData(points.dataset)
             elif type(points) is str:
                 mesh = pyvista.read(points)
             elif type(points) is PyvistaPolyData:
@@ -93,14 +96,28 @@ class PolyData(polydata_type):
             # Now, mesh is a pyvista mesh
 
             cleaned_mesh = mesh.clean()
+
             if cleaned_mesh.n_points != mesh.n_points:
                 mesh = cleaned_mesh
-                if landmarks is not None:
-                    warn("Mesh has been cleaned. Landmarks are ignored.")
+                if (
+                    landmarks is not None
+                    or "landmarks_indices" in mesh.field_data
+                ):
+                    warn(
+                        "Mesh has been cleaned and points were removed."
+                        + " Landmarks are ignored."
+                    )
+                    for i in mesh.field_data.keys():
+                        if i.startswith("landmarks"):
+                            mesh.field_data.remove(i)
                     landmarks = None
 
-                if point_data is not None:
-                    warn("Mesh has been cleaned. Point_data are ignored.")
+                if point_data is not None or len(mesh.point_data) > 0:
+                    warn(
+                        "Mesh has been cleaned and points were removed."
+                        + " Points data are ignored."
+                    )
+                    mesh.point_data.clear()
                     point_data = None
 
             # If the mesh is 2D, in pyvista it is a 3D mesh with z=0
@@ -115,6 +132,12 @@ class PolyData(polydata_type):
                 triangles = torch.from_numpy(triangles.copy())
                 edges = None
 
+            elif len(cleaned_mesh.faces) > 0 and len(cleaned_mesh.lines) > 0:
+                raise ValueError(
+                    "The mesh you try to convert to PolyData has both"
+                    + " triangles and edges. This is not supported."
+                )
+
             elif mesh.triangulate().is_all_triangles:
                 triangles = mesh.triangulate().faces.reshape(-1, 4)[:, 1:]
                 triangles = torch.from_numpy(triangles.copy())
@@ -122,6 +145,11 @@ class PolyData(polydata_type):
 
             elif len(mesh.lines) > 0:
                 edges = mesh.lines.reshape(-1, 3)[:, 1:]
+                edges = torch.from_numpy(edges.copy())
+                triangles = None
+
+            elif len(cleaned_mesh.faces) == 0 and len(cleaned_mesh.lines) > 0:
+                edges = cleaned_mesh.lines.reshape(-1, 3)[:, 1:]
                 edges = torch.from_numpy(edges.copy())
                 triangles = None
 
@@ -135,9 +163,8 @@ class PolyData(polydata_type):
                 )
                 for key in point_data.keys():
                     if str(key) + "_shape" in mesh.field_data:
-                        point_data[key] = point_data[key].reshape(
-                            mesh.field_data[str(key) + "_shape"]
-                        )
+                        shape = tuple(mesh.field_data[str(key) + "_shape"])
+                        point_data[key] = point_data[key].reshape(shape)
 
             if (
                 ("landmarks_values" in mesh.field_data)
@@ -153,8 +180,6 @@ class PolyData(polydata_type):
 
         if device is None:
             device = points.device
-
-        self._device = torch.device(device)
 
         # We don't call the setters here because the setter of points is meant
         # to be used when the shape is modified in order to check the validity
@@ -193,6 +218,11 @@ class PolyData(polydata_type):
         else:
             self._landmarks = None
 
+        if control_points is not None:
+            self._control_points = control_points
+        else:
+            self._control_points = None
+
         # Initialize the point_data if it was not done before
         if point_data is None:
             self._point_data = DataAttributes(
@@ -207,6 +237,8 @@ class PolyData(polydata_type):
                 point_data = point_data.to(self.device)
 
             self._point_data = point_data
+
+        self.device = device
 
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
@@ -322,25 +354,15 @@ class PolyData(polydata_type):
     #### Copy functions #####
     #########################
     @typecheck
-    def copy(
-        self, device: Optional[Union[str, torch.device]] = None
-    ) -> PolyData:
+    def copy(self) -> PolyData:
         """Copy the shape.
-
-        Parameters
-        ----------
-        device
-            The device on which the copy is stored.
 
         Returns
         -------
         PolyData
             The copy of the shape.
         """
-        if device is None:
-            device = self.device
-
-        kwargs = {"points": self._points.clone(), "device": device}
+        kwargs = {"points": self._points.clone()}
 
         if self._triangles is not None:
             kwargs["triangles"] = self._triangles.clone()
@@ -350,12 +372,21 @@ class PolyData(polydata_type):
             kwargs["landmarks"] = self._landmarks.clone()
         if self._point_data is not None:
             kwargs["point_data"] = self._point_data.clone()
-        return PolyData(**kwargs)
+        if self._control_points is not None:
+            kwargs["control_points"] = self.control_points.copy()
+
+        return PolyData(**kwargs, device=self.device)
 
     @typecheck
     def to(self, device: Union[str, torch.device]) -> PolyData:
         """Copy the shape on a given device."""
-        return self.copy(device=device)
+        torch_device = torch.Tensor().to(device).device
+        if self.device == torch_device:
+            return self
+        else:
+            copy = self.copy()
+            copy.device = device
+            return copy
 
     ###########################
     #### Vedo interface #######
@@ -363,51 +394,7 @@ class PolyData(polydata_type):
     @typecheck
     def to_vedo(self) -> vedo.Mesh:
         """Vedo Mesh converter."""
-        if self._triangles is not None:
-            mesh = vedo.Mesh(
-                [
-                    self.points.detach().cpu().numpy(),
-                    self.triangles.detach().cpu().numpy(),
-                ]
-            )
-        elif self._edges is not None:
-            mesh = vedo.Mesh(
-                [
-                    self.points.detach().cpu().numpy(),
-                    self.edges.detach().cpu().numpy(),
-                ]
-            )
-        else:
-            mesh = vedo.Mesh(self.points.detach().cpu().numpy())
-
-        if self.dim == 2:
-            mesh = mesh.wireframe().color("black")
-
-        # Add the point data if any
-        if len(self.point_data) > 0:
-            point_data_dict = self.point_data.to_numpy_dict()
-            for key in point_data_dict:
-                if len(point_data_dict[key].shape) <= 2:
-                    # If the data is 1D or 2D, we add it as a point data
-                    mesh.pointdata[key] = point_data_dict[key]
-                else:
-                    # If the data is 3D or more, we must be careful
-                    # because vedo does not support 3D or more point data
-                    shape = point_data_dict[key].shape
-                    mesh.pointdata["data"] = point_data_dict[key].reshape(
-                        shape[0], -1
-                    )
-                    mesh.metadata[str(key) + "_shape"] = shape
-
-        # Add the landmarks if any
-        if hasattr(self, "_landmarks") and self.landmarks is not None:
-            coalesced_landmarks = self.landmarks.coalesce()
-            mesh.metadata["landmarks_values"] = coalesced_landmarks.values()
-            mesh.metadata["landmarks_indices"] = coalesced_landmarks.indices()
-            mesh.metadata["landmarks_size"] = coalesced_landmarks.size()
-            mesh.metadata["landmark_points"] = self.landmark_points.detach()
-
-        return mesh
+        return vedo.Mesh(self.to_pyvista())
 
     ###########################
     #### PyVista interface ####
@@ -610,9 +597,9 @@ class PolyData(polydata_type):
     ##############################
     @property
     @typecheck
-    def device(self) -> Union[str, torch.device]:
+    def device(self) -> torch.device:
         """Device getter."""
-        return self._device
+        return self.points.device
 
     @device.setter
     @typecheck
@@ -626,9 +613,14 @@ class PolyData(polydata_type):
         """
         for attr in dir(self):
             if attr.startswith("_"):
-                if type(getattr(self, attr)) == torch.Tensor:
-                    setattr(self, attr, getattr(self, attr).to(device))
-        self._device = device
+                attribute = getattr(self, attr)
+                if isinstance(attribute, torch.Tensor):
+                    setattr(self, attr, attribute.to(device))
+
+        if self._point_data is not None:
+            self._point_data = self._point_data.to(device)
+        if self._control_points is not None:
+            self._control_points = self._control_points.to(device)
 
     ################################
     #### point_data getter/setter ##
@@ -802,7 +794,7 @@ class PolyData(polydata_type):
 
         else:
             if self.landmarks is None:
-                self.landmarks = indices
+                self.landmark_indices = indices
 
             else:
                 new_indices = torch.tensor(
@@ -830,14 +822,9 @@ class PolyData(polydata_type):
                 )
 
                 n_landmarks = self.n_landmarks + n_new_landmarks
-                n_points = self.n_points
 
                 indices = torch.cat((old_indices, new_indices), dim=1)
                 values = torch.concat((old_values, new_values))
-
-                print(indices)
-                print(values)
-                print((n_landmarks, n_points))
 
                 self.landmarks = torch.sparse_coo_tensor(
                     indices=indices,
@@ -952,14 +939,7 @@ class PolyData(polydata_type):
     def triangle_areas(self) -> Float1dTensor:
         """Area of each triangle."""
         # Raise an error if triangles are not defined
-        if self.triangles is None:
-            raise ValueError("Triangles are not defined")
-
-        A = self.points[self.triangles[:, 0]]
-        B = self.points[self.triangles[:, 1]]
-        C = self.points[self.triangles[:, 2]]
-
-        return torch.cross(B - A, C - A).norm(dim=1) / 2
+        return self.triangle_normals.norm(dim=1) / 2
 
     @property
     @typecheck
@@ -972,6 +952,13 @@ class PolyData(polydata_type):
         A = self.points[self.triangles[:, 0]]
         B = self.points[self.triangles[:, 1]]
         C = self.points[self.triangles[:, 2]]
+
+        if self.dim == 2:
+            # Add a zero z coordinate to the points to compute the
+            # cross product
+            A = torch.cat((A, torch.zeros_like(A[:, 0]).view(-1, 1)), dim=1)
+            B = torch.cat((B, torch.zeros_like(B[:, 0]).view(-1, 1)), dim=1)
+            C = torch.cat((C, torch.zeros_like(C[:, 0]).view(-1, 1)), dim=1)
 
         # TODO: Normalize?
         return torch.cross(B - A, C - A)
@@ -1017,7 +1004,9 @@ class PolyData(polydata_type):
         return unbalanced_weights
 
     @typecheck
-    def bounding_grid(self, N: int = 10) -> polydata_type:
+    def bounding_grid(
+        self, N: int = 10, offset: float = 0.05
+    ) -> polydata_type:
         """Bounding grid of the shape.
 
         Compute a bounding grid of the shape. The grid is a PolyData with
@@ -1027,6 +1016,10 @@ class PolyData(polydata_type):
         ----------
         N
             The number of points on each axis of the grid.
+        offset
+            The offset of the grid with respect to the shape. If offset=0, the
+            grid is exactly the bounding box of the shape. If offset=1, the
+            grid is the bounding box of the shape dilated by a factor 2.
 
         Returns
         -------
@@ -1036,11 +1029,15 @@ class PolyData(polydata_type):
         pv_shape = self.to_pyvista()
         # Get the bounds of the mesh
         xmin, xmax, ymin, ymax, zmin, zmax = pv_shape.bounds
-        origin = (xmin, ymin, zmin)
         spacing = (
-            (xmax - xmin) / (N - 1),
-            (ymax - ymin) / (N - 1),
-            (zmax - zmin) / (N - 1),
+            (1 + 2 * offset) * (xmax - xmin) / (N - 1),
+            (1 + 2 * offset) * (ymax - ymin) / (N - 1),
+            (1 + 2 * offset) * (zmax - zmin) / (N - 1),
+        )
+        origin = (
+            xmin - offset * (xmax - xmin),
+            ymin - offset * (ymax - ymin),
+            zmin - offset * (zmax - zmin),
         )
 
         # Create the grid
@@ -1054,6 +1051,35 @@ class PolyData(polydata_type):
 
     @property
     @typecheck
-    def control_points(self) -> Points:
+    def control_points(self) -> Optional[polydata_type]:
         """Control points of the shape."""
-        return self.bounding_grid(N=10).points
+        return self._control_points
+
+    @control_points.setter
+    @convert_inputs
+    @typecheck
+    def control_points(self, control_points: Optional[polydata_type]) -> None:
+        """Set the control points of the shape.
+
+        The control points are a PolyData object. The principal use case of
+        control points is in [`ExtrinsicDeformation`][skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation] # noqa: E501
+
+        Parameters
+        ----------
+        control_points
+            PolyData representing the control points.
+
+        Raises
+        ------
+        ValueError
+            If `self.device != control_points.device`.
+
+        """
+        if control_points is not None and self.device != control_points.device:
+            raise ValueError(
+                "Controls points must be on the same device as"
+                + " the corresponding PolyData, found "
+                + f"{control_points.device} for control points"
+                + f" and {self.device} for the PolyData."
+            )
+        self._control_points = control_points

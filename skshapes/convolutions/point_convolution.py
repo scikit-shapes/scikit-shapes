@@ -2,11 +2,8 @@
 
 import numpy as np
 
-from ..types import (
-    typecheck,
-    Number,
-    polydata_type,
-)
+from ..types import Number, polydata_type
+from ..input_validation import typecheck
 from typing import Optional, Literal
 from .squared_distances import squared_distances
 from .constant_kernel import constant_1_kernel

@@ -9,17 +9,16 @@ regularized by a Riemannian metric on the shape space.
 import torch
 from .basemodel import BaseModel
 from ..types import (
-    typecheck,
     Float3dTensor,
     polydata_type,
-    convert_inputs,
+    MorphingOutput,
 )
-from .utils import MorphingOutput
+from ..input_validation import typecheck, convert_inputs
 from .metrics import Metric, ElasticMetric
 from typing import Optional
 
 
-class VectorFieldDeformation(BaseModel):
+class IntrinsicDeformation(BaseModel):
     """Vector field deformation model."""
 
     @typecheck
@@ -72,7 +71,9 @@ class VectorFieldDeformation(BaseModel):
             the path if requested.
         """
         if parameter.device != shape.device:
-            parameter = parameter.to(shape.device)
+            raise ValueError(
+                "The shape and the parameter must be on the same device."
+            )
 
         assert parameter.shape == self.parameter_shape(shape)
 

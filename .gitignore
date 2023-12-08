@@ -175,3 +175,6 @@ example.ipynb
 
 # Gallery
 docs/generated/
+
+# Edges extraction
+*edges_extraction.cpp

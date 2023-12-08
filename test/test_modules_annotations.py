@@ -80,7 +80,7 @@ morphing_template = {
         "shape": sks.shape_type,
         "return_path": bool,
         "return_regularization": bool,
-        "return": sks.morphing.utils.MorphingOutput,
+        "return": sks.types.MorphingOutput,
     }
 }
 

@@ -3,6 +3,35 @@ import pyvista
 import torch
 import pytest
 
+def test_indice_mapping_interface():
+
+    sphere = sks.Sphere()
+    d1 = sks.Decimation(n_points=10)
+    d1.fit(sphere)
+    newsphere1, im1 = d1.transform(sphere, return_indice_mapping=True)
+
+    d2 = sks.Decimation(n_points=10)
+    newsphere2, im2 = d2.fit_transform(sphere, return_indice_mapping=True)
+
+    assert torch.allclose(newsphere1.points, newsphere2.points)
+    assert torch.allclose(im1, im2)
+
+
+def test_mesh_decimation_n_points_strict():
+    import pyvista.examples
+
+    mesh = sks.PolyData(pyvista.examples.download_louis_louvre())
+    target_n_points = 50
+    d = sks.Decimation(n_points=1)
+
+    d.fit(mesh=mesh)
+
+    decimated_mesh_notstrict = d.transform(mesh=mesh, n_points=50)
+    decimated_mesh_strict = d.transform(mesh=mesh, n_points_strict=50)
+
+    assert decimated_mesh_notstrict.n_points != target_n_points
+    assert decimated_mesh_strict.n_points == target_n_points
+
 
 def test_decimation_basic():
     """Assert that the if we fit_transform the decimator from sks on a mesh,
@@ -35,15 +64,64 @@ def test_decimation_basic():
         decimated_sphere.triangles, decimated_sphere2.triangles
     )
 
+    target_reduction = 0.9
+
     # test with target_reduction
-    decimation = sks.Decimation(target_reduction=0.9)
+    decimation = sks.Decimation(target_reduction=target_reduction)
     decimated_sphere = decimation.fit_transform(sphere)
-    decimated_sphere2 = sphere.decimate(target_reduction=0.9)
+    decimated_sphere2 = sphere.decimate(target_reduction=target_reduction)
 
     assert torch.allclose(decimated_sphere.points, decimated_sphere2.points)
     assert torch.allclose(
         decimated_sphere.triangles, decimated_sphere2.triangles
     )
+
+    # test with ratio (= 1 - target_reduction)
+    decimated_sphere3 = decimation.transform(
+        sphere, ratio=1 - target_reduction
+    )
+    assert torch.allclose(
+        decimated_sphere3.points, decimated_sphere2.points
+    )  # same points
+
+    # Initialisation with ratio
+    decimation = sks.Decimation(ratio=1 - target_reduction)
+    decimated_sphere4 = decimation.fit_transform(sphere)
+    assert torch.allclose(
+        decimated_sphere4.points, decimated_sphere2.points
+    )  # same points
+
+    # Assert that the number of points is different when we use a different
+    # ratio in the transform method
+    decimated_sphere5 = decimation.transform(
+        sphere,
+        ratio=2 * (1 - target_reduction),
+    )
+
+    assert decimated_sphere5.n_points != decimated_sphere4.n_points
+
+    # Some errors
+    mesh = sks.Sphere()
+
+    try:
+        mesh.decimate(n_points=10, target_reduction=0.9)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised a ValueError as both"
+            + " n_points and target_reduction are specified"
+        )
+
+    try:
+        mesh.decimate()
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(
+            "Should have raised a ValueError as neither"
+            + " n_points or target_reduction are specified"
+        )
 
 
 def test_decimation_landmarks():

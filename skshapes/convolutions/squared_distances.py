@@ -11,9 +11,9 @@ from pykeops.torch.cluster import (
 
 
 from ..types import (
-    typecheck,
     Number,
 )
+from ..input_validation import typecheck
 from typing import Optional, Literal
 from collections.abc import Callable
 

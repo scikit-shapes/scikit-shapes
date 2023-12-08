@@ -13,16 +13,17 @@ from __future__ import annotations
 import torch
 from .basemodel import BaseModel
 from ..types import (
-    typecheck,
     Points,
     polydata_type,
+    MorphingOutput,
 )
-from typing import Optional, Literal
-from .utils import MorphingOutput, Integrator, EulerIntegrator
+from ..input_validation import typecheck
+from typing import Optional
+from .utils import Integrator, EulerIntegrator
 from .kernels import Kernel, GaussianKernel
 
 
-class KernelDeformation(BaseModel):
+class ExtrinsicDeformation(BaseModel):
     """Kernel deformation morphing algorithm."""
 
     @typecheck
@@ -31,8 +32,7 @@ class KernelDeformation(BaseModel):
         n_steps: int = 1,
         integrator: Optional[Integrator] = None,
         kernel: Optional[Kernel] = None,
-        control_points: Optional[Literal["grid"]] = None,
-        n_grid: int = 10,
+        control_points: bool = True,
         **kwargs,
     ) -> None:
         """Class constructor.
@@ -46,12 +46,10 @@ class KernelDeformation(BaseModel):
         kernel
             Kernel used to smooth the momentum.
         control_points
-            If None, the control points are the points of the shape. If "grid",
-            the control points are a regular grid enclosing the shape, with
-            `n_grid` points per side.
-        n_grid
-            Number of points per side of the grid if `control_points` is
-            "grid".
+            If True, the control points are the control points of the shape
+            (accessible with `shape.control_points`). If False, the control
+            points are the points of the shape. If `shape.control_points` is
+            None, the control points are the points of the shape.
 
         """
         if integrator is None:
@@ -63,7 +61,6 @@ class KernelDeformation(BaseModel):
         self.cometric = kernel
         self.n_steps = n_steps
         self.control_points = control_points
-        self.n_grid = n_grid
 
     @typecheck
     def morph(
@@ -93,16 +90,18 @@ class KernelDeformation(BaseModel):
             the path if needed.
         """
         if parameter.device != shape.device:
-            p = parameter.to(shape.device)
-        else:
-            p = parameter
+            raise ValueError(
+                "The shape and the parameter must be on the same device."
+            )
+
+        p = parameter
         p.requires_grad = True
 
-        if self.control_points is None:
+        if self.control_points is False or shape.control_points is None:
             q = shape.points.clone()
-        elif self.control_points == "grid":
+        else:
             points = shape.points.clone()
-            q = shape.bounding_grid(N=self.n_grid).points.clone()
+            q = shape.control_points.points.clone()
         q.requires_grad = True
 
         # Compute the regularization
@@ -122,19 +121,29 @@ class KernelDeformation(BaseModel):
         else:
             path = [shape.copy() for _ in range(self.n_steps + 1)]
 
-        for i in range(self.n_steps):
-            p, q = self.integrator(p, q, H, dt)
-            if self.control_points is None:
-                # Update the points
-                # no control points -> q = shape.points
-                points = q.clone()
-            elif self.control_points == "grid":
-                # Update the points
-                K = self.cometric.operator(points, q)
-                points = points + (K @ p)
-
+        if self.n_steps == 1:
+            # If there is only one step, we can compute the transormation
+            # directly without using the integrator as we do not need p_1
+            K = self.cometric.operator(shape.points, q)
+            points = shape.points + dt * (K @ p)
             if return_path:
-                path[i + 1].points = points
+                path[1].points = points
+
+        else:
+            for i in range(self.n_steps):
+                if not self.control_points or shape.control_points is None:
+                    # Update the points
+                    # no control points -> q = shape.points
+                    p, q = self.integrator(p, q, H, dt)
+                    points = q.clone()
+                else:
+                    # Update the points
+                    K = self.cometric.operator(points, q)
+                    points = points + dt * (K @ p)
+                    p, q = self.integrator(p, q, H, dt)
+
+                if return_path:
+                    path[i + 1].points = points
 
         morphed_shape = shape.copy()
         morphed_shape.points = points
@@ -159,11 +168,7 @@ class KernelDeformation(BaseModel):
         tuple[int, int]
             The shape of the parameter.
         """
-        if self.control_points is None:
+        if not self.control_points or shape.control_points is None:
             return shape.points.shape
-
-        elif self.control_points == "grid":
-            if shape.dim == 2:
-                return (self.n_grid**2, 2)
-            elif shape.dim == 3:
-                return (self.n_grid**3, 3)
+        else:
+            return shape.control_points.points.shape

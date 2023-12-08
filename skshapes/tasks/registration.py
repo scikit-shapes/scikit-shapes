@@ -2,13 +2,11 @@
 
 from ..optimization import Optimizer, LBFGS
 from ..types import (
-    typecheck,
-    convert_inputs,
     shape_type,
-    float_dtype,
     FloatTensor,
 )
-from typing import Union, Optional
+from ..input_validation import typecheck, convert_inputs
+from typing import Union, Optional, get_args
 from ..loss import Loss
 from ..morphing import Model
 import torch
@@ -70,16 +68,16 @@ class Registration:
 
         if gpu:
             if torch.cuda.is_available():
-                self.optim_device = torch.device("cuda")
+                self.optim_device = "cuda"
             else:
                 print(
                     "Warning : gpu is set to True but no cuda device is "
                     + "available. The optimization will be performed on cpu."
                 )
-                self.optim_device = torch.device("cpu")
+                self.optim_device = "cpu"
 
         else:
-            self.optim_device = torch.device("cpu")
+            self.optim_device = "cpu"
 
     @convert_inputs
     @typecheck
@@ -168,9 +166,7 @@ class Registration:
             parameter = parameter.to(self.optim_device)
         else:
             # if no parameter is provided, initialize it with zeros
-            parameter = torch.zeros(
-                parameter_shape, device=self.optim_device, dtype=float_dtype
-            )
+            parameter = self.model.inital_parameter(shape=source)
 
         parameter.requires_grad = True
 
@@ -214,22 +210,30 @@ class Registration:
             return_regularization=True,
         )
 
+        # Automatically add attributes with final values of the morphing
+        for attr in dir(morphing):
+            if not attr.startswith("_") and attr not in ["count", "index"]:
+                attribute_name = attr + "_"
+                attribute_value = getattr(morphing, attr)
+
+                if isinstance(attribute_value, torch.Tensor):
+                    attribute_value = attribute_value.detach().to(
+                        self.output_device
+                    )
+
+                if isinstance(attribute_value, get_args(shape_type)):
+                    attribute_value = attribute_value.to(self.output_device)
+                if isinstance(attribute_value, list) and all(
+                    isinstance(s, get_args(shape_type))
+                    for s in attribute_value
+                ):
+                    attribute_value = [
+                        s.to(self.output_device) for s in attribute_value
+                    ]
+
+                setattr(self, attribute_name, attribute_value)
+
         self.loss_ = loss_value.detach().to(self.output_device)
-        self.regularization_ = morphing.regularization.to(self.output_device)
-        self.transformed_shape_ = morphing.morphed_shape
-        self.path_ = morphing.path
-
-        # If needed : move the transformed shape and the path to the output
-        # device
-        if self.transformed_shape_.device != self.output_device:
-            self.transformed_shape_ = self.transformed_shape_.to(
-                self.output_device
-            )
-            self.path_ = [s.to(self.output_device) for s in self.path_]
-
-        self.transformed_shape_.points
-        for s in self.path_:
-            s.points
 
     @typecheck
     def transform(self, *, source: shape_type) -> shape_type:
@@ -245,19 +249,16 @@ class Registration:
         shape_type
             the transformed shape.
         """
-        if not hasattr(self, "parameter_"):
+        if not hasattr(self, "morphed_shape_"):
             raise ValueError(
                 "The registration must be fitted before calling transform"
             )
-
-        transformed_shape = self.model.morph(
-            shape=source, parameter=self.parameter_
+        return self.model.morph(
+            shape=source,
+            parameter=self.parameter_,
+            return_path=True,
+            return_regularization=True,
         ).morphed_shape
-
-        if transformed_shape.device != self.output_device:
-            return transformed_shape.to(self.output_device)
-        else:  # If transformed_shape is on the output device don't copy
-            return transformed_shape
 
     @convert_inputs
     @typecheck

@@ -1,7 +1,8 @@
 """Lp losses for PolyData."""
 
 import torch
-from ..types import typecheck, FloatScalar, Number, polydata_type
+from ..types import FloatScalar, Number, polydata_type
+from ..input_validation import typecheck
 from .baseloss import BaseLoss
 
 

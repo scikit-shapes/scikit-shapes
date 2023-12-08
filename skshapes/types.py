@@ -1,13 +1,13 @@
 """Basic types aliases and utility functions for scikit-shapes."""
-from beartype import beartype
-from jaxtyping import jaxtyped, Float32, Float64, Int32, Int64, Float, Int
-from typing import Union
-import torch
-import numpy as np
 import os
 from warnings import warn
+from typing import Union, Optional, NamedTuple, Literal
+from jaxtyping import Float32, Float64, Int32, Int64, Float, Int
+from beartype import beartype
 from beartype.typing import Annotated
 from beartype.vale import Is
+import torch
+import numpy as np
 
 
 admissile_float_dtypes = ["float32", "float64"]
@@ -24,93 +24,6 @@ else:
     float_dtype = torch.float32
 
 int_dtype = torch.int64
-
-
-def typecheck(func):
-    """Runtime checker for function's arguments.
-
-    This is a combination of the beartype and jaxtyping decorators. Jaxtyped
-    allows to use jaxtyping typing hints for arrays/tensors while beartype is a
-    runtime type checker. This decorator allows to use both.
-
-    Parameters
-    ----------
-    func : callable
-        the function to decorate
-
-    Returns
-    -------
-    callable
-        the decorated function
-    """
-    return jaxtyped(beartype(func))
-
-
-def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
-    """Convert an array to the right type.
-
-    Depending on the type of the input, it converts the input to the right
-    type (torch.Tensor) and convert the dtype of the tensor to the right one
-    (float32 for float, int64 for int).
-
-    Parameters
-    ----------
-    x : Union[np.ndarray, torch.Tensor])
-        the input array
-
-    Raises
-    ------
-    ValueError
-        if the input is a complex tensor
-
-    Returns
-    -------
-    torch.Tensor
-        corresponding tensor with the right dtype
-
-    """
-    if isinstance(x, np.ndarray):
-        x = torch.from_numpy(x)
-
-    if isinstance(x, torch.Tensor):
-        if torch.is_floating_point(x) and x.dtype != float_dtype:
-            return x.to(float_dtype)
-        elif torch.is_complex(x):
-            raise ValueError("Complex tensors are not supported")
-        elif not torch.is_floating_point(x) and x.dtype != int_dtype:
-            return x.to(int_dtype)
-
-    return x
-
-
-def convert_inputs(func, parameters=None):
-    """Convert a function's inputs to the right type.
-
-    It converts the inputs arrays to the right type (torch.Tensor) and
-    convert the dtype of the tensor to the right one (float32 for float,
-    int64 for int), before calling the function.
-
-    TODO: so far, it only works with numpy arrays and torch tensors.
-    Is it relevant to add support for lists and tuples ? -> must be careful
-    on which arguments are converted (only the ones that are supposed to be
-    converted to torch.Tensor).
-    """
-
-    def wrapper(*args, **kwargs):
-        # Convert args and kwargs to torch.Tensor
-        # and convert the dtype to the right one
-        new_args = []
-        for arg in args:
-            new_args.append(_convert_arg(arg))
-
-        for key, value in kwargs.items():
-            kwargs[key] = _convert_arg(value)
-
-        return func(*new_args, **kwargs)
-
-    # Copy annotations (if not, beartype does not work)
-    wrapper.__annotations__ = func.__annotations__
-    return wrapper
 
 
 # Type aliases
@@ -135,7 +48,7 @@ NumericalArray = Union[FloatArray, IntArray]
 Float1dArray = Float[np.ndarray, "_"]
 Int1dArray = Int[np.ndarray, "_"]
 
-# Numerical types
+# Numerical typestyp
 FloatTensor = JaxFloat[
     torch.Tensor, "..."
 ]  # Only Float32 tensors are FloatTensors
@@ -161,6 +74,12 @@ IntSequence = Union[
     Int[np.ndarray, "_"],  # noqa: F821
     list[int],
 ]
+
+NumberSequence = Union[
+    FloatSequence,
+    IntSequence,
+]
+
 
 DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
@@ -201,3 +120,82 @@ class image_type:
 
 
 shape_type = Union[polydata_type, image_type]
+
+
+@beartype
+class FineToCoarsePolicy(NamedTuple):
+    """Parameters for the fine to coarse propagation scheme.
+
+    Parameters
+    ----------
+    reduce : str, default="mean"
+        The reduction operation to use when propagating the signal from the
+        fine to the coarse resolutions. Possible values are "mean", "max",
+        "min" and "sum".
+    """
+
+    reduce: Literal["mean", "max", "min", "sum"] = "mean"
+
+
+@beartype
+class CoarseToFinePolicy(NamedTuple):
+    """Parameters for the coarse to fine propagation scheme.
+
+    Parameters
+    ----------
+    smoothing : str, default="constant"
+        The smoothing operation to use when propagating the signal from the
+        coarse to the fine resolutions. Possible values are "constant",
+        "point_convolution" and "mesh_convolution".
+    n_smoothing_steps : int, default=1
+        The number of smoothing steps to perform when propagating the signal
+        from the coarse to the fine resolutions.
+    """
+
+    smoothing: Literal[
+        "constant",
+        "point_convolution",
+        "mesh_convolution",
+    ] = "constant"
+    n_smoothing_steps: int = 1
+
+
+class MorphingOutput:
+    """Class containing the result of the morphing algorithms.
+
+    It acts as a container for the result of the morphing algorithms. It
+    contains the morphed shape, the regularization parameter (if any), the path
+    (if any), the path length (if any) and eventually other attributes.
+
+    Parameters
+    ----------
+    morphed_shape
+        the morphed shape
+    regularization
+        the regularization parameter
+    path
+        the path (list of shapes)
+    path_length
+        the length of the path
+    kwargs
+        other attributes (if any)
+
+    """
+
+    def __init__(
+        self,
+        morphed_shape: Optional[shape_type] = None,
+        regularization: Optional[FloatScalar] = None,
+        path: Optional[list[shape_type]] = None,
+        path_length: Optional[FloatScalar] = None,
+        **kwargs,
+    ) -> None:
+        # Define the attributes (common to all morphing algorithms)
+        self.morphed_shape = morphed_shape
+        self.regularization = regularization
+        self.path = path
+        self.path_length = path_length
+
+        # Eventually add other attributes
+        for key, value in kwargs.items():
+            setattr(self, key, value)
