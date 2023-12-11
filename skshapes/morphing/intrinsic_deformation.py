@@ -14,7 +14,7 @@ from ..types import (
     MorphingOutput,
 )
 from ..input_validation import typecheck, convert_inputs
-from .metrics import Metric, ElasticMetric
+from .metrics import Metric, AsIsometricAsPossible
 from typing import Optional
 
 
@@ -36,7 +36,7 @@ class IntrinsicDeformation(BaseModel):
 
         """
         if metric is None:
-            metric = ElasticMetric()
+            metric = AsIsometricAsPossible()
 
         self.n_steps = n_steps
         self.metric = metric
