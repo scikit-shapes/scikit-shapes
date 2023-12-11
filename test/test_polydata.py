@@ -537,6 +537,10 @@ def test_point_data2():
         back_from_vedo["many_dims_signal"], sks_mesh["many_dims_signal"]
     )
 
+    # Reset signals
+    sks_mesh.point_data = None
+    assert len(sks_mesh.point_data) == 0
+
 
 def test_landmarks_creation():
     mesh1 = sks.Sphere()
