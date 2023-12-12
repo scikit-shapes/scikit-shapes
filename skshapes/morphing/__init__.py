@@ -8,7 +8,9 @@ from .rigid_motion import RigidMotion
 
 from .utils import EulerIntegrator
 from .kernels import GaussianKernel
-from .metrics import ElasticMetric
+from .metrics import (
+    AsIsometricAsPossible,
+)
 
 from typing import Union
 

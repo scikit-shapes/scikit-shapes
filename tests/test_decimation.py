@@ -3,8 +3,8 @@ import pyvista
 import torch
 import pytest
 
-def test_indice_mapping_interface():
 
+def test_indice_mapping_interface():
     sphere = sks.Sphere()
     d1 = sks.Decimation(n_points=10)
     d1.fit(sphere)

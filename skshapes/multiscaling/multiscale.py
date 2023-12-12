@@ -107,17 +107,23 @@ class Multiscale:
         elif scales is not None:
             raise NotImplementedError("Scales are not implemented yet")
 
-        if shape.is_triangle_mesh():
-            min_n_points = 1
-            decimation_module = Decimation(n_points=min_n_points)
+        if decimation_module is not None:
+            if not hasattr(decimation_module, "ref_mesh_"):
+                raise ValueError("The decimation module must have been fitted")
+            self._decimation_module = decimation_module
 
-        else:
-            raise NotImplementedError(
-                "Only triangle meshes are supported for now"
-            )
+        if decimation_module is None:
+            if shape.is_triangle_mesh():
+                min_n_points = 1
+                decimation_module = Decimation(n_points=min_n_points)
 
-        decimation_module.fit(shape)
-        self._decimation_module = decimation_module
+            else:
+                raise NotImplementedError(
+                    "Only triangle meshes are supported for now"
+                )
+
+            decimation_module.fit(shape)
+            self._decimation_module = decimation_module
 
         self.shapes = {}
         self.mappings_from_origin = {}

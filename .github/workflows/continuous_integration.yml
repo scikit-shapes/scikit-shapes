@@ -40,9 +40,19 @@ jobs:
       - name: Test with pytest
         run: |
           export SKSHAPES_FLOAT_DTYPE=float32
-          pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html test/
+          pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html tests/
           cp -r htmlcov artifacts/
-      
+
+      # https://github.com/pyvista/setup-headless-display-action
+      - name: Setup headless display
+        uses: pyvista/setup-headless-display-action@v2
+        
+      - name: build documentation
+        if: matrix.python-version == '3.11'
+        run: |
+          mkdocs build
+          cp -r site artifacts/
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
