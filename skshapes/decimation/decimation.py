@@ -1,5 +1,5 @@
 """Decimation module."""
-
+from __future__ import annotations
 import numpy as np
 from ..data import PolyData
 import torch
@@ -80,7 +80,7 @@ class Decimation:
             self.target_reduction = 1 - ratio
 
     @typecheck
-    def fit(self, mesh: polydata_type) -> None:
+    def fit(self, mesh: polydata_type) -> Decimation:
         """Fit the decimation algorithm to a mesh.
 
         Parameters
@@ -92,6 +92,11 @@ class Decimation:
         ------
         ValueError
             If the mesh is not triangular.
+
+        Returns
+        -------
+        Decimation
+            self
 
         """
         if hasattr(self, "n_points"):
@@ -132,6 +137,7 @@ class Decimation:
         self.collapses_ = collapses
         self.ref_mesh_ = mesh
         self.actual_reduction_ = actual_reduction
+        return self
 
     @no_more_than_one(
         parameters=[

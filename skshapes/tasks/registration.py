@@ -1,5 +1,5 @@
 """Registration between two shapes."""
-
+from __future__ import annotations
 from ..optimization import Optimizer, LBFGS
 from ..types import (
     shape_type,
@@ -87,7 +87,7 @@ class Registration:
         source: shape_type,
         target: shape_type,
         initial_parameter: Optional[FloatTensor] = None,
-    ) -> None:
+    ) -> Registration:
         """Fit the registration between the source and target shapes.
 
         After calling this method, the registration's parameter can be accessed
@@ -109,6 +109,12 @@ class Registration:
         ------
         ValueError
             if the source and target shapes are not on the same device.
+
+        Returns
+        -------
+        Registration
+            self
+
         """
         # Check that the shapes are on the same device
         if source.device != target.device:
@@ -234,6 +240,7 @@ class Registration:
                 setattr(self, attribute_name, attribute_value)
 
         self.loss_ = loss_value.detach().to(self.output_device)
+        return self
 
     @typecheck
     def transform(self, *, source: shape_type) -> shape_type:
