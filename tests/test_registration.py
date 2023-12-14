@@ -32,7 +32,7 @@ list_optimizers = [
     n_steps=st.integers(min_value=1, max_value=3),
     loss=st.sampled_from(list_losses),
     optimizer=st.sampled_from(list_optimizers),
-    n_iter=st.integers(min_value=1, max_value=3),
+    n_iter=st.integers(min_value=0, max_value=3),
     regularization=st.floats(min_value=0, max_value=1),
     gpu=st.booleans(),
     verbose=st.booleans(),
@@ -160,9 +160,9 @@ def test_registration_device():
                     gpu=gpu,
                     regularization=0.1,
                     verbose=1,
-                )
+                ).fit(source=source, target=target)
 
-                newshape = task.fit_transform(source=source, target=target)
+                newshape = task.transform(source=source)
 
                 # Check that the device on which the optimization is performed
                 # corresponds to the gpu argument

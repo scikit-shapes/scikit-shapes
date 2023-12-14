@@ -239,6 +239,9 @@ class Registration:
 
                 setattr(self, attribute_name, attribute_value)
 
+        if self.n_iter == 0:
+            loss_value = loss_fn(parameter=parameter)
+
         self.loss_ = loss_value.detach().to(self.output_device)
         return self
 

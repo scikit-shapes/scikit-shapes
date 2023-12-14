@@ -6,8 +6,7 @@ import pytest
 
 def test_indice_mapping_interface():
     sphere = sks.Sphere()
-    d1 = sks.Decimation(n_points=10)
-    d1.fit(sphere)
+    d1 = sks.Decimation(n_points=10).fit(mesh=sphere)
     newsphere1, im1 = d1.transform(sphere, return_indice_mapping=True)
 
     d2 = sks.Decimation(n_points=10)
