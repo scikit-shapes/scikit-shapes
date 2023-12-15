@@ -65,10 +65,8 @@ pip install -e .[dev]
 ```
 Then, you will have the possibility to interactively edit the code, run the linting tool and syntax checker, run the tests and build the documentation. From scikit-shapes directory, use the following commands :
 ```bash
-# Lint
-black .
-# Check syntax 
-flake8 skshapes
+# Lint wityh black + check syntax 
+pre-commit run --all-files
 # Run tests and show code coverage
 pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html test/
 firefox htmlcov/index.html
