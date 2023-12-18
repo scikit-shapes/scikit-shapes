@@ -5,6 +5,7 @@ from .features import *
 from .convolutions import *
 from .applications import *
 from .data import *
+from .triangle_mesh import *
 from .loss import *
 from .morphing import *
 from .optimization import *
@@ -19,6 +20,7 @@ __all__ = [
     "convolutions",
     "applications",
     "data",
+    "triangle_mesh",
     "loss",
     "morphing",
     "optimization",

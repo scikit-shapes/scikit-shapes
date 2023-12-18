@@ -11,6 +11,15 @@ extension = Extension(
     define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
 )
 
+extension2 = Extension(
+    name="skshapes.triangle_mesh.cython_edges_extraction",
+    sources=[
+        "skshapes/triangle_mesh/cython_edges_extraction.pyx",
+    ],
+    include_dirs=[np.get_include()],
+    define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
+)
+
 
 dependencies = [
     "numpy",
@@ -30,6 +39,7 @@ submodules = [
     "convolutions",
     "multiscaling",
     "data",
+    "triangle_mesh",
     "decimation",
     "features",
     "loss",
@@ -48,5 +58,5 @@ setup(
     install_requires=dependencies,
     packages=["skshapes"]
     + ["skshapes." + submodule for submodule in submodules],
-    ext_modules=cythonize(extension),
+    ext_modules=cythonize([extension, extension2]),
 )

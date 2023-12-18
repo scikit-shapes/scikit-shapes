@@ -92,6 +92,15 @@ Points = Union[
     Points2d,
     Points3d,
 ]  # 3D or 2D points
+
+# Points sequences for sequence of poses (i.e. sequence of shapes)
+# The first dimension is the number of points
+# The second dimension is the number of poses
+# The third dimension is the dimension of the points
+PointsSequence2D = JaxFloat[torch.Tensor, "_ _ 2"]
+PointsSequence3D = JaxFloat[torch.Tensor, "_ _ 3"]
+PointsSequence = Union[PointsSequence2D, PointsSequence3D]
+
 Edges = JaxInt[torch.Tensor, "_ 2"]
 Triangles = JaxInt[torch.Tensor, "_ 3"]
 
