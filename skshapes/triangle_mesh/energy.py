@@ -118,22 +118,45 @@ def membrane_energy(
         The triangles of the mesh(es). Shape: (n_triangles, 3).
 
     """
-    ei_def = points_def[triangles[:, 0]]
-    ej_def = points_def[triangles[:, 1]]
-    ek_def = points_def[triangles[:, 2]]
+    if edge_topology is None:
+        edge_topology = EdgeTopology(triangles)
 
-    ei_undef = points_undef[triangles[:, 0]]
-    ej_undef = points_undef[triangles[:, 1]]
-    ek_undef = points_undef[triangles[:, 2]]
+    a = points_def[triangles[:, 0]]  # i
+    b = points_def[triangles[:, 1]]  # j
+    c = points_def[triangles[:, 2]]  # k
+
+    ei = c - b
+    ej = a - c
+    ek = a - b
+
+    ei_norm = (ei**2).sum(dim=-1)
+    ej_norm = (ej**2).sum(dim=-1)
+    ek_norm = (ek**2).sum(dim=-1)
+
+    a = points_undef[triangles[:, 0], :]
+    b = points_undef[triangles[:, 1], :]
+    c = points_undef[triangles[:, 2], :]
+
+    ei = c - b
+    ej = a - c
+    ek = a - b
 
     trace = (
-        (ei_def**2) * (ej_undef * ek_undef)
-        + (ej_def**2) * (ei_undef * ek_undef)
-        + (ek_def**2) * (ei_undef * ej_undef)
-    ).sum(dim=-1)
+        ei_norm * (ej * ek).sum(dim=-1)
+        + ej_norm * (ek * ei).sum(dim=-1)
+        - ek_norm * (ei * ej).sum(dim=-1)
+    )
 
-    areas_def = triangle_areas(points=points_def, triangles=triangles)
-    areas_undef = triangle_areas(points=points_undef, triangles=triangles)
+    areas_def = triangle_areas(
+        points=points_def,
+        triangles=triangles,
+        edge_topology=edge_topology,
+    )
+    areas_undef = triangle_areas(
+        points=points_undef,
+        triangles=triangles,
+        edge_topology=edge_topology,
+    )
 
     mu = 1.0
     lambd = 1.0

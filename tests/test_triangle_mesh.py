@@ -62,6 +62,110 @@ from skshapes.triangle_mesh import (
     dihedral_angles,
 )
 
+from skshapes.triangle_mesh.geometry import _get_geometry
+
+from math import sqrt
+
+
+def test_functional_geometry():
+    # A simple 2D example to test the geometry functions on a simple mesh
+    #
+    #
+    #  2 -- 3
+    #  | \  |
+    #  |  \ |
+    #  0 -- 1
+
+    points = torch.tensor(
+        [
+            [0, 0],
+            [1, 0],
+            [0, 1],
+            [1, 1],
+        ],
+        dtype=sks.float_dtype,
+    )
+
+    triangles = torch.tensor(
+        [
+            [0, 1, 2],
+            [1, 2, 3],
+        ],
+        dtype=sks.int_dtype,
+    )
+
+    expected_edges = torch.tensor(
+        [
+            [0, 1],
+            [0, 2],
+            [1, 2],
+            [1, 3],
+            [2, 3],
+        ],
+        dtype=sks.int_dtype,
+    )
+
+    expected_edges_centers = torch.tensor(
+        [
+            [0.5, 0],
+            [0, 0.5],
+            [0.5, 0.5],
+            [1, 0.5],
+            [0.5, 1],
+        ],
+        dtype=sks.float_dtype,
+    )
+
+    expected_edge_lengths = torch.tensor(
+        [
+            1,
+            1,
+            sqrt(2),
+            1,
+            1,
+        ],
+        dtype=sks.float_dtype,
+    )
+
+    expected_triangle_areas = torch.tensor([0.5, 0.5], dtype=sks.float_dtype)
+
+    expected_triangles_centers = torch.tensor(
+        [
+            [1 / 3, 1 / 3],
+            [2 / 3, 2 / 3],
+        ],
+        dtype=sks.float_dtype,
+    )
+
+    edge_topology = EdgeTopology(triangles)
+
+    assert len(edge_topology.manifold_edges) == 1
+    assert len(edge_topology.boundary_edges) == 4
+
+    assert torch.allclose(edge_topology.edges, expected_edges)
+    assert torch.allclose(
+        edge_centers(points=points, triangles=triangles),
+        expected_edges_centers,
+    )
+    assert torch.allclose(
+        edge_lengths(points=points, triangles=triangles),
+        expected_edge_lengths,
+    )
+    assert torch.allclose(
+        triangle_areas(points=points, triangles=triangles),
+        expected_triangle_areas,
+    )
+    assert torch.allclose(
+        triangle_centers(points=points, triangles=triangles),
+        expected_triangles_centers,
+    )
+
+    Pi, Pj, Pk, Pl = _get_geometry(points, triangles)
+    assert torch.allclose(Pi[0], points[1])
+    assert torch.allclose(Pj[0], points[2])
+    assert torch.allclose(Pk[0], points[0])
+    assert torch.allclose(Pl[0], points[3])
+
 
 def _create_points_list_and_frame(n_frames, points):
     # Create the list of tensors with frame format
