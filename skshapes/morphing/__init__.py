@@ -10,6 +10,7 @@ from .utils import EulerIntegrator
 from .kernels import GaussianKernel
 from .metrics import (
     AsIsometricAsPossible,
+    ShellEnergyMetric,
 )
 
 from typing import Union
