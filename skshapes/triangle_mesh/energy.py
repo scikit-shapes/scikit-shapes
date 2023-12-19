@@ -165,7 +165,7 @@ def membrane_energy(
         (mu * trace / 8 + lambd * (areas_def**2) / 4) / areas_undef
         - areas_undef
         * (
-            (mu / 2 + lambd / 4) * torch.log(areas_def / areas_undef)
+            (mu / 2 + lambd / 4) * (2 * torch.log(areas_def / areas_undef))
             + mu
             + lambd / 4
         ),
@@ -206,6 +206,9 @@ def shell_energy(
         The weight of the bending energy. Default: 0.001.
 
     """
+    if edge_topology is None:
+        edge_topology = EdgeTopology(triangles)
+
     m_energy = membrane_energy(
         points_undef=points_undef,
         points_def=points_def,
