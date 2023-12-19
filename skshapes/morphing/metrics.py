@@ -5,6 +5,7 @@ from ..types import (
     Edges,
     Triangles,
     Float3dTensor,
+    Number,
 )
 from ..input_validation import typecheck
 from typing import Optional
@@ -74,19 +75,19 @@ class AsIsometricAsPossible(Metric):
         return torch.sum(a1**2) / (2 * n_steps * (scale**4))
 
 
-class AsRigidAsPossible(Metric):
-    """
-    As rigid as possible metric.
+class ShellEnergyMetric(Metric):
+    """Shell energy metric.
 
-    This metric penalizes the non-isometricity of the mesh. See
-    https://dmg.tuwien.ac.at/geom/ig/publications/oldpub/2007/kilian-2007-gmss/paper_docs/shape_space_sig_07.pdf # noqa E501
-    for more details.
+    Parameters
+    ----------
+    weight
+        Weight of the bending energy.
     """
 
     @typecheck
-    def __init__(self) -> None:
+    def __init__(self, weight: Number = 0.001) -> None:
         """Class constructor."""
-        pass
+        self.weight = weight
 
     @typecheck
     def __call__(
@@ -96,7 +97,7 @@ class AsRigidAsPossible(Metric):
         edges: Optional[Edges] = None,
         triangles: Optional[Triangles] = None,
     ) -> FloatScalar:
-        """Compute the metric along the sequence of points.
+        """Compute shell enery along the sequence of points.
 
         Parameters
         ----------
@@ -109,39 +110,27 @@ class AsRigidAsPossible(Metric):
         triangles
             Triangles.
 
+        Raises
+        ------
+            ValueError: This metric requires edges to be specified
+
+        Returns
+        -------
+            FloatScalar: the mean velocities metric
         """
-        from ..tasks import Registration
-        from .rigid_motion import RigidMotion
-        from ..loss import L2Loss
-        from ..data import PolyData
-        from ..optimization import SGD
+        if triangles is None:
+            raise ValueError("This metric requires edges to be defined")
 
-        gpu = True if points_sequence.is_cuda else False
+        n_steps = points_sequence.shape[1]
 
-        loss = L2Loss()
-        model = RigidMotion()
-        registration = Registration(
-            model=model,
-            loss=loss,
-            optimizer=SGD(1e-2),
-            n_iter=2,
-            verbose=False,
-            gpu=gpu,
-        )
+        points_undef = points_sequence[:, 0:n_steps, :]
+        points_def = points_undef + velocities_sequence
 
-        rigid_velocity_sequence = torch.zeros_like(velocities_sequence)
-        for i in range(velocities_sequence.shape[1] - 1):
-            source = PolyData(points=points_sequence[:, i, :])
-            target = PolyData(points=points_sequence[:, i + 1, :])
+        from ..triangle_mesh import shell_energy
 
-            rigid_morph = registration.fit_transform(
-                source=source, target=target
-            )
-
-            rigid_velocity_sequence[:, i, :] = (
-                rigid_morph.points - source.points
-            )
-
-        return torch.sum(
-            (rigid_velocity_sequence - velocities_sequence) ** 2
-        ) / (2 * velocities_sequence.shape[1])
+        return shell_energy(
+            points_undef=points_undef,
+            points_def=points_def,
+            triangles=triangles,
+            weight=self.weight,
+        ).mean()
