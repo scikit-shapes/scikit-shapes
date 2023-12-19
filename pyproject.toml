@@ -29,7 +29,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "hypothesis",
-    "pytorch_shell @ git+https://github.com/Louis-Pujol/shell-energy-pytorch@latest",
+    "pytorch_shell @ git+https://github.com/Louis-Pujol/shell-energy-pytorch@main",
     "mkdocs",
     "mkdocs-material",
     "mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@latest",
