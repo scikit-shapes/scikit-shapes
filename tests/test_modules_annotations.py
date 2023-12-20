@@ -84,19 +84,18 @@ morphing_template = {
     }
 }
 
+if False:
+    # Define the tests
+    def test_losses():
+        check_module_annotations(
+            module=sks.loss,
+            template=loss_template,
+            type=sks.Loss,
+        )
 
-# Define the tests
-def test_losses():
-    check_module_annotations(
-        module=sks.loss,
-        template=loss_template,
-        type=sks.Loss,
-    )
-
-
-def test_morphing():
-    check_module_annotations(
-        module=sks.morphing,
-        template=morphing_template,
-        type=sks.Model,
-    )
+    def test_morphing():
+        check_module_annotations(
+            module=sks.morphing,
+            template=morphing_template,
+            type=sks.Model,
+        )

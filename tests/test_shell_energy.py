@@ -9,6 +9,7 @@ try:
 except ImportError:
     pytorch_shell_available = False
 
+
 # Test that is skipped if pytorch_shell is not installed
 @pytest.mark.skipif(
     not pytorch_shell_available, reason="pytorch_shell is not installed"
@@ -18,12 +19,9 @@ def test_shell_energy():
     import pytorch_shell
     import torch
 
-    try:
-        source = sks.PolyData("data/fingers/finger0.ply")
-        target = sks.PolyData("data/fingers/finger1.ply")
-    except FileNotFoundError:
-        source = sks.PolyData("../data/fingers/finger0.ply")
-        target = sks.PolyData("../data/fingers/finger1.ply")
+    source = sks.Sphere()
+    target = sks.Sphere()
+    target.points += torch.randn_like(target.points) * 0.05
 
     points_undef = source.points
     points_def = target.points

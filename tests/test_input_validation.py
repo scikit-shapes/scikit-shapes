@@ -1,5 +1,6 @@
 import skshapes as sks
 from beartype.roar import BeartypeCallHintParamViolation
+from jaxtyping import TypeCheckError
 
 
 def test_one_and_only_one_decorator():
@@ -42,10 +43,12 @@ def test_one_and_only_one_decorator():
 
     try:
         func(a="dog")  # not ok : wrong type
+    except TypeCheckError:
+        pass
     except BeartypeCallHintParamViolation:
         pass
     else:
-        raise RuntimeError("Expected BeartypeCallHintParamViolation")
+        raise RuntimeError("Expected an error as the type is wrong")
 
 
 def test_no_more_than_one():
@@ -84,7 +87,9 @@ def test_no_more_than_one():
 
     try:
         func(a="dog")  # not ok : wrong type
+    except TypeCheckError:
+        pass
     except BeartypeCallHintParamViolation:
         pass
     else:
-        raise RuntimeError("Expected BeartypeCallHintParamViolation")
+        raise RuntimeError("Expected an error as the type is wrong")

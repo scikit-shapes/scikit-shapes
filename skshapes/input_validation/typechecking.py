@@ -21,4 +21,4 @@ def typecheck(func):
     callable
         the decorated function
     """
-    return jaxtyped(beartype(func))
+    return jaxtyped(typechecker=beartype)(func)
