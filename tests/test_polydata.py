@@ -7,6 +7,7 @@ import skshapes as sks
 import pytest
 import os
 from beartype.roar import BeartypeCallHintParamViolation
+from jaxtyping import TypeCheckError
 
 
 def _cube():
@@ -414,6 +415,8 @@ def test_point_data():
     try:
         mesh.point_data = 4
     except BeartypeCallHintParamViolation:
+        pass
+    except TypeCheckError:
         pass
     else:
         raise AssertionError(
