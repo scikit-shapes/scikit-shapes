@@ -283,14 +283,11 @@ def dihedral_angles(
     nl = nl / nl.norm(dim=-1).unsqueeze(-1)
 
     cross_prod = torch.cross(nk, nl, dim=-1)
-    # We do not want to have values outside of [-1, 1] because of acos
-    # in addition to that, we do not want to have exactly 1 or -1 because
-    # of the gradient of acos (else there will be nan in gradient)
-    aux = torch.clip(
-        (nk * nl).sum(dim=-1),
-        min=-1 + 1e-7,
-        max=1 - 1e-7,
-    )
+    edge_dir = Pj - Pi
+    edge_dir = edge_dir / edge_dir.norm(dim=-1).unsqueeze(-1)
 
-    tmp = (cross_prod * (Pj - Pi)).sum(dim=-1)
-    return (torch.sign(tmp)) * torch.acos(aux)
+    aux = (nk * nl).sum(dim=-1)
+
+    tmp = (cross_prod * edge_dir).sum(dim=-1)
+
+    return torch.atan2(tmp, aux)
