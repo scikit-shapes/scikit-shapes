@@ -151,7 +151,7 @@ class Registration:
 
             if self.verbose > 0:
                 self.current_loss = loss.clone().detach()
-                self.current_regularization = (
+                self.current_path_length = (
                     morphing.regularization.clone().detach()
                 )
 
@@ -189,8 +189,19 @@ class Registration:
         if self.verbose > 0:
             loss_value = loss_fn(parameter)
             print(f"Initial loss : {loss_fn(parameter):.2e}")
-            print(f"    fidelity = {self.current_loss:.2e}")
-            print(f"    regularization = {self.current_regularization:.2e}")
+            print(f"  = {self.current_loss:.2e}", end="")
+            if self.regularization != 0:
+                print(
+                    f" + {self.regularization} * "
+                    f"{self.current_path_length:.2e}",
+                    end="",
+                )
+            else:
+                print(
+                    " + 0",
+                    end="",
+                )
+            print(" (fidelity + regularization * path length)")
 
         # Run the optimization
         for i in range(self.n_iter):
@@ -198,10 +209,19 @@ class Registration:
             if self.verbose > 0:
                 loss_value = loss_fn(parameter)
                 print(f"Loss after {i + 1} iteration(s) : {loss_value:.2e}")
-                print(f"    fidelity = {self.current_loss:.2e}")
-                print(
-                    f"    regularization = {self.current_regularization:.2e}"
-                )
+                print(f"  = {self.current_loss:.2e}", end="")
+                if self.regularization != 0:
+                    print(
+                        f" + {self.regularization} * "
+                        f"{self.current_path_length:.2e}",
+                        end="",
+                    )
+                else:
+                    print(
+                        " + 0",
+                        end="",
+                    )
+                print(" (fidelity + regularization * path length)")
 
         # Store the device type of the parameter (useful for testing purposes)
         self.internal_parameter_device_type = parameter.device.type
