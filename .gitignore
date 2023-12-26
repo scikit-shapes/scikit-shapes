@@ -178,3 +178,4 @@ docs/generated/
 
 # Edges extraction
 *edges_extraction.cpp
+skshapes/data/edges_extraction.cpp
