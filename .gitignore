@@ -138,6 +138,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+# vscode settings
+**/.vscode/
+
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -178,3 +181,4 @@ docs/generated/
 
 # Edges extraction
 *edges_extraction.cpp
+skshapes/data/edges_extraction.cpp
