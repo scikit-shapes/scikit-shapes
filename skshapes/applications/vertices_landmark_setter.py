@@ -16,19 +16,18 @@ class LandmarkSetter:
     If a list is provided, the first shape is considered as the reference shape
     and the landmarks are selected on this shape. Then, the same landmarks must
     be selected on the other shapes.
+
+    Parameters
+    ----------
+    shapes
+        The shape or list of shapes on which the landmarks are selected.
     """
 
     @typecheck
     def __init__(
         self, shapes: Union[list[polydata_type], polydata_type]
     ) -> None:
-        """Class constructor.
-
-        Parameters
-        ----------
-        shapes
-            The shapes or list of shapes on which the landmarks are selected.
-        """
+        """Class constructor."""
         super().__init__()
 
         if hasattr(shapes, "__iter__") and len(shapes) > 1:
@@ -68,6 +67,7 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
             vedo.Points(self.lpoints, r=15).pickable(False).c("r")
         )
         self.add(self.lpoints_pointcloud)
+        self._closed = False
 
         text = (
             "Start by selecting landmarks on the reference shape\n"
@@ -88,10 +88,10 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         """
         if evt.keypress == "e":
             if evt.picked3d is not None:
-                pt = vedo.Points(self.actor.points()).closest_point(
+                pt = vedo.Points(self.actor.vertices).closest_point(
                     evt.picked3d
                 )
-                indice = closest_vertex(self.actor.points().copy(), pt)
+                indice = closest_vertex(self.actor.vertices.copy(), pt)
                 self.lpoints.append(pt)
                 self.landmarks.append(indice)
 
@@ -105,14 +105,16 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
             self.shape.landmark_indices = torch.tensor(self.landmarks)
             # Close the window
             self.close()
+            self._closed = True
 
-        # Update the display
-        self.remove(self.lpoints_pointcloud)
-        self.lpoints_pointcloud = (
-            vedo.Points(self.lpoints, r=15).pickable(False).c("r")
-        )
-        self.add(self.lpoints_pointcloud)
-        self.render()
+        if not self._closed:
+            # Update the display
+            self.remove(self.lpoints_pointcloud)
+            self.lpoints_pointcloud = (
+                vedo.Points(self.lpoints, r=15).pickable(False).c("r")
+            )
+            self.add(self.lpoints_pointcloud)
+            self.render()
 
     def start(self):
         """Start the landmark setter."""
@@ -145,11 +147,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
 
         # Convert the shapes to vedo.Mesh objects
         self.shapes = shapes
-        self.actors = [shape.to_vedo() for shape in shapes]
+        self.objects = [shape.to_vedo() for shape in shapes]
 
         # The first actor is the reference
-        self.reference = self.actors[0]
-        self.others = self.actors[1:]
+        self.reference = self.objects[0]
+        self.others = self.objects[1:]
 
         # At the beginning : the reference shape is plotted on the left
         # and the first other shape is plotted on the right
@@ -172,7 +174,7 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         # The reference vertices are stored in a vedo.Points object, we do not
         # display them but we store them to be able to
         # pick them
-        self.reference_vertices = vedo.Points(self.reference.points())
+        self.reference_vertices = vedo.Points(self.reference.vertices)
 
         # Instructions corresponding to the "reference" mode
         text_reference = (
@@ -328,11 +330,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         if self.mode == "reference" and evt.actor == self.reference:
             if evt.keypress == "e":
                 if evt.picked3d is not None:
-                    pt = vedo.Points(self.active_actor.points()).closest_point(
+                    pt = vedo.Points(self.active_actor.vertices).closest_point(
                         evt.picked3d
                     )
                     indice = closest_vertex(
-                        self.active_actor.points().copy(), pt
+                        self.active_actor.vertices.copy(), pt
                     )
                     self.reference_lpoints.append(pt)
                     self.reference_indices.append(indice)
@@ -353,11 +355,11 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
                 and len(self.other_lpoints) < self.n_landmarks
             ):
                 if evt.picked3d is not None:
-                    pt = vedo.Points(self.active_actor.points()).closest_point(
+                    pt = vedo.Points(self.active_actor.vertices).closest_point(
                         evt.picked3d
                     )
                     indice = closest_vertex(
-                        self.active_actor.points().copy(), pt
+                        self.active_actor.vertices.copy(), pt
                     )
                     self.other_lpoints.append(pt)
                     self.other_indices.append(indice)
