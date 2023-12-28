@@ -65,6 +65,8 @@ pip install -e .[dev]
 ```
 Then, you will have the possibility to interactively edit the code, run the linting tool and syntax checker, run the tests and build the documentation. From scikit-shapes directory, use the following commands :
 ```bash
+# Install pre-commit config
+pre-commit install
 # Lint wityh black + check syntax 
 pre-commit run --all-files
 # Run tests and show code coverage
