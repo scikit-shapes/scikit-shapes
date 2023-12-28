@@ -70,7 +70,7 @@ pre-commit install
 # Lint wityh black + check syntax 
 pre-commit run --all-files
 # Run tests and show code coverage
-pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html test/
+pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html tests/
 firefox htmlcov/index.html
 # Build documentation
 mkdocs serve
