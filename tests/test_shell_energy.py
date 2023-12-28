@@ -66,3 +66,20 @@ def test_shell_energy():
     assert torch.allclose(sks_bending, pytorch_shell_bending)
     assert torch.allclose(sks_membrane, pytorch_shell_membrane)
     assert torch.allclose(sks_shell, pytorch_shell_shell)
+
+
+def test_register_with_shellenergy():
+    source = sks.Sphere()
+    target = sks.Sphere()
+    loss = sks.L2Loss()
+    model = sks.IntrinsicDeformation(
+        n_steps=3,
+        metric=sks.ShellEnergyMetric(),
+    )
+
+    r = sks.Registration(loss=loss, model=model)
+
+    r.fit(
+        source=source,
+        target=target,
+    )

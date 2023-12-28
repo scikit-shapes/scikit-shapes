@@ -112,14 +112,14 @@ class ShellEnergyMetric(Metric):
 
         Raises
         ------
-            ValueError: This metric requires edges to be specified
+            ValueError: This metric requires triangles to be defined
 
         Returns
         -------
             FloatScalar: the mean velocities metric
         """
         if triangles is None:
-            raise ValueError("This metric requires edges to be defined")
+            raise ValueError("This metric requires triangles to be defined")
 
         n_steps = points_sequence.shape[1]
 
