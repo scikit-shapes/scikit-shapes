@@ -149,11 +149,8 @@ class Registration:
             loss = self.loss(source=morphing.morphed_shape, target=target)
             total_loss = loss + self.regularization * morphing.regularization
 
-            if self.verbose > 0:
-                self.current_loss = loss.clone().detach()
-                self.current_path_length = (
-                    morphing.regularization.clone().detach()
-                )
+            self.current_loss = loss.clone().detach()
+            self.current_path_length = morphing.regularization.clone().detach()
 
             return total_loss
 
@@ -186,8 +183,8 @@ class Registration:
             loss_value.backward()
             return loss_value
 
+        loss_value = loss_fn(parameter)
         if self.verbose > 0:
-            loss_value = loss_fn(parameter)
             print(f"Initial loss : {loss_fn(parameter):.2e}")
             print(f"  = {self.current_loss:.2e}", end="")
             if self.regularization != 0:
@@ -203,9 +200,16 @@ class Registration:
                 )
             print(" (fidelity + regularization * path length)")
 
+        fidelity_history = []
+        path_length_history = []
+
+        fidelity_history.append(self.current_loss)
+        path_length_history.append(self.current_path_length)
         # Run the optimization
         for i in range(self.n_iter):
             loss_value = optimizer.step(closure)
+            fidelity_history.append(self.current_loss)
+            path_length_history.append(self.current_path_length)
             if self.verbose > 0:
                 loss_value = loss_fn(parameter)
                 print(f"Loss after {i + 1} iteration(s) : {loss_value:.2e}")
@@ -263,6 +267,13 @@ class Registration:
             loss_value = loss_fn(parameter=parameter)
 
         self.loss_ = loss_value.detach().to(self.output_device)
+
+        self.fidelity_history_ = torch.stack(fidelity_history).to(
+            self.output_device
+        )
+        self.path_length_history_ = torch.stack(path_length_history).to(
+            self.output_device
+        )
         return self
 
     @typecheck

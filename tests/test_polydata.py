@@ -8,6 +8,7 @@ import pytest
 import os
 from beartype.roar import BeartypeCallHintParamViolation
 from jaxtyping import TypeCheckError
+import pytest
 
 
 def _cube():
@@ -67,6 +68,7 @@ def test_polydata_creation():
     # Shape initialized with points and triangles
     # dtype are automatically converted to float32 and int64 and numpy arrays
     # are converted to torch.Tensor
+
     points = torch.tensor(
         [[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float64
     )

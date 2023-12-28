@@ -75,14 +75,14 @@ def scatter(
         referenced by the index tensor.
     """
     if src.device != index.device:
-        raise RuntimeError(
+        raise ValueError(
             "The src and index tensors must be on the same device."
         )
     device = src.device
 
     if min_length is not None:
         if index.max() >= min_length:
-            raise RuntimeError(
+            raise ValueError(
                 "The min_length parameter must be greater than the maximum"
                 + " index value."
             )

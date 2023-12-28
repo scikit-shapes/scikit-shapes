@@ -6,6 +6,47 @@ from hypothesis import given, settings
 from hypothesis import strategies as st
 
 
+def test_multiscale_api():
+
+    mesh = sks.Sphere()
+
+    # Initialize with ratios
+    ratios = [0.01, 0.1, 0.5, 1]
+    M = sks.Multiscale(mesh, ratios=ratios)
+
+    # Initialize with n_points
+    n_points = [10, 100]
+    M = sks.Multiscale(mesh, n_points=n_points)
+
+    # Parallel initialization
+    mesh1 = sks.Sphere()
+    mesh2 = sks.Sphere()
+    decimation_module = sks.Decimation(n_points=1).fit(mesh1)
+
+    M1 = sks.Multiscale(
+        mesh1, n_points=n_points, decimation_module=decimation_module
+    )
+
+    M2 = sks.Multiscale(
+        mesh2, n_points=n_points, decimation_module=decimation_module
+    )
+
+    ratio = torch.rand(1).item()
+    assert torch.allclose(
+        M1.at(ratio=ratio).points,
+        M2.at(ratio=ratio).points,
+    )
+
+    # propagate a signal with default policies
+    M1.at(n_points=100)["test_signal"] = torch.rand(
+        M1.at(n_points=100).n_points
+    )
+    M1.propagate(
+        signal_name="test_signal",
+        from_n_points=100,
+    )
+
+
 def test_scattrer_toy():
     """A toy example to test the scatter function"""
 
@@ -239,7 +280,7 @@ def test_multiscale(init_type):
 
 
 @given(
-    smoothing=st.sampled_from(["mesh_convolution"]),
+    smoothing=st.sampled_from(["mesh_convolution", "constant"]),
 )
 @settings(deadline=None)
 def test_multiscale_signal_api(smoothing):
@@ -249,7 +290,7 @@ def test_multiscale_signal_api(smoothing):
     ratios = [0.01, 0.1, 0.5, 1]
 
     coarse_to_fine_policy = sks.CoarseToFinePolicy(
-        smoothing="constant",
+        smoothing=smoothing,
     )
     fine_to_coarse_policy = sks.FineToCoarsePolicy(
         reduce="mean",
@@ -275,28 +316,3 @@ def test_multiscale_signal_api(smoothing):
     M.append(ratio=0.2)
 
     assert "test_signal" not in M.at(ratio=0.2).point_data.keys()
-
-
-# def test_multiscale_list():
-#     mesh1 = sks.Sphere()
-#     mesh2 = sks.Sphere()
-
-#     # Test correspondence = True
-#     multimesh1, multimesh2 = sks.Multiscale(
-#         [mesh1, mesh2], correspondence=True, ratios=[0.1]
-#     )
-#     # Test that the two multiscale objects are equal
-#     assert torch.allclose(multimesh1.at(ratio=0.1).points, multimesh2.at(ratio=0.1).points)
-#     # test that they share the same decimation module
-#     assert multimesh1.decimation_module == multimesh2.decimation_module
-
-#     # Test correspondence = False
-#     multimesh1, multimesh2 = sks.Multiscale(
-#         [mesh1, mesh2], correspondence=False, ratios=[0.1]
-#     )
-#     # Test that the two multiscale objects are equal
-#     assert torch.allclose(multimesh1.at(ratio=0.1).points, multimesh2.at(ratio=0.1).points)
-#     # test that they do not share the same decimation module
-#     assert multimesh1.decimation_module != multimesh2.decimation_module
-
-#     assert multimesh1.at(ratio=0.1).points.dtype == sks.float_dtype
