@@ -1,3 +1,5 @@
+"""Tests for the multiscale module."""
+
 import skshapes as sks
 import torch
 from pyvista import examples
@@ -7,16 +9,9 @@ from hypothesis import strategies as st
 
 
 def test_multiscale_api():
-
-    mesh = sks.Sphere()
-
-    # Initialize with ratios
-    ratios = [0.01, 0.1, 0.5, 1]
-    M = sks.Multiscale(mesh, ratios=ratios)
-
+    """Test the multiscale API."""
     # Initialize with n_points
     n_points = [10, 100]
-    M = sks.Multiscale(mesh, n_points=n_points)
 
     # Parallel initialization
     mesh1 = sks.Sphere()
@@ -48,8 +43,7 @@ def test_multiscale_api():
 
 
 def test_scattrer_toy():
-    """A toy example to test the scatter function"""
-
+    """A toy example to test the scatter function."""
     # dimension 1
     src = torch.tensor([1, -1, 0.5], dtype=sks.float_dtype)
     index = torch.tensor([0, 1, 1], dtype=sks.int_dtype)
@@ -95,9 +89,7 @@ def test_scattrer_toy():
 )
 @settings(deadline=None)
 def test_scatter_multidim(n, n_dim):
-    """Assert that the scatter function works as expected for multidimensional
-    signals"""
-
+    """Assert scatter function works as expected for multidim signals."""
     # dimension d
     d = torch.randint(1, 10, (n_dim,))
 
@@ -143,7 +135,6 @@ def test_multiscale(init_type):
     ratios and test the signal propagation from high to low resolution and
     back, specifically the composition of two propagations.
     """
-
     # Load a triangle mesh (~34k points)
     mesh = sks.PolyData(examples.download_bunny())
 
@@ -284,8 +275,7 @@ def test_multiscale(init_type):
 )
 @settings(deadline=None)
 def test_multiscale_signal_api(smoothing):
-    """Test the multiscale signal API"""
-
+    """Test the multiscale signal API."""
     mesh = sks.PolyData(examples.download_bunny())
     ratios = [0.01, 0.1, 0.5, 1]
 

@@ -1,14 +1,16 @@
+"""Tests for the PolyData class."""
+
 import torch
 import pyvista
 from pyvista.core.pointset import PolyData as PyvistaPolyData
 import numpy as np
 import vedo
-import skshapes as sks
 import pytest
 import os
 from beartype.roar import BeartypeCallHintParamViolation
 from jaxtyping import TypeCheckError
-import pytest
+
+import skshapes as sks
 
 
 def _cube():
@@ -65,10 +67,10 @@ def _cube():
 
 
 def test_polydata_creation():
+    """Test the creation of a PolyData object."""
     # Shape initialized with points and triangles
     # dtype are automatically converted to float32 and int64 and numpy arrays
     # are converted to torch.Tensor
-
     points = torch.tensor(
         [[0, 0, 0], [0, 0, 1], [0, 1, 0]], dtype=torch.float64
     )
@@ -163,6 +165,7 @@ def test_polydata_creation():
 
 
 def test_geometry_features():
+    """Test some geometry features on a simple mesh."""
     square_points = torch.tensor(
         [[0, 0], [1, 0], [1, 1], [0, 1]], dtype=sks.float_dtype
     )
@@ -270,6 +273,7 @@ def test_geometry_features():
 
 
 def test_polydata_creation_2d():
+    """Test manually creating a 2d mesh + interaction with pv/vedo."""
     points = torch.tensor([[0, 0], [0, 1], [1, 0]], dtype=torch.float64)
     triangles = torch.tensor([[0, 1, 2]], dtype=torch.int32)
 
@@ -293,6 +297,7 @@ def test_polydata_creation_2d():
 
 
 def test_interaction_with_pyvista():
+    """Test the interaction with pyvista."""
     # Import/export from/to pyvista
     from pyvista.examples import load_sphere
 
@@ -340,6 +345,7 @@ def test_interaction_with_pyvista():
 
 
 def test_mesh_cleaning():
+    """Assert that .clean() is called when loading a mesh with skshapes."""
     # Example of a mesh with duplicated points
     points = np.array(
         [
@@ -365,6 +371,7 @@ def test_mesh_cleaning():
 
 
 def test_point_data():
+    """Test the PointData (signals) interface."""
     mesh = sks.PolyData(pyvista.Sphere())
 
     # Add some point_data
@@ -401,11 +408,11 @@ def test_point_data():
     }
 
     mesh.point_data = new_point_data  # Replace the point_data
-    for key, value in mesh.point_data.items():
+    for key, _ in mesh.point_data.items():
         print(key)
     mesh.point_data.append(torch.rand(mesh.n_points, 2))  # Add a new feature
     print("")
-    for key, value in mesh.point_data.items():
+    for key, _ in mesh.point_data.items():
         print(key)
     assert list(mesh.point_data.keys()) == [
         "rotations",
@@ -477,6 +484,7 @@ def test_point_data():
 
 
 def test_point_data2():
+    """Test the PointData (signals) interface: higher dimension."""
     # Load a pyvista.PolyData and add an attribute
     pv_mesh = pyvista.Sphere()
     # The attribute has 4 dims
@@ -548,11 +556,12 @@ def test_point_data2():
 
 
 def test_landmarks_creation():
+    """Test the creation of landmarks as sparse tensors."""
     mesh1 = sks.Sphere()
     mesh2 = sks.Sphere()
 
     assert mesh1.n_landmarks == 0
-    assert mesh1.landmark_points == None
+    assert mesh1.landmark_points is None
 
     mesh1.add_landmarks(3)
     assert mesh1.n_landmarks == 1
@@ -595,6 +604,7 @@ def test_landmarks_creation():
 
 
 def test_landmarks_conservation():
+    """Test landmarks conservation when converting to pyvista and vedo."""
     # Create a mesh and add landmarks
     mesh = sks.PolyData(pyvista.Sphere(), landmarks=[2, 45, 12, 125])
 
@@ -625,6 +635,7 @@ def test_landmarks_conservation():
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_point_data_cuda():
+    """Test the behavior of signals with respect to the device."""
     # Load a pyvista.PolyData and add an attribute
     pv_mesh = pyvista.Sphere()
     pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 3)
@@ -674,7 +685,8 @@ def test_point_data_cuda():
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"
 
 
-def test_clean_polydata_signal_and_landmarks():
+def test_polydata_signal_and_landmarks():
+    """Test preservation of landmarks and signal when converting."""
     sphere = sks.Sphere()
     landmarks = torch.tensor([0, 1, 2, 3, 4, 5])
     signal = torch.rand(sphere.n_points, dtype=sks.float_dtype)
@@ -705,6 +717,7 @@ def test_clean_polydata_signal_and_landmarks():
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_gpu():
+    """Test moving a polydata to the gpu."""
     cube = sks.PolyData(_cube())
 
     cube_gpu = cube.to("cuda")
@@ -718,6 +731,7 @@ def test_gpu():
 
 
 def test_control_points():
+    """Test the interface of control points."""
     mesh = sks.Circle()
     grid = mesh.bounding_grid(N=5)
 
@@ -735,6 +749,7 @@ def test_control_points():
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_control_points_device():
+    """Test the behavior of the control points with respect to the device."""
     # mesh on cpu and control points on gpu -> should raise an error
     mesh = sks.Sphere().to("cpu")
     grid = mesh.bounding_grid(N=5)

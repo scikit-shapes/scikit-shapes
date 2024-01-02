@@ -64,7 +64,7 @@ class BarycentricLandmarkSetter(vedo.Plotter):
         self.mode = "reference"
         # The reference vertices are stored in a vedo.Points object, we do not
         # display them but we store them to be able to pick them
-        self.reference_vertices = vedo.Points(self.reference.points())
+        self.reference_vertices = vedo.Points(self.reference.vertices)
 
         # Instructions corresponding to the "reference" mode
         text_reference = "Start by selecting landmarks on the reference mesh\n"
@@ -211,7 +211,7 @@ class BarycentricLandmarkSetter(vedo.Plotter):
                 self.reference_lpoints.append(pt)
 
             if evt.keypress == "e":
-                pt = vedo.Points(self.active_actor.points()).closest_point(
+                pt = vedo.Points(self.active_actor.vertices).closest_point(
                     evt.picked3d
                 )
                 self.reference_lpoints.append(pt)
@@ -238,7 +238,7 @@ class BarycentricLandmarkSetter(vedo.Plotter):
                 evt.keypress == "e"
                 and len(self.other_lpoints) < self.n_landmarks
             ):
-                pt = vedo.Points(self.active_actor.points()).closest_point(
+                pt = vedo.Points(self.active_actor.vertices).closest_point(
                     evt.picked3d
                 )
                 self.other_lpoints.append(pt)

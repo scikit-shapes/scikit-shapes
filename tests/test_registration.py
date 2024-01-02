@@ -1,3 +1,5 @@
+"""Test the registration task."""
+
 import skshapes as sks
 import pyvista
 import torch
@@ -52,6 +54,7 @@ def test_registration_hypothesis(
     provide_initial_parameter,
     dim,
 ):
+    """Test that the registration task not failed with random params."""
     # Load two meshes
 
     if dim == 3:
@@ -123,7 +126,9 @@ def test_registration_hypothesis(
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_registration_device():
-    """This test ensure the behavior of the registration task with respect to
+    """Test the behavior of the registration task with respect to the device.
+
+    This test ensure the behavior of the registration task with respect to
         the devices of the source, target and the gpu argument.
     Expected behavior:
         - If the gpu argument is True, the optimization should occurs on the
@@ -192,6 +197,7 @@ def test_registration_device():
 
 
 def test_lddmm_control_points():
+    """Test to run LDDMM with control points."""
     mesh1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
     mesh2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
 

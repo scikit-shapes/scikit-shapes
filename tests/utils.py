@@ -1,8 +1,9 @@
+"""Utils for the tests."""
+
 import torch
 from torch.profiler import profile, ProfilerActivity
 import vedo as vd
 import skshapes as sks
-from skshapes.types import polydata_type
 from typing import Optional, Literal
 import sys
 
@@ -53,6 +54,7 @@ def create_shape(
     radius=1,
     offset=0,
 ):
+    """Create a shape from a file or a function."""
     if shape == "sphere":
         points = torch.randn(n_points, 3)
         points = radius * torch.nn.functional.normalize(points, p=2, dim=1)
@@ -90,12 +92,14 @@ def dim4(*, points, offset=0, scale=1):
 
 
 def quadratic_function(*, points, quadric, offset=0, scale=1):
+    """Compute a quadratic function."""
     assert quadric.shape == (4, 4)
     X = dim4(points=points, offset=offset, scale=scale)
     return ((X @ quadric) * X).sum(-1)
 
 
 def quadratic_gradient(*, points, quadric, offset=0, scale=1):
+    """Compute the gradient of a quadratic function."""
     # Make sure that the quadric is symmetric:
     assert quadric.shape == (4, 4)
     quadric = (quadric + quadric.T) / 2
@@ -106,6 +110,7 @@ def quadratic_gradient(*, points, quadric, offset=0, scale=1):
 
 
 def vedo_frames(points, frames):
+    """Create a vedo object for the frames."""
     n = vd.Arrows(points, points + frames[:, :, 0], c="red", alpha=0.9)
     u = vd.Arrows(points, points + frames[:, :, 1], c="blue", alpha=0.9)
     v = vd.Arrows(points, points + frames[:, :, 2], c="green", alpha=0.9)
@@ -113,6 +118,7 @@ def vedo_frames(points, frames):
 
 
 def profiler():
+    """Create a profiler."""
     activities = [ProfilerActivity.CPU]
     if torch.cuda.is_available():
         activities.append(ProfilerActivity.CUDA)
@@ -127,7 +133,3 @@ def profiler():
         ),
     )
     return myprof
-
-
-def create_2d_polydata() -> tuple[polydata_type, polydata_type]:
-    """Generate two 2D shapes: a circle and a line"""

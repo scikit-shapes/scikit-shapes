@@ -1,6 +1,9 @@
+"""Test the shell energy implementation."""
+
 import torch
-import skshapes as sks
 import pytest
+
+import skshapes as sks
 
 try:
     import pytorch_shell
@@ -15,10 +18,7 @@ except ImportError:
     not pytorch_shell_available, reason="pytorch_shell is not installed"
 )
 def test_shell_energy():
-    import skshapes as sks
-    import pytorch_shell
-    import torch
-
+    """Test that the shell energy is the same as pytorch_shell (reference)."""
     source = sks.Sphere()
     target = sks.Sphere()
     target.points += torch.randn_like(target.points) * 0.05
@@ -69,6 +69,7 @@ def test_shell_energy():
 
 
 def test_register_with_shellenergy():
+    """Test that the registration works with shell energy."""
     source = sks.Sphere()
     target = sks.Sphere()
     loss = sks.L2Loss()

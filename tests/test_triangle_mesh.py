@@ -1,14 +1,27 @@
-import skshapes as sks
-from skshapes.triangle_mesh import EdgeTopology
+"""Test the triangle mesh module."""
+
 from pyvista import examples
+from math import sqrt
 import torch
+
+import skshapes as sks
+from skshapes.triangle_mesh import (
+    triangle_normals,
+    triangle_areas,
+    triangle_centers,
+    edge_centers,
+    edge_lengths,
+    dihedral_angles,
+    EdgeTopology,
+)
+from skshapes.triangle_mesh.geometry import _get_geometry
 
 
 def test_edge_topology():
+    """Test the edge topology class."""
     hills = examples.load_random_hills()
     mesh = sks.PolyData(hills)
 
-    points = mesh.points
     triangles = mesh.triangles
 
     edge_topology = EdgeTopology(triangles)
@@ -53,21 +66,8 @@ def test_edge_topology():
         assert opposed_point in adjacent_triangle
 
 
-from skshapes.triangle_mesh import (
-    triangle_normals,
-    triangle_areas,
-    triangle_centers,
-    edge_centers,
-    edge_lengths,
-    dihedral_angles,
-)
-
-from skshapes.triangle_mesh.geometry import _get_geometry
-
-from math import sqrt
-
-
 def test_functional_geometry():
+    """Test some geometry/topology functions on a simple mesh."""
     # A simple 2D example to test the geometry functions on a simple mesh
     #
     #
@@ -183,6 +183,7 @@ def _create_points_list_and_frame(n_frames, points):
 
 
 def test_geometry():
+    """Test the geometry functions with multiple frames."""
     mesh = sks.Sphere()
 
     points = mesh.points
@@ -217,6 +218,7 @@ def test_geometry():
 
 
 def test_energy():
+    """Test the energy function with multiple frames."""
     mesh = sks.PolyData(examples.load_random_hills())
 
     from skshapes.triangle_mesh import (
@@ -227,7 +229,6 @@ def test_energy():
 
     points = mesh.points
     triangles = mesh.triangles
-    edge_topology = EdgeTopology(triangles)
 
     n_frames = 7
     _, frames = _create_points_list_and_frame(n_frames, points)
