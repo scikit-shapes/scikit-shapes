@@ -13,7 +13,7 @@ jobs:
     strategy:
       matrix:
         # os: [ubuntu-latest, macos-latest]
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.11"]
         os: [ubuntu-latest]
 
     steps:
@@ -27,7 +27,7 @@ jobs:
       - name : Create artifacts directory
         run: |
           mkdir -p artifacts/
-      
+
       - name: Install package (with dependencies for linting, testing and building doc)
         run: |
           pip install --upgrade pip
@@ -46,7 +46,7 @@ jobs:
       # https://github.com/pyvista/setup-headless-display-action
       - name: Setup headless display
         uses: pyvista/setup-headless-display-action@v2
-        
+
       - name: build documentation
         if: matrix.python-version == '3.11'
         run: |
