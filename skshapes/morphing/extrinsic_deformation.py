@@ -11,6 +11,9 @@ at q.
 from __future__ import annotations
 
 import torch
+from torchdiffeq import odeint
+from typing import Optional, Literal
+
 from .basemodel import BaseModel
 from ..types import (
     Points,
@@ -18,7 +21,7 @@ from ..types import (
     MorphingOutput,
 )
 from ..input_validation import typecheck
-from typing import Optional
+
 from .utils import Integrator, EulerIntegrator
 from .kernels import Kernel, GaussianKernel
 
@@ -33,6 +36,7 @@ class ExtrinsicDeformation(BaseModel):
         integrator: Optional[Integrator] = None,
         kernel: Optional[Kernel] = None,
         control_points: bool = True,
+        backend: Literal["sks", "torchdiffeq"] = "sks",
         **kwargs,
     ) -> None:
         """Class constructor.
@@ -61,6 +65,7 @@ class ExtrinsicDeformation(BaseModel):
         self.cometric = kernel
         self.n_steps = n_steps
         self.control_points = control_points
+        self.backend = backend
 
     @typecheck
     def morph(
@@ -99,6 +104,7 @@ class ExtrinsicDeformation(BaseModel):
 
         if self.control_points is False or shape.control_points is None:
             q = shape.points.clone()
+            points = None
         else:
             points = shape.points.clone()
             q = shape.control_points.points.clone()
@@ -114,39 +120,83 @@ class ExtrinsicDeformation(BaseModel):
             K = self.cometric.operator(q, q)
             return torch.sum(p * (K @ p)) / 2
 
-        dt = 1 / self.n_steps  # Time step
-
         if not return_path:
             path = None
         else:
             path = [shape.copy() for _ in range(self.n_steps + 1)]
 
-        if self.n_steps == 1:
-            # If there is only one step, we can compute the transormation
-            # directly without using the integrator as we do not need p_1
-            K = self.cometric.operator(shape.points, q)
-            points = shape.points + dt * (K @ p)
-            if return_path:
-                path[1].points = points
+        if self.backend == "torchdiffeq":
 
-        else:
-            for i in range(self.n_steps):
-                if not self.control_points or shape.control_points is None:
-                    # Update the points
-                    # no control points -> q = shape.points
-                    p, q = self.integrator(p, q, H, dt)
-                    points = q.clone()
+            def ode_func(t, y):
+                if len(y) == 2:
+                    p, q = y
+                elif len(y) == 3:
+                    p, q, pts = y
+
+                Gp, Gq = torch.autograd.grad(
+                    H(p, q), (p, q), create_graph=True
+                )
+                pdot, qdot = -Gq, Gp
+
+                if len(y) == 2:
+                    return pdot, qdot
                 else:
-                    # Update the points
-                    K = self.cometric.operator(points, q)
-                    points = points + dt * (K @ p)
-                    p, q = self.integrator(p, q, H, dt)
+                    Gp2 = self.cometric.operator(pts, q) @ p
+                    ptsdot = Gp2
+                    return pdot, qdot, ptsdot
 
+            y_0 = (p, q) if points is None else (p, q, points)
+            time = torch.linspace(0, 1, self.n_steps + 1).to(p.device)
+
+            if points is None:
+                (
+                    path_p,
+                    path_q,
+                ) = odeint(func=ode_func, y0=y_0, t=time, method="rk4")
+                path_pts = path_q  # points and control points are the same
+            else:
+                (
+                    path_p,
+                    path_q,
+                    path_pts,
+                ) = odeint(func=ode_func, y0=y_0, t=time, method="rk4")
+
+            if return_path:
+                for i in range(self.n_steps + 1):
+                    path[i].points = path_pts[i]
+
+            morphed_shape = shape.copy()
+            morphed_shape.points = path_pts[-1]
+
+        elif self.backend == "sks":
+            dt = 1 / self.n_steps  # Time step
+
+            if self.n_steps == 1:
+                # If there is only one step, we can compute the transormation
+                # directly without using the integrator as we do not need p_1
+                K = self.cometric.operator(shape.points, q)
+                points = shape.points + dt * (K @ p)
                 if return_path:
-                    path[i + 1].points = points
+                    path[1].points = points
 
-        morphed_shape = shape.copy()
-        morphed_shape.points = points
+            else:
+                for i in range(self.n_steps):
+                    if not self.control_points or shape.control_points is None:
+                        # Update the points
+                        # no control points -> q = shape.points
+                        p, q = self.integrator(p, q, H, dt)
+                        points = q.clone()
+                    else:
+                        # Update the points
+                        K = self.cometric.operator(points, q)
+                        points = points + dt * (K @ p)
+                        p, q = self.integrator(p, q, H, dt)
+
+                    if return_path:
+                        path[i + 1].points = points
+
+            morphed_shape = shape.copy()
+            morphed_shape.points = points
 
         return MorphingOutput(
             morphed_shape=morphed_shape,
