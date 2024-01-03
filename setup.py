@@ -24,6 +24,7 @@ extension2 = Extension(
 dependencies = [
     "numpy",
     "torch>=1.11",
+    "torchdiffeq",
     "pykeops",
     "geomloss",
     "jaxtyping",
