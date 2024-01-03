@@ -1,3 +1,5 @@
+"""Tests for the moments of a shape."""
+
 import torch
 import skshapes as sks
 from hypothesis import given, settings
@@ -10,6 +12,7 @@ sys.path.append(sys.path[0][:-4])
 
 
 def moments(X):
+    """Compute the first 4 moments of a point cloud."""
     # Switch to Float64 precision for better accuracy
     X = X.double()
     N, D = X.shape
@@ -31,6 +34,7 @@ def moments(X):
 )
 @settings(max_examples=1000, deadline=None)
 def test_moments_1(*, n_points: int, scale: float, offset: float):
+    """Test the first 4 moments of a random shape."""
     points = scale * torch.randn(n_points, 3) + offset * torch.randn(1)
     shape = sks.PolyData(points=points)
 
@@ -55,6 +59,7 @@ def test_moments_1(*, n_points: int, scale: float, offset: float):
 
 
 def display_moments(*, scale=1, **kwargs):
+    """Display moments of a shape (not a test)."""
     shape = create_shape(**kwargs)
 
     local_average = shape.point_moments(order=1, scale=scale)

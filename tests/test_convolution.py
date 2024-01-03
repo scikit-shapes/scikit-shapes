@@ -1,10 +1,13 @@
+"""Tests for the convolution module."""
+
 import skshapes as sks
 import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
 
-def test_mesh_convolution():
+def test_mesh_convolution_point_cloud():
+    """Test error handling for mesh_convolution on a pont cloud."""
     points = torch.rand(10, 3)
     pc = sks.PolyData(points=points)
     try:
@@ -20,6 +23,7 @@ def test_mesh_convolution():
 
 
 def test_squared_distance():
+    """Test the squared distance function."""
     N, M = 2000, 1000
 
     # Define two point clouds
@@ -64,8 +68,8 @@ def test_squared_distance():
     assert torch.allclose(signal_out1, signal_out2)
 
 
-def test_convolution_trivial():
-    #
+def test_convolution_simple():
+    """Test the convolution results by comparing with direct computations."""
     X = torch.tensor(
         [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], dtype=sks.float_dtype
     )
@@ -122,6 +126,7 @@ def test_convolution_functional(
     normalize: bool,
     dim: int,
 ):
+    """Test the convolution results by comparing with direct computations."""
     # Sample two point clouds
     X = torch.rand(N, 3).to(sks.float_dtype)
     Y = torch.rand(M, 3).to(sks.float_dtype)
@@ -184,7 +189,8 @@ def test_convolution_functional(
     assert torch.allclose(A, B, atol=1e-4)
 
 
-def test_mesh_convolution():
+def test_mesh_convolution_constant_signal():
+    """Test that a constant signal is kept unchanged."""
     mesh = sks.Sphere()
     # define a constant signal
     signal = torch.rand(1) * torch.ones(mesh.n_points, dtype=sks.float_dtype)
@@ -197,13 +203,12 @@ def test_mesh_convolution():
 
 
 def test_multidimensional_matrix_multiplication():
-    """test the LinearOperator class for multidimensional matrix multiplication
+    """Test the LinearOperator class for multidimensional matrix product.
 
     More precisely, we test that if M is a Linearoperator of shape (n, m) and
     A a tensor of shape (m, *t), then M @ A is well defined and results in a
     (n, *t) tensor, t being a tuple of integers.
     """
-
     # Define a LinearOperator of shape (n, m)
     randint = (
         lambda up, low=1: torch.randint(low, up, (1,))[0] if up > low else low
@@ -235,8 +240,7 @@ def test_multidimensional_matrix_multiplication():
 
 
 def test_multidimensional_signal_convolution():
-    """Test that the mesh convolution operator is well defined for
-        multidimensional signals
+    """Test well defineness for multidimensional signals.
 
     The mesh convolution operator is defined as a matrix of shape
     (n_points, n_points) where n_points is the number of points of the mesh. In
@@ -246,7 +250,6 @@ def test_multidimensional_signal_convolution():
     output signal is checked to have the right shape after matrix
     multiplication.
     """
-
     mesh = sks.Sphere()
     n_points = mesh.n_points
 

@@ -1,3 +1,5 @@
+"""Tests for the deformation modules."""
+
 import skshapes as sks
 import torch
 
@@ -9,6 +11,7 @@ deformation_models = [
 
 
 def test_deformation():
+    """Compatibility of deformations modules wrt autograd."""
     for deformation_model in deformation_models:
         _test(deformation_model)
 
@@ -37,7 +40,7 @@ def _test(deformation_model):
         p = p.cuda()
         try:
             model.morph(shape=shape, parameter=p).morphed_shape
-        except ValueError as e:
+        except ValueError:
             pass
         else:
             raise RuntimeError("Expected ValueError")

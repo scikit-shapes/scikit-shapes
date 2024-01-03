@@ -1,3 +1,5 @@
+"""Tests for the decimation module."""
+
 import skshapes as sks
 import pyvista
 import torch
@@ -5,6 +7,7 @@ import pytest
 
 
 def test_indice_mapping_interface():
+    """Test the interface of the indice mapping class."""
     sphere = sks.Sphere()
     d1 = sks.Decimation(n_points=10).fit(mesh=sphere)
     newsphere1, im1 = d1.transform(sphere, return_indice_mapping=True)
@@ -17,6 +20,7 @@ def test_indice_mapping_interface():
 
 
 def test_mesh_decimation_n_points_strict():
+    """Test that the n_points_strict argument works."""
     import pyvista.examples
 
     mesh = sks.PolyData(pyvista.examples.download_louis_louvre())
@@ -33,9 +37,7 @@ def test_mesh_decimation_n_points_strict():
 
 
 def test_decimation_basic():
-    """Assert that the if we fit_transform the decimator from sks on a mesh,
-    and then transform a copy of the mesh the result is the same"""
-
+    """Test that fit + transform gives the same result as fit_transform."""
     sphere = sks.PolyData(pyvista.Sphere())
     sphere_copy = sks.PolyData(pyvista.Sphere())
 
@@ -124,6 +126,7 @@ def test_decimation_basic():
 
 
 def test_decimation_landmarks():
+    """Test decimation with landmarks."""
     mesh = sks.PolyData(pyvista.Sphere())
 
     values = [1, 1, 0.3, 0.4, 0.3, 1]
@@ -153,8 +156,7 @@ def test_decimation_landmarks():
 
 
 def test_torch_sparse_tensor_repetitions():
-    """Assert that the torch.sparse_coo_tensor can handle repetitions in the
-    indices and sum the values"""
+    """Test assign a value to a sparse tensor with repetitions (must sum)."""
     import random
 
     a = random.random()
@@ -178,7 +180,7 @@ def test_torch_sparse_tensor_repetitions():
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_decimation_gpu():
-    # Assert that the decimation works with PolyData on the gpu
+    """Test decimation with PolyData on the gpu."""
     sphere = sks.Sphere().to("cuda")
 
     dec = sks.Decimation(n_points=15)

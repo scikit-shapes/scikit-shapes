@@ -6,6 +6,7 @@ import skshapes as sks
 
 
 def test_errors_metrics():
+    """Raise some errors for the metrics."""
     triangle_mesh = sks.Sphere()
     edges = triangle_mesh.edges
     points = triangle_mesh.points
@@ -48,6 +49,7 @@ def test_errors_metrics():
 
 
 def tests_error_registration():
+    """Raise some errors for the Registration class."""
     source = sks.Sphere()
     target = sks.Sphere()
 
@@ -67,6 +69,7 @@ def tests_error_registration():
 
 
 def test_errors_polydata():
+    """Raise some errors for the PolyData class."""
     # Try to initialize a mesh with a complex tensor
     real = torch.tensor([1, 2], dtype=torch.float32)
     imag = torch.tensor([3, 4], dtype=torch.float32)

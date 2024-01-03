@@ -1,3 +1,5 @@
+"""Tests related to the device compatibility of shapes."""
+
 import skshapes as sks
 import pyvista.examples
 from typing import get_args
@@ -12,7 +14,9 @@ shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.5)
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_registration_device():
-    """This test ensure the behavior of the registration task with respect to
+    """Test the device compatibility of source and target for registration.
+
+    This test ensure the behavior of the registration task with respect to
     the devices of the source, target and the gpu argument.
     Expected behavior:
         - If the gpu argument is True, the optimization should occurs on the
@@ -72,6 +76,7 @@ def test_registration_device():
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_loss_device():
+    """Error if source and target are on different devices."""
     source = shape1.to("cpu")
     target = shape2.to("cuda")
 

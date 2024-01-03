@@ -1,3 +1,5 @@
+"""Tests for the curvatures module."""
+
 import time
 import numpy as np
 import torch
@@ -36,6 +38,7 @@ def test_curvatures_quadratic(
     e: float,
     f: float,
 ):
+    """Test the curvatures of a quadratic function."""
     # Our current estimation method relies on the estimation of the tangent
     # plane, and does not give perfect results for quadratic functions "off
     # center".
@@ -93,6 +96,7 @@ def test_curvatures_quadratic(
 def test_curvatures_sphere(
     *, n_points: int, radius: float, relative_scale: float
 ):
+    """Test the curvatures of a sphere."""
     # Create a sphere with the correct radius and an arbitrary center:
     shape = create_shape(shape="sphere", n_points=n_points, radius=radius)
 
@@ -105,6 +109,7 @@ def test_curvatures_sphere(
 
 
 def display_curvatures_old(*, function: callable, scale=1):
+    """Old version of display_curvatures, kept for reference."""
     points, normals = create_point_cloud(n_points=20, f=function, normals=True)
     points = points + 0.05 * torch.randn(len(points), 3)
 
@@ -126,6 +131,7 @@ def display_curvatures_old(*, function: callable, scale=1):
 
 
 def display_curvatures(*, scale=1, highlight=0, **kwargs):
+    """Display the curvatures of a shape (not a test)."""
     shape = create_shape(**kwargs)
     scales = [scale, 2 * scale, 5 * scale, 10 * scale]
 
@@ -195,51 +201,51 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
 
 if __name__ == "__main__":
     shapes = [
-        dict(
+        dict(  # noqa C408
             shape="sphere",
             radius=1,
             scale=0.05,
             n_points=500,
         ),
-        dict(
+        dict(  # noqa C408
             shape="sphere",
             radius=0.1,
             scale=0.005,
             n_points=500,
         ),
-        dict(
+        dict(  # noqa C408
             shape="sphere",
             radius=10,
             scale=0.5,
             n_points=500,
         ),
-        dict(
+        dict(  # noqa C408
             function=lambda x, y: 0.5 * x**2 + 0.5 * y**2,
             scale=0.05,
             n_points=31,
             noise=0.0001,
             highlight=0 if False else int(31**2 / 2),
         ),
-        dict(
+        dict(  # noqa C408
             function=lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
             scale=0.05,
             n_points=15,
             noise=0.01,
         ),
-        dict(
+        dict(  # noqa C408
             function=lambda x, y: 0.5 * x**2 - 0.5 * y**2,
             scale=0.05,
             n_points=31,
             noise=0.0001,
             highlight=0 if False else int(31**2 / 2),
         ),
-        dict(
+        dict(  # noqa C408
             shape="unit patch",
             function=lambda x, y: 2 * x * y,
             scale=0.08,
             n_points=1000,
         ),
-        dict(
+        dict(  # noqa C408
             function=lambda x, y: 0.5 * x * x / 3
             - x * y
             - 0.5 * 1.5 * y * y
@@ -249,14 +255,14 @@ if __name__ == "__main__":
             noise=0.0001,
             highlight=0 if False else int(15**2 / 2),
         ),
-        dict(
+        dict(  # noqa C408
             function=lambda x, y: y**2 + y,
             scale=0.05,
             n_points=31,
             noise=0.0001,
             highlight=0 if False else int(31**2 / 2),
         ),
-        dict(
+        dict(  # noqa C408
             file_name="~/data/PN1.stl",
             scale=2.0,
             n_points=5e3,

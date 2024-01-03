@@ -1,3 +1,5 @@
+"""Test the implicit quadrics module."""
+
 import torch
 import skshapes as sks
 from hypothesis import given, settings
@@ -45,6 +47,7 @@ def test_quadratic_function(*, n_points: int):
 
 
 def display_quadratic_fit(points, highlight=0, scale=1):
+    """Display the quadratic fit of a point cloud (not a test)."""
     # Fit a quadratic function to the point cloud
     quadrics, mean_point, sigma = sks.implicit_quadrics(
         points=points, scale=scale

@@ -1,3 +1,5 @@
+"""Tests for the input validation decorators."""
+
 import skshapes as sks
 from beartype.roar import BeartypeCallHintParamViolation
 from jaxtyping import TypeCheckError
@@ -10,7 +12,6 @@ def test_one_and_only_one_decorator():
     when the function is called with more than one of the arguments
     specified in the decorator or when none of the arguments is specified.
     """
-
     # define a function with the decorator
     @sks.one_and_only_one(["a", "b"])
     @sks.typecheck
@@ -58,7 +59,6 @@ def test_no_more_than_one():
     when the function is called with more than one of the arguments
     specified in the decorator.
     """
-
     # define a function with the decorator
     @sks.no_more_than_one(["a", "b"])
     @sks.typecheck
