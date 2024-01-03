@@ -11,6 +11,7 @@ def test_one_and_only_one_decorator():
     This test checks that the one_and_only_one decorator raises an error
     when the function is called with more than one of the arguments
     specified in the decorator or when none of the arguments is specified.
+
     """
     # define a function with the decorator
     @sks.one_and_only_one(["a", "b"])
@@ -58,6 +59,7 @@ def test_no_more_than_one():
     This test checks that the no_more_than_one decorator raises an error
     when the function is called with more than one of the arguments
     specified in the decorator.
+
     """
     # define a function with the decorator
     @sks.no_more_than_one(["a", "b"])
