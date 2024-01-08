@@ -24,7 +24,7 @@ from ..types import (
     polydata_type,
     IntSequence,
 )
-from ..input_validation import typecheck, convert_inputs
+from ..input_validation import typecheck, convert_inputs, one_and_only_one
 from typing import Optional, Any, Union, Literal
 from warnings import warn
 from .utils import DataAttributes
@@ -281,11 +281,13 @@ class PolyData(polydata_type):
     )
 
     @typecheck
+    @one_and_only_one(["target_reduction", "n_points", "ratio"])
     def decimate(
         self,
         *,
-        target_reduction: Optional[float] = None,
-        n_points: Optional[Number] = None,
+        target_reduction: Optional[Number] = None,
+        n_points: Optional[int] = None,
+        ratio: Optional[Number] = None,
     ) -> PolyData:
         """Decimation of the shape.
 
@@ -307,28 +309,16 @@ class PolyData(polydata_type):
         PolyData
             The decimated shape.
         """
-        if target_reduction is None and n_points is None:
-            raise ValueError(
-                "Either target_reduction or n_points must be provided."
-            )
-
-        if target_reduction is not None and n_points is not None:
-            raise ValueError(
-                "Only one of target_reduction or n_points must be provided."
-            )
-
-        if n_points is not None:
-            assert n_points > 0, "n_points must be positive"
-            target_reduction = max(0, 1 - n_points / self.n_points)
-
-        assert (
-            target_reduction >= 0 and target_reduction <= 1
-        ), "target_reduction must be between 0 and 1"
+        kwargs = {
+            "target_reduction": target_reduction,
+            "n_points": n_points,
+            "ratio": ratio,
+        }
 
         if self.is_triangle_mesh:
             from ..decimation import Decimation
 
-            d = Decimation(target_reduction=target_reduction)
+            d = Decimation(**kwargs)
             return d.fit_transform(self)
         else:
             raise NotImplementedError(
