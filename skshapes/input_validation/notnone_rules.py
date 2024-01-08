@@ -20,6 +20,7 @@ Decorators already implemented:
 - `no_more_than_one` : no more than one of the parameters must be not None
 """
 from functools import wraps
+from ..errors import InputStructureError
 
 
 def generator_notnone_rule(rule):
@@ -59,7 +60,7 @@ def generator_notnone_rule(rule):
 
                 Raises
                 ------
-                ValueError
+                InputStructureError
                     if more than of the parameters list is not None
                 """
                 # Check that only one of the parameters is not None
@@ -85,7 +86,7 @@ def generator_notnone_rule(rule):
 def rule_one_and_only_one(not_none: int, parameters: list[str]) -> None:
     """Rule that checks that one and only one of the parameters is not None."""
     if not_none != 1:
-        raise ValueError(
+        raise InputStructureError(
             f"One and only one of the parameters {parameters} must be"
             + " not None and they must be passed as keyword arguments"
         )
@@ -94,7 +95,7 @@ def rule_one_and_only_one(not_none: int, parameters: list[str]) -> None:
 def rule_no_more_than_one(not_none: int, parameters: list[str]) -> None:
     """Rule that checks that no more than one of the parameters is not None."""
     if not_none > 1:
-        raise ValueError(
+        raise InputStructureError(
             f"No more than one if the parameters {parameters} must be"
             + " not None and they must be passed as keyword arguments"
         )
@@ -115,7 +116,7 @@ def one_and_only_one(parameters):
 
     Raises
     ------
-    ValueError
+    InputStructureError
         if more than one parameter is not None
 
     Examples
@@ -126,7 +127,7 @@ def one_and_only_one(parameters):
     >>> func(a=1)
     >>> func(b=1)
     >>> func(a=1, b=1)
-    ValueError: Only one of the parameters a, b must be not None
+    InputStructureError: Only one of the parameters a, b must be not None
 
     """
     return generator_notnone_rule(rule_one_and_only_one)(parameters)
@@ -147,7 +148,7 @@ def no_more_than_one(parameters):
 
     Raises
     ------
-    ValueError
+    InputStructureError
         if more than one parameter is not None
 
     Examples
@@ -159,7 +160,7 @@ def no_more_than_one(parameters):
     >>> func(a=1)
     >>> func(b=1)
     >>> func(a=1, b=1)
-    ValueError: No more than one of the parameters a, b must be not None
+    InputStructureError: No more than one of the parameters a, b must be not None  # noqa E501
 
     """
     return generator_notnone_rule(rule_no_more_than_one)(parameters)
