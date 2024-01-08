@@ -1,9 +1,12 @@
 """Tests for the deformation modules."""
 
-import skshapes as sks
+
 import pytest
 import torch
 import os
+
+import skshapes as sks
+from skshapes.errors import DeviceError
 
 deformation_models = [
     sks.IntrinsicDeformation,
@@ -40,7 +43,7 @@ def _test(deformation_model):
 
     if torch.cuda.is_available():
         p = p.cuda()
-        with pytest.raises(ValueError):
+        with pytest.raises(DeviceError):
             model.morph(shape=shape, parameter=p).morphed_shape
 
 

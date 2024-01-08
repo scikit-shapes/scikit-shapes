@@ -5,6 +5,7 @@ from ..data import PolyData
 import torch
 from ..types import float_dtype, int_dtype, Number, Int1dTensor, polydata_type
 from ..input_validation import typecheck, one_and_only_one, no_more_than_one
+from ..errors import NotFittedError
 from typing import Optional, Union
 import fast_simplification
 
@@ -63,7 +64,8 @@ class Decimation:
 
         Raises
         ------
-            ValueError: If both target_reduction and n_points are provided or
+        InputStructureError
+            If both target_reduction and n_points are provided or
             if none of them is provided.
         """
         if target_reduction is not None:
@@ -235,7 +237,9 @@ class Decimation:
             target_reduction = self.target_reduction
 
         if self.collapses_ is None:
-            raise ValueError("The decimation object has not been fitted yet.")
+            raise NotFittedError(
+                "The decimation object has not been fitted yet."
+            )
 
         if target_reduction is not None:
             if not (0 <= target_reduction <= 1):
@@ -368,7 +372,9 @@ class Decimation:
         if hasattr(self, "collapses_"):
             return self.collapses_
         else:
-            raise ValueError("The decimation object has not been fitted yet.")
+            raise NotFittedError(
+                "The decimation object has not been fitted yet."
+            )
 
     @typecheck
     @property
@@ -377,7 +383,9 @@ class Decimation:
         if hasattr(self, "actual_reduction_"):
             return self.actual_reduction_
         else:
-            raise ValueError("The decimation object has not been fitted yet.")
+            raise NotFittedError(
+                "The decimation object has not been fitted yet."
+            )
 
     @typecheck
     @property
@@ -386,4 +394,6 @@ class Decimation:
         if hasattr(self, "ref_mesh_"):
             return self.ref_mesh_
         else:
-            raise ValueError("The decimation object has not been fitted yet.")
+            raise NotFittedError(
+                "The decimation object has not been fitted yet."
+            )

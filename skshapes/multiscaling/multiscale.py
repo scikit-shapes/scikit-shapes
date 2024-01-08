@@ -17,6 +17,7 @@ from ..types import (
 )
 from ..utils import scatter
 from ..input_validation import typecheck, one_and_only_one, convert_inputs
+from ..errors import NotFittedError
 from ..decimation import Decimation
 
 
@@ -109,7 +110,9 @@ class Multiscale:
 
         if decimation_module is not None:
             if not hasattr(decimation_module, "ref_mesh_"):
-                raise ValueError("The decimation module must have been fitted")
+                raise NotFittedError(
+                    "The decimation module has not been fitted."
+                )
             self._decimation_module = decimation_module
 
         if decimation_module is None:

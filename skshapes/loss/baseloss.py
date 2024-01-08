@@ -7,6 +7,7 @@ from ..types import (
     float_dtype,
     shape_type,
 )
+from ..errors import DeviceError
 from ..input_validation import typecheck
 from typing import Any, Optional
 import torch
@@ -95,7 +96,7 @@ class BaseLoss:
 
         """
         if source.device != target.device:
-            raise ValueError(
+            raise DeviceError(
                 "Source and target shapes must be on the same device, found"
                 + "source on device {} and target on device {}".format(
                     source.device, target.device

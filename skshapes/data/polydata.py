@@ -24,7 +24,8 @@ from ..types import (
     polydata_type,
     IntSequence,
 )
-from ..input_validation import typecheck, convert_inputs
+from ..errors import DeviceError
+from ..input_validation import typecheck, convert_inputs, one_and_only_one
 from typing import Optional, Any, Union, Literal
 from warnings import warn
 from .utils import DataAttributes
@@ -281,11 +282,13 @@ class PolyData(polydata_type):
     )
 
     @typecheck
+    @one_and_only_one(["target_reduction", "n_points", "ratio"])
     def decimate(
         self,
         *,
-        target_reduction: Optional[float] = None,
-        n_points: Optional[Number] = None,
+        target_reduction: Optional[Number] = None,
+        n_points: Optional[int] = None,
+        ratio: Optional[Number] = None,
     ) -> PolyData:
         """Decimation of the shape.
 
@@ -298,7 +301,7 @@ class PolyData(polydata_type):
 
         Raises
         ------
-        ValueError
+        InputStructureError
             If both target_reduction and n_points are provided.
             If none of target_reduction and n_points are provided.
 
@@ -307,28 +310,16 @@ class PolyData(polydata_type):
         PolyData
             The decimated shape.
         """
-        if target_reduction is None and n_points is None:
-            raise ValueError(
-                "Either target_reduction or n_points must be provided."
-            )
-
-        if target_reduction is not None and n_points is not None:
-            raise ValueError(
-                "Only one of target_reduction or n_points must be provided."
-            )
-
-        if n_points is not None:
-            assert n_points > 0, "n_points must be positive"
-            target_reduction = max(0, 1 - n_points / self.n_points)
-
-        assert (
-            target_reduction >= 0 and target_reduction <= 1
-        ), "target_reduction must be between 0 and 1"
+        kwargs = {
+            "target_reduction": target_reduction,
+            "n_points": n_points,
+            "ratio": ratio,
+        }
 
         if self.is_triangle_mesh:
             from ..decimation import Decimation
 
-            d = Decimation(target_reduction=target_reduction)
+            d = Decimation(**kwargs)
             return d.fit_transform(self)
         else:
             raise NotImplementedError(
@@ -583,7 +574,7 @@ class PolyData(polydata_type):
         Raises
         ------
         ValueError
-            If the new number of points is different from the actuam number of
+            If the new number of points is different from the actual number of
             points in the shape.
         """
         if points.shape[0] != self.n_points:
@@ -909,7 +900,7 @@ class PolyData(polydata_type):
         """Center of each edge."""
         # Raise an error if edges are not defined
         if self.edges is None:
-            raise ValueError("Edges cannot be computed")
+            raise AttributeError("Edges are not defined")
 
         return (
             self.points[self.edges[:, 0]] + self.points[self.edges[:, 1]]
@@ -921,7 +912,7 @@ class PolyData(polydata_type):
         """Length of each edge."""
         # Raise an error if edges are not defined
         if self.edges is None:
-            raise ValueError("Edges cannot be computed")
+            raise AttributeError("Edges are not defined")
 
         return (
             self.points[self.edges[:, 0]] - self.points[self.edges[:, 1]]
@@ -933,7 +924,7 @@ class PolyData(polydata_type):
         """Center of the triangles."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
-            raise ValueError("Triangles are not defined")
+            raise AttributeError("Triangles are not defined")
 
         A = self.points[self.triangles[:, 0]]
         B = self.points[self.triangles[:, 1]]
@@ -954,7 +945,7 @@ class PolyData(polydata_type):
         """Normal of each triangle."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
-            raise ValueError("Triangles are not defined")
+            raise AttributeError("Triangles are not defined")
 
         A = self.points[self.triangles[:, 0]]
         B = self.points[self.triangles[:, 1]]
@@ -1078,12 +1069,12 @@ class PolyData(polydata_type):
 
         Raises
         ------
-        ValueError
+        DeviceError
             If `self.device != control_points.device`.
 
         """
         if control_points is not None and self.device != control_points.device:
-            raise ValueError(
+            raise DeviceError(
                 "Controls points must be on the same device as"
                 + " the corresponding PolyData, found "
                 + f"{control_points.device} for control points"

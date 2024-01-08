@@ -21,8 +21,8 @@ def _mesh_convolution(
 
     Raises
     ------
-    ValueError
-        If the mesh is not a triangle mesh or a wireframe PolyData.
+    AttributeError
+        If the PolyData has no edges.
 
     Returns
     -------
@@ -30,7 +30,7 @@ def _mesh_convolution(
         A (N, N) convolution kernel.
     """
     if self.n_edges == 0:
-        raise ValueError(
+        raise AttributeError(
             "Mesh convolution is only defined on triangle meshes or "
             "wireframe PolyData."
         )

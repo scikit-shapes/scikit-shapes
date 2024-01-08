@@ -7,9 +7,9 @@ from pyvista.core.pointset import PolyData as PyvistaPolyData
 import numpy as np
 import vedo
 import os
-from jaxtyping import TypeCheckError
 
 import skshapes as sks
+from skshapes.errors import InputTypeError, DeviceError
 
 
 def _cube():
@@ -109,7 +109,7 @@ def test_polydata_creation():
     assert triangle.edge_centers is not None
     assert triangle.edge_lengths is not None
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError, match="Triangles are not defined"):
         triangle.triangle_areas
 
     with pytest.raises(ValueError):
@@ -156,9 +156,9 @@ def test_geometry_features():
     square = sks.PolyData(points=square_points, edges=square_edges)
     assert square.n_edges == 4
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError, match="Triangles are not defined"):
         square.triangle_centers
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError, match="Triangles are not defined"):
         square.triangle_normals
 
     assert torch.allclose(
@@ -218,7 +218,7 @@ def test_geometry_features():
         "edge_lengths",
         "edge_centers",
     ]:
-        with pytest.raises(ValueError):
+        with pytest.raises(AttributeError):
             getattr(pointcloud, attribute)
 
 
@@ -364,7 +364,7 @@ def test_point_data():
     ]  # Check the name of the point_data
 
     # Check that trying to set the point_data with a wrong type raises an error
-    with pytest.raises(TypeCheckError):
+    with pytest.raises(InputTypeError):
         mesh.point_data = 4
     # Check that trying to set the point_data with an invalid dict (here the
     # size of the tensors is not correct) raises an error
@@ -592,6 +592,7 @@ def test_point_data_cuda():
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_polydata_signal_and_landmarks():
     """Test preservation of landmarks and signal when converting."""
     sphere = sks.Sphere()
@@ -613,7 +614,7 @@ def test_polydata_signal_and_landmarks():
     sphere_pv_notclean = sphere_pv.copy()
     sphere_pv_notclean.points = np.concatenate([sphere_pv.points, [[0, 0, 0]]])
 
-    # Assert that has the mesh must be cleaned
+    # Assert that as the mesh must be cleaned,
     # landmarks and signal are ignored
     sphere_back2 = sks.PolyData(sphere_pv_notclean)
     assert sphere_back2.landmark_indices is None
@@ -662,7 +663,7 @@ def test_control_points_device():
     grid = mesh.bounding_grid(N=5)
     # grid = grid.to("cuda:0")
     grid.device = "cuda"
-    with pytest.raises(ValueError):
+    with pytest.raises(DeviceError):
         mesh.control_points = grid
 
     # mesh on cpu and control points on cpu -> should not raise an error

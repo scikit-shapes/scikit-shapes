@@ -1,9 +1,10 @@
 """Tests for the decimation module."""
 
-import skshapes as sks
 import pyvista
 import torch
 import pytest
+import skshapes as sks
+from skshapes.errors import InputStructureError
 
 
 def test_indice_mapping_interface():
@@ -104,25 +105,14 @@ def test_decimation_basic():
     # Some errors
     mesh = sks.Sphere()
 
-    try:
+    with pytest.raises(InputStructureError):
+        # n_points and target_reduction are mutually exclusive
         mesh.decimate(n_points=10, target_reduction=0.9)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised a ValueError as both"
-            + " n_points and target_reduction are specified"
-        )
 
-    try:
+    with pytest.raises(InputStructureError):
+        # at least one of n_points, n_target_reduction or ratio must be
+        # specified
         mesh.decimate()
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised a ValueError as neither"
-            + " n_points or target_reduction are specified"
-        )
 
 
 def test_decimation_landmarks():

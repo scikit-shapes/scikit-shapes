@@ -6,6 +6,7 @@ from ..types import (
     FloatTensor,
 )
 from ..input_validation import typecheck, convert_inputs
+from ..errors import DeviceError, NotFittedError
 from typing import Union, Optional, get_args
 from ..loss import Loss
 from ..morphing import Model
@@ -107,7 +108,7 @@ class Registration:
 
         Raises
         ------
-        ValueError
+        DeviceError
             if the source and target shapes are not on the same device.
 
         Returns
@@ -118,7 +119,7 @@ class Registration:
         """
         # Check that the shapes are on the same device
         if source.device != target.device:
-            raise ValueError(
+            raise DeviceError(
                 "Source and target shapes must be on the same device, found"
                 + "source on device {} and target on device {}".format(
                     source.device, target.device
@@ -291,7 +292,7 @@ class Registration:
             the transformed shape.
         """
         if not hasattr(self, "morphed_shape_"):
-            raise ValueError(
+            raise NotFittedError(
                 "The registration must be fitted before calling transform"
             )
         return self.model.morph(
