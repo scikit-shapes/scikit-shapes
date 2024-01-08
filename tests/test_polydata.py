@@ -7,9 +7,9 @@ from pyvista.core.pointset import PolyData as PyvistaPolyData
 import numpy as np
 import vedo
 import os
-from jaxtyping import TypeCheckError
 
 import skshapes as sks
+from skshapes.errors import InputTypeError
 
 
 def _cube():
@@ -364,7 +364,7 @@ def test_point_data():
     ]  # Check the name of the point_data
 
     # Check that trying to set the point_data with a wrong type raises an error
-    with pytest.raises(TypeCheckError):
+    with pytest.raises(InputTypeError):
         mesh.point_data = 4
     # Check that trying to set the point_data with an invalid dict (here the
     # size of the tensors is not correct) raises an error
