@@ -2,12 +2,11 @@
 
 import torch
 import pyvista
+import pytest
 from pyvista.core.pointset import PolyData as PyvistaPolyData
 import numpy as np
 import vedo
-import pytest
 import os
-from beartype.roar import BeartypeCallHintParamViolation
 from jaxtyping import TypeCheckError
 
 import skshapes as sks
@@ -110,22 +109,11 @@ def test_polydata_creation():
     assert triangle.edge_centers is not None
     assert triangle.edge_lengths is not None
 
-    try:
+    with pytest.raises(ValueError):
         triangle.triangle_areas
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("Assigning edges should delete triangles")
 
-    try:
+    with pytest.raises(ValueError):
         triangle.points = torch.rand(triangle.n_points + 1, 3)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the size of the"
-            + " points tensor is not correct"
-        )
 
     triangle_mesh = sks.Sphere()
     wireframe_mesh = sks.Circle()
@@ -153,15 +141,8 @@ def test_polydata_creation():
     # add a triangle to the wireframe mesh
     mixed_mesh.faces = np.concatenate([mixed_mesh.faces, [3, 0, 1, 2]])
 
-    try:
+    with pytest.raises(ValueError):
         sks.PolyData(mixed_mesh)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the mesh contains"
-            + " both edges and triangles"
-        )
 
 
 def test_geometry_features():
@@ -174,27 +155,11 @@ def test_geometry_features():
     )
     square = sks.PolyData(points=square_points, edges=square_edges)
     assert square.n_edges == 4
-    try:
-        square.triangle_centers
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the mesh is not a"
-            + " triangle mesh so triangle_centers cannot be"
-            + " computed"
-        )
 
-    try:
+    with pytest.raises(ValueError):
+        square.triangle_centers
+    with pytest.raises(ValueError):
         square.triangle_normals
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the mesh is not a"
-            + " triangle mesh so triangle_normals cannot be"
-            + " computed"
-        )
 
     assert torch.allclose(
         square.point_weights, torch.tensor([1, 1, 1, 1], dtype=sks.float_dtype)
@@ -253,23 +218,8 @@ def test_geometry_features():
         "edge_lengths",
         "edge_centers",
     ]:
-        try:
+        with pytest.raises(ValueError):
             getattr(pointcloud, attribute)
-        except ValueError:
-            pass
-        else:
-            raise AssertionError(
-                "Should have raised an error, the mesh has"
-                + " no triangles and no edges so"
-                + f" {attribute} cannot be computed"
-            )
-
-
-# def test_plotting():
-#     pyvista.OFF_SCREEN = True
-#     mesh = sks.Sphere()
-#     mesh.plot(backend="pyvista")
-#     mesh.plot(backend="vedo", offscreen=True)
 
 
 def test_polydata_creation_2d():
@@ -379,15 +329,8 @@ def test_point_data():
     mesh.point_data["normals"] = torch.rand(mesh.n_points, 3)
     mesh.point_data.append(torch.rand(mesh.n_points))
 
-    try:
+    with pytest.raises(ValueError):
         mesh.point_data.append(torch.rand(mesh.n_points + 1))
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the size of the tensor is not"
-            + " correct"
-        )
 
     # Check that the point_data are correctly copied
     copy = mesh.copy()
@@ -421,66 +364,30 @@ def test_point_data():
     ]  # Check the name of the point_data
 
     # Check that trying to set the point_data with a wrong type raises an error
-    try:
+    with pytest.raises(TypeCheckError):
         mesh.point_data = 4
-    except BeartypeCallHintParamViolation:
-        pass
-    except TypeCheckError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the point_data should be a dict or"
-            + "a sks.data.utils.DataAttributes object"
-        )
-
     # Check that trying to set the point_data with an invalid dict (here the
     # size of the tensors is not correct) raises an error
-    try:
+    with pytest.raises(ValueError):
         mesh.point_data = {
             "colors": torch.rand(mesh.n_points + 2, 3),
             "normals": torch.rand(mesh.n_points, 3),
         }
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the size of the colors tensor is"
-            + "not correct"
-        )
 
     dict = {
         "colors": torch.rand(mesh.n_points + 1, 3),
     }
 
     # Try to assign a dict with a wrong size
-    try:
+    with pytest.raises(ValueError):
         mesh.point_data = dict
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the size of the colors tensor is"
-            + "not correct"
-        )
 
     # Try to get a point_data that does not exist
-    try:
+    with pytest.raises(KeyError):
         mesh.point_data["not_existing"]
-    except KeyError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the point_data does not exist"
-        )
 
-    try:
+    with pytest.raises(KeyError):
         mesh["not_existing"]
-    except KeyError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the point_data does not exist"
-        )
 
 
 def test_point_data2():
@@ -755,15 +662,8 @@ def test_control_points_device():
     grid = mesh.bounding_grid(N=5)
     # grid = grid.to("cuda:0")
     grid.device = "cuda"
-    try:
+    with pytest.raises(ValueError):
         mesh.control_points = grid
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, the control points"
-            + " should be on the same device as the mesh"
-        )
 
     # mesh on cpu and control points on cpu -> should not raise an error
     grid2 = grid.to("cpu")

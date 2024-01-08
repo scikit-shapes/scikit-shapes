@@ -1,11 +1,19 @@
 """Tests for the input validation decorators."""
 
-import skshapes as sks
+import pytest
 from beartype.roar import BeartypeCallHintParamViolation
 from jaxtyping import TypeCheckError
+import skshapes as sks
 
 
-def test_one_and_only_one_decorator():
+@sks.one_and_only_one(["a", "b"])
+@sks.typecheck
+def func_one_and_only_one(a: int = None, b: int = None):
+    """An example function with one_and_only_one."""
+    pass
+
+
+def test_one_and_only_one_decorator(func=func_one_and_only_one):
     """Test the one_and_only_one decorator.
 
     This test checks that the one_and_only_one decorator raises an error
@@ -13,47 +21,26 @@ def test_one_and_only_one_decorator():
     specified in the decorator or when none of the arguments is specified.
 
     """
-    # define a function with the decorator
-    @sks.one_and_only_one(["a", "b"])
-    @sks.typecheck
-    def func(a: int = None, b: int = None):
-        pass
-
-    # check that the function works as expected
-
     func(a=1)  # ok
     func(b=1)  # ok
-    try:
+    with pytest.raises(ValueError):
         func(2)  # not ok (must be passed as keyword)
-    except ValueError:
-        pass
-    else:
-        raise RuntimeError("Expected ValueError")
-    try:
+    with pytest.raises(ValueError):
         func(a=1, b=1)  # not ok (both arguments are specified)
-    except ValueError:
-        pass
-    else:
-        raise RuntimeError("Expected ValueError")
-
-    try:
+    with pytest.raises(ValueError):
         func()  # not ok (no argument is specified)
-    except ValueError:
-        pass
-    else:
-        raise RuntimeError("Expected ValueError")
-
-    try:
+    with pytest.raises(TypeCheckError):
         func(a="dog")  # not ok : wrong type
-    except TypeCheckError:
-        pass
-    except BeartypeCallHintParamViolation:
-        pass
-    else:
-        raise RuntimeError("Expected an error as the type is wrong")
 
 
-def test_no_more_than_one():
+@sks.no_more_than_one(["a", "b"])
+@sks.typecheck
+def func_no_more_than_one(*, a: int = None, b: int = None):
+    """An example function with no_more_than_one."""
+    pass
+
+
+def test_no_more_than_one(func=func_no_more_than_one):
     """Test the no_more_than_one decorator.
 
     This test checks that the no_more_than_one decorator raises an error
@@ -61,37 +48,12 @@ def test_no_more_than_one():
     specified in the decorator.
 
     """
-    # define a function with the decorator
-    @sks.no_more_than_one(["a", "b"])
-    @sks.typecheck
-    def func(*, a: int = None, b: int = None):
-        pass
-
-    # check that the function works as expected
-
     func(a=1)  # ok
     func(b=1)  # ok
     func()  # ok
-
-    try:
+    with pytest.raises(TypeError):
         func(2)
-    except TypeError:
-        pass
-    else:
-        raise RuntimeError("Expected TypeError as no keyword arguments")
-
-    try:
+    with pytest.raises(ValueError):
         func(a=1, b=1)  # not ok (both arguments are specified)
-    except ValueError:
-        pass
-    else:
-        raise RuntimeError("Expected ValueError")
-
-    try:
+    with pytest.raises(TypeCheckError):
         func(a="dog")  # not ok : wrong type
-    except TypeCheckError:
-        pass
-    except BeartypeCallHintParamViolation:
-        pass
-    else:
-        raise RuntimeError("Expected an error as the type is wrong")
