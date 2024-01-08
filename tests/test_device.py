@@ -1,10 +1,11 @@
 """Tests related to the device compatibility of shapes."""
 
-import skshapes as sks
 import pyvista.examples
 from typing import get_args
 import pytest
 import torch
+import skshapes as sks
+from skshapes.errors import DeviceError
 
 shape1 = sks.PolyData(pyvista.Sphere())
 shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.5)
@@ -64,12 +65,8 @@ def test_registration_device():
     # sraised
     source = shape1.to("cpu")
     target = shape2.to("cuda")
-    try:
+    with pytest.raises(DeviceError):
         task.fit(source=source, target=target)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("Should have raised an error")
 
 
 @pytest.mark.skipif(
@@ -88,11 +85,5 @@ def test_loss_device():
     for loss in list_of_losses:
         loss_fn = loss()
 
-        try:
+        with pytest.raises(DeviceError):
             loss_fn(source=source, target=target)
-        except ValueError:
-            pass
-        else:
-            loss_fn(source=source, target=target)
-            print(loss)
-            raise AssertionError("Should have raised an error")

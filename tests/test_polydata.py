@@ -9,7 +9,7 @@ import vedo
 import os
 
 import skshapes as sks
-from skshapes.errors import InputTypeError
+from skshapes.errors import InputTypeError, DeviceError
 
 
 def _cube():
@@ -662,7 +662,7 @@ def test_control_points_device():
     grid = mesh.bounding_grid(N=5)
     # grid = grid.to("cuda:0")
     grid.device = "cuda"
-    with pytest.raises(ValueError):
+    with pytest.raises(DeviceError):
         mesh.control_points = grid
 
     # mesh on cpu and control points on cpu -> should not raise an error

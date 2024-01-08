@@ -22,6 +22,7 @@ from ..types import (
     FloatScalar,
 )
 from ..input_validation import typecheck
+from ..errors import DeviceError
 
 from .utils import Integrator, EulerIntegrator
 from .kernels import Kernel, GaussianKernel
@@ -107,7 +108,7 @@ class ExtrinsicDeformation(BaseModel):
             the path if needed.
         """
         if parameter.device != shape.device:
-            raise ValueError(
+            raise DeviceError(
                 "The shape and the parameter must be on the same device."
             )
 

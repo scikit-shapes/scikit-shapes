@@ -14,6 +14,7 @@ from ..types import (
     MorphingOutput,
 )
 from ..input_validation import typecheck, convert_inputs
+from ..errors import DeviceError
 from .metrics import Metric, AsIsometricAsPossible
 from typing import Optional
 
@@ -71,7 +72,7 @@ class IntrinsicDeformation(BaseModel):
             the path if requested.
         """
         if parameter.device != shape.device:
-            raise ValueError(
+            raise DeviceError(
                 "The shape and the parameter must be on the same device."
             )
 

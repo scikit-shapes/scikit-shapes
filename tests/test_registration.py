@@ -1,12 +1,13 @@
 """Test the registration task."""
 
-import skshapes as sks
+
 import pyvista
 import torch
 import pytest
-
 from hypothesis import given, settings
 from hypothesis import strategies as st
+import skshapes as sks
+from skshapes.errors import NotFittedError, DeviceError
 
 list_models = [
     sks.RigidMotion,
@@ -100,16 +101,8 @@ def test_registration_hypothesis(
         initial_parameter = None
 
     # Try to transform the source shape without fitting first
-    try:
+    with pytest.raises(NotFittedError):
         r.transform(source=source)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, fit must be called"
-            + "before transform"
-        )
-
     # Fit
     r.fit(source=source, target=target, initial_parameter=initial_parameter)
 
@@ -188,12 +181,8 @@ def test_registration_device():
         #  raised
         source = shape1.to("cpu")
         target = shape2.to("cuda")
-        try:
+        with pytest.raises(DeviceError):
             task.fit(source=source, target=target)
-        except ValueError:
-            pass
-        else:
-            raise AssertionError("Should have raised an error")
 
 
 def test_lddmm_control_points():

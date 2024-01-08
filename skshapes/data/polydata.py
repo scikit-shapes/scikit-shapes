@@ -24,6 +24,7 @@ from ..types import (
     polydata_type,
     IntSequence,
 )
+from ..errors import DeviceError
 from ..input_validation import typecheck, convert_inputs, one_and_only_one
 from typing import Optional, Any, Union, Literal
 from warnings import warn
@@ -300,7 +301,7 @@ class PolyData(polydata_type):
 
         Raises
         ------
-        ValueError
+        InputStructureError
             If both target_reduction and n_points are provided.
             If none of target_reduction and n_points are provided.
 
@@ -573,7 +574,7 @@ class PolyData(polydata_type):
         Raises
         ------
         ValueError
-            If the new number of points is different from the actuam number of
+            If the new number of points is different from the actual number of
             points in the shape.
         """
         if points.shape[0] != self.n_points:
@@ -1068,12 +1069,12 @@ class PolyData(polydata_type):
 
         Raises
         ------
-        ValueError
+        DeviceError
             If `self.device != control_points.device`.
 
         """
         if control_points is not None and self.device != control_points.device:
-            raise ValueError(
+            raise DeviceError(
                 "Controls points must be on the same device as"
                 + " the corresponding PolyData, found "
                 + f"{control_points.device} for control points"
