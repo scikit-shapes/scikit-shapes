@@ -1,7 +1,9 @@
 """Tests for the deformation modules."""
 
 import skshapes as sks
+import pytest
 import torch
+import os
 
 deformation_models = [
     sks.IntrinsicDeformation,
@@ -38,9 +40,85 @@ def _test(deformation_model):
 
     if torch.cuda.is_available():
         p = p.cuda()
-        try:
+        with pytest.raises(ValueError):
             model.morph(shape=shape, parameter=p).morphed_shape
-        except ValueError:
-            pass
-        else:
-            raise RuntimeError("Expected ValueError")
+
+
+@pytest.mark.skipif(
+    "data" not in os.listdir(),
+    reason="Data folder is not present",
+)
+def test_extrinsic_deformation():
+    """Test for extrinsic deformation.
+
+    More specifically, we test the backends: torchdiffeq and sks
+    """
+    source = sks.PolyData("data/fingers/finger0.ply")
+    source.control_points = source.bounding_grid(N=5)
+    target = sks.PolyData("data/fingers/finger1.ply")
+
+    for control_points in [True, False]:
+        n_steps = 2
+        model_torchdiffeq = sks.ExtrinsicDeformation(
+            backend="torchdiffeq",
+            solver="euler",
+            n_steps=n_steps,
+            control_points=control_points,
+        )
+
+        model_sks = sks.ExtrinsicDeformation(
+            backend="sks",
+            integrator=sks.EulerIntegrator(),
+            n_steps=n_steps,
+            control_points=control_points,
+        )
+
+        # For both models, we register with only one iteration of gradient
+        # descent we expect the same result (tolerance of 0.5%)
+        optimizer = sks.SGD(lr=10.0)
+        n_iter = 1
+        loss = sks.L2Loss()
+        gpu = False
+        regularization = 1.0
+
+        registration_torchdiffeq = sks.Registration(
+            model=model_torchdiffeq,
+            loss=loss,
+            optimizer=optimizer,
+            n_iter=n_iter,
+            regularization=regularization,
+            gpu=gpu,
+        )
+
+        registration_sks = sks.Registration(
+            model=model_sks,
+            integrator=sks.EulerIntegrator(),
+            loss=loss,
+            optimizer=optimizer,
+            n_iter=n_iter,
+            regularization=regularization,
+            gpu=gpu,
+        )
+
+        out_torchdiffeq = registration_torchdiffeq.fit_transform(
+            source=source, target=target
+        )
+        out_sks = registration_sks.fit_transform(source=source, target=target)
+
+        print(out_torchdiffeq.points)
+        print(out_sks.points)
+
+        # Make sure that something has appened, ie the points are not the same
+        # after registration than before
+        assert not torch.allclose(
+            out_torchdiffeq.points,
+            source.points,
+            rtol=5e-3,
+        )
+
+        # Now, we check that the two backends give the same result
+        assert torch.allclose(
+            out_torchdiffeq.points,
+            out_sks.points,
+            rtol=5e-3,
+        )
