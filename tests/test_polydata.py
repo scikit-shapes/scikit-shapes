@@ -592,6 +592,7 @@ def test_point_data_cuda():
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"
 
 
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_polydata_signal_and_landmarks():
     """Test preservation of landmarks and signal when converting."""
     sphere = sks.Sphere()
@@ -613,7 +614,7 @@ def test_polydata_signal_and_landmarks():
     sphere_pv_notclean = sphere_pv.copy()
     sphere_pv_notclean.points = np.concatenate([sphere_pv.points, [[0, 0, 0]]])
 
-    # Assert that has the mesh must be cleaned
+    # Assert that as the mesh must be cleaned,
     # landmarks and signal are ignored
     sphere_back2 = sks.PolyData(sphere_pv_notclean)
     assert sphere_back2.landmark_indices is None
