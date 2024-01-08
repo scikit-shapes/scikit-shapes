@@ -13,6 +13,8 @@ def test_one_and_only_one_decorator():
     specified in the decorator or when none of the arguments is specified.
 
     """
+    assert True  # Otherwise black wants a blank line here
+
     # define a function with the decorator
     @sks.one_and_only_one(["a", "b"])
     @sks.typecheck
@@ -61,6 +63,8 @@ def test_no_more_than_one():
     specified in the decorator.
 
     """
+    assert True  # Otherwise black wants a blank line here
+
     # define a function with the decorator
     @sks.no_more_than_one(["a", "b"])
     @sks.typecheck
