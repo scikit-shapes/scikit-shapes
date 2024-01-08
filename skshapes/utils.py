@@ -7,6 +7,7 @@ from .types import (
     Number,
 )
 from .input_validation import typecheck, convert_inputs
+from .errors import DeviceError
 from typing import Literal, Optional
 
 
@@ -75,7 +76,7 @@ def scatter(
         referenced by the index tensor.
     """
     if src.device != index.device:
-        raise ValueError(
+        raise DeviceError(
             "The src and index tensors must be on the same device."
         )
     device = src.device

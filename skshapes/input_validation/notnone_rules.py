@@ -11,7 +11,7 @@ def foo(a=None, b=None, c=None):
 foo(a=1) # OK
 foo(b=1) # OK
 foo(c=1) # OK
-foo(a=1, b=1) # ValueError
+foo(a=1, b=1) # InputStructureError
 ```
 
 Decorators already implemented:

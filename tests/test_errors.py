@@ -28,7 +28,9 @@ def test_errors_metrics():
 
     registration.fit(source=triangle_mesh, target=target)
     registration.fit(source=wireframe_mesh, target=target)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        AttributeError, match="This metric requires edges to be defined"
+    ):
         registration.fit(source=pointcloud, target=target)
 
     model_shell = sks.IntrinsicDeformation(
@@ -42,9 +44,13 @@ def test_errors_metrics():
     )
 
     registration.fit(source=triangle_mesh, target=target)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        AttributeError, match="This metric requires triangles to be defined"
+    ):
         registration.fit(source=wireframe_mesh, target=target)
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        AttributeError, match="This metric requires triangles to be defined"
+    ):
         registration.fit(source=pointcloud, target=target)
 
 

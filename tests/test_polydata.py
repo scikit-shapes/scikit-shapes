@@ -109,7 +109,7 @@ def test_polydata_creation():
     assert triangle.edge_centers is not None
     assert triangle.edge_lengths is not None
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError, match="Triangles are not defined"):
         triangle.triangle_areas
 
     with pytest.raises(ValueError):
@@ -156,9 +156,9 @@ def test_geometry_features():
     square = sks.PolyData(points=square_points, edges=square_edges)
     assert square.n_edges == 4
 
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError, match="Triangles are not defined"):
         square.triangle_centers
-    with pytest.raises(ValueError):
+    with pytest.raises(AttributeError, match="Triangles are not defined"):
         square.triangle_normals
 
     assert torch.allclose(
@@ -218,7 +218,7 @@ def test_geometry_features():
         "edge_lengths",
         "edge_centers",
     ]:
-        with pytest.raises(ValueError):
+        with pytest.raises(AttributeError):
             getattr(pointcloud, attribute)
 
 

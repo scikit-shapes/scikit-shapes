@@ -54,14 +54,14 @@ class AsIsometricAsPossible(Metric):
 
         Raises
         ------
-            ValueError: This metric requires edges to be specified
+            AttributeError: This metric requires edges to be defined
 
         Returns
         -------
             FloatScalar: the mean velocities metric
         """
         if edges is None:
-            raise ValueError("This metric requires edges to be defined")
+            raise AttributeError("This metric requires edges to be defined")
 
         n_steps = points_sequence.shape[1]
         e0, e1 = edges[:, 0], edges[:, 1]
@@ -112,14 +112,16 @@ class ShellEnergyMetric(Metric):
 
         Raises
         ------
-            ValueError: This metric requires triangles to be defined
+            AttributeError: This metric requires triangles to be defined
 
         Returns
         -------
             FloatScalar: the mean velocities metric
         """
         if triangles is None:
-            raise ValueError("This metric requires triangles to be defined")
+            raise AttributeError(
+                "This metric requires triangles to be defined"
+            )
 
         n_steps = points_sequence.shape[1]
 

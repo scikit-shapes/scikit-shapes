@@ -2,6 +2,7 @@
 
 import skshapes as sks
 import torch
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -10,16 +11,12 @@ def test_mesh_convolution_point_cloud():
     """Test error handling for mesh_convolution on a pont cloud."""
     points = torch.rand(10, 3)
     pc = sks.PolyData(points=points)
-    try:
+    with pytest.raises(
+        AttributeError,
+        match="Mesh convolution is only defined on"
+        + " triangle meshes or wireframe PolyData",
+    ):
         pc.mesh_convolution()
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "mesh_convolution should raise a ValueError"
-            + " if the mesh is not a triangle mesh or a"
-            + " wireframe PolyData."
-        )
 
 
 def test_squared_distance():

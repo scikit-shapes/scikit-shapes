@@ -900,7 +900,7 @@ class PolyData(polydata_type):
         """Center of each edge."""
         # Raise an error if edges are not defined
         if self.edges is None:
-            raise ValueError("Edges cannot be computed")
+            raise AttributeError("Edges are not defined")
 
         return (
             self.points[self.edges[:, 0]] + self.points[self.edges[:, 1]]
@@ -912,7 +912,7 @@ class PolyData(polydata_type):
         """Length of each edge."""
         # Raise an error if edges are not defined
         if self.edges is None:
-            raise ValueError("Edges cannot be computed")
+            raise AttributeError("Edges are not defined")
 
         return (
             self.points[self.edges[:, 0]] - self.points[self.edges[:, 1]]
@@ -924,7 +924,7 @@ class PolyData(polydata_type):
         """Center of the triangles."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
-            raise ValueError("Triangles are not defined")
+            raise AttributeError("Triangles are not defined")
 
         A = self.points[self.triangles[:, 0]]
         B = self.points[self.triangles[:, 1]]
@@ -945,7 +945,7 @@ class PolyData(polydata_type):
         """Normal of each triangle."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
-            raise ValueError("Triangles are not defined")
+            raise AttributeError("Triangles are not defined")
 
         A = self.points[self.triangles[:, 0]]
         B = self.points[self.triangles[:, 1]]
