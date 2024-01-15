@@ -26,20 +26,24 @@ theme:
 
 nav:
   - Home: index.md
-  - Installation: installation.md
-  - User Guide:
-    - Data Structures:
-      - PolyData: user_guide/data_structures/polydata.md
-      - Images: user_guide/data_structures/images.md
-      - MultiScale: user_guide/data_structures/multiscale.md
-    - Registration:
-      - Registration: user_guide/registration/registration.md
-      - Loss functions: user_guide/registration/loss.md
-      - Deformation models: user_guide/registration/deformations.md
-  - Examples: generated/gallery
+  - Installation guide: installation.md
+  - Scikit-Shapes guide: user_guide/
+    # - Data:
+    #   - PolyData: user_guide/data_structures/polydata.md
+    #   - Images: user_guide/data_structures/images.md
+    #   - What makes PolyData ans Images different: user_guide/data_structures/differences.md
+    # - Single Shape analysis:
+    #   - MultiScaling: user_guide/single_shape/multiscale.md
+    #   - Features:
+    #     - Curvature: user_guide/single_shape/features/curvature.md
+    # - Registration:
+    #   - Registration: user_guide/registration/registration.md
+    #   - Loss functions: user_guide/registration/loss.md
+    #   - Deformation models: user_guide/registration/deformations.md
+  - Gallery of examples: generated/gallery
   - API Reference:
     - skshapes: reference/
-  - Contributing: contributing.md
+  - Contribution guide: contributing.md
   - About: about.md
   - License: license.md
 
@@ -82,4 +86,4 @@ extra_javascript:
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-  
+
