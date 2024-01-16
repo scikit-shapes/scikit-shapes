@@ -105,11 +105,9 @@ class RigidMotion(BaseModel):
         rotation_matrix = axis_angle_to_matrix(rotation_angles)
         translation = parameter[1]
         center = shape.points.mean(dim=0)
-        newpoints = (
-            (rotation_matrix @ (shape.points - center).T).T
-            + center
-            + translation
-        )
+
+        newpoints = (shape.points - center) @ rotation_matrix.T + translation
+        newpoints += center
 
         morphed_shape = shape.copy()
         morphed_shape.points = newpoints
@@ -122,20 +120,16 @@ class RigidMotion(BaseModel):
 
             else:
                 path = [shape.copy()]
-                small_rotation_angles = (1 / self.n_steps) * rotation_angles
+                small_rotation_angles = rotation_angles / self.n_steps
                 small_rotation_matrix = axis_angle_to_matrix(
                     small_rotation_angles
                 )
-                small_translation = (1 / self.n_steps) * translation
-                for _ in range(self.n_steps):
-                    newpoints = (
-                        (small_rotation_matrix @ (shape.points - center).T).T
-                        + center
-                        + small_translation
-                    )
-                    newshape = shape.copy()
-                    newshape.points = newpoints
-                    path.append(newshape)
+                small_translation = translation / self.n_steps
+                path = self.create_path(
+                    shape=shape,
+                    small_rotation_matrix=small_rotation_matrix,
+                    small_translation=small_translation,
+                )
 
         output = MorphingOutput(
             morphed_shape=morphed_shape,
@@ -194,7 +188,6 @@ class RigidMotion(BaseModel):
                 path = [shape.copy(), morphed_shape.copy()]
 
             else:
-                path = [shape.copy()]
                 small_theta = (1 / (self.n_steps)) * theta
                 small_rotation = torch.tensor(
                     [
@@ -204,16 +197,11 @@ class RigidMotion(BaseModel):
                     device=parameter.device,
                 )
                 small_translation = (1 / (self.n_steps)) * translation
-                for _ in range(self.n_steps):
-                    center = path[-1].points.mean(dim=0)
-                    newpoints = (
-                        (small_rotation @ (path[-1].points - center).T).T
-                        + center
-                        + small_translation
-                    )
-                    newshape = shape.copy()
-                    newshape.points = newpoints
-                    path.append(newshape)
+                path = self.create_path(
+                    shape=shape,
+                    small_rotation_matrix=small_rotation,
+                    small_translation=small_translation,
+                )
 
         output = MorphingOutput(
             morphed_shape=morphed_shape,
@@ -227,6 +215,47 @@ class RigidMotion(BaseModel):
         output.translation = translation
 
         return output
+
+    @typecheck
+    def create_path(
+        self,
+        *,
+        shape: polydata_type,
+        small_rotation_matrix: Float2dTensor,
+        small_translation: Float1dTensor
+    ) -> list[polydata_type]:
+        """Create the path from the rotation matrix and the translation.
+
+        Parameters
+        ----------
+        shape
+            The initial shape.
+        small_rotation_matrix
+            The rotation matrix that will be applied at each step.
+        translation
+            The translation vector that will be applied at each step.
+
+        Returns
+        -------
+        list[polydata_type]
+            The path. Its length is n_steps + 1.
+        """
+        path = [shape.copy()]
+        center = shape.points.mean(dim=0)
+        newpoints = shape.points - center
+
+        # Apply rotations
+        for _ in range(self.n_steps):
+            newpoints = newpoints @ small_rotation_matrix.T
+            newshape = shape.copy()
+            newshape.points = newpoints + center
+            path.append(newshape)
+
+        # Apply translations
+        for i in range(1, self.n_steps + 1):
+            path[i].points += i * small_translation
+
+        return path
 
     @typecheck
     def parameter_shape(
