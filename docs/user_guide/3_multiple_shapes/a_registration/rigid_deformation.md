@@ -14,7 +14,7 @@ A rigid motion is determined by a rotation matrix $R$ and a translation vector $
 $$\text{Morph}(X_i) = \bar{X} + R (X_i - \bar{X}) + t$$
 
 - In 2D, the rotation is determined by an angle $\theta$ and the rotation matrix is $R = \begin{pmatrix} \cos \theta & - \sin \theta \\ \sin \theta & \cos \theta \end{pmatrix}$
-- In 3D, the rotation is represented by three Euler angles $(\theta, \phi, \psi)$, representing a sequence of rotations around axis. See the [Wikipedia entry](https://en.wikipedia.org/wiki/Euler_angles) to get more information about Euler angles.
+- In 3D, the rotation is represented by three Euler angles $(\psi, \theta, \phi)$, representing a sequence of rotations around axis. See the [Wikipedia entry](https://en.wikipedia.org/wiki/Euler_angles) to get more information about Euler angles.
 
 ## Code
 

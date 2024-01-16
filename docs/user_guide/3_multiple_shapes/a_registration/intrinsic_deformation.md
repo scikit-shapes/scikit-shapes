@@ -1,32 +1,46 @@
 ## Presentation
 
+Intrinsic deformations are defined as sequences of speed vectors applied to the points of a shape. The length of such a sequence is computed thanks to a Riemannian metric, whose role is to penalize certain transformation. Choosing such a metric roughly corresponds to penalize some distortions of the shape.
 
 
 ## Math
 
-In intrinsic deformation is determined by a sequence of velocity vector fields $V = (V^t)_{1 \leq t \leq T}$. The shape after deformation is defined as
+In intrinsic deformation is determined by a sequence of velocity vector fields $V = (V^t)_{1 \leq t \leq T}$. The shape after deformation is defined as:
 
-$$\text{Morph}(X_i, V) = X_i + \sum_{t=1}^T V^t_i$$.
+$$\text{Morph}(X_i, V) = X_i + \sum_{t=1}^T V^t_i.$$
 
-We also defined intermediate states of the deformation
+We also define intermediate states $(X^m)_{1 \leq m \leq T}$ of the deformation:
 
 $$X_i^{m} = X_i + \sum_{t=1}^m V^t_i$$
 
 
-The length of the deformation is determined by a Riemannian metric
+The length of the deformation is determined by a Riemannian metric:
 
-$$\text{length}(X, V^t)$ = \sum \ll V^t, V^t \gg_{X^t} $$
+$$\text{Length}(X, V^t) = \frac{1}{T}\sum_{t=1}^{T} \ll V^t, V^t \gg_{X^t},$$
+
+where $\ll V^t, V^t \gg_{X^t}$ is a Riemannian metric depending on the position of the points and the topology (edges, triangles) of the shape. This term informs about the "distortion" of the shape caused by the transformation:
+
+$$ X^t \rightarrow X^{t+1} = X^t + V^{t}$$
 
 
 ## Code
 
-Rigid motion is accessible in scikit-shapes through the class [`IntrinsicDeformation`][skshapes.morphing.IntrinsicDeformation]. The only argument is `n_steps`. Note that this argument has no influence at all on the optimization step, its only influence is if you want to create an animation and have intermediate steps
+Intrinsic Deformation is accessible in scikit-shapes through the class [`IntrinsicDeformation`][skshapes.morphing.IntrinsicDeformation]. The argument `n_step` controls ther number of time steps $T$, the higher `n_step` is, the more flexible is the model. However, the memory impact grows linearly in `n_step` and the running time is also impacted. The Riemannian metric is given with the argument `metric`. Available metrics in scikit-shapes can be found in the module [`skshapes.morphing.metrics`][skshapes.morphing.metrics].
+
+- [`as-isometric-as-possible`][skshapes.morphing.metrics.AsIsometricAsPossible] (requires points and edges)
+- [`shell-energy`][skshapes.morphing.metrics.ShellEnergyMetric] (requires triangles)
+
+
 
 ```python
 import skshapes as sks
 
 loss = ...
-model = sks.RigidMotion()
+metric = sks.ShellEnergyMetric
+model = sks.IntrinsicDeformation(
+    n_steps=10,
+    metric=metric
+)
 
 registration = sks.Registration(loss=loss, model=model)
 registration.fit(source=source, target=target)
