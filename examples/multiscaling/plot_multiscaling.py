@@ -1,18 +1,27 @@
 """
-Multiscaling
-============
+Multiscale triangle mesh with quadric decimation
+================================================
 
-This example show the basic usage of the multiscaling module.
+Learn how to create a multiscale representation of a triangle mesh using
+quadric decimation and how to propagate a signal on the multiscale
+representation.
 """
 
 # %%
-# Load a mesh and create a multiscale representation
+# The Multiscale class is used to create a multiscale representation of a
+# triangle mesh using quadric decimation. Quadric decimation reduces the number
+# of points of a mesh by iteratively collapsing the edge with the smallest
+# quadric error.
+#
+# For reference on quadric decimation, see: [Garland and Heckbert 1997](https://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf)
+#
+# We use the implementation proposed by [fast-simplification](https://github.com/pyvista/fast-simplification)
+
 
 import skshapes as sks
 import pyvista.examples
 
 bunny = sks.PolyData(pyvista.examples.download_bunny())
-
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
 
 

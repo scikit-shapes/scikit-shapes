@@ -14,7 +14,7 @@ import numpy as np
 import torch
 import pyvista as pv
 
-# %%
+# %%
 # Prepare the data
 
 source = sks.PolyData("data/fingers/finger0.ply")
@@ -22,7 +22,7 @@ target = sks.PolyData("data/fingers/finger1.ply")
 
 source.control_points = source.bounding_grid(N=15, offset=0.15)
 
-# %%
+# %%
 # Prepare the model
 
 gpu = False
@@ -34,11 +34,11 @@ loss = sks.L2Loss()
 optimizer = sks.LBFGS()
 
 model = sks.ExtrinsicDeformation(
-        n_steps=n_steps,
-        kernel=sks.GaussianKernel(sigma=0.4),
-        control_points=True,
-        backend="torchdiffeq",
-        solver="rk4",
+    n_steps=n_steps,
+    kernel=sks.GaussianKernel(sigma=0.4),
+    control_points=True,
+    backend="torchdiffeq",
+    solver="rk4",
 )
 
 registration = sks.Registration(
@@ -52,13 +52,13 @@ registration = sks.Registration(
 )
 
 # %%
-# Fit the registration model
+# Fit the registration model
 
 registration.fit(source=source, target=target)
 path = registration.path_
 
 # %%
-# Visualize the result
+# Visualize the result
 
 cp = source.control_points.copy()
 morphed_cp = model.morph(
