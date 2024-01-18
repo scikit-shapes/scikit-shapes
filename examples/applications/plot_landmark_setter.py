@@ -25,8 +25,8 @@ shape2.point_data.clear()
 # Below there is a screen recording of the application in action.
 
 
-app = sks.LandmarkSetter([shape1, shape2])
-#app.start()
+# app = sks.LandmarkSetter([shape1, shape2])
+# app.start()
 
 # %%
 # ![](../../../imgs/demolandmarks.gif)

@@ -35,7 +35,7 @@ assert mesh_pyvista.n_points == mesh_sks.n_points
 # %%
 # ## Add point data to the mesh
 
-mesh_sks["signal"] = mesh_pyvista.points[:, 0]
+mesh_sks["signal"] = mesh_sks.points[:, 0]
 # Now, export the mesh to PyVista
 mesh_pv2 = mesh_sks.to_pyvista()
 # The signal is transfered to the PyVista mesh as a point data array
