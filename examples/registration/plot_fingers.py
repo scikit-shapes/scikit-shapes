@@ -14,6 +14,11 @@ import numpy as np
 import torch
 import pyvista as pv
 
+import sys
+import pykeops
+
+sys.path.append(pykeops.get_build_folder())
+
 # %%
 # Prepare the data
 
