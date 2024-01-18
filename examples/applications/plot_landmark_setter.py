@@ -29,7 +29,7 @@ app = sks.LandmarkSetter([shape1, shape2])
 #app.start()
 
 # %%
-# ![](../../imgs/demolandmarks.gif)
+# ![](../../../imgs/demolandmarks.gif)
 #
 # Application: now, shape1 and shape2 have landmarks, you can access them with
 # shape1.landmark_indices and shape2.landmark_indices. You can use them with
