@@ -18,6 +18,5 @@ conf = {
     "image_scrapers": (
         "matplotlib",
         "pyvista",
-        "vedo",
     ),
 }
