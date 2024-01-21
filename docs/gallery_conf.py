@@ -17,6 +17,7 @@ extensions = [
 conf = {
     "image_scrapers": (
         "matplotlib",
-        "pyvista",
+        "pyvista_dynamic",
+        "vedo",
     ),
 }
