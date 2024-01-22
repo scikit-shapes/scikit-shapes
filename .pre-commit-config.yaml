@@ -1,8 +1,26 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+
 repos:
-  - repo: https://github.com/ambv/black
-    rev: 22.8.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v4.5.0"
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      # - id: name-tests-test
+      #   args: ["--pytest-test-first"]
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+
+
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: "23.12.1"
     hooks:
       - id: black
         alias: black
@@ -10,6 +28,27 @@ repos:
         language_version: python3.11
         files: skshapes/|tests/
         verbose: true
+
+  - repo: https://github.com/adamchainz/blacken-docs
+    rev: "1.16.0"  # replace with latest tag on GitHub
+    hooks:
+      - id: blacken-docs
+        additional_dependencies:
+          - black==22.12.0
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: "v2.2.6"
+    hooks:
+      - id: codespell
+        args: ["-L", "sur,nd", "--skip", "devdoc/*"]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.1.13"
+    hooks:
+      - id: ruff
+        args: ["--show-fixes"]
+
+
 
   - repo: https://github.com/pycqa/flake8
     rev: 5.0.4
@@ -28,7 +67,7 @@ repos:
         files: skshapes/
         verbose: true
 
-  # - repo: https://github.com/scientific-python/cookie
-  #   rev: 2023.12.21
-  #   hooks:
-  #     - id: sp-repo-review
+  - repo: https://github.com/scientific-python/cookie
+    rev: 2023.12.21
+    hooks:
+      - id: sp-repo-review

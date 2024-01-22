@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["numpy", "cython", "setuptools", "wheel"]
+requires = ["numpy", "cython", "setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
@@ -62,3 +62,22 @@ log_cli_level = "info"
 testpaths = [
   "tests",
 ]
+
+[tool.repo-review]
+ignore = [
+    "PC140", # MyPy
+    "PC170", # PyGrep (because no rst files)
+    "PC180", # Prettier
+    "PC901", # pre-commit CI, TODO remove when the repo is public (https://learn.scientific-python.org/development/guides/style/#PC901)
+    "MY", # MyPy
+    "RF", # Ruff
+    "RTD" # ReadTheDocs
+    ]
+
+
+# See: https://learn.scientific-python.org/development/guides/style/#PC190
+[tool.ruff]
+src = ["skshapes"]
+
+[tool.ruff.lint]
+ignore = ["E", "F"]

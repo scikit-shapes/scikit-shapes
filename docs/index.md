@@ -22,7 +22,7 @@ Scikit-shapes offers the possibility to get insight of shape data by various mea
 - Single-shape level: compute statistics, compute features
 - Multi-shape level: compute distances between two shapes or distances inside a population of shapes
 
-Our goal is to make the integration of scikit-shapes into machine learning pipelines such as [scikit-learn](https://scikit-learn.org/stable/) seamless. You can think of scikit-shapes as a preprocessing tool that allows you to convert shape data (basically a format that ML tools are not able to read) to a descritpion that can feed various ML/DL procedure. One typical situation is the following:
+Our goal is to make the integration of scikit-shapes into machine learning pipelines such as [scikit-learn](https://scikit-learn.org/stable/) seamless. You can think of scikit-shapes as a preprocessing tool that allows you to convert shape data (basically a format that ML tools are not able to read) to a description that can feed various ML/DL procedure. One typical situation is the following:
 
 - You have a collection of 3d data that you may want to clusterized
 - You can use scikit-shapes to compute a distance matrix

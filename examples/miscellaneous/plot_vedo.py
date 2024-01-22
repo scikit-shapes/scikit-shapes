@@ -34,7 +34,7 @@ assert mesh_vedo.nvertices == mesh_sks.n_points
 mesh_sks["signal"] = mesh_sks.points[:, 0]
 # Now, export the mesh to Vedo
 mesh_vedo2 = mesh_sks.to_vedo()
-# The signal is transfered to the Vedo mesh as a point data array
+# The signal is transferred to the Vedo mesh as a point data array
 # with the same name and can be plotted
 mesh_vedo2.cmap("jet", mesh_vedo2.pointdata["signal"])
 vedo.show(mesh_vedo2, offscreen=True)

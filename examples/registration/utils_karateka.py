@@ -104,9 +104,7 @@ def plot_extrinsic_deformation(source, target, registration, animation=False):
         control_points = source.control_points
         morphed_cp = registration.transform(source=control_points)
 
-        parameter = registration.parameter_
         regularization = registration.regularization_
-        model = registration.model
         loss = registration.loss
 
         initial_loss = loss(source, target)
@@ -154,7 +152,7 @@ def plot_extrinsic_deformation(source, target, registration, animation=False):
         plotter.camera_position = cpos2
 
         plotter.add_text(
-            f"Final loss: {final_loss:.2e}\nRegularization: {regularization:.2e}"
+            f"Loss: {final_loss:.2e}\nRegularization: {regularization:.2e}"
         )
 
         plotter.show()
@@ -264,7 +262,7 @@ def plot_intrinsic_deformation(source, target, registration, animation=False):
 
             plotter.add_mesh(arrows, color="r")
         plotter.add_text(
-            f"Final loss: {final_loss:.2e}\nRegularization: {regularization:.2e}"
+            f"Loss: {final_loss:.2e}\nRegularization: {regularization:.2e}"
         )
         plotter.show()
 

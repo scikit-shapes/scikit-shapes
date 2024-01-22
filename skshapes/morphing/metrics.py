@@ -97,7 +97,7 @@ class ShellEnergyMetric(Metric):
         edges: Optional[Edges] = None,
         triangles: Optional[Triangles] = None,
     ) -> FloatScalar:
-        """Compute shell enery along the sequence of points.
+        """Compute shell energy along the sequence of points.
 
         Parameters
         ----------

@@ -22,7 +22,7 @@ class Decimation:
     ```python
     # assume that pose1 and pose2 are two meshes with the same connectivity:
 
-    pose1, pose2 = sks.PolyData("data/pose1.vtk","data/pose2.vtk")
+    pose1, pose2 = sks.PolyData("data/pose1.vtk", "data/pose2.vtk")
     decimator = sks.Decimation(target_reduction=0.5)
     decimator.fit(cat1)
     pose1_decimated = decimator.transform(cat1)

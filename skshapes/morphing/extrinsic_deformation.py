@@ -1,6 +1,6 @@
 """Kernel deformation morphing algorithm.
 
-This algorithm decribes the morphing as a deformation of the ambiant space.
+This algorithm describes the morphing as a deformation of the ambiant space.
 The parameter is a vector field, which is referred to as the momentum. This
 momentum is smoothed by a kernel, and the morphed shape is obtained by
 integrating the momentum. The regularization is given by <p, K_q p> where
@@ -136,7 +136,7 @@ class ExtrinsicDeformation(BaseModel):
 
         dt = 1 / self.n_steps  # Time step
         if self.n_steps == 1:
-            # If there is only one step, we can compute the transormation
+            # If there is only one step, we can compute the transformation
             # directly without using the integrator as we do not need p_1
             K = self.cometric.operator(shape.points, q)
             points = shape.points + (K @ p)
@@ -149,7 +149,11 @@ class ExtrinsicDeformation(BaseModel):
                 time = torch.linspace(0, 1, self.n_steps + 1).to(p.device)
 
                 if len(y_0) == 3:
-                    (path_p, path_q, path_pts,) = odeint(
+                    (
+                        path_p,
+                        path_q,
+                        path_pts,
+                    ) = odeint(
                         func=self.ode_module,
                         y0=y_0,
                         t=time,
@@ -161,7 +165,10 @@ class ExtrinsicDeformation(BaseModel):
                             m.points = path_pts[i].clone()
 
                 if len(y_0) == 2:
-                    (path_p, path_q,) = odeint(
+                    (
+                        path_p,
+                        path_q,
+                    ) = odeint(
                         func=self.ode_module,
                         y0=y_0,
                         t=time,

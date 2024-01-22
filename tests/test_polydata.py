@@ -96,7 +96,7 @@ def test_polydata_creation():
     assert triangle.edge_lengths is not None
     assert triangle.triangle_areas is not None
 
-    # /!\ Assinging edges manually will delete the triangles
+    # /!\ Assigning edges manually will delete the triangles
     triangle.edges = triangle.edges
     assert triangle.edges is not None
     assert triangle._triangles is None
@@ -473,7 +473,7 @@ def test_landmarks_creation():
     mesh1.add_landmarks(3)
     assert mesh1.n_landmarks == 1
 
-    # Create landmarks with coo sparse tensor
+    # Create landmarks with coo_sparse_tensor
     landmarks_indices = [0, 1, 2, 3]
     landmarks_values = 4 * [1.0]
     n_landmarks = len(landmarks_indices)
@@ -608,7 +608,7 @@ def test_polydata_signal_and_landmarks():
     assert torch.allclose(sphere_back.landmark_indices, landmarks)
     assert torch.allclose(sphere_back["signal"], signal)
 
-    # Add a point not conected to the mesh
+    # Add a point not connected to the mesh
     import numpy as np
 
     sphere_pv_notclean = sphere_pv.copy()

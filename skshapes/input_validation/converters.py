@@ -60,19 +60,23 @@ def convert_inputs(func, parameters=None):
     import skshapes as sks
     from skshapes.types import NumericalTensor
 
+
     @sks.convert_inputs
     @sks.typecheck
     def foo(a: NumericalTensor) -> NumericalTensor:
         return a
 
-    foo(np.zeros(10)) # OK
+
+    foo(np.zeros(10))  # OK
+
 
     @sks.typecheck
     @sks.convert_inputs
     def bar(a: NumericalTensor) -> NumericalTensor:
         return a
 
-    bar(np.zeros(10)) # Beartype error
+
+    bar(np.zeros(10))  # Beartype error
     ```
 
     TODO: so far, it only works with numpy arrays and torch tensors.

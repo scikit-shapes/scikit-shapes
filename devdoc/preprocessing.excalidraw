@@ -205,11 +205,11 @@
       "locked": false,
       "fontSize": 20,
       "fontFamily": 2,
-      "text": "Issue : if we do LandmarkSetter -> Decimation\nit is possible that the landmarks does not corresponds to actual points\non the shapes and it could be a problem for ElasticMetric() where deformations\nare limited to shape.points.",
+      "text": "Issue : if we do LandmarkSetter -> Decimation\nit is possible that the landmarks does not corresponds to actual points\non the shapes and it could be a problem for AsIsometricAsPossible() where deformations\nare limited to shape.points.",
       "textAlign": "left",
       "verticalAlign": "top",
       "containerId": null,
-      "originalText": "Issue : if we do LandmarkSetter -> Decimation\nit is possible that the landmarks does not corresponds to actual points\non the shapes and it could be a problem for ElasticMetric() where deformations\nare limited to shape.points.",
+      "originalText": "Issue : if we do LandmarkSetter -> Decimation\nit is possible that the landmarks does not corresponds to actual points\non the shapes and it could be a problem for AsIsometricAsPossible() where deformations\nare limited to shape.points.",
       "lineHeight": 1.15,
       "baseline": 87
     },

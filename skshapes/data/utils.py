@@ -187,7 +187,7 @@ class DataAttributes(dict):
         attributes: dict[Any, Union[NumericalTensor, NumericalArray]],
         device: Optional[Union[str, torch.device]] = None,
     ) -> DataAttributes:
-        """From dictionnary constructor."""
+        """From dictionary constructor."""
         if len(attributes) == 0:
             raise ValueError(
                 "The dictionary of attributes should not be empty to"
@@ -199,7 +199,7 @@ class DataAttributes(dict):
         for value in attributes.values():
             if value.shape[0] != n:
                 raise ValueError(
-                    "The number of elements of the dictionnary should be the"
+                    "The number of elements of the dictionary should be the"
                     + "same to be converted into a DataAttributes object"
                 )
 
@@ -248,7 +248,7 @@ class DataAttributes(dict):
 
     @typecheck
     def to_numpy_dict(self) -> dict[Any, NumericalArray]:
-        """Cast as dictionnary of numpy arrays."""
+        """Cast as dictionary of numpy arrays."""
         d = dict(self)
         for key, value in d.items():
             d[key] = value.detach().cpu().numpy()

@@ -31,7 +31,7 @@ nav:
     # - Data:
     #   - PolyData: user_guide/data_structures/polydata.md
     #   - Images: user_guide/data_structures/images.md
-    #   - What makes PolyData ans Images different: user_guide/data_structures/differences.md
+    #   - What makes PolyData and Images different: user_guide/data_structures/differences.md
     # - Single Shape analysis:
     #   - MultiScaling: user_guide/single_shape/multiscale.md
     #   - Features:
@@ -89,5 +89,3 @@ extra_javascript:
   - javascripts/mathjax.js
   - https://polyfill.io/v3/polyfill.min.js?features=es6
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
-
-

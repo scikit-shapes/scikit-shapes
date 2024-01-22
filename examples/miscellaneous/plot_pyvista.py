@@ -38,7 +38,7 @@ assert mesh_pyvista.n_points == mesh_sks.n_points
 mesh_sks["signal"] = mesh_sks.points[:, 0]
 # Now, export the mesh to PyVista
 mesh_pv2 = mesh_sks.to_pyvista()
-# The signal is transfered to the PyVista mesh as a point data array
+# The signal is transferred to the PyVista mesh as a point data array
 # with the same name and can be plotted
 mesh_pv2.plot(scalars="signal", cpos="xy")
 

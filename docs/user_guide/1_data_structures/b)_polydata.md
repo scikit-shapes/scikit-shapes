@@ -24,7 +24,7 @@ A polydata must be one of the three types:
 import skshapes as sks
 import torch
 
-# Manually set points
+# Manually set points
 points = torch.tensor(
     [
         [0.0, 0.0, 0.0],
@@ -33,10 +33,10 @@ points = torch.tensor(
         [0.0, 1.0, 0.0],
         [0.5, 0.5, 1],
     ],
-    dtype=sks.float_dtype
+    dtype=sks.float_dtype,
 )
 
-# Manually set points
+# Manually set points
 triangles = torch.tensor(
     [
         [0, 1, 2],
@@ -48,19 +48,20 @@ triangles = torch.tensor(
     ],
 )
 
-# Create shape
+# Create shape
 pyramid = sks.PolyData(points=points, triangles=triangles)
-
 ```
 - from a file
 ```python
 import skshapes as sks
+
 # Load file
 shape = sks.PolyData("mesh.vtk")
 ```
 - from vedo.Mesh or pyvista.Polydata
 ```python
 import pyvista.examples
+
 # Load a pyvista PolyData from pyvista examples
 bunny_pyvista = pyvista.examples.download_bunny()
 # Cast it as a scikit-shapes PolyData
@@ -68,8 +69,9 @@ bunny_sks = sks.PolyData(bunny_pyvista)
 
 import vedo
 from vedo import dataurl
+
 # Load a vedo Mesh from vedoexamples
-pot = vedo.Mesh(dataurl+"teapot.vtk").shrink(0.75)
+pot = vedo.Mesh(dataurl + "teapot.vtk").shrink(0.75)
 # Cast it as a scikit-shapes PolyData
 pot_sks = sks.PolyData(pot)
 ```
@@ -97,12 +99,12 @@ Landmarks are distinguished vertices. The main utility of defining landmarks is 
 
 Landmarks are represented as a sparse `torch.tensor`
 
-Landmarks can be set following 
+Landmarks can be set following
 
 ## Control points
 
-Control points are 
+Control points are
 
 ## Multiscaling
 
-Multiscaling allows to represent a shape at different scales ensuring consistency of landmarks, control points and signal accross scales. Read the documentation of Multiscaling to know more about this functionality.
+Multiscaling allows to represent a shape at different scales ensuring consistency of landmarks, control points and signal across scales. Read the documentation of Multiscaling to know more about this functionality.

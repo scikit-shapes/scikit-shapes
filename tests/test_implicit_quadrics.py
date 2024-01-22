@@ -135,7 +135,7 @@ if __name__ == "__main__":
                 points=points, scale=1
             )
 
-        # Create an "output/" foler if it doesn't exist
+        # Create an "output/" folder if it doesn't exist
         import os
 
         if not os.path.exists("output"):
