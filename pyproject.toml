@@ -65,7 +65,6 @@ testpaths = [
 
 [tool.repo-review]
 ignore = [
-    "GH",
     "PC",
     "MY",
     "RF",
