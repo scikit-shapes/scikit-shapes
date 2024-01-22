@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["numpy", "cython", "setuptools", "wheel"]
+requires = ["numpy", "cython", "setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
@@ -62,3 +62,12 @@ log_cli_level = "info"
 testpaths = [
   "tests",
 ]
+
+[tool.repo-review]
+ignore = [
+    "GH",
+    "PC",
+    "MY",
+    "RF",
+    "RTD"
+    ]
