@@ -28,15 +28,13 @@ shape1 = sks.read("data/shape1.vtk")
 shape2 = sks.read("data/shape2.vtk")
 
 registration = sks.Registration(
-
-    model = sks.ExtrinsicDeformation(n_steps=5, kernel="gaussian", blur=0.5),
-    loss = sks.NearestNeighborLoss(),
-    gpu = True,
+    model=sks.ExtrinsicDeformation(n_steps=5, kernel="gaussian", blur=0.5),
+    loss=sks.NearestNeighborLoss(),
+    gpu=True,
 )
 
 registration.fit(source=shape1, target=shape2)
 transformed_shape = registration.transform(source=shape1)
-
 ```
 
 

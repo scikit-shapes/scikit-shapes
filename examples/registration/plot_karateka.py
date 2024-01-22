@@ -15,10 +15,15 @@ This example shows how both approaches differ on a simple 2D example.
 import sys
 import pykeops
 
-sys.path.append(pykeops.get_build_folder())
-
 import skshapes as sks
-from utils_karateka import *
+from utils_karateka import (
+    plot_intrinsic_deformation,
+    plot_extrinsic_deformation,
+    plot_karatekas,
+    load_data,
+)
+
+sys.path.append(pykeops.get_build_folder())
 
 kwargs = {
     "loss": sks.L2Loss(),

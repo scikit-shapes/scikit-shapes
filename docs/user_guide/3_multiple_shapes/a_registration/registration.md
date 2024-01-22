@@ -16,7 +16,7 @@ import skshapes as sks
 source = sks.Circle()
 target = sks.Circle()
 target.points += torch.tensor([1.0, 2.0], dtype=sks.float_dtype)
-# Define loss and deformation model
+# Define loss and deformation model
 loss = sks.L2Loss()
 model = sks.RigidMotion()
 # Initialize the registration object
@@ -24,12 +24,12 @@ r = sks.Registration(
     model=model,
     loss=loss,
 )
-# Fit the registration
+# Fit the registration
 r.fit(
     source=source,
     target=target,
 )
-# Print the translation parameter
+# Print the translation parameter
 print(r.translation_)
 ```
 ```
@@ -41,11 +41,13 @@ tensor([1., 2.])
 A loss function is a way to quantify the difference between two shapes. In scikit-shapes a loss functiion is represented by a class that can be intialized with some hyperparameters
 ```python
 import skshapes as sks
+
 l1_loss = sks.LpLoss(p=1)
 ```
 Linear combination of loss function are valid loss functions:
 ```python
 import skshapes as sks
+
 custom_loss = 2 * sks.LandmarkLoss() + sks.NearestNeighborsLoss()
 ```
 Some losses requires that `source` and `target` fulfill certains conditions:
@@ -59,7 +61,7 @@ Some losses requires that `source` and `target` fulfill certains conditions:
 | `LandmarkLoss`         | Lp loss for landmarks                | `source` and `target` must have corresponding landmarks |
 | `NearestNeighborsLoss` | Nearest neighbors distance           | NA                                                      |
 
-- for images 
+- for images
 
 | Loss function          | Description                          | Restrictions                                            |
 | ---------------------- | ------------------------------------ | ------------------------------------------------------- |

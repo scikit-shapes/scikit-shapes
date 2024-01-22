@@ -34,7 +34,7 @@ In this environment, you can execute the following directly in the `scikit-shape
 ```bash
 # Lint
 black .
-# Check syntax 
+# Check syntax
 flake8 skshapes
 # Run tests and show code coverage
 pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html test/

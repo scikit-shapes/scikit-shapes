@@ -13,17 +13,8 @@ This document is intended to explain how deformation models must be implemented 
 A deformation model must inherits from `sks.morphing.BaseModel` and following methods are required :
 
 - `__init__` : class constructor used to define some hyperparameters
-- `morph` : method to apply the deformation to the shape given a parameter. The annotations are imposed in the tests
+- `morph` : method to apply the deformation to the shape given a parameter. It returns a [`MorphingOutput`](skshapes.types.MorphingOutput), it is a `NamedTuple` with at least a `morphed_shape` entry.
 
-```python
-def morph(
-    self,
-    shape: shape_type,
-    parameter: torch.Tensor,
-    return_path: bool,
-    return_regularization: bool
-    ) -> MorphingOutput
-```
 - `parameter_shape(shape=...)`: method that output a tuple corresponding to the shape of the parameter that must be passed to `morph`
 - `initial_parameter(shape=...)`: method that returns a default parameter. For now it is a zero `torch.tensor` defined on the right device and with the right shape.
 
@@ -43,15 +34,14 @@ Task interact with `deformation`:
 - by calling `morph(shape, parameter)`
 - by copying the content of `MorphingOutput`
 
-Tasks relies on optimization schemes and `morph` must be compatible with `autograd` the following test must tun without error (it is actually in the test suite) 
+Tasks relies on optimization schemes and `morph` must be compatible with `autograd` the following test must tun without error (it is actually in the test suite)
 
 ```python
-
-source, target = ... # Any shapes
-loss = ... # Any loss
-# Initialize the deformation model
+source, target = ...  # Any shapes
+loss = ...  # Any loss
+# Initialize the deformation model
 model = deformation_model()
-# Get an initial parameter
+# Get an initial parameter
 p = model.inital_parameter(shape=source)
 p.requires_grad_(True)
 
@@ -67,7 +57,9 @@ if torch.cuda.is_available():
     except ValueError as e:
         pass
     else:
-        raise RuntimeError("Expected ValueError as parameter and shape not on the same device")
+        raise RuntimeError(
+            "Expected ValueError as parameter and shape not on the same device"
+        )
 ```
 
 

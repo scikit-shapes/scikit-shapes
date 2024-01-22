@@ -149,7 +149,11 @@ class ExtrinsicDeformation(BaseModel):
                 time = torch.linspace(0, 1, self.n_steps + 1).to(p.device)
 
                 if len(y_0) == 3:
-                    (path_p, path_q, path_pts,) = odeint(
+                    (
+                        path_p,
+                        path_q,
+                        path_pts,
+                    ) = odeint(
                         func=self.ode_module,
                         y0=y_0,
                         t=time,
@@ -161,7 +165,10 @@ class ExtrinsicDeformation(BaseModel):
                             m.points = path_pts[i].clone()
 
                 if len(y_0) == 2:
-                    (path_p, path_q,) = odeint(
+                    (
+                        path_p,
+                        path_q,
+                    ) = odeint(
                         func=self.ode_module,
                         y0=y_0,
                         t=time,

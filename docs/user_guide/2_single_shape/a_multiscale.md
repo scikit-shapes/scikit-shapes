@@ -8,8 +8,5 @@ import pyvista.examples
 
 bunny = sks.PolyData(pyvista.examples.download_bunny())
 
-multiscale_bunny = sks.Multiscale(
-    shape=bunny,
-    ratios=[0.1, 0.01]
-)
+multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01])
 ```

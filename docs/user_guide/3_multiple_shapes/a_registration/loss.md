@@ -24,7 +24,7 @@ Some loss functions require some attributes to be available for shapes. An examp
 | `LandmarkLoss`         | L2 loss for landmarks                | `source` and `target` must have corresponding landmarks |
 | `NearestNeighborsLoss` | Nearest neighbors distance           | NA                                                      |
 
-- for images 
+- for images
 
 | Loss function          | Description                          | Restrictions                                            |
 | ---------------------- | ------------------------------------ | ------------------------------------------------------- |

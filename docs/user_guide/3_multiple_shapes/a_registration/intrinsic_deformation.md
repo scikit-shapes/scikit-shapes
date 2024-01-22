@@ -37,10 +37,7 @@ import skshapes as sks
 
 loss = ...
 metric = sks.ShellEnergyMetric
-model = sks.IntrinsicDeformation(
-    n_steps=10,
-    metric=metric
-)
+model = sks.IntrinsicDeformation(n_steps=10, metric=metric)
 
 registration = sks.Registration(loss=loss, model=model)
 registration.fit(source=source, target=target)

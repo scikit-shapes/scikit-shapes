@@ -8,10 +8,12 @@ of them. This can be done with the `one_and_only_one` decorator:
 @one_and_only_one(["a", "b", "c"])
 def foo(a=None, b=None, c=None):
     pass
-foo(a=1) # OK
-foo(b=1) # OK
-foo(c=1) # OK
-foo(a=1, b=1) # InputStructureError
+
+
+foo(a=1)  # OK
+foo(b=1)  # OK
+foo(c=1)  # OK
+foo(a=1, b=1)  # InputStructureError
 ```
 
 Decorators already implemented:

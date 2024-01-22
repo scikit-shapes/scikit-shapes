@@ -52,7 +52,7 @@ def extract_edges(FLOAT_DTYPE_t [:, :] points, INT_DTYPE_t [:, :] triangles):
     # Sort edges by lexicographic sort
     edges = np.sort(np.asarray(edges), axis=0)
     cdef INT_DTYPE_t[:] order = np.lexsort((np.asarray(edges[1, :]), np.asarray(edges[0, :])))
-    
+
     # Remove duplicates
     cdef INT_DTYPE_t[:, :] tight_edges = np.zeros((2, 3 * n_triangles), dtype=INT_DTYPE)
     cdef INT_DTYPE_t n_keep = 1
