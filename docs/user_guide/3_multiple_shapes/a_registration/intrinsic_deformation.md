@@ -25,7 +25,7 @@ $$ X^t \rightarrow X^{t+1} = X^t + V^{t}$$
 
 ## Code
 
-Intrinsic Deformation is accessible in scikit-shapes through the class [`IntrinsicDeformation`][skshapes.morphing.IntrinsicDeformation]. The argument `n_step` controls ther number of time steps $T$, the higher `n_step` is, the more flexible is the model. However, the memory impact grows linearly in `n_step` and the running time is also impacted. The Riemannian metric is given with the argument `metric`. Available metrics in scikit-shapes can be found in the module [`skshapes.morphing.metrics`][skshapes.morphing.metrics].
+Intrinsic Deformation is accessible in scikit-shapes through the class [`IntrinsicDeformation`][skshapes.morphing.IntrinsicDeformation]. The argument `n_step` controls the number of time steps $T$, the higher `n_step` is, the more flexible is the model. However, the memory impact grows linearly in `n_step` and the running time is also impacted. The Riemannian metric is given with the argument `metric`. Available metrics in scikit-shapes can be found in the module [`skshapes.morphing.metrics`][skshapes.morphing.metrics].
 
 - [`as-isometric-as-possible`][skshapes.morphing.metrics.AsIsometricAsPossible] (requires points and edges)
 - [`shell-energy`][skshapes.morphing.metrics.ShellEnergyMetric] (requires triangles)

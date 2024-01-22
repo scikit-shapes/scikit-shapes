@@ -111,7 +111,7 @@ def test_extrinsic_deformation():
         print(out_torchdiffeq.points)
         print(out_sks.points)
 
-        # Make sure that something has appened, ie the points are not the same
+        # Make sure that something happened, ie the points are not the same
         # after registration than before
         assert not torch.allclose(
             out_torchdiffeq.points,

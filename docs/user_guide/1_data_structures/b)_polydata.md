@@ -107,4 +107,4 @@ Control points are
 
 ## Multiscaling
 
-Multiscaling allows to represent a shape at different scales ensuring consistency of landmarks, control points and signal accross scales. Read the documentation of Multiscaling to know more about this functionality.
+Multiscaling allows to represent a shape at different scales ensuring consistency of landmarks, control points and signal across scales. Read the documentation of Multiscaling to know more about this functionality.

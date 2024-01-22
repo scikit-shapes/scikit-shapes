@@ -8,7 +8,7 @@ from hypothesis import strategies as st
 
 
 def test_mesh_convolution_point_cloud():
-    """Test error handling for mesh_convolution on a pont cloud."""
+    """Test error handling for mesh_convolution on a point cloud."""
     points = torch.rand(10, 3)
     pc = sks.PolyData(points=points)
     with pytest.raises(

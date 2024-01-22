@@ -16,7 +16,7 @@ Scikit-shapes is a python package for the analysis of 2D and 3D shape data. It g
 
 Scikit-shapes is thinked to be intuitive and user-friendly, our am is to provide a library that is
 - **Task-oriented**: basic objects are high-level tasks, such as `Registration` or `Multiscaling`. The mathematical details as loss function, deformation model, are defined as hyperparameters.
-- **Modular**: workflows can be designed following a plug-and-play approach, allowing comparison accross different methods for the same task. In addition, it is possible to implement new modules such as deformation model or loss function and integrate them in existing pipelines.
+- **Modular**: workflows can be designed following a plug-and-play approach, allowing comparison across different methods for the same task. In addition, it is possible to implement new modules such as deformation model or loss function and integrate them in existing pipelines.
 - **Efficient**: skshapes relies mostly on pyTorch and pyKeOps for computations. It allows to speed-up numerical intensive part of the analysis with parallelization on CPU or GPU.
 
 Here is a code snippet illustrating how a registration model is build by combining a loss function and a deformation model:
@@ -57,7 +57,7 @@ pip install .
 ```
 ## From source (for developers)
 
-To install scikit-shapes as well as developpers dependencies, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
+To install scikit-shapes as well as developer dependencies, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
 ```bash
 pip install -e .[dev]
 ```

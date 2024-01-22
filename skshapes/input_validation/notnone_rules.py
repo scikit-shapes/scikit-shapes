@@ -1,6 +1,6 @@
 """Not-None rules.
 
-This module define decorators that allows to do some chaecks for functions that
+This module define decorators that allows to do some checks for functions that
 can be called by different arguments combinations. For example, a function can
 be called with one of the arguments `a`, `b` or `c` but not with more than one
 of them. This can be done with the `one_and_only_one` decorator:

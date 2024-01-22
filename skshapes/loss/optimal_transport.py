@@ -22,7 +22,7 @@ class OptimalTransportLoss(BaseLoss):
     def __init__(self, loss: losses = "sinkhorn", **kwargs) -> None:
         """Initialize the OptimalTransportLoss class.
 
-        For mor details on the arguments, see the documentation of geomloss:
+        For more details on the arguments, see the documentation of geomloss:
         https://www.kernel-operations.io/geomloss/api/pytorch-api.html
 
         Parameters

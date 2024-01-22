@@ -6,8 +6,8 @@ Registration is the task of finding a suitable transformation from a source to a
 
 A registration task must be at least parametrized with a `deformation model` and a `loss function`
 
-- The deformation model specifies contrains about the way source can be transformed to match target.
-- The loss function measure the discrepency between the morphed source and the target
+- The deformation model specifies constrains about the way source can be transformed to match target.
+- The loss function measure the discrepancy between the morphed source and the target
 
 ```python
 import skshapes as sks
@@ -38,7 +38,7 @@ tensor([1., 2.])
 
 ## Choosing a Loss function
 
-A loss function is a way to quantify the difference between two shapes. In scikit-shapes a loss functiion is represented by a class that can be intialized with some hyperparameters
+A loss function is a way to quantify the difference between two shapes. In scikit-shapes a loss function is represented by a class that can be initialized with some hyperparameters
 ```python
 import skshapes as sks
 
@@ -56,8 +56,8 @@ Some losses requires that `source` and `target` fulfill certains conditions:
 
 | Loss function          | Description                          | Restrictions                                            |
 | ---------------------- | ------------------------------------ | ------------------------------------------------------- |
-| `LpLoss`               | Lp loss for vertices                 | `source` and `target` must be in correspondance         |
-| `L2Loss`               | L2 loss for vertices                 | `source` and `target` must be in correspondance         |
+| `LpLoss`               | Lp loss for vertices                 | `source` and `target` must be in correspondence         |
+| `L2Loss`               | L2 loss for vertices                 | `source` and `target` must be in correspondence         |
 | `LandmarkLoss`         | Lp loss for landmarks                | `source` and `target` must have corresponding landmarks |
 | `NearestNeighborsLoss` | Nearest neighbors distance           | NA                                                      |
 

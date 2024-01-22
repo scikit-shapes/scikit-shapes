@@ -301,7 +301,7 @@ if __name__ == "__main__":
 
         print(shape.point_moments.cache_info())
 
-        # Create an "output/" foler if it doesn't exist
+        # Create an "output/" folder if it doesn't exist
         import os
 
         if not os.path.exists("output"):

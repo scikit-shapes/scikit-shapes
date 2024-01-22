@@ -29,7 +29,7 @@ int_dtype = torch.int64
 # Type aliases
 Number = Union[int, float]
 
-correspondance = {
+correspondence = {
     torch.float32: Float32,
     torch.float64: Float64,
     torch.int64: Int64,
@@ -37,9 +37,9 @@ correspondance = {
 }
 
 
-JaxFloat = correspondance[float_dtype]
+JaxFloat = correspondence[float_dtype]
 JaxDouble = Float64
-JaxInt = correspondance[int_dtype]
+JaxInt = correspondence[int_dtype]
 
 # Numpy array types
 FloatArray = Float[np.ndarray, "..."]  # Any float format numpy array

@@ -36,6 +36,13 @@ repos:
         additional_dependencies:
           - black==22.12.0
 
+  - repo: https://github.com/codespell-project/codespell
+    rev: "v2.2.6"
+    hooks:
+      - id: codespell
+        args: ["-L", "sur,nd", "--skip", "devdoc/*"]
+
+
   - repo: https://github.com/pycqa/flake8
     rev: 5.0.4
     hooks:
