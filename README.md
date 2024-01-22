@@ -67,12 +67,25 @@ Then, you will have the possibility to interactively edit the code, run the lint
 ```bash
 # Install pre-commit config
 pre-commit install
-# Lint wityh black + check syntax 
+# Lint wityh black + check syntax
 pre-commit run --all-files
 # Run tests and show code coverage
 pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html tests/
 firefox htmlcov/index.html
 # Build documentation
+mkdocs serve
+```
+
+To build the documentation, from scikit-shapes directory:
+```
+# Make sure to have the latest mkdocs-gallery patch
+# pip uninstall mkdocs-gallery
+# pip install mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@latest"
+
+# Optional, clean generated examples
+# rm -r docs/generated
+
+# Build documentation and serve
 mkdocs serve
 ```
 
