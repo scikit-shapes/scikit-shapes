@@ -44,3 +44,21 @@ dev = [
 
 [tool.black]
 line-length = 79
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "-ra",
+    "--showlocals",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=skshapes",
+    "--cov-report=term-missing",
+    "--cov-report=html"
+    ]
+xfail_strict = true
+filterwarnings = ["error"]
+log_cli_level = "info"
+testpaths = [
+  "tests",
+]
