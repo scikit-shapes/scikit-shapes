@@ -65,7 +65,11 @@ testpaths = [
 
 [tool.repo-review]
 ignore = [
-    "PC",
+    "PC140", # MyPy
+    "PC170", # PyGrep (because no rst files)
+    "PC180", # Prettier
+    "PC190", # Ruff
+    "PC901",
     "MY",
     "RF",
     "RTD"
