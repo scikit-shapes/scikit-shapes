@@ -48,11 +48,11 @@ jobs:
       - name: Setup headless display
         uses: pyvista/setup-headless-display-action@v2
 
-      - name: build documentation
-        if: matrix.python-version == '3.11'
-        run: |
-          mkdocs build
-          cp -r site artifacts/
+      # - name: build documentation
+      #   if: matrix.python-version == '3.11'
+      #   run: |
+      #     mkdocs build
+      #     cp -r site artifacts/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
