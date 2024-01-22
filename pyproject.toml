@@ -68,9 +68,16 @@ ignore = [
     "PC140", # MyPy
     "PC170", # PyGrep (because no rst files)
     "PC180", # Prettier
-    "PC190", # Ruff
-    "PC901",
+    "PC901", # pre-commit CI, TODO remove when the repo is public (https://learn.scientific-python.org/development/guides/style/#PC901)
     "MY",
     "RF",
     "RTD"
     ]
+
+
+# See: https://learn.scientific-python.org/development/guides/style/#PC190
+[tool.ruff]
+src = ["skshapes"]
+
+[tool.ruff.lint]
+ignore = ["E", "F"]
