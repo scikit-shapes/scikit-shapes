@@ -69,9 +69,9 @@ ignore = [
     "PC170", # PyGrep (because no rst files)
     "PC180", # Prettier
     "PC901", # pre-commit CI, TODO remove when the repo is public (https://learn.scientific-python.org/development/guides/style/#PC901)
-    "MY",
-    "RF",
-    "RTD"
+    "MY", # MyPy
+    "RF", # Ruff
+    "RTD" # ReadTheDocs
     ]
 
 
