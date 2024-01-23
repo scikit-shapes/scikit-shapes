@@ -13,6 +13,7 @@ from pyvista.core.pointset import PolyData as PyvistaPolyData
 
 from ..errors import DeviceError, ShapeError
 from ..input_validation import convert_inputs, one_and_only_one, typecheck
+from ..triangle_mesh import EdgeTopology
 from ..types import (
     Edges,
     Float1dTensor,
@@ -29,7 +30,6 @@ from ..types import (
     int_dtype,
     polydata_type,
 )
-from .edges_extraction import extract_edges
 from .utils import DataAttributes
 
 
@@ -503,17 +503,10 @@ class PolyData(polydata_type):
             return self._edges
 
         elif self._triangles is not None:
-            points_numpy = (
-                self.points.detach().cpu().numpy().astype(np.float64)
-            )
-            triangles_numpy = (
-                self.triangles.detach().cpu().numpy().astype(np.int64)
-            )
-            edges = extract_edges(points_numpy, triangles_numpy.T)
-            edges = torch.from_numpy(edges.T).to(int_dtype).to(self.device)
-
+            edges = EdgeTopology(self._triangles).edges
             self._edges = edges
             return edges
+
         return None
 
     @edges.setter
