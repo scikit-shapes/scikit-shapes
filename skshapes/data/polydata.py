@@ -324,9 +324,7 @@ class PolyData(polydata_type):
             return d.fit_transform(self)
         else:
             msg = "Decimation is only implemented for triangle meshes so far."
-            raise NotImplementedError(
-                msg
-            )
+            raise NotImplementedError(msg)
 
     @typecheck
     def save(self, filename: str) -> None:
@@ -753,9 +751,7 @@ class PolyData(polydata_type):
     @landmark_indices.setter
     @convert_inputs
     @typecheck
-    def landmark_indices(
-        self, landmarks: Int1dTensor | list[int]
-    ) -> None:
+    def landmark_indices(self, landmarks: Int1dTensor | list[int]) -> None:
         """Landmarks setter with indices list.
 
         Parameters

@@ -108,7 +108,6 @@ def test_extrinsic_deformation():
         )
         out_sks = registration_sks.fit_transform(source=source, target=target)
 
-
         # Make sure that something happened, ie the points are not the same
         # after registration than before
         assert not torch.allclose(

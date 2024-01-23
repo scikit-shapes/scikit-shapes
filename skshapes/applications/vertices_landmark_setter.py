@@ -89,9 +89,7 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         It is used to add or delete landmarks and update the display.
         """
         if evt.keypress == "e" and evt.picked3d is not None:
-            pt = vedo.Points(self.actor.vertices).closest_point(
-                evt.picked3d
-            )
+            pt = vedo.Points(self.actor.vertices).closest_point(evt.picked3d)
             indice = closest_vertex(self.actor.vertices.copy(), pt)
             self.lpoints.append(pt)
             self.landmarks.append(indice)
@@ -332,9 +330,7 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
                 pt = vedo.Points(self.active_actor.vertices).closest_point(
                     evt.picked3d
                 )
-                indice = closest_vertex(
-                    self.active_actor.vertices.copy(), pt
-                )
+                indice = closest_vertex(self.active_actor.vertices.copy(), pt)
                 self.reference_lpoints.append(pt)
                 self.reference_indices.append(indice)
 
@@ -355,9 +351,7 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
                 pt = vedo.Points(self.active_actor.vertices).closest_point(
                     evt.picked3d
                 )
-                indice = closest_vertex(
-                    self.active_actor.vertices.copy(), pt
-                )
+                indice = closest_vertex(self.active_actor.vertices.copy(), pt)
                 self.other_lpoints.append(pt)
                 self.other_indices.append(indice)
 

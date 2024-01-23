@@ -239,16 +239,12 @@ class Decimation:
 
         if self.collapses_ is None:
             msg = "The decimation object has not been fitted yet."
-            raise NotFittedError(
-                msg
-            )
+            raise NotFittedError(msg)
 
         if target_reduction is not None:
             if not (0 <= target_reduction <= 1):
                 msg = "The target reduction must be between 0 and 1"
-                raise ValueError(
-                    msg
-                )
+                raise ValueError(msg)
             ratio = 1 - target_reduction
             n_target_points = int(ratio * self.ref_mesh.n_points)
 
@@ -377,9 +373,7 @@ class Decimation:
             return self.collapses_
         else:
             msg = "The decimation object has not been fitted yet."
-            raise NotFittedError(
-                msg
-            )
+            raise NotFittedError(msg)
 
     @typecheck
     @property
@@ -389,9 +383,7 @@ class Decimation:
             return self.actual_reduction_
         else:
             msg = "The decimation object has not been fitted yet."
-            raise NotFittedError(
-                msg
-            )
+            raise NotFittedError(msg)
 
     @typecheck
     @property
@@ -401,6 +393,4 @@ class Decimation:
             return self.ref_mesh_
         else:
             msg = "The decimation object has not been fitted yet."
-            raise NotFittedError(
-                msg
-            )
+            raise NotFittedError(msg)

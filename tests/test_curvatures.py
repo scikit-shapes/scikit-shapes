@@ -289,7 +289,6 @@ if __name__ == "__main__":
         with myprof as prof:
             kmax, kmin = shape.point_principal_curvatures(scale=scale)
 
-
         # Create an "output/" folder if it doesn't exist
         import os
 

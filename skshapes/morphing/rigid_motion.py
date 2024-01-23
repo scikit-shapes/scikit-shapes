@@ -72,9 +72,7 @@ class RigidMotion(BaseModel):
         """
         if parameter.device != shape.device:
             msg = "The shape and the parameter must be on the same device."
-            raise DeviceError(
-                msg
-            )
+            raise DeviceError(msg)
 
         if shape.dim == 2:
             return self._morph2d(

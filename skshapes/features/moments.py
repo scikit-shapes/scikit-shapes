@@ -189,16 +189,12 @@ def _point_moments(
 
     else:
         msg = f"Moments of order {order} have not been implemented."
-        raise NotImplementedError(
-            msg
-        )
+        raise NotImplementedError(msg)
 
     if rescale:
         if scale is None:
             msg = "A finite scale must be provided if rescale is True"
-            raise ValueError(
-                msg
-            )
+            raise ValueError(msg)
 
         moments = moments / scale**order
 

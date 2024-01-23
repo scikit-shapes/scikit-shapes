@@ -34,9 +34,7 @@ def _mesh_convolution(
             "Mesh convolution is only defined on triangle meshes or "
             "wireframe PolyData."
         )
-        raise AttributeError(
-            msg
-        )
+        raise AttributeError(msg)
     n_edges = self.n_edges
     n_points = self.n_points
     edges = self.edges

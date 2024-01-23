@@ -120,9 +120,7 @@ class ShellEnergyMetric(Metric):
         """
         if triangles is None:
             msg = "This metric requires triangles to be defined"
-            raise AttributeError(
-                msg
-            )
+            raise AttributeError(msg)
 
         n_steps = points_sequence.shape[1]
 

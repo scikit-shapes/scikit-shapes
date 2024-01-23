@@ -187,9 +187,7 @@ def squared_distances(
 
     if geodesic:
         msg = "Geodesic distances are not implemented yet."
-        raise NotImplementedError(
-            msg
-        )
+        raise NotImplementedError(msg)
 
     if window is None:
         return KeOpsSquaredDistances(

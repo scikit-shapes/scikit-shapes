@@ -272,9 +272,7 @@ class Registration:
         """
         if not hasattr(self, "morphed_shape_"):
             msg = "The registration must be fitted before calling transform"
-            raise NotFittedError(
-                msg
-            )
+            raise NotFittedError(msg)
         return self.model.morph(
             shape=source,
             parameter=self.parameter_,

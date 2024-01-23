@@ -37,9 +37,7 @@ class BaseLoss:
             this class is abstract and should not be instantiated
         """
         msg = "BaseLoss is an abstract class and should not be instantiated"
-        raise NotImplementedError(
-            msg
-        )
+        raise NotImplementedError(msg)
 
     @typecheck
     def __add__(self, other: BaseLoss) -> BaseLoss:

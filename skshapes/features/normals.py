@@ -21,9 +21,7 @@ def _point_normals(
     if scale is None:
         if self.triangles is None:
             msg = "If no triangles are provided, you must specify a scale."
-            raise ValueError(
-                msg
-            )
+            raise ValueError(msg)
 
         tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
         n = torch.zeros_like(self.points)
@@ -211,7 +209,6 @@ def smooth_normals(
     return F.normalize(U, p=2, dim=-1)  # (N, 3) or (N, S, 3)
 
 
-
 def tangent_vectors(normals) -> FloatTensor:
     """Compute tangent vectors to a normal vector field.
 
@@ -244,4 +241,3 @@ def tangent_vectors(normals) -> FloatTensor:
         (1 + s * x * x * a, s * b, -s * x, b, s + y * y * a, -y), dim=-1
     )
     return uv.view(uv.shape[:-1] + (2, 3))
-

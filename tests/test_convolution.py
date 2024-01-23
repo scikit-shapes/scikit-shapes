@@ -204,6 +204,7 @@ def test_multidimensional_matrix_multiplication():
     A a tensor of shape (m, *t), then M @ A is well defined and results in a
     (n, *t) tensor, t being a tuple of integers.
     """
+
     # Define a LinearOperator of shape (n, m)
     def randint(up, low=1):
         return torch.randint(low, up, (1,))[0] if up > low else low

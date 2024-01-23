@@ -111,9 +111,7 @@ class Multiscale:
         if decimation_module is not None:
             if not hasattr(decimation_module, "ref_mesh_"):
                 msg = "The decimation module has not been fitted."
-                raise NotFittedError(
-                    msg
-                )
+                raise NotFittedError(msg)
             self._decimation_module = decimation_module
 
         if decimation_module is None:
@@ -123,9 +121,7 @@ class Multiscale:
 
             else:
                 msg = "Only triangle meshes are supported for now"
-                raise NotImplementedError(
-                    msg
-                )
+                raise NotImplementedError(msg)
 
             decimation_module.fit(shape)
             self._decimation_module = decimation_module
@@ -343,9 +339,7 @@ class Multiscale:
                     fine_ratio_signal = convolution @ fine_ratio_signal
             else:
                 msg = "This function is not implemented yet"
-                raise NotImplementedError(
-                    msg
-                )
+                raise NotImplementedError(msg)
 
             return fine_ratio_signal
 

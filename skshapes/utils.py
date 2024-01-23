@@ -79,9 +79,7 @@ def scatter(
     """
     if src.device != index.device:
         msg = "The src and index tensors must be on the same device."
-        raise DeviceError(
-            msg
-        )
+        raise DeviceError(msg)
     device = src.device
 
     if min_length is not None:
