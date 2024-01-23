@@ -15,7 +15,7 @@ from typing import Literal, Union
 import torch
 from torchdiffeq import odeint
 
-from ..errors import DeviceError
+from ..errors import DeviceError, ShapeError
 from ..input_validation import typecheck
 from ..types import (
     FloatScalar,
@@ -110,6 +110,14 @@ class ExtrinsicDeformation(BaseModel):
         if parameter.device != shape.device:
             msg = "The shape and the parameter must be on the same device."
             raise DeviceError(msg)
+
+        if parameter.shape != self.parameter_shape(shape):
+            msg = (
+                "The shape of the parameter is not correct. "
+                f"Expected {self.parameter_shape(shape)}, "
+                f"got {parameter.shape}."
+            )
+            raise ShapeError(msg)
 
         p = parameter
         p.requires_grad = True

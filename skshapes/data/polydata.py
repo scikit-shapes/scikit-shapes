@@ -520,7 +520,7 @@ class PolyData(polydata_type):
     def edges(self, edges: Edges) -> None:
         """Set the edges of the shape and the triangles to None."""
         if edges.max() >= self.n_points:
-            raise ValueError(
+            raise IndexError(
                 "The maximum vertex index in edges array is larger than the"
                 + " number of points."
             )
@@ -543,7 +543,7 @@ class PolyData(polydata_type):
     def triangles(self, triangles: Triangles) -> None:
         """Set the triangles of the shape and edges to None."""
         if triangles.max() >= self.n_points:
-            raise ValueError(
+            raise IndexError(
                 "The maximum vertex index in triangles array is larger than"
                 + " the number of points."
             )

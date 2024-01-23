@@ -3,6 +3,7 @@
 import pytest
 import skshapes as sks
 import torch
+from skshapes.errors import ShapeError
 
 
 def test_errors_metrics():
@@ -54,21 +55,28 @@ def test_errors_metrics():
         registration.fit(source=pointcloud, target=target)
 
 
-def tests_error_registration():
+@pytest.mark.parametrize(
+    "model",
+    [
+        sks.RigidMotion(),
+        sks.ExtrinsicDeformation(),
+        sks.IntrinsicDeformation(),
+    ],
+)
+def tests_error_registration(model):
     """Raise some errors for the Registration class."""
     source = sks.Sphere()
     target = sks.Sphere()
 
     # wrong parameter shape
     initial_parameter = torch.rand(15, 15)
-    model = sks.RigidMotion()
 
     registration = sks.Registration(
         model=model,
         loss=sks.L2Loss(),
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ShapeError):
         registration.fit(
             source=source, target=target, initial_parameter=initial_parameter
         )
@@ -80,7 +88,7 @@ def test_errors_polydata():
     real = torch.tensor([1, 2], dtype=torch.float32)
     imag = torch.tensor([3, 4], dtype=torch.float32)
     z = torch.complex(real, imag)
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Complex tensors are not supported"):
         polydata = sks.PolyData(z)
 
     # Polydata with 3 points
@@ -96,7 +104,7 @@ def test_errors_polydata():
         ]
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         polydata.edges = edges
 
     # try to assign an incorrect triangle array
@@ -108,5 +116,5 @@ def test_errors_polydata():
         ]
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(IndexError):
         polydata.triangles = triangles

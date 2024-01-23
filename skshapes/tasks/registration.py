@@ -5,7 +5,7 @@ from typing import get_args
 
 import torch
 
-from ..errors import DeviceError, NotFittedError
+from ..errors import DeviceError, NotFittedError, ShapeError
 from ..input_validation import convert_inputs, typecheck
 from ..loss import Loss
 from ..morphing import Model
@@ -160,10 +160,11 @@ class Registration:
             # if a parameter is provided, check that it has the right shape
             # and move it to the optimization device
             if initial_parameter.shape != parameter_shape:
-                raise ValueError(
+                msg = (
                     f"Initial parameter has shape {initial_parameter.shape}"
                     + f" but the model expects shape {parameter_shape}"
                 )
+                raise ShapeError(msg)
 
             parameter = initial_parameter.clone().detach()
             parameter = parameter.to(self.optim_device)

@@ -2,14 +2,15 @@
 
 import sys
 import time
+from pathlib import Path
 
 import numpy as np
+import pytest
 import skshapes as sks
 import torch
 import vedo as vd
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from pytest import approx
 
 from .utils import create_point_cloud, create_shape
 
@@ -81,8 +82,8 @@ def test_curvatures_quadratic(
         return
         kmax = kmax[0].item()
         kmin = kmin[0].item()
-        assert kmax * kmin == approx(gauss, abs=5e-1, rel=2e-1)
-        assert (kmax + kmin) / 2 == approx(mean, abs=5e-1, rel=2e-1)
+        assert kmax * kmin == pytest.approx(gauss, abs=5e-1, rel=2e-1)
+        assert (kmax + kmin) / 2 == pytest.approx(mean, abs=5e-1, rel=2e-1)
 
 
 @given(
@@ -138,7 +139,7 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
     for i, s in enumerate(scales):
         Xm = shape.point_moments(order=1, scale=s)
         curvedness = shape.point_curvedness(scale=s)
-        shape.point_quadratic_coefficients(scale=s).r2
+        # shape.point_quadratic_coefficients(scale=s).r2
         kmax, kmin = shape.point_principal_curvatures(scale=s)
         quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
         assert quadratic_fit.shape == (3, 3, 3)
@@ -195,73 +196,74 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
 
 if __name__ == "__main__":
     shapes = [
-        dict(  # noqa C408
-            shape="sphere",
-            radius=1,
-            scale=0.05,
-            n_points=500,
-        ),
-        dict(  # noqa C408
-            shape="sphere",
-            radius=0.1,
-            scale=0.005,
-            n_points=500,
-        ),
-        dict(  # noqa C408
-            shape="sphere",
-            radius=10,
-            scale=0.5,
-            n_points=500,
-        ),
-        dict(  # noqa C408
-            function=lambda x, y: 0.5 * x**2 + 0.5 * y**2,
-            scale=0.05,
-            n_points=31,
-            noise=0.0001,
-            highlight=0 if False else int(31**2 / 2),
-        ),
-        dict(  # noqa C408
-            function=lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
-            scale=0.05,
-            n_points=15,
-            noise=0.01,
-        ),
-        dict(  # noqa C408
-            function=lambda x, y: 0.5 * x**2 - 0.5 * y**2,
-            scale=0.05,
-            n_points=31,
-            noise=0.0001,
-            highlight=0 if False else int(31**2 / 2),
-        ),
-        dict(  # noqa C408
-            shape="unit patch",
-            function=lambda x, y: 2 * x * y,
-            scale=0.08,
-            n_points=1000,
-        ),
-        dict(  # noqa C408
-            function=lambda x, y: 0.5 * x * x / 3
+        {
+            "shape": "sphere",
+            "radius": 1,
+            "scale": 0.05,
+            "n_points": 500,
+        },
+        {
+            "shape": "sphere",
+            "radius": 0.1,
+            "scale": 0.005,
+            "n_points": 500,
+        },
+        {
+            "shape": "sphere",
+            "radius": 10,
+            "scale": 0.5,
+            "n_points": 500,
+        },
+        {
+            "function": lambda x, y: 0.5 * x**2 + 0.5 * y**2,
+            "scale": 0.05,
+            "n_points": 31,
+            "noise": 0.0001,
+            "highlight": 0 if False else int(31**2 / 2),
+        },
+        {
+            "function": lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt()
+            - 1,
+            "scale": 0.05,
+            "n_points": 15,
+            "noise": 0.01,
+        },
+        {
+            "function": lambda x, y: 0.5 * x**2 - 0.5 * y**2,
+            "scale": 0.05,
+            "n_points": 31,
+            "noise": 0.0001,
+            "highlight": 0 if False else int(31**2 / 2),
+        },
+        {
+            "shape": "unit patch",
+            "function": lambda x, y: 2 * x * y,
+            "scale": 0.08,
+            "n_points": 1000,
+        },
+        {
+            "function": lambda x, y: 0.5 * x * x / 3
             - x * y
             - 0.5 * 1.5 * y * y
             + 2,
-            scale=0.05,
-            n_points=15,
-            noise=0.0001,
-            highlight=0 if False else int(15**2 / 2),
-        ),
-        dict(  # noqa C408
-            function=lambda x, y: y**2 + y,
-            scale=0.05,
-            n_points=31,
-            noise=0.0001,
-            highlight=0 if False else int(31**2 / 2),
-        ),
-        dict(  # noqa C408
-            file_name="~/data/PN1.stl",
-            scale=2.0,
-            n_points=5e3,
-            highlight=0,
-        ),
+            "scale": 0.05,
+            "n_points": 15,
+            "noise": 0.0001,
+            "highlight": 0 if False else int(15**2 / 2),
+        },
+        {
+            "function": lambda x, y: y**2 + y,  # noqa: ARG005
+            "scale": 0.05,
+            "n_points": 31,
+            "noise": 0.0001,
+            "highlight": 0 if False else int(31**2 / 2),
+        },
+        {
+            "file_name": "~/data/PN1.stl",
+            "scale": 2.0,
+            "n_points": 5e3,
+            "highlight": 0,
+        },
     ]
     shapes = shapes[:-1]
     mode = ["display", "profile"][0]
@@ -290,10 +292,10 @@ if __name__ == "__main__":
             kmax, kmin = shape.point_principal_curvatures(scale=scale)
 
         # Create an "output/" folder if it doesn't exist
-        import os
 
-        if not os.path.exists("output"):
-            os.makedirs("output")
+        output_path = Path("output")
+        if not Path.exists(output_path):
+            Path.mkdir(output_path, parents=True)
 
         # Export to chrome://tracing
         prof.export_chrome_trace("output/trace_curvatures.json")

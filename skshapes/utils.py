@@ -34,7 +34,7 @@ def diagonal_ranges(batch_x=None, batch_y=None):
     """Encode the block-diagonal structure associated to a batch vector."""
     if batch_x is None and batch_y is None:
         return None  # No batch processing
-    elif batch_y is None:
+    elif batch_y is None:  # noqa: RET505 (unnecessary elif ?)
         batch_y = batch_x  # "symmetric" case
 
     ranges_x, slices_x = ranges_slices(batch_x)

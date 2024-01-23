@@ -44,7 +44,7 @@ def _test(deformation_model):
     if torch.cuda.is_available():
         p = p.cuda()
         with pytest.raises(DeviceError):
-            model.morph(shape=shape, parameter=p).morphed_shape
+            model.morph(shape=shape, parameter=p).morphed_shape  # noqa: B018
 
 
 @pytest.mark.skipif(

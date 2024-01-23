@@ -1,6 +1,7 @@
 """Test the implicit quadrics module."""
 
 import sys
+from pathlib import Path
 
 import skshapes as sks
 import torch
@@ -136,10 +137,9 @@ if __name__ == "__main__":
             )
 
         # Create an "output/" folder if it doesn't exist
-        import os
 
-        if not os.path.exists("output"):
-            os.makedirs("output")
+        if not Path.exists(Path("output")):
+            Path.mkdir(Path("output"))
 
         # Export to chrome://tracing
         prof.export_chrome_trace("output/trace_implicit_quadrics.json")
