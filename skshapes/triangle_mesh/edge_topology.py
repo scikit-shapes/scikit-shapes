@@ -4,7 +4,7 @@ import numpy as np
 import torch
 
 from ..types import Triangles, int_dtype
-from .cython_edges_extraction import extract_edges
+from .edges_extraction import extract_edges
 
 
 class EdgeTopology:
