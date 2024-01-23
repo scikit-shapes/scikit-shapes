@@ -1,13 +1,13 @@
 """Test the registration task."""
 
 
-import pyvista
-import torch
 import pytest
+import pyvista
+import skshapes as sks
+import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
-import skshapes as sks
-from skshapes.errors import NotFittedError, DeviceError
+from skshapes.errors import DeviceError, NotFittedError
 
 list_models = [
     sks.RigidMotion,

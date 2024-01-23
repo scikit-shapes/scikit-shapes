@@ -1,9 +1,10 @@
 """Simple Qt windows generator."""
 
 import sys
+
 from PyQt5 import Qt, QtWidgets
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from vedo import Plotter
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 
 class WindowGenerator(Qt.QMainWindow):

@@ -1,9 +1,11 @@
 """Converters for arguments."""
 
-from typing import Union
 from functools import wraps
-import torch
+from typing import Union
+
 import numpy as np
+import torch
+
 from ..types import float_dtype, int_dtype
 
 

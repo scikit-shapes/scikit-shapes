@@ -1,13 +1,16 @@
 """Decimation module."""
 from __future__ import annotations
-import numpy as np
-from ..data import PolyData
-import torch
-from ..types import float_dtype, int_dtype, Number, Int1dTensor, polydata_type
-from ..input_validation import typecheck, one_and_only_one, no_more_than_one
-from ..errors import NotFittedError
+
 from typing import Optional, Union
+
 import fast_simplification
+import numpy as np
+import torch
+
+from ..data import PolyData
+from ..errors import NotFittedError
+from ..input_validation import no_more_than_one, one_and_only_one, typecheck
+from ..types import Int1dTensor, Number, float_dtype, int_dtype, polydata_type
 
 
 class Decimation:

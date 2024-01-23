@@ -1,13 +1,14 @@
 """Point normals and tangent vectors."""
 
-import torch
-from pykeops.torch import LazyTensor
-import torch.nn.functional as F
-
-from ..utils import diagonal_ranges
-from ..types import Points, FloatTensor, Triangles, Number
-from ..input_validation import typecheck
 from typing import Optional
+
+import torch
+import torch.nn.functional as F
+from pykeops.torch import LazyTensor
+
+from ..input_validation import typecheck
+from ..types import FloatTensor, Number, Points, Triangles
+from ..utils import diagonal_ranges
 
 
 @typecheck

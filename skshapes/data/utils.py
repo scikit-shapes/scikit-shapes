@@ -1,22 +1,24 @@
 """Utility functions and classes for the data module."""
 
 from __future__ import annotations
-from functools import lru_cache, partial, update_wrapper, cached_property
+
 import functools
 import weakref
-
 from collections.abc import Callable
+from functools import cached_property, lru_cache, partial, update_wrapper
+from typing import Any, Optional, TypeVar, Union
+
+import numpy as np
+import pyvista
+import torch
+
+from ..input_validation import convert_inputs, typecheck
 from ..types import (
     FloatTensor,
     IntTensor,
-    NumericalTensor,
     NumericalArray,
+    NumericalTensor,
 )
-from ..input_validation import typecheck, convert_inputs
-from typing import Optional, TypeVar, Union, Any
-import torch
-import pyvista
-import numpy as np
 
 
 class DataAttributes(dict):

@@ -13,10 +13,10 @@ adding landmarks.
 # We load two meshes from the `pyvista` example datasets. We then rescale them
 # to lie in the unit cube to avoid dealing with scale issues.
 
+import pyvista as pv
 import skshapes as sks
 import torch
 from pyvista import examples
-import pyvista as pv
 
 shape1 = sks.PolyData(examples.download_human())
 shape2 = sks.PolyData(examples.download_doorman())
@@ -56,9 +56,9 @@ plotter.show()
 # and we need to use a loss function that can handle this. We use the nearest
 # neighbors loss.
 
-from skshapes.tasks import Registration
-from skshapes.morphing import RigidMotion
 from skshapes.loss import NearestNeighborsLoss
+from skshapes.morphing import RigidMotion
+from skshapes.tasks import Registration
 
 loss = NearestNeighborsLoss()
 # The parameter n_steps is the number of steps for the motion. For a rigid

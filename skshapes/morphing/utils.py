@@ -1,14 +1,13 @@
 """Utility functions for morphing."""
 
 import torch
-from ..types import Number, Points
+
 from ..input_validation import typecheck
+from ..types import Number, Points
 
 
 class Integrator:
     """Base class for integrators."""
-
-    pass
 
 
 class EulerIntegrator(Integrator):
@@ -16,7 +15,6 @@ class EulerIntegrator(Integrator):
 
     def __init__(self) -> None:
         """Initialize the integrator."""
-        pass
 
     @typecheck
     def __call__(

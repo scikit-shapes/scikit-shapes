@@ -1,13 +1,14 @@
 """Point convolutions kernel."""
 
+from typing import Literal, Optional
+
 import numpy as np
 
-from ..types import Number, polydata_type
 from ..input_validation import typecheck
-from typing import Optional, Literal
-from .squared_distances import squared_distances
+from ..types import Number, polydata_type
 from .constant_kernel import constant_1_kernel
 from .linear_operator import LinearOperator
+from .squared_distances import squared_distances
 
 
 @typecheck

@@ -1,18 +1,20 @@
 """Utility functions for the skshapes package."""
 
+from typing import Literal, Optional
+
 import torch
+
+from .errors import DeviceError
+from .input_validation import convert_inputs, typecheck
 from .types import (
-    NumericalTensor,
     Int1dTensor,
     Number,
+    NumericalTensor,
 )
-from .input_validation import typecheck, convert_inputs
-from .errors import DeviceError
-from typing import Literal, Optional
 
 
 def ranges_slices(batch):
-    """Helper function for the diagonal ranges function."""  # noqa: D401
+    """Helper function for the diagonal ranges function."""
     Ns = batch.bincount()
     indices = Ns.cumsum(0)
     ranges = torch.cat((0 * indices[:1], indices))

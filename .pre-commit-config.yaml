@@ -46,7 +46,7 @@ repos:
     rev: "v0.1.13"
     hooks:
       - id: ruff
-        args: ["--show-fixes"]
+        args: ["--fix", "--show-fixes"]
 
 
 

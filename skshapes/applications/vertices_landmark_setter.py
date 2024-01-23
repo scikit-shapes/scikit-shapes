@@ -1,10 +1,12 @@
 """Landmark setter application."""
 
-import vedo
-import torch
-from ..types import polydata_type
-from ..input_validation import typecheck
 from typing import Union
+
+import torch
+import vedo
+
+from ..input_validation import typecheck
+from ..types import polydata_type
 
 
 class LandmarkSetter:

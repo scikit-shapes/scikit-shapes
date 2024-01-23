@@ -1,8 +1,8 @@
 """Tests for the convolution module."""
 
+import pytest
 import skshapes as sks
 import torch
-import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 

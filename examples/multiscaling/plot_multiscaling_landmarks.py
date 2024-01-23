@@ -8,12 +8,10 @@ Landmarks are preserved during the multiscale representation.
 # %%
 # Imports
 
-from pyvista import examples
+
 import pyvista
 import skshapes as sks
-import numpy as np
-import time
-import matplotlib.pyplot as plt
+from pyvista import examples
 
 # %%
 # Load a mesh and define landmarks

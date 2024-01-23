@@ -1,8 +1,8 @@
 """A bunch of tests for some expected errors."""
 
 import pytest
-import torch
 import skshapes as sks
+import torch
 
 
 def test_errors_metrics():

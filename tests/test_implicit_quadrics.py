@@ -1,16 +1,18 @@
 """Test the implicit quadrics module."""
 
-import torch
+import sys
+
 import skshapes as sks
+import torch
+import vedo as vd
 from hypothesis import given, settings
 from hypothesis import strategies as st
-import vedo as vd
+
 from .utils import (
     create_point_cloud,
     quadratic_function,
     quadratic_gradient,
 )
-import sys
 
 sys.path.append(sys.path[0][:-4])
 
@@ -20,7 +22,7 @@ sys.path.append(sys.path[0][:-4])
 def test_quadratic_function(*, n_points: int):
     """Test on a simple dataset z = f(x, y)."""
     # Create the dataset
-    import skshapes.types as types
+    from skshapes import types
 
     points = create_point_cloud(
         n_points=n_points,
@@ -29,7 +31,7 @@ def test_quadratic_function(*, n_points: int):
     )
 
     N = len(points)
-    assert N == n_points**2
+    assert n_points**2 == N
 
     # Compute the implicit quadrics
     quadrics, mean_point, sigma = sks.implicit_quadrics(points=points, scale=1)
@@ -110,7 +112,7 @@ if __name__ == "__main__":
             display_quadratic_fit(points, highlight=55, scale=0.3)
 
     else:
-        from torch.profiler import profile, ProfilerActivity
+        from torch.profiler import ProfilerActivity, profile
 
         activities = [ProfilerActivity.CPU]
         if torch.cuda.is_available():

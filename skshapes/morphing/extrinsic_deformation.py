@@ -10,22 +10,22 @@ at q.
 
 from __future__ import annotations
 
+from typing import Literal, Optional, Union
+
 import torch
 from torchdiffeq import odeint as odeint
-from typing import Optional, Literal, Union
 
-from .basemodel import BaseModel
+from ..errors import DeviceError
+from ..input_validation import typecheck
 from ..types import (
+    FloatScalar,
+    MorphingOutput,
     Points,
     polydata_type,
-    MorphingOutput,
-    FloatScalar,
 )
-from ..input_validation import typecheck
-from ..errors import DeviceError
-
-from .utils import Integrator, EulerIntegrator
-from .kernels import Kernel, GaussianKernel
+from .basemodel import BaseModel
+from .kernels import GaussianKernel, Kernel
+from .utils import EulerIntegrator, Integrator
 
 
 class ExtrinsicDeformation(BaseModel):

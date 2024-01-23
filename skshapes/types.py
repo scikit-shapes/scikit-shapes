@@ -1,14 +1,14 @@
 """Basic types aliases and utility functions for scikit-shapes."""
 import os
+from typing import Literal, NamedTuple, Optional, Union
 from warnings import warn
-from typing import Union, Optional, NamedTuple, Literal
-from jaxtyping import Float32, Float64, Int32, Int64, Float, Int
+
+import numpy as np
+import torch
 from beartype import beartype
 from beartype.typing import Annotated
 from beartype.vale import Is
-import torch
-import numpy as np
-
+from jaxtyping import Float, Float32, Float64, Int, Int32, Int64
 
 admissile_float_dtypes = ["float32", "float64"]
 float_dtype = os.environ.get("SKSHAPES_FLOAT_DTYPE", "float32")
@@ -119,13 +119,9 @@ Landmarks = Annotated[
 class polydata_type:
     """Class for polydata shapes."""
 
-    pass
-
 
 class image_type:
     """Class for image shapes."""
-
-    pass
 
 
 shape_type = Union[polydata_type, image_type]

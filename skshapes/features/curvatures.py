@@ -1,23 +1,23 @@
 """Curvature estimators for point clouds and triangular meshes."""
 
+import colorsys
+from typing import NamedTuple, Optional
+
 import numpy as np
 import torch
 from pykeops.torch import LazyTensor
-import colorsys
-from typing import NamedTuple
 
-from ..utils import diagonal_ranges
+from ..input_validation import typecheck
 from ..types import (
-    float_dtype,
-    Points,
-    Triangles,
-    Number,
     Float1dTensor,
     Float2dTensor,
     FloatTensor,
+    Number,
+    Points,
+    Triangles,
+    float_dtype,
 )
-from ..input_validation import typecheck
-from typing import Optional
+from ..utils import diagonal_ranges
 from .normals import smooth_normals, tangent_vectors
 from .structure_tensors import structure_tensors
 

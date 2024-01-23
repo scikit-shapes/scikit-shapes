@@ -1,16 +1,19 @@
 """Abstract classes for losses."""
 
 from __future__ import annotations
+
+from typing import Any, Optional
+
+import torch
+
+from ..errors import DeviceError
+from ..input_validation import typecheck
 from ..types import (
-    Number,
     FloatScalar,
+    Number,
     float_dtype,
     shape_type,
 )
-from ..errors import DeviceError
-from ..input_validation import typecheck
-from typing import Any, Optional
-import torch
 
 
 class BaseLoss:
@@ -114,7 +117,6 @@ class EmptyLoss(BaseLoss):
     @typecheck
     def __init__(self) -> None:
         """Class constructor."""
-        pass
 
     @typecheck
     def __call__(

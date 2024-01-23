@@ -6,10 +6,10 @@ Example of rigid motion registration
 This is an example of rigid motion registration, or alignment, in 2D.
 """
 
+import pyvista as pv
 import skshapes as sks
 import torch
 from pyvista import examples
-import pyvista as pv
 
 # %%
 # ## Load data
@@ -69,9 +69,9 @@ plotter.show()
 # ## Rigid registration
 #
 
-from skshapes.tasks import Registration
-from skshapes.morphing import RigidMotion
 from skshapes.loss import L2Loss
+from skshapes.morphing import RigidMotion
+from skshapes.tasks import Registration
 
 loss = L2Loss()
 model = RigidMotion(n_steps=5)

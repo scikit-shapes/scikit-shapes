@@ -1,9 +1,10 @@
 """Nearest Neighbors loss for PolyData."""
 
-from pykeops.torch import Vi, Vj
 import torch
-from ..types import FloatScalar, polydata_type
+from pykeops.torch import Vi, Vj
+
 from ..input_validation import typecheck
+from ..types import FloatScalar, polydata_type
 from .baseloss import BaseLoss
 
 
@@ -22,7 +23,6 @@ class NearestNeighborsLoss(BaseLoss):
     @typecheck
     def __init__(self) -> None:
         """Initialize the NearestNeighborsLoss class."""
-        pass
 
     @typecheck
     def __call__(

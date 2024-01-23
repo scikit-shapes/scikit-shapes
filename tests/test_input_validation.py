@@ -1,7 +1,6 @@
 """Tests for the input validation decorators."""
 
 import pytest
-
 import skshapes as sks
 from skshapes.errors import InputStructureError, InputTypeError
 
@@ -10,7 +9,6 @@ from skshapes.errors import InputStructureError, InputTypeError
 @sks.typecheck
 def func_one_and_only_one(a: int = None, b: int = None):
     """One_and_only_one example."""
-    pass
 
 
 def test_one_and_only_one_decorator(func=func_one_and_only_one):
@@ -37,7 +35,6 @@ def test_one_and_only_one_decorator(func=func_one_and_only_one):
 @sks.typecheck
 def func_no_more_than_one(a: int = None, b: int = None):
     """No_more_than_one example."""
-    pass
 
 
 def test_no_more_than_one(func=func_no_more_than_one):

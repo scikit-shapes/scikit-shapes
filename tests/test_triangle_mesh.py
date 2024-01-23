@@ -1,18 +1,18 @@
 """Test the triangle mesh module."""
 
-from pyvista import examples
 from math import sqrt
-import torch
 
 import skshapes as sks
+import torch
+from pyvista import examples
 from skshapes.triangle_mesh import (
-    triangle_normals,
-    triangle_areas,
-    triangle_centers,
+    EdgeTopology,
+    dihedral_angles,
     edge_centers,
     edge_lengths,
-    dihedral_angles,
-    EdgeTopology,
+    triangle_areas,
+    triangle_centers,
+    triangle_normals,
 )
 from skshapes.triangle_mesh.geometry import _get_geometry
 

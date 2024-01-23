@@ -2,10 +2,10 @@
 
 import skshapes as sks
 import torch
-from pyvista import examples
-from skshapes.utils import scatter
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from pyvista import examples
+from skshapes.utils import scatter
 
 
 def test_multiscale_api():
@@ -255,7 +255,7 @@ def test_multiscale(init_type):
     assert torch.allclose(back2, low_resol_signal)
     assert torch.allclose(back3, low_resol_signal)
 
-    return None
+    return
 
     signal = torch.rand(M.at(1).n_points)
     signal_out = M.signal_convolution(

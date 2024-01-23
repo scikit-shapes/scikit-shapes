@@ -1,12 +1,14 @@
 """Tests for the moments of a shape."""
 
-import torch
+import sys
+
 import skshapes as sks
+import torch
+import vedo as vd
 from hypothesis import given, settings
 from hypothesis import strategies as st
-import vedo as vd
+
 from .utils import create_shape, vedo_frames
-import sys
 
 sys.path.append(sys.path[0][:-4])
 

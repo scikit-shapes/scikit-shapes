@@ -1,11 +1,12 @@
 """Utils for the tests."""
 
-import torch
-from torch.profiler import profile, ProfilerActivity
-import vedo as vd
-import skshapes as sks
-from typing import Optional, Literal
 import sys
+from typing import Literal, Optional
+
+import skshapes as sks
+import torch
+import vedo as vd
+from torch.profiler import ProfilerActivity, profile
 
 sys.path.append(sys.path[0][:-4])
 
@@ -27,7 +28,7 @@ def create_point_cloud(
     z = f(x, y).to(dtype=dtype)
 
     N = len(x)
-    assert N == n_points**2
+    assert n_points**2 == N
 
     points = torch.stack([x, y, z], dim=1).view(N, 3)
 
@@ -72,7 +73,7 @@ def create_shape(
 
     else:
         shape = sks.PolyData(file_name).decimate(n_points=n_points)
-        print("Loaded shape with {:,} points".format(shape.n_points))
+        print(f"Loaded shape with {shape.n_points:,} points")
 
     shape.points = shape.points + offset * torch.randn(1, 3).to(
         sks.float_dtype

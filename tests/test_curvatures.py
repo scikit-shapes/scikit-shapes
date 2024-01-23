@@ -1,19 +1,17 @@
 """Tests for the curvatures module."""
 
+import sys
 import time
-import numpy as np
-import torch
-import skshapes as sks
 
-from pytest import approx
+import numpy as np
+import skshapes as sks
+import torch
+import vedo as vd
 from hypothesis import given, settings
 from hypothesis import strategies as st
-
-import vedo as vd
+from pytest import approx
 
 from .utils import create_point_cloud, create_shape
-
-import sys
 
 sys.path.append(sys.path[0][:-4])
 
@@ -80,7 +78,7 @@ def test_curvatures_quadratic(
 
     for scale in scales:
         kmax, kmin = shape.point_principal_curvatures(scale=scale)
-        return None
+        return
         kmax = kmax[0].item()
         kmin = kmin[0].item()
         assert kmax * kmin == approx(gauss, abs=5e-1, rel=2e-1)

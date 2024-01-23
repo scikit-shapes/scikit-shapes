@@ -2,23 +2,24 @@
 
 from __future__ import annotations
 
-
 from typing import Optional
+
 import torch
+
+from ..decimation import Decimation
+from ..errors import NotFittedError
+from ..input_validation import convert_inputs, one_and_only_one, typecheck
 from ..types import (
-    Number,
-    shape_type,
+    CoarseToFinePolicy,
+    FineToCoarsePolicy,
     FloatTensor,
     Int1dTensor,
     IntSequence,
+    Number,
     NumberSequence,
-    FineToCoarsePolicy,
-    CoarseToFinePolicy,
+    shape_type,
 )
 from ..utils import scatter
-from ..input_validation import typecheck, one_and_only_one, convert_inputs
-from ..errors import NotFittedError
-from ..decimation import Decimation
 
 
 class Multiscale:

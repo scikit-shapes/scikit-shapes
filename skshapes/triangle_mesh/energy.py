@@ -1,21 +1,23 @@
 """Energy functions for triangle meshes."""
+from typing import Optional, Union
+
 import torch
-from typing import Union, Optional
-from .edge_topology import EdgeTopology
-from .geometry import (
-    triangle_areas,
-    edge_lengths,
-    dihedral_angles,
-)
+
+from ..input_validation import typecheck
 from ..types import (
-    Triangles,
-    Points,
-    PointsSequence,
     Float1dTensor,
     FloatScalar,
     Number,
+    Points,
+    PointsSequence,
+    Triangles,
 )
-from ..input_validation import typecheck
+from .edge_topology import EdgeTopology
+from .geometry import (
+    dihedral_angles,
+    edge_lengths,
+    triangle_areas,
+)
 
 
 @typecheck

@@ -1,21 +1,21 @@
 """Squared distances between points."""
 
+from collections.abc import Callable
+from typing import Literal, Optional
+
 import numpy as np
 import torch
 from pykeops.torch import LazyTensor
 from pykeops.torch.cluster import (
-    grid_cluster,
     cluster_ranges_centroids,
     from_matrix,
+    grid_cluster,
 )
 
-
+from ..input_validation import typecheck
 from ..types import (
     Number,
 )
-from ..input_validation import typecheck
-from typing import Optional, Literal
-from collections.abc import Callable
 
 
 class KeOpsSquaredDistances:

@@ -2,16 +2,16 @@
 
 from math import sqrt
 from typing import Optional
+
 from pykeops.torch import LazyTensor
-from ..types import Points, FloatScalar
-from ..input_validation import typecheck
+
 from ..convolutions import LinearOperator
+from ..input_validation import typecheck
+from ..types import FloatScalar, Points
 
 
 class Kernel:
     """Base class for kernels."""
-
-    pass
 
 
 class GaussianKernel(Kernel):

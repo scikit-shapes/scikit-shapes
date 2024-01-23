@@ -1,15 +1,15 @@
 """Tests for the PolyData class."""
 
-import torch
-import pyvista
-import pytest
-from pyvista.core.pointset import PolyData as PyvistaPolyData
-import numpy as np
-import vedo
 import os
 
+import numpy as np
+import pytest
+import pyvista
 import skshapes as sks
-from skshapes.errors import InputTypeError, DeviceError
+import torch
+import vedo
+from pyvista.core.pointset import PolyData as PyvistaPolyData
+from skshapes.errors import DeviceError, InputTypeError
 
 
 def _cube():

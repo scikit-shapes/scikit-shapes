@@ -1,16 +1,19 @@
 """Registration between two shapes."""
 from __future__ import annotations
-from ..optimization import Optimizer, LBFGS
-from ..types import (
-    shape_type,
-    FloatTensor,
-)
-from ..input_validation import typecheck, convert_inputs
+
+from typing import Optional, Union, get_args
+
+import torch
+
 from ..errors import DeviceError, NotFittedError
-from typing import Union, Optional, get_args
+from ..input_validation import convert_inputs, typecheck
 from ..loss import Loss
 from ..morphing import Model
-import torch
+from ..optimization import LBFGS, Optimizer
+from ..types import (
+    FloatTensor,
+    shape_type,
+)
 
 
 class Registration:

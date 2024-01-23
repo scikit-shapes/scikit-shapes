@@ -1,21 +1,21 @@
 """Metrics."""
 
-from ..types import (
-    FloatScalar,
-    Edges,
-    Triangles,
-    Float3dTensor,
-    Number,
-)
-from ..input_validation import typecheck
 from typing import Optional
+
 import torch
+
+from ..input_validation import typecheck
+from ..types import (
+    Edges,
+    Float3dTensor,
+    FloatScalar,
+    Number,
+    Triangles,
+)
 
 
 class Metric:
     """Base class for all metrics."""
-
-    pass
 
 
 class AsIsometricAsPossible(Metric):
@@ -29,7 +29,6 @@ class AsIsometricAsPossible(Metric):
 
     def __init__(self) -> None:
         """Class constructor."""
-        pass
 
     @typecheck
     def __call__(

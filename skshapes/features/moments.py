@@ -1,16 +1,18 @@
 """Moments for point clouds."""
 
+from typing import Literal, Optional
+
 import torch
+
+from ..input_validation import typecheck
 from ..types import (
-    FloatTensor,
+    Double2dTensor,
     DoubleTensor,
     Float2dTensor,
-    Double2dTensor,
+    FloatTensor,
     Number,
     Union,
 )
-from ..input_validation import typecheck
-from typing import Literal, Optional
 
 
 def symmetric_sum(a, b):

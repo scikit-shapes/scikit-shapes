@@ -1,9 +1,9 @@
 """Tests for the decimation module."""
 
-import pyvista
-import torch
 import pytest
+import pyvista
 import skshapes as sks
+import torch
 from skshapes.errors import InputStructureError
 
 

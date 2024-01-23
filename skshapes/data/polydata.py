@@ -1,35 +1,36 @@
 """PolyData class."""
 from __future__ import annotations
 
-import pyvista
-from pyvista.core.pointset import PolyData as PyvistaPolyData
-import vedo
-import torch
-import numpy as np
 import functools
+from typing import Any, Literal, Optional, Union
+from warnings import warn
 
+import numpy as np
+import pyvista
+import torch
+import vedo
+from pyvista.core.pointset import PolyData as PyvistaPolyData
+
+from ..errors import DeviceError
+from ..input_validation import convert_inputs, one_and_only_one, typecheck
 from ..types import (
-    float_dtype,
-    int_dtype,
-    Number,
-    NumericalTensor,
-    Points,
     Edges,
-    Triangles,
-    Landmarks,
     Float1dTensor,
     Float2dTensor,
     Int1dTensor,
-    IntTensor,
-    polydata_type,
     IntSequence,
+    IntTensor,
+    Landmarks,
+    Number,
+    NumericalTensor,
+    Points,
+    Triangles,
+    float_dtype,
+    int_dtype,
+    polydata_type,
 )
-from ..errors import DeviceError
-from ..input_validation import typecheck, convert_inputs, one_and_only_one
-from typing import Optional, Any, Union, Literal
-from warnings import warn
-from .utils import DataAttributes
 from .edges_extraction import extract_edges
+from .utils import DataAttributes
 
 
 class PolyData(polydata_type):
@@ -267,19 +268,19 @@ class PolyData(polydata_type):
                 ),
             )
 
-    from .utils import cache_clear
-    from ..convolutions import _point_convolution, _mesh_convolution
+    from ..convolutions import _mesh_convolution, _point_convolution
     from ..features import (
-        _point_normals,
+        _point_curvature_colors,
+        _point_curvedness,
         _point_frames,
         _point_moments,
+        _point_normals,
+        _point_principal_curvatures,
         _point_quadratic_coefficients,
         _point_quadratic_fits,
-        _point_principal_curvatures,
         _point_shape_indices,
-        _point_curvedness,
-        _point_curvature_colors,
     )
+    from .utils import cache_clear
 
     @typecheck
     @one_and_only_one(["target_reduction", "n_points", "ratio"])

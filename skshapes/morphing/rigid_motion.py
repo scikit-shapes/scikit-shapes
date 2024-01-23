@@ -4,19 +4,20 @@ This module contains the implementation of the rigid motion model. This model
 is described by a translation and a rotation. The morphing is not regularized.
 """
 
-from .basemodel import BaseModel
-import torch
 from typing import Union
 
+import torch
+
+from ..errors import DeviceError
+from ..input_validation import convert_inputs, typecheck
 from ..types import (
     Float1dTensor,
     Float2dTensor,
+    MorphingOutput,
     polydata_type,
     shape_type,
-    MorphingOutput,
 )
-from ..input_validation import typecheck, convert_inputs
-from ..errors import DeviceError
+from .basemodel import BaseModel
 
 
 class RigidMotion(BaseModel):
@@ -32,7 +33,6 @@ class RigidMotion(BaseModel):
             Number of steps.
         """
         self.n_steps = n_steps
-        pass
 
     @convert_inputs
     @typecheck

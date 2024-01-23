@@ -1,11 +1,11 @@
 """Tests for the deformation modules."""
 
 
-import pytest
-import torch
 import os
 
+import pytest
 import skshapes as sks
+import torch
 from skshapes.errors import DeviceError
 
 deformation_models = [
