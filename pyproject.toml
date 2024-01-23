@@ -1,6 +1,6 @@
 [project]
 name = "skshapes"
-version = "0.0.1"
+version = "0.1"
 dependencies = [
     "torch",
     "torchdiffeq",
@@ -22,11 +22,6 @@ build-backend = "setuptools.build_meta"
 dev = [
     "black",
     "flake8",
-    "flake8-docstrings",
-    "flake8-bugbear",
-    "flake8-builtins",
-    "flake8-comprehensions",
-    "flake8-annotations",
     "pytest",
     "pytest-cov",
     "hypothesis",
@@ -41,6 +36,9 @@ dev = [
     "mkdocstrings-python",
     "pytkdocs[numpy-style]",
 ]
+
+[tool.setuptools]
+packages = ["skshapes"]
 
 [tool.black]
 line-length = 79

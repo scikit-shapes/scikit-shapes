@@ -12,43 +12,42 @@ edges_extraction = Extension(
 )
 
 
-dependencies = [
-    "numpy",
-    "torch>=1.11",
-    "torchdiffeq",
-    "pykeops",
-    "geomloss",
-    "jaxtyping",
-    "beartype>=0.16.1",
-    "pyvista",
-    "vedo",
-    "fast-simplification",
-    # 'git+https://github.com/Louis-Pujol/fast-simplification.git',
-]
+# dependencies = [
+#     "numpy",
+#     "torch>=1.11",
+#     "torchdiffeq",
+#     "pykeops",
+#     "geomloss",
+#     "jaxtyping",
+#     "beartype>=0.16.1",
+#     "pyvista",
+#     "vedo",
+#     "fast-simplification",
+# ]
 
-submodules = [
-    "applications",
-    "convolutions",
-    "multiscaling",
-    "data",
-    "triangle_mesh",
-    "decimation",
-    "features",
-    "loss",
-    "morphing",
-    "optimization",
-    "tasks",
-]
+# submodules = [
+#     "applications",
+#     "convolutions",
+#     "multiscaling",
+#     "data",
+#     "triangle_mesh",
+#     "decimation",
+#     "features",
+#     "loss",
+#     "morphing",
+#     "optimization",
+#     "tasks",
+# ]
 
 setup(
-    name="scikit-shapes",
-    version="1.0",
-    description="Shape Analysis in Python",
-    author="Scikit-Shapes Developers",
-    author_email="skshapes@gmail.com",
-    url="",
-    install_requires=dependencies,
-    packages=["skshapes"]
-    + ["skshapes." + submodule for submodule in submodules],
+    # name="scikit-shapes",
+    # version="1.0",
+    # description="Shape Analysis in Python",
+    # author="Scikit-Shapes Developers",
+    # author_email="skshapes@gmail.com",
+    # url="",
+    # install_requires=dependencies,
+    # packages=["skshapes"]
+    # + ["skshapes." + submodule for submodule in submodules],
     ext_modules=cythonize([edges_extraction]),
 )
