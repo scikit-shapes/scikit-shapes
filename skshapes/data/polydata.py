@@ -11,7 +11,7 @@ import torch
 import vedo
 from pyvista.core.pointset import PolyData as PyvistaPolyData
 
-from ..errors import DeviceError
+from ..errors import DeviceError, ShapeError
 from ..input_validation import convert_inputs, one_and_only_one, typecheck
 from ..types import (
     Edges,
@@ -574,13 +574,13 @@ class PolyData(polydata_type):
 
         Raises
         ------
-        ValueError
+        ShapeError
             If the new number of points is different from the actual number of
             points in the shape.
         """
         if points.shape[0] != self.n_points:
             msg = "The number of points cannot be changed."
-            raise ValueError(msg)
+            raise ShapeError(msg)
 
         self._points = points.clone().to(self.device)
         self.cache_clear()
@@ -647,7 +647,7 @@ class PolyData(polydata_type):
                 point_data_dict = DataAttributes.from_dict(point_data_dict)
 
             if point_data_dict.n != self.n_points:
-                raise ValueError(
+                raise ShapeError(
                     "The number of points in the point_data entries should be"
                     + " the same as the number of points in the shape."
                 )

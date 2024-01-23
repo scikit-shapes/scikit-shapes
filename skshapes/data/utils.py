@@ -12,6 +12,7 @@ import numpy as np
 import pyvista
 import torch
 
+from ..errors import DeviceError, ShapeError
 from ..input_validation import convert_inputs, typecheck
 from ..types import (
     FloatTensor,
@@ -102,7 +103,7 @@ class DataAttributes(dict):
     @typecheck
     def _check_value(self, value: NumericalTensor) -> NumericalTensor:
         if value.shape[0] != self._n:
-            raise ValueError(
+            raise ShapeError(
                 f"First dimension of the tensor should be {self._n}, got"
                 + f"{value.shape[0]}"
             )
@@ -200,9 +201,9 @@ class DataAttributes(dict):
         n = next(iter(attributes.values())).shape[0]
         for value in attributes.values():
             if value.shape[0] != n:
-                raise ValueError(
-                    "The number of elements of the dictionary should be the"
-                    + "same to be converted into a DataAttributes object"
+                raise ShapeError(
+                    "The number of rows of each value the dictionary must be"
+                    + " the same to be convert to a DataAttributes object"
                 )
 
         if device is None:
@@ -213,7 +214,7 @@ class DataAttributes(dict):
                 device = next(iter(attributes.values())).device
                 for value in attributes.values():
                     if value.device != device:
-                        raise ValueError(
+                        raise DeviceError(
                             "The attributes should be on the same device to be"
                             + " converted into a DataAttributes object"
                         )
