@@ -307,7 +307,8 @@ class Multiscale:
         """Propagate a signal from one scale to another."""
         if source_ratio == target_ratio:
             return source_signal
-        elif source_ratio > target_ratio:
+
+        if source_ratio > target_ratio:
             # propagate from fine to coarse
             reduce = fine_to_coarse_policy.reduce
             return scatter(
@@ -333,7 +334,8 @@ class Multiscale:
 
             if smoothing == "constant":
                 return fine_ratio_signal
-            elif smoothing == "mesh_convolution":
+
+            if smoothing == "mesh_convolution":
                 convolution = self.at(ratio=target_ratio).mesh_convolution()
                 for _ in range(n_smoothing_steps):
                     fine_ratio_signal = convolution @ fine_ratio_signal
@@ -381,10 +383,9 @@ class Multiscale:
         if fine_ratio == coarse_ratio:
             return torch.arange(self.shapes[fine_ratio].n_points)
 
-        elif fine_ratio == 1:
+        if fine_ratio == 1:
             return self.mappings_from_origin[coarse_ratio]
 
-        else:
-            tmp = self.mappings_from_origin[fine_ratio]
-            tmp = scatter(src=torch.arange(len(tmp)), index=tmp, reduce="min")
-            return self.mappings_from_origin[coarse_ratio][tmp]
+        tmp = self.mappings_from_origin[fine_ratio]
+        tmp = scatter(src=torch.arange(len(tmp)), index=tmp, reduce="min")
+        return self.mappings_from_origin[coarse_ratio][tmp]

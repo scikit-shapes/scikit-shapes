@@ -266,7 +266,7 @@ class DataAttributes(dict):
 
     @n.setter
     @typecheck
-    def n(self, n: Any) -> None:
+    def n(self, n: Any) -> None:  # noqa: ARG002
         """Setter for the number of elements.
 
         This setter is not meant to be used, as it would change the number of
@@ -290,7 +290,7 @@ class DataAttributes(dict):
 
     @device.setter
     @typecheck
-    def device(self, device: Any) -> None:
+    def device(self, device: Any) -> None:  # noqa: ARG002
         """Device cannot be changed with the setter.
 
         If you want to change the device of the DataAttributes object, use
@@ -368,7 +368,7 @@ def instance_lru_cache(
                 update_wrapper(partial(wrapped, self), wrapped)
             )
 
-        return cached_property(wrapper)  # type: ignore
+        return cached_property(wrapper)  # type: ignore[code]
 
     return decorator if method is None else decorator(method)
 

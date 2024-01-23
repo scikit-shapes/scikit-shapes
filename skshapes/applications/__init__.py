@@ -6,5 +6,5 @@ try:
 
     from .window_generator import WindowGenerator
 
-except:
+except ImportError:
     pass

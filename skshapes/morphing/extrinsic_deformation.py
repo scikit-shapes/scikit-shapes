@@ -63,7 +63,6 @@ class ExtrinsicDeformation(BaseModel):
         control_points: bool = True,
         backend: Literal["sks", "torchdiffeq"] = "sks",
         solver: Literal["euler", "midpoint", "rk4"] = "euler",
-        **kwargs,
     ) -> None:
         """Class constructor."""
         if integrator is None:
@@ -150,61 +149,60 @@ class ExtrinsicDeformation(BaseModel):
             if return_path:
                 path[1].points = points
 
-        else:
-            if self.backend == "torchdiffeq":
-                y_0 = (p, q) if points is None else (p, q, points)
-                time = torch.linspace(0, 1, self.n_steps + 1).to(p.device)
+        elif self.backend == "torchdiffeq":
+            y_0 = (p, q) if points is None else (p, q, points)
+            time = torch.linspace(0, 1, self.n_steps + 1).to(p.device)
 
-                if len(y_0) == 3:
-                    (
-                        path_p,
-                        path_q,
-                        path_pts,
-                    ) = odeint(
-                        func=self.ode_module,
-                        y0=y_0,
-                        t=time,
-                        method=self.solver,
-                    )
-                    points = path_pts[-1].clone()
-                    if return_path:
-                        for i, m in enumerate(path):
-                            m.points = path_pts[i].clone()
+            if len(y_0) == 3:
+                (
+                    path_p,
+                    path_q,
+                    path_pts,
+                ) = odeint(
+                    func=self.ode_module,
+                    y0=y_0,
+                    t=time,
+                    method=self.solver,
+                )
+                points = path_pts[-1].clone()
+                if return_path:
+                    for i, m in enumerate(path):
+                        m.points = path_pts[i].clone()
 
-                if len(y_0) == 2:
-                    (
-                        path_p,
-                        path_q,
-                    ) = odeint(
-                        func=self.ode_module,
-                        y0=y_0,
-                        t=time,
-                        method=self.solver,
-                    )
+            if len(y_0) == 2:
+                (
+                    path_p,
+                    path_q,
+                ) = odeint(
+                    func=self.ode_module,
+                    y0=y_0,
+                    t=time,
+                    method=self.solver,
+                )
 
+                # Update the points
+                points = path_q[-1].clone()
+                if return_path:
+                    for i, m in enumerate(path):
+                        m.points = path_q[i].clone()
+
+        elif self.backend == "sks":
+            dt = 1 / self.n_steps  # Time step
+
+            for i in range(self.n_steps):
+                if not self.control_points or shape.control_points is None:
                     # Update the points
-                    points = path_q[-1].clone()
-                    if return_path:
-                        for i, m in enumerate(path):
-                            m.points = path_q[i].clone()
+                    # no control points -> q = shape.points
+                    p, q = self.integrator(p, q, self.H, dt)
+                    points = q.clone()
+                else:
+                    # Update the points
+                    K = self.cometric.operator(points, q)
+                    points = points + dt * (K @ p)
+                    p, q = self.integrator(p, q, self.H, dt)
 
-            elif self.backend == "sks":
-                dt = 1 / self.n_steps  # Time step
-
-                for i in range(self.n_steps):
-                    if not self.control_points or shape.control_points is None:
-                        # Update the points
-                        # no control points -> q = shape.points
-                        p, q = self.integrator(p, q, self.H, dt)
-                        points = q.clone()
-                    else:
-                        # Update the points
-                        K = self.cometric.operator(points, q)
-                        points = points + dt * (K @ p)
-                        p, q = self.integrator(p, q, self.H, dt)
-
-                    if return_path:
-                        path[i + 1].points = points
+                if return_path:
+                    path[i + 1].points = points
 
         morphed_shape = shape.copy()
         morphed_shape.points = points
@@ -241,7 +239,7 @@ class ExtrinsicDeformation(BaseModel):
         return torch.sum(p * (K @ p)) / 2
 
     @typecheck
-    def ode_func(self, t: float, y: type_y) -> type_y:
+    def ode_func(self, t: float, y: type_y) -> type_y:  # noqa: ARG002
         """ODE function."""
         if len(y) == 2:
             p, q = y

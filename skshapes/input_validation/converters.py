@@ -47,7 +47,7 @@ def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
     return x
 
 
-def convert_inputs(func, parameters=None):
+def convert_inputs(func: callable):
     """Convert a function's inputs to the right type.
 
     It converts the inputs arrays to the right type (torch.Tensor) and

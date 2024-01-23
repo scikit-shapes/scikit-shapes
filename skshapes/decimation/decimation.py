@@ -47,7 +47,6 @@ class Decimation:
         *,
         target_reduction: float | None = None,
         n_points: int | None = None,
-        n_points_strict: int | None = None,
         ratio: Number | None = None,
     ) -> None:
         """Class constructor.
@@ -71,7 +70,7 @@ class Decimation:
         """
         if target_reduction is not None:
             assert (
-                target_reduction > 0 and target_reduction < 1
+                0 < target_reduction < 1
             ), "The target reduction must be between 0 and 1"
             self.target_reduction = target_reduction
 
@@ -79,7 +78,7 @@ class Decimation:
             self.n_points = n_points
 
         if ratio is not None:
-            assert ratio > 0 and ratio < 1, "The ratio must be between 0 and 1"
+            assert 0 < ratio < 1, "The ratio must be between 0 and 1"
             self.target_reduction = 1 - ratio
 
     @typecheck

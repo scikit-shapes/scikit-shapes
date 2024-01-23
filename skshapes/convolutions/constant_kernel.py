@@ -56,7 +56,7 @@ class Constant1Kernel:
 
 @typecheck
 def constant_1_kernel(
-    *, points, target_points=None, **kwargs
+    *, points, target_points=None, **kwargs  # noqa: ARG001
 ) -> Constant1Kernel:
     """(N, N) matrix of squared distances between points.
 

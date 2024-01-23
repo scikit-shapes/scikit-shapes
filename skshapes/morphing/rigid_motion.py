@@ -41,7 +41,7 @@ class RigidMotion(BaseModel):
         shape: polydata_type,
         parameter: Union[Float2dTensor, Float1dTensor],
         return_path: bool = False,
-        return_regularization: bool = False,
+        return_regularization: bool = False,  # noqa: ARG002
     ) -> MorphingOutput:
         """Morph a shape using the rigid motion model.
 
@@ -75,21 +75,21 @@ class RigidMotion(BaseModel):
             raise DeviceError(msg)
 
         if shape.dim == 2:
-            return self._morph2d(
+            output = self._morph2d(
                 shape=shape,
                 parameter=parameter,
                 return_path=return_path,
-                return_regularization=return_regularization,
             )
 
         elif shape.dim == 3:
-            return self._morph3d(
+            output = self._morph3d(
                 shape=shape,
                 parameter=parameter,
                 return_path=return_path,
-                return_regularization=return_regularization,
             )
-        return None
+
+        output.regularization = torch.tensor(0.0, device=shape.device)
+        return output
 
     @convert_inputs
     @typecheck
@@ -98,7 +98,6 @@ class RigidMotion(BaseModel):
         shape: polydata_type,
         parameter: Float2dTensor,
         return_path: bool = False,
-        return_regularization: bool = False,
     ) -> MorphingOutput:
         """Morphing for 3D shapes."""
         rotation_angles = parameter[0]
@@ -111,7 +110,6 @@ class RigidMotion(BaseModel):
 
         morphed_shape = shape.copy()
         morphed_shape.points = newpoints
-        regularization = torch.tensor(0.0, device=parameter.device)
 
         path = None
         if return_path:
@@ -133,7 +131,6 @@ class RigidMotion(BaseModel):
 
         output = MorphingOutput(
             morphed_shape=morphed_shape,
-            regularization=regularization,
             path=path,
         )
 
@@ -151,7 +148,6 @@ class RigidMotion(BaseModel):
         shape: polydata_type,
         parameter: Float1dTensor,
         return_path: bool = False,
-        return_regularization: bool = False,
     ) -> MorphingOutput:
         """Morphing for 2D shapes."""
         assert parameter.shape == (3,)
@@ -180,8 +176,6 @@ class RigidMotion(BaseModel):
         morphed_shape = shape.copy()
         morphed_shape.points = newpoints
 
-        regularization = torch.tensor(0.0, device=parameter.device)
-
         path = None
         if return_path:
             if self.n_steps == 1:
@@ -205,7 +199,6 @@ class RigidMotion(BaseModel):
 
         output = MorphingOutput(
             morphed_shape=morphed_shape,
-            regularization=regularization,
             path=path,
         )
 

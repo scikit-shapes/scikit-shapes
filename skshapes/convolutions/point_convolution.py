@@ -81,45 +81,44 @@ def _point_convolution(
         # scale = +infinity, the kernel is always equal to 1
         K_ij = constant_1_kernel(points=X, target_points=Y, **backend_args)
 
-    else:
-        if kernel == "gaussian":
-            # Divisions are expensive: whenever possible, it's best to scale
-            # the points ahead of time instead of scaling the distances for
-            # every pair of points.
-            sqrt_2 = 1.41421356237
-            X = X / (sqrt_2 * scale)
-            Y = Y / (sqrt_2 * scale)
+    elif kernel == "gaussian":
+        # Divisions are expensive: whenever possible, it's best to scale
+        # the points ahead of time instead of scaling the distances for
+        # every pair of points.
+        sqrt_2 = 1.41421356237
+        X = X / (sqrt_2 * scale)
+        Y = Y / (sqrt_2 * scale)
 
-            # For dense computations, users may specify a cutoff as a kernel
-            # value below which the kernel is assumed to be zero.
-            # exp(-x^2) <= cutoff <=> x^2 >= -log(cutoff)
-            if window is None and cutoff is not None and cutoff < 1:
-                assert cutoff > 0
-                backend_args["cutoff"] = -np.log(cutoff)
+        # For dense computations, users may specify a cutoff as a kernel
+        # value below which the kernel is assumed to be zero.
+        # exp(-x^2) <= cutoff <=> x^2 >= -log(cutoff)
+        if window is None and cutoff is not None and cutoff < 1:
+            assert cutoff > 0
+            backend_args["cutoff"] = -np.log(cutoff)
 
-            K_ij = squared_distances(
-                points=X,
-                target_points=Y,
-                kernel=lambda d2: (-d2).exp(),
-                **backend_args,
-            )
+        K_ij = squared_distances(
+            points=X,
+            target_points=Y,
+            kernel=lambda d2: (-d2).exp(),
+            **backend_args,
+        )
 
-        elif kernel == "uniform":
-            X = X / scale
-            Y = Y / scale
-            # For dense computations, users may specify a cutoff as a kernel
-            # value below which the kernel is assumed to be zero.
-            # For the uniform kernel, this just means discarding pairs of
-            # points which are at distance > 1 (after rescaling).
-            if window is None and cutoff is not None:
-                backend_args["cutoff"] = 1.01  # To be on the safe side...
+    elif kernel == "uniform":
+        X = X / scale
+        Y = Y / scale
+        # For dense computations, users may specify a cutoff as a kernel
+        # value below which the kernel is assumed to be zero.
+        # For the uniform kernel, this just means discarding pairs of
+        # points which are at distance > 1 (after rescaling).
+        if window is None and cutoff is not None:
+            backend_args["cutoff"] = 1.01  # To be on the safe side...
 
-            K_ij = squared_distances(
-                points=X,
-                target_points=Y,
-                kernel=lambda d2: 1.0 * (1 - d2).step(),
-                **backend_args,
-            )
+        K_ij = squared_distances(
+            points=X,
+            target_points=Y,
+            kernel=lambda d2: 1.0 * (1 - d2).step(),
+            **backend_args,
+        )
 
     if normalize:
         # Clip to avoid division by zero

@@ -89,7 +89,7 @@ plotter = pv.Plotter()
 plotter.add_mesh(shape1.to_pyvista())
 actor = plotter.add_mesh(shape2.to_pyvista())
 plotter.open_gif("rigid_registration.gif", fps=3)
-for i, shape in enumerate(path):
+for shape in path:
     plotter.remove_actor(actor)
     actor = plotter.add_mesh(shape.to_pyvista())
     plotter.write_frame()
@@ -156,7 +156,7 @@ plotter = pv.Plotter()
 plotter.add_mesh(shape1.to_pyvista())
 actor = plotter.add_mesh(shape2.to_pyvista())
 plotter.open_gif("rigid_registration.gif", fps=3)
-for i, shape in enumerate(path):
+for shape in path:
     plotter.remove_actor(actor)
     actor = plotter.add_mesh(shape.to_pyvista())
     plotter.write_frame()

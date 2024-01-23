@@ -91,7 +91,7 @@ class PolyData(polydata_type):
         if type(points) in [vedo.Mesh, pyvista.PolyData, str]:
             if type(points) is vedo.Mesh:
                 mesh = pyvista.PolyData(points.dataset)
-            elif type(points) is str:
+            elif isinstance(points, str):
                 mesh = pyvista.read(points)
             elif type(points) is PyvistaPolyData:
                 mesh = points
@@ -107,7 +107,8 @@ class PolyData(polydata_type):
                 ):
                     warn(
                         "Mesh has been cleaned and points were removed."
-                        + " Landmarks are ignored."
+                        + " Landmarks are ignored.",
+                        stacklevel=3,
                     )
                     for i in mesh.field_data:
                         if i.startswith("landmarks"):
@@ -117,7 +118,8 @@ class PolyData(polydata_type):
                 if point_data is not None or len(mesh.point_data) > 0:
                     warn(
                         "Mesh has been cleaned and points were removed."
-                        + " Points data are ignored."
+                        + " Points data are ignored.",
+                        stacklevel=3,
                     )
                     mesh.point_data.clear()
                     point_data = None
@@ -760,7 +762,7 @@ class PolyData(polydata_type):
             The indices of the landmarks.
 
         """
-        if type(landmarks) is list:
+        if isinstance(landmarks, list):
             landmarks = torch.tensor(landmarks, dtype=int_dtype)
 
         assert landmarks.max() < self.n_points
@@ -792,46 +794,45 @@ class PolyData(polydata_type):
         if not hasattr(indices, "__iter__"):
             self.add_landmarks([indices])
 
+        elif self.landmarks is None:
+            self.landmark_indices = indices
+
         else:
-            if self.landmarks is None:
-                self.landmark_indices = indices
+            new_indices = torch.tensor(
+                indices, dtype=int_dtype, device=self.device
+            )
 
-            else:
-                new_indices = torch.tensor(
-                    indices, dtype=int_dtype, device=self.device
-                )
+            coalesced_landmarks = self.landmarks.coalesce()
+            old_values = coalesced_landmarks.values()
+            old_indices = coalesced_landmarks.indices()
 
-                coalesced_landmarks = self.landmarks.coalesce()
-                old_values = coalesced_landmarks.values()
-                old_indices = coalesced_landmarks.indices()
+            n_new_landmarks = len(new_indices)
+            new_indices = torch.zeros(
+                (2, n_new_landmarks), dtype=int_dtype, device=self.device
+            )
+            new_indices[0] = (
+                torch.arange(n_new_landmarks, dtype=int_dtype)
+                + self.n_landmarks
+            )
+            new_indices[1] = torch.tensor(
+                indices, dtype=int_dtype, device=self.device
+            )
 
-                n_new_landmarks = len(new_indices)
-                new_indices = torch.zeros(
-                    (2, n_new_landmarks), dtype=int_dtype, device=self.device
-                )
-                new_indices[0] = (
-                    torch.arange(n_new_landmarks, dtype=int_dtype)
-                    + self.n_landmarks
-                )
-                new_indices[1] = torch.tensor(
-                    indices, dtype=int_dtype, device=self.device
-                )
+            new_values = torch.ones_like(
+                new_indices[0], dtype=float_dtype, device=self.device
+            )
 
-                new_values = torch.ones_like(
-                    new_indices[0], dtype=float_dtype, device=self.device
-                )
+            n_landmarks = self.n_landmarks + n_new_landmarks
 
-                n_landmarks = self.n_landmarks + n_new_landmarks
+            indices = torch.cat((old_indices, new_indices), dim=1)
+            values = torch.concat((old_values, new_values))
 
-                indices = torch.cat((old_indices, new_indices), dim=1)
-                values = torch.concat((old_values, new_values))
-
-                self.landmarks = torch.sparse_coo_tensor(
-                    indices=indices,
-                    values=values,
-                    size=(n_landmarks, self.n_points),
-                    device=self.device,
-                )
+            self.landmarks = torch.sparse_coo_tensor(
+                indices=indices,
+                values=values,
+                size=(n_landmarks, self.n_points),
+                device=self.device,
+            )
 
     ##########################
     #### Shape properties ####

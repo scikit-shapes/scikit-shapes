@@ -80,7 +80,9 @@ class BaseLoss:
 
     @typecheck
     def __call__(
-        self, source: shape_type, target: shape_type, **kwargs: Any
+        self,
+        source: shape_type,
+        target: shape_type,
     ) -> Any:
         """Assert that the source and target shapes are on the same device.
 

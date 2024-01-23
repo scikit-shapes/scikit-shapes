@@ -19,7 +19,8 @@ if float_dtype in admissile_float_dtypes:
 else:
     warn(
         f"Unknown float dtype {float_dtype}. Possible values are"
-        + "{admissile_float_dtypes}. Using float32 as default."
+        + "{admissile_float_dtypes}. Using float32 as default.",
+        stacklevel=1,
     )
     float_dtype = torch.float32
 

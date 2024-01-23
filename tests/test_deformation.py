@@ -95,7 +95,6 @@ def test_extrinsic_deformation():
 
         registration_sks = sks.Registration(
             model=model_sks,
-            integrator=sks.EulerIntegrator(),
             loss=loss,
             optimizer=optimizer,
             n_iter=n_iter,

@@ -205,7 +205,6 @@ def test_lddmm_control_points():
         loss=loss,
         optimizer=optimizer,
         n_iter=10,
-        lr=0.1,
         regularization=0.1,
         gpu=False,
         verbose=True,

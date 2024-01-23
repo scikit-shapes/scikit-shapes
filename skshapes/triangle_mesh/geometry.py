@@ -39,7 +39,6 @@ def triangle_normals(
     *,
     points: Union[Points, PointsSequence],
     triangles: Triangles,
-    **kwargs,
 ) -> Union[Float2dTensor, Float3dTensor]:
     """Triangle normals of a triangular mesh.
 
@@ -76,7 +75,6 @@ def triangle_areas(
     *,
     points: Union[Points, PointsSequence],
     triangles: Triangles,
-    **kwargs,
 ) -> Union[Float1dTensor, Float2dTensor]:
     """Areas of the triangles of a triangular mesh.
 
@@ -135,7 +133,6 @@ def triangle_centers(
     *,
     points: Union[Points, PointsSequence],
     triangles: Triangles,
-    **kwargs,
 ) -> Union[Float2dTensor, Float3dTensor]:
     """Centers of the triangles of a triangular mesh.
 

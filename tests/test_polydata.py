@@ -384,7 +384,7 @@ def test_point_data():
     with pytest.raises(KeyError):
         mesh.point_data["dummy"]
 
-    # Same throught the __getitem__ interface
+    # Same through the __getitem__ interface
     with pytest.raises(KeyError):
         mesh["dummy"]
 

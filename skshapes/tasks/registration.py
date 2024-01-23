@@ -37,7 +37,6 @@ class Registration:
         n_iter: int = 10,
         verbose: int = 0,
         gpu: bool = True,
-        **kwargs,
     ) -> None:
         """Initialize the registration object.
 
