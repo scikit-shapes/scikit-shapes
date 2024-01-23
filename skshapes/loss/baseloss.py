@@ -1,16 +1,19 @@
 """Abstract classes for losses."""
 
 from __future__ import annotations
+
+from typing import Any
+
+import torch
+
+from ..errors import DeviceError
+from ..input_validation import typecheck
 from ..types import (
-    Number,
     FloatScalar,
+    Number,
     float_dtype,
     shape_type,
 )
-from ..errors import DeviceError
-from ..input_validation import typecheck
-from typing import Any, Optional
-import torch
 
 
 class BaseLoss:
@@ -33,9 +36,8 @@ class BaseLoss:
         NotImplementedError
             this class is abstract and should not be instantiated
         """
-        raise NotImplementedError(
-            "BaseLoss is an abstract class and should not be instantiated"
-        )
+        msg = "BaseLoss is an abstract class and should not be instantiated"
+        raise NotImplementedError(msg)
 
     @typecheck
     def __add__(self, other: BaseLoss) -> BaseLoss:
@@ -78,7 +80,9 @@ class BaseLoss:
 
     @typecheck
     def __call__(
-        self, source: shape_type, target: shape_type, **kwargs: Any
+        self,
+        source: shape_type,
+        target: shape_type,
     ) -> Any:
         """Assert that the source and target shapes are on the same device.
 
@@ -114,7 +118,6 @@ class EmptyLoss(BaseLoss):
     @typecheck
     def __init__(self) -> None:
         """Class constructor."""
-        pass
 
     @typecheck
     def __call__(
@@ -141,8 +144,8 @@ class SumLoss(BaseLoss):
     @typecheck
     def __init__(
         self,
-        loss1: Optional[BaseLoss] = None,
-        loss2: Optional[BaseLoss] = None,
+        loss1: BaseLoss | None = None,
+        loss2: BaseLoss | None = None,
     ) -> None:
         """Class constructor.
 
@@ -196,7 +199,7 @@ class ProductLoss(BaseLoss):
 
     @typecheck
     def __init__(
-        self, loss: Optional[BaseLoss] = None, scalar: Number = 1.0
+        self, loss: BaseLoss | None = None, scalar: Number = 1.0
     ) -> None:
         """Class constructor.
 

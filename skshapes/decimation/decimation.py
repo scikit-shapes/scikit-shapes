@@ -1,13 +1,14 @@
 """Decimation module."""
 from __future__ import annotations
-import numpy as np
-from ..data import PolyData
-import torch
-from ..types import float_dtype, int_dtype, Number, Int1dTensor, polydata_type
-from ..input_validation import typecheck, one_and_only_one, no_more_than_one
-from ..errors import NotFittedError
-from typing import Optional, Union
+
 import fast_simplification
+import numpy as np
+import torch
+
+from ..data import PolyData
+from ..errors import NotFittedError
+from ..input_validation import no_more_than_one, one_and_only_one, typecheck
+from ..types import Int1dTensor, Number, float_dtype, int_dtype, polydata_type
 
 
 class Decimation:
@@ -44,10 +45,9 @@ class Decimation:
     def __init__(
         self,
         *,
-        target_reduction: Optional[float] = None,
-        n_points: Optional[int] = None,
-        n_points_strict: Optional[int] = None,
-        ratio: Optional[Number] = None,
+        target_reduction: float | None = None,
+        n_points: int | None = None,
+        ratio: Number | None = None,
     ) -> None:
         """Class constructor.
 
@@ -70,7 +70,7 @@ class Decimation:
         """
         if target_reduction is not None:
             assert (
-                target_reduction > 0 and target_reduction < 1
+                0 < target_reduction < 1
             ), "The target reduction must be between 0 and 1"
             self.target_reduction = target_reduction
 
@@ -78,7 +78,7 @@ class Decimation:
             self.n_points = n_points
 
         if ratio is not None:
-            assert ratio > 0 and ratio < 1, "The ratio must be between 0 and 1"
+            assert 0 < ratio < 1, "The ratio must be between 0 and 1"
             self.target_reduction = 1 - ratio
 
     @typecheck
@@ -154,12 +154,12 @@ class Decimation:
         self,
         mesh: polydata_type,
         *,
-        target_reduction: Optional[float] = None,
-        n_points: Optional[int] = None,
-        n_points_strict: Optional[int] = None,
-        ratio: Optional[float] = None,
+        target_reduction: float | None = None,
+        n_points: int | None = None,
+        n_points_strict: int | None = None,
+        ratio: float | None = None,
         return_indice_mapping: bool = False,
-    ) -> Union[polydata_type, tuple[polydata_type, Int1dTensor]]:
+    ) -> polydata_type | tuple[polydata_type, Int1dTensor]:
         """Transform a mesh using the decimation algorithm.
 
         The decimation must have been fitted to a mesh before calling this
@@ -237,21 +237,20 @@ class Decimation:
             target_reduction = self.target_reduction
 
         if self.collapses_ is None:
-            raise NotFittedError(
-                "The decimation object has not been fitted yet."
-            )
+            msg = "The decimation object has not been fitted yet."
+            raise NotFittedError(msg)
 
         if target_reduction is not None:
             if not (0 <= target_reduction <= 1):
-                raise ValueError(
-                    "The target reduction must be between 0 and 1"
-                )
+                msg = "The target reduction must be between 0 and 1"
+                raise ValueError(msg)
             ratio = 1 - target_reduction
             n_target_points = int(ratio * self.ref_mesh.n_points)
 
         elif ratio is not None:
             if not (0 <= ratio <= 1):
-                raise ValueError("The ratio must be between 0 and 1")
+                msg = "The ratio must be between 0 and 1"
+                raise ValueError(msg)
             n_target_points = int(ratio * self.ref_mesh.n_points)
 
         elif n_points is not None:
@@ -348,12 +347,12 @@ class Decimation:
         self,
         mesh: polydata_type,
         *,
-        target_reduction: Optional[float] = None,
-        n_points: Optional[int] = None,
-        n_points_strict: Optional[int] = None,
-        ratio: Optional[float] = None,
+        target_reduction: float | None = None,
+        n_points: int | None = None,
+        n_points_strict: int | None = None,
+        ratio: float | None = None,
         return_indice_mapping: bool = False,
-    ) -> Union[polydata_type, tuple[polydata_type, Int1dTensor]]:
+    ) -> polydata_type | tuple[polydata_type, Int1dTensor]:
         """Decimate and return decimated mesh."""
         self.fit(mesh)
         kwargs = {
@@ -372,9 +371,8 @@ class Decimation:
         if hasattr(self, "collapses_"):
             return self.collapses_
         else:
-            raise NotFittedError(
-                "The decimation object has not been fitted yet."
-            )
+            msg = "The decimation object has not been fitted yet."
+            raise NotFittedError(msg)
 
     @typecheck
     @property
@@ -383,9 +381,8 @@ class Decimation:
         if hasattr(self, "actual_reduction_"):
             return self.actual_reduction_
         else:
-            raise NotFittedError(
-                "The decimation object has not been fitted yet."
-            )
+            msg = "The decimation object has not been fitted yet."
+            raise NotFittedError(msg)
 
     @typecheck
     @property
@@ -394,6 +391,5 @@ class Decimation:
         if hasattr(self, "ref_mesh_"):
             return self.ref_mesh_
         else:
-            raise NotFittedError(
-                "The decimation object has not been fitted yet."
-            )
+            msg = "The decimation object has not been fitted yet."
+            raise NotFittedError(msg)

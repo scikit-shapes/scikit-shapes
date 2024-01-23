@@ -18,8 +18,8 @@ representation.
 # We use the implementation proposed by [fast-simplification](https://github.com/pyvista/fast-simplification)
 
 
-import skshapes as sks
 import pyvista.examples
+import skshapes as sks
 
 bunny = sks.PolyData(pyvista.examples.download_bunny())
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
@@ -27,7 +27,6 @@ multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
 
 # %%
 # Visualize the multiscale representation
-import matplotlib.pyplot as plt
 import pyvista as pv
 
 plotter = pv.Plotter(shape=(1, 4))

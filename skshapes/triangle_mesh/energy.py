@@ -1,21 +1,23 @@
 """Energy functions for triangle meshes."""
+from typing import Optional, Union
+
 import torch
-from typing import Union, Optional
-from .edge_topology import EdgeTopology
-from .geometry import (
-    triangle_areas,
-    edge_lengths,
-    dihedral_angles,
-)
+
+from ..input_validation import typecheck
 from ..types import (
-    Triangles,
-    Points,
-    PointsSequence,
     Float1dTensor,
     FloatScalar,
     Number,
+    Points,
+    PointsSequence,
+    Triangles,
 )
-from ..input_validation import typecheck
+from .edge_topology import EdgeTopology
+from .geometry import (
+    dihedral_angles,
+    edge_lengths,
+    triangle_areas,
+)
 
 
 @typecheck
@@ -91,7 +93,6 @@ def membrane_energy(
     points_undef: Union[Points, PointsSequence],
     points_def: Union[Points, PointsSequence],
     triangles: Triangles,
-    edge_topology: Optional[EdgeTopology] = None,
 ) -> Union[FloatScalar, Float1dTensor]:
     """Compute the membrane energy of the mesh.
 
@@ -118,8 +119,6 @@ def membrane_energy(
         The triangles of the mesh(es). Shape: (n_triangles, 3).
 
     """
-    if edge_topology is None:
-        edge_topology = EdgeTopology(triangles)
 
     a = points_def[triangles[:, 0]]  # i
     b = points_def[triangles[:, 1]]  # j
@@ -150,12 +149,10 @@ def membrane_energy(
     areas_def = triangle_areas(
         points=points_def,
         triangles=triangles,
-        edge_topology=edge_topology,
     )
     areas_undef = triangle_areas(
         points=points_undef,
         triangles=triangles,
-        edge_topology=edge_topology,
     )
 
     mu = 1.0
@@ -213,7 +210,6 @@ def shell_energy(
         points_undef=points_undef,
         points_def=points_def,
         triangles=triangles,
-        edge_topology=edge_topology,
     )
     b_energy = bending_energy(
         points_undef=points_undef,

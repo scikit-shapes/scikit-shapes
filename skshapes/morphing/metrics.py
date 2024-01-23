@@ -1,21 +1,21 @@
 """Metrics."""
 
-from ..types import (
-    FloatScalar,
-    Edges,
-    Triangles,
-    Float3dTensor,
-    Number,
-)
-from ..input_validation import typecheck
 from typing import Optional
+
 import torch
+
+from ..input_validation import typecheck
+from ..types import (
+    Edges,
+    Float3dTensor,
+    FloatScalar,
+    Number,
+    Triangles,
+)
 
 
 class Metric:
     """Base class for all metrics."""
-
-    pass
 
 
 class AsIsometricAsPossible(Metric):
@@ -29,7 +29,6 @@ class AsIsometricAsPossible(Metric):
 
     def __init__(self) -> None:
         """Class constructor."""
-        pass
 
     @typecheck
     def __call__(
@@ -37,7 +36,7 @@ class AsIsometricAsPossible(Metric):
         points_sequence: Float3dTensor,
         velocities_sequence: Float3dTensor,
         edges: Optional[Edges] = None,
-        triangles: Optional[Triangles] = None,
+        triangles: Optional[Triangles] = None,  # noqa: ARG002
     ) -> FloatScalar:
         """Compute the mean velocities' metric along the sequence of points.
 
@@ -61,7 +60,8 @@ class AsIsometricAsPossible(Metric):
             FloatScalar: the mean velocities metric
         """
         if edges is None:
-            raise AttributeError("This metric requires edges to be defined")
+            msg = "This metric requires edges to be defined"
+            raise AttributeError(msg)
 
         n_steps = points_sequence.shape[1]
         e0, e1 = edges[:, 0], edges[:, 1]
@@ -94,7 +94,7 @@ class ShellEnergyMetric(Metric):
         self,
         points_sequence: Float3dTensor,
         velocities_sequence: Float3dTensor,
-        edges: Optional[Edges] = None,
+        edges: Optional[Edges] = None,  # noqa: ARG002
         triangles: Optional[Triangles] = None,
     ) -> FloatScalar:
         """Compute shell energy along the sequence of points.
@@ -119,9 +119,8 @@ class ShellEnergyMetric(Metric):
             FloatScalar: the mean velocities metric
         """
         if triangles is None:
-            raise AttributeError(
-                "This metric requires triangles to be defined"
-            )
+            msg = "This metric requires triangles to be defined"
+            raise AttributeError(msg)
 
         n_steps = points_sequence.shape[1]
 

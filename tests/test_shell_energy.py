@@ -1,9 +1,8 @@
 """Test the shell energy implementation."""
 
-import torch
 import pytest
-
 import skshapes as sks
+import torch
 
 try:
     import pytorch_shell

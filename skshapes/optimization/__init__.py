@@ -1,7 +1,7 @@
-import torch.optim
-
 # from ..types import Optimizer
 from typing import Union
+
+import torch.optim
 
 
 class BaseOptimizer:

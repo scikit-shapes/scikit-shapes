@@ -1,18 +1,20 @@
 """Utility functions for the skshapes package."""
 
+from typing import Literal, Optional
+
 import torch
+
+from .errors import DeviceError
+from .input_validation import convert_inputs, typecheck
 from .types import (
-    NumericalTensor,
     Int1dTensor,
     Number,
+    NumericalTensor,
 )
-from .input_validation import typecheck, convert_inputs
-from .errors import DeviceError
-from typing import Literal, Optional
 
 
 def ranges_slices(batch):
-    """Helper function for the diagonal ranges function."""  # noqa: D401
+    """Helper function for the diagonal ranges function."""
     Ns = batch.bincount()
     indices = Ns.cumsum(0)
     ranges = torch.cat((0 * indices[:1], indices))
@@ -32,7 +34,8 @@ def diagonal_ranges(batch_x=None, batch_y=None):
     """Encode the block-diagonal structure associated to a batch vector."""
     if batch_x is None and batch_y is None:
         return None  # No batch processing
-    elif batch_y is None:
+
+    if batch_y is None:
         batch_y = batch_x  # "symmetric" case
 
     ranges_x, slices_x = ranges_slices(batch_x)
@@ -76,9 +79,8 @@ def scatter(
         referenced by the index tensor.
     """
     if src.device != index.device:
-        raise DeviceError(
-            "The src and index tensors must be on the same device."
-        )
+        msg = "The src and index tensors must be on the same device."
+        raise DeviceError(msg)
     device = src.device
 
     if min_length is not None:
@@ -115,7 +117,6 @@ def scatter(
         output = torch.full((length,), blank_value, dtype=src.dtype).to(device)
 
     # Scatter syntax for pytorch > 1.11
-    output = output.scatter_reduce(
+    return output.scatter_reduce(
         index=index, src=src, dim=0, reduce=reduce, include_self=False
     )
-    return output

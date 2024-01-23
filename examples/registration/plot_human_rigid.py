@@ -13,20 +13,18 @@ adding landmarks.
 # We load two meshes from the `pyvista` example datasets. We then rescale them
 # to lie in the unit cube to avoid dealing with scale issues.
 
+import pyvista as pv
 import skshapes as sks
 import torch
 from pyvista import examples
-import pyvista as pv
 
 shape1 = sks.PolyData(examples.download_human())
 shape2 = sks.PolyData(examples.download_doorman())
 shape1.point_data.clear()
 shape2.point_data.clear()
 
-bounds = (
-    lambda shape: torch.max(shape.points, dim=0).values
-    - torch.min(shape.points, dim=0).values
-)
+def bounds(shape):
+    return torch.max(shape.points, dim=0).values - torch.min(shape.points, dim=0).values
 
 lims1 = bounds(shape1)
 lims2 = bounds(shape2)
@@ -56,9 +54,9 @@ plotter.show()
 # and we need to use a loss function that can handle this. We use the nearest
 # neighbors loss.
 
-from skshapes.tasks import Registration
-from skshapes.morphing import RigidMotion
 from skshapes.loss import NearestNeighborsLoss
+from skshapes.morphing import RigidMotion
+from skshapes.tasks import Registration
 
 loss = NearestNeighborsLoss()
 # The parameter n_steps is the number of steps for the motion. For a rigid
@@ -91,7 +89,7 @@ plotter = pv.Plotter()
 plotter.add_mesh(shape1.to_pyvista())
 actor = plotter.add_mesh(shape2.to_pyvista())
 plotter.open_gif("rigid_registration.gif", fps=3)
-for i, shape in enumerate(path):
+for shape in path:
     plotter.remove_actor(actor)
     actor = plotter.add_mesh(shape.to_pyvista())
     plotter.write_frame()
@@ -158,7 +156,7 @@ plotter = pv.Plotter()
 plotter.add_mesh(shape1.to_pyvista())
 actor = plotter.add_mesh(shape2.to_pyvista())
 plotter.open_gif("rigid_registration.gif", fps=3)
-for i, shape in enumerate(path):
+for shape in path:
     plotter.remove_actor(actor)
     actor = plotter.add_mesh(shape.to_pyvista())
     plotter.write_frame()

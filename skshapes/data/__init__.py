@@ -1,11 +1,13 @@
-from .polydata import PolyData
-from .image import Image
-from typing import Union
-from ..types import polydata_type
-from ..input_validation import typecheck
 from math import pi
+from typing import Union
+
 import pyvista
 import torch
+
+from ..input_validation import typecheck
+from ..types import polydata_type
+from .image import Image
+from .polydata import PolyData
 
 Shape = Union[PolyData, Image]
 

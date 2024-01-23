@@ -6,17 +6,19 @@ to obtain the sequence of points of the morphed shape. The morphing is
 regularized by a Riemannian metric on the shape space.
 """
 
+from typing import Optional
+
 import torch
-from .basemodel import BaseModel
+
+from ..errors import DeviceError
+from ..input_validation import convert_inputs, typecheck
 from ..types import (
     Float3dTensor,
-    polydata_type,
     MorphingOutput,
+    polydata_type,
 )
-from ..input_validation import typecheck, convert_inputs
-from ..errors import DeviceError
-from .metrics import Metric, AsIsometricAsPossible
-from typing import Optional
+from .basemodel import BaseModel
+from .metrics import AsIsometricAsPossible, Metric
 
 
 class IntrinsicDeformation(BaseModel):
@@ -72,9 +74,8 @@ class IntrinsicDeformation(BaseModel):
             the path if requested.
         """
         if parameter.device != shape.device:
-            raise DeviceError(
-                "The shape and the parameter must be on the same device."
-            )
+            msg = "The shape and the parameter must be on the same device."
+            raise DeviceError(msg)
 
         assert parameter.shape == self.parameter_shape(shape)
 

@@ -1,11 +1,11 @@
 """Tests for the deformation modules."""
 
 
-import pytest
-import torch
 import os
 
+import pytest
 import skshapes as sks
+import torch
 from skshapes.errors import DeviceError
 
 deformation_models = [
@@ -44,7 +44,7 @@ def _test(deformation_model):
     if torch.cuda.is_available():
         p = p.cuda()
         with pytest.raises(DeviceError):
-            model.morph(shape=shape, parameter=p).morphed_shape
+            model.morph(shape=shape, parameter=p).morphed_shape  # noqa: B018
 
 
 @pytest.mark.skipif(
@@ -95,7 +95,6 @@ def test_extrinsic_deformation():
 
         registration_sks = sks.Registration(
             model=model_sks,
-            integrator=sks.EulerIntegrator(),
             loss=loss,
             optimizer=optimizer,
             n_iter=n_iter,
@@ -107,9 +106,6 @@ def test_extrinsic_deformation():
             source=source, target=target
         )
         out_sks = registration_sks.fit_transform(source=source, target=target)
-
-        print(out_torchdiffeq.points)
-        print(out_sks.points)
 
         # Make sure that something happened, ie the points are not the same
         # after registration than before

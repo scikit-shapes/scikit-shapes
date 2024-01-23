@@ -1,17 +1,15 @@
 """Functions related to triangle meshes."""
 from .edge_topology import EdgeTopology
-
+from .energy import (
+    bending_energy,
+    membrane_energy,
+    shell_energy,
+)
 from .geometry import (
-    triangle_normals,
+    dihedral_angles,
+    edge_centers,
+    edge_lengths,
     triangle_areas,
     triangle_centers,
-    edge_lengths,
-    edge_centers,
-    dihedral_angles,
-)
-
-from .energy import (
-    membrane_energy,
-    bending_energy,
-    shell_energy,
+    triangle_normals,
 )

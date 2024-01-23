@@ -1,9 +1,11 @@
 """Losses based on optimal transport for Polydata."""
 
-from geomloss import SamplesLoss
-from ..types import FloatScalar, polydata_type
-from ..input_validation import typecheck
 from typing import Literal
+
+from geomloss import SamplesLoss
+
+from ..input_validation import typecheck
+from ..types import FloatScalar, polydata_type
 from .baseloss import BaseLoss
 
 losses = Literal["sinkhorn", "hausdorff", "energy", "gaussian", "laplacian"]

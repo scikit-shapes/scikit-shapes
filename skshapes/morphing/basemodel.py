@@ -1,7 +1,8 @@
 """Base class for all deformation models."""
 
-from ..types import shape_type, float_dtype, FloatTensor
 import torch
+
+from ..types import FloatTensor, float_dtype, shape_type
 
 
 class BaseModel:

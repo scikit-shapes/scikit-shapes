@@ -9,16 +9,14 @@ InputTypeError = (TypeCheckError, BeartypeCallHintParamViolation)
 class InputStructureError(Exception):
     """Raised when the input structure is not valid."""
 
-    pass
+
+class ShapeError(Exception):
+    """Raised when an input has an invalid shape."""
 
 
 class DeviceError(Exception):
     """Raised when devices mismatch."""
 
-    pass
-
 
 class NotFittedError(Exception):
     """Raised when the model is not fitted."""
-
-    pass

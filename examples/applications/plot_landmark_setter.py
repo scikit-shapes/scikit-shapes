@@ -9,8 +9,8 @@ In this example, we demonstrate how to use the landmark setter application.
 # ## Load data
 #
 
-from pyvista import examples
 import skshapes as sks
+from pyvista import examples
 
 shape1 = sks.PolyData(examples.download_human())
 shape2 = sks.PolyData(examples.download_doorman())

@@ -1,10 +1,11 @@
 """Tests related to the device compatibility of shapes."""
 
-import pyvista.examples
 from typing import get_args
+
 import pytest
-import torch
+import pyvista.examples
 import skshapes as sks
+import torch
 from skshapes.errors import DeviceError
 
 shape1 = sks.PolyData(pyvista.Sphere())

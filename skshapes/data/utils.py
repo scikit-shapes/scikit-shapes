@@ -1,22 +1,25 @@
 """Utility functions and classes for the data module."""
 
 from __future__ import annotations
-from functools import lru_cache, partial, update_wrapper, cached_property
+
 import functools
 import weakref
-
 from collections.abc import Callable
+from functools import cached_property, lru_cache, partial, update_wrapper
+from typing import Any, TypeVar
+
+import numpy as np
+import pyvista
+import torch
+
+from ..errors import DeviceError, ShapeError
+from ..input_validation import convert_inputs, typecheck
 from ..types import (
     FloatTensor,
     IntTensor,
-    NumericalTensor,
     NumericalArray,
+    NumericalTensor,
 )
-from ..input_validation import typecheck, convert_inputs
-from typing import Optional, TypeVar, Union, Any
-import torch
-import pyvista
-import numpy as np
 
 
 class DataAttributes(dict):
@@ -41,7 +44,7 @@ class DataAttributes(dict):
     """
 
     @typecheck
-    def __init__(self, *, n: int, device: Union[str, torch.device]) -> None:
+    def __init__(self, *, n: int, device: str | torch.device) -> None:
         """Class constructor.
 
         Parameters
@@ -100,7 +103,7 @@ class DataAttributes(dict):
     @typecheck
     def _check_value(self, value: NumericalTensor) -> NumericalTensor:
         if value.shape[0] != self._n:
-            raise ValueError(
+            raise ShapeError(
                 f"First dimension of the tensor should be {self._n}, got"
                 + f"{value.shape[0]}"
             )
@@ -113,7 +116,7 @@ class DataAttributes(dict):
     @convert_inputs
     @typecheck
     def __setitem__(
-        self, key: Any, value: Union[NumericalTensor, NumericalArray]
+        self, key: Any, value: NumericalTensor | NumericalArray
     ) -> None:
         """Set an attribute of the DataAttributes object.
 
@@ -129,7 +132,7 @@ class DataAttributes(dict):
 
     @convert_inputs
     @typecheck
-    def append(self, value: Union[FloatTensor, IntTensor]) -> None:
+    def append(self, value: FloatTensor | IntTensor) -> None:
         """Append an attribute to the DataAttributes object.
 
         The key of the attribute will be "attribute_{i}" where i is the minimum
@@ -162,7 +165,7 @@ class DataAttributes(dict):
         return clone
 
     @typecheck
-    def to(self, device: Union[str, torch.device]) -> DataAttributes:
+    def to(self, device: str | torch.device) -> DataAttributes:
         """Move the DataAttributes object on a given device.
 
         Parameters
@@ -184,8 +187,8 @@ class DataAttributes(dict):
     @classmethod
     def from_dict(
         cls,
-        attributes: dict[Any, Union[NumericalTensor, NumericalArray]],
-        device: Optional[Union[str, torch.device]] = None,
+        attributes: dict[Any, NumericalTensor | NumericalArray],
+        device: str | torch.device | None = None,
     ) -> DataAttributes:
         """From dictionary constructor."""
         if len(attributes) == 0:
@@ -195,23 +198,23 @@ class DataAttributes(dict):
             )
 
         # Ensure that the number of elements of the attributes is the same
-        n = list(attributes.values())[0].shape[0]
+        n = next(iter(attributes.values())).shape[0]
         for value in attributes.values():
             if value.shape[0] != n:
-                raise ValueError(
-                    "The number of elements of the dictionary should be the"
-                    + "same to be converted into a DataAttributes object"
+                raise ShapeError(
+                    "The number of rows of each value the dictionary must be"
+                    + " the same to be convert to a DataAttributes object"
                 )
 
         if device is None:
             # Ensure that the attributes are on the same device (if they are
             # torch.Tensor, unless they have no device attribute and we set
             # device to cpu)
-            if hasattr(list(attributes.values())[0], "device"):
-                device = list(attributes.values())[0].device
+            if hasattr(next(iter(attributes.values())), "device"):
+                device = next(iter(attributes.values())).device
                 for value in attributes.values():
                     if value.device != device:
-                        raise ValueError(
+                        raise DeviceError(
                             "The attributes should be on the same device to be"
                             + " converted into a DataAttributes object"
                         )
@@ -228,13 +231,13 @@ class DataAttributes(dict):
     def from_pyvista_datasetattributes(
         cls,
         attributes: pyvista.DataSetAttributes,
-        device: Optional[Union[str, torch.device]] = None,
+        device: str | torch.device | None = None,
     ) -> DataAttributes:
         """From pyvista.DataSetAttributes constructor."""
         # First, convert the pyvista.DataSetAttributes object to a dictionary
         dict_attributes = {}
 
-        for key in attributes.keys():
+        for key in attributes:
             if isinstance(attributes[key], np.ndarray):
                 dict_attributes[key] = np.array(attributes[key])
             else:
@@ -263,7 +266,7 @@ class DataAttributes(dict):
 
     @n.setter
     @typecheck
-    def n(self, n: Any) -> None:
+    def n(self, n: Any) -> None:  # noqa: ARG002
         """Setter for the number of elements.
 
         This setter is not meant to be used, as it would change the number of
@@ -281,13 +284,13 @@ class DataAttributes(dict):
 
     @property
     @typecheck
-    def device(self) -> Union[str, torch.device]:
+    def device(self) -> str | torch.device:
         """Device getter."""
         return self._device
 
     @device.setter
     @typecheck
-    def device(self, device: Any) -> None:
+    def device(self, device: Any) -> None:  # noqa: ARG002
         """Device cannot be changed with the setter.
 
         If you want to change the device of the DataAttributes object, use
@@ -333,11 +336,11 @@ T = TypeVar("T")
 
 
 def instance_lru_cache(
-    method: Optional[Callable[..., T]] = None,
+    method: Callable[..., T] | None = None,
     *,
-    maxsize: Optional[int] = 128,
+    maxsize: int | None = 128,
     typed: bool = False,
-) -> Union[Callable[..., T], Callable[[Callable[..., T]], Callable[..., T]]]:
+) -> Callable[..., T] | Callable[[Callable[..., T]], Callable[..., T]]:
     """Least-recently-used cache decorator for instance methods.
 
     The cache follows the lifetime of an object (it is stored on the object,
@@ -365,7 +368,7 @@ def instance_lru_cache(
                 update_wrapper(partial(wrapped, self), wrapped)
             )
 
-        return cached_property(wrapper)  # type: ignore
+        return cached_property(wrapper)  # type: ignore[code]
 
     return decorator if method is None else decorator(method)
 

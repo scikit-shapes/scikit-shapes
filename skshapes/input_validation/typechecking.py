@@ -1,7 +1,7 @@
 """Runtime checker for function's arguments."""
 
-from jaxtyping import jaxtyped
 from beartype import beartype
+from jaxtyping import jaxtyped
 
 
 def typecheck(func):

@@ -1,5 +1,4 @@
 import pyvista
-import numpy as np
 
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True

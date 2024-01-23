@@ -1,13 +1,14 @@
 """Implicit quadrics."""
 
-import torch
+from typing import Optional
+
 import numpy as np
+import torch
 from pykeops.torch import LazyTensor
 
-from ..utils import diagonal_ranges
-from ..types import Points, Float1dTensor, Number
 from ..input_validation import typecheck
-from typing import Optional
+from ..types import Float1dTensor, Number, Points
+from ..utils import diagonal_ranges
 
 # from .normals import smooth_normals, tangent_vectors
 
@@ -157,7 +158,7 @@ def implicit_quadrics(
     eigenvalues, F = torch.lobpcg(MD_i, k=1, B=ND_i, largest=False)
     F = F[:, :, 0]  # We only care about one eigenvector
     assert eigenvalues.shape == (q, 1)
-    assert F.shape == (q, 10), "F.shape = {}".format(F.shape)
+    assert F.shape == (q, 10), f"F.shape = {F.shape}"
 
     # For each point i, F[i, :] now contains the coefficients of the optimal
     # quadric for a window of scale "scale" centered at points[i, :].

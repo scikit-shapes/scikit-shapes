@@ -1,15 +1,15 @@
 """Tests for the PolyData class."""
 
-import torch
-import pyvista
-import pytest
-from pyvista.core.pointset import PolyData as PyvistaPolyData
-import numpy as np
-import vedo
-import os
+from pathlib import Path
 
+import numpy as np
+import pytest
+import pyvista
 import skshapes as sks
-from skshapes.errors import InputTypeError, DeviceError
+import torch
+import vedo
+from pyvista.core.pointset import PolyData as PyvistaPolyData
+from skshapes.errors import DeviceError, InputTypeError, ShapeError
 
 
 def _cube():
@@ -110,9 +110,10 @@ def test_polydata_creation():
     assert triangle.edge_lengths is not None
 
     with pytest.raises(AttributeError, match="Triangles are not defined"):
-        triangle.triangle_areas
+        triangle.triangle_areas  # noqa: B018 (useless expression)
 
-    with pytest.raises(ValueError):
+    # Cannot change the number of points
+    with pytest.raises(ShapeError):
         triangle.points = torch.rand(triangle.n_points + 1, 3)
 
     triangle_mesh = sks.Sphere()
@@ -141,7 +142,7 @@ def test_polydata_creation():
     # add a triangle to the wireframe mesh
     mixed_mesh.faces = np.concatenate([mixed_mesh.faces, [3, 0, 1, 2]])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="both triangles and edges"):
         sks.PolyData(mixed_mesh)
 
 
@@ -157,9 +158,9 @@ def test_geometry_features():
     assert square.n_edges == 4
 
     with pytest.raises(AttributeError, match="Triangles are not defined"):
-        square.triangle_centers
+        square.triangle_centers  # noqa: B018 (useless expression)
     with pytest.raises(AttributeError, match="Triangles are not defined"):
-        square.triangle_normals
+        square.triangle_normals  # noqa: B018 (useless expression)
 
     assert torch.allclose(
         square.point_weights, torch.tensor([1, 1, 1, 1], dtype=sks.float_dtype)
@@ -204,7 +205,6 @@ def test_geometry_features():
         torch.tensor([[1 / 3, 1 / 3]], dtype=sks.float_dtype),
     )
 
-    print(triangle.triangle_normals)
     assert torch.allclose(
         triangle.triangle_normals,
         torch.tensor([[0, 0, 1]], dtype=sks.float_dtype),
@@ -262,7 +262,6 @@ def test_interaction_with_pyvista():
 
     # back to pyvista, check that the mesh is the same
     mesh2 = polydata.to_pyvista()
-    print(np.max(np.abs(mesh.points - mesh2.points)))
     assert np.allclose(mesh.points, mesh2.points)
     assert np.allclose(mesh.faces, mesh2.faces)
 
@@ -286,7 +285,7 @@ def test_interaction_with_pyvista():
 
     # Importing a point cloud from pyvsita
     n = 100
-    points = np.random.rand(n, 3)
+    points = np.random.default_rng().random(size=(n, 3))
     polydata = pyvista.PolyData(points)
     mesh = sks.PolyData(polydata)
     assert mesh.n_points == n
@@ -329,7 +328,7 @@ def test_point_data():
     mesh.point_data["normals"] = torch.rand(mesh.n_points, 3)
     mesh.point_data.append(torch.rand(mesh.n_points))
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ShapeError):
         mesh.point_data.append(torch.rand(mesh.n_points + 1))
 
     # Check that the point_data are correctly copied
@@ -351,12 +350,11 @@ def test_point_data():
     }
 
     mesh.point_data = new_point_data  # Replace the point_data
-    for key, _ in mesh.point_data.items():
-        print(key)
+    for _key, _ in mesh.point_data.items():
+        pass
     mesh.point_data.append(torch.rand(mesh.n_points, 2))  # Add a new feature
-    print("")
-    for key, _ in mesh.point_data.items():
-        print(key)
+    for _key, _ in mesh.point_data.items():
+        pass
     assert list(mesh.point_data.keys()) == [
         "rotations",
         "colors",
@@ -368,7 +366,7 @@ def test_point_data():
         mesh.point_data = 4
     # Check that trying to set the point_data with an invalid dict (here the
     # size of the tensors is not correct) raises an error
-    with pytest.raises(ValueError):
+    with pytest.raises(ShapeError):
         mesh.point_data = {
             "colors": torch.rand(mesh.n_points + 2, 3),
             "normals": torch.rand(mesh.n_points, 3),
@@ -379,23 +377,27 @@ def test_point_data():
     }
 
     # Try to assign a dict with a wrong size
-    with pytest.raises(ValueError):
+    with pytest.raises(ShapeError):
         mesh.point_data = dict
 
     # Try to get a point_data that does not exist
     with pytest.raises(KeyError):
-        mesh.point_data["not_existing"]
+        mesh.point_data["dummy"]
 
+    # Same through the __getitem__ interface
     with pytest.raises(KeyError):
-        mesh["not_existing"]
+        mesh["dummy"]
 
 
 def test_point_data2():
     """Test the PointData (signals) interface: higher dimension."""
     # Load a pyvista.PolyData and add an attribute
+    rnd_generator = np.random.default_rng()
     pv_mesh = pyvista.Sphere()
     # The attribute has 4 dims
-    pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 2)
+    pv_mesh.point_data["curvature"] = rnd_generator.random(
+        size=(pv_mesh.n_points, 2)
+    )
     # Convert it to a skshapes.PolyData
     sks_mesh = sks.PolyData(pv_mesh)
 
@@ -414,13 +416,15 @@ def test_point_data2():
     sks_mesh.point_data["color"] = torch.rand(sks_mesh.n_points, 3).cpu()
     # It is also possible to assign a numpy array, it will be automatically
     # converted to a torch.Tensor
-    sks_mesh.point_data["normals"] = np.random.rand(sks_mesh.n_points, 3)
+    sks_mesh.point_data["normals"] = rnd_generator.random(
+        size=(sks_mesh.n_points, 3)
+    )
 
     back_to_pyvista = sks_mesh.to_pyvista()
     assert type(back_to_pyvista) is PyvistaPolyData
 
     # Assert that the point_data attributes are correctly copied
-    assert "color" in back_to_pyvista.point_data.keys()
+    assert "color" in back_to_pyvista.point_data
     assert np.allclose(
         back_to_pyvista.point_data["normals"],
         sks_mesh.point_data["normals"].numpy(),
@@ -535,7 +539,7 @@ def test_landmarks_conservation():
     mesh.save("test.vtk")
     mesh_back = sks.PolyData("test.vtk")
     assert torch.allclose(mesh_back.landmark_points, mesh.landmark_points)
-    os.remove("test.vtk")
+    Path.unlink(Path("test.vtk"))
 
 
 @pytest.mark.skipif(
@@ -544,8 +548,11 @@ def test_landmarks_conservation():
 def test_point_data_cuda():
     """Test the behavior of signals with respect to the device."""
     # Load a pyvista.PolyData and add an attribute
+    rnd_generator = np.random.default_rng()
     pv_mesh = pyvista.Sphere()
-    pv_mesh.point_data["curvature"] = np.random.rand(pv_mesh.n_points, 3)
+    pv_mesh.point_data["curvature"] = rnd_generator.random(
+        size=(pv_mesh.n_points, 3)
+    )
 
     # Convert it to a skshapes.PolyData
     sks_mesh = sks.PolyData(pv_mesh)
@@ -565,7 +572,9 @@ def test_point_data_cuda():
     sks_mesh.point_data["color"] = torch.rand(sks_mesh.n_points, 3).cpu()
     # It is also possible to assign a numpy array, it will be automatically
     # converted to a torch.Tensor
-    sks_mesh.point_data["normals"] = np.random.rand(sks_mesh.n_points, 3)
+    sks_mesh.point_data["normals"] = rnd_generator.random(
+        size=(sks_mesh.n_points, 3)
+    )
 
     # Assert that the point_data attributes are correctly formatted
     assert sks_mesh.point_data["color"].dtype == sks.float_dtype
@@ -585,7 +594,8 @@ def test_point_data_cuda():
     sks_mesh_cuda.point_data["color"] = color
     # It is also possible to assign a numpy array, it will be automatically
     # converted to a torch.Tensor
-    normals = np.random.rand(sks_mesh_cuda.n_points, 3)
+    generator = np.random.default_rng()
+    normals = generator.random(size=(sks_mesh_cuda.n_points, 3))
     sks_mesh_cuda.point_data["normals"] = normals
 
     assert sks_mesh_cuda.point_data["color"].device.type == "cuda"

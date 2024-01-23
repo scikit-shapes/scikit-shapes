@@ -1,9 +1,9 @@
 """Mesh convolution kernel."""
 
-from ..types import float_dtype
-from ..input_validation import typecheck
-
 import torch
+
+from ..input_validation import typecheck
+from ..types import float_dtype
 from .linear_operator import LinearOperator
 
 
@@ -30,10 +30,11 @@ def _mesh_convolution(
         A (N, N) convolution kernel.
     """
     if self.n_edges == 0:
-        raise AttributeError(
+        msg = (
             "Mesh convolution is only defined on triangle meshes or "
             "wireframe PolyData."
         )
+        raise AttributeError(msg)
     n_edges = self.n_edges
     n_points = self.n_points
     edges = self.edges

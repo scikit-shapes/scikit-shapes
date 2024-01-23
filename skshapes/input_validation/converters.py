@@ -1,9 +1,11 @@
 """Converters for arguments."""
 
-from typing import Union
 from functools import wraps
-import torch
+from typing import Union
+
 import numpy as np
+import torch
+
 from ..types import float_dtype, int_dtype
 
 
@@ -37,14 +39,15 @@ def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
         if torch.is_floating_point(x) and x.dtype != float_dtype:
             return x.to(float_dtype)
         elif torch.is_complex(x):
-            raise ValueError("Complex tensors are not supported")
+            msg = "Complex tensors are not supported"
+            raise ValueError(msg)
         elif not torch.is_floating_point(x) and x.dtype != int_dtype:
             return x.to(int_dtype)
 
     return x
 
 
-def convert_inputs(func, parameters=None):
+def convert_inputs(func: callable):
     """Convert a function's inputs to the right type.
 
     It converts the inputs arrays to the right type (torch.Tensor) and

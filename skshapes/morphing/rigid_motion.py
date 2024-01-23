@@ -4,19 +4,20 @@ This module contains the implementation of the rigid motion model. This model
 is described by a translation and a rotation. The morphing is not regularized.
 """
 
-from .basemodel import BaseModel
-import torch
 from typing import Union
 
+import torch
+
+from ..errors import DeviceError
+from ..input_validation import convert_inputs, typecheck
 from ..types import (
     Float1dTensor,
     Float2dTensor,
+    MorphingOutput,
     polydata_type,
     shape_type,
-    MorphingOutput,
 )
-from ..input_validation import typecheck, convert_inputs
-from ..errors import DeviceError
+from .basemodel import BaseModel
 
 
 class RigidMotion(BaseModel):
@@ -32,7 +33,6 @@ class RigidMotion(BaseModel):
             Number of steps.
         """
         self.n_steps = n_steps
-        pass
 
     @convert_inputs
     @typecheck
@@ -41,7 +41,7 @@ class RigidMotion(BaseModel):
         shape: polydata_type,
         parameter: Union[Float2dTensor, Float1dTensor],
         return_path: bool = False,
-        return_regularization: bool = False,
+        return_regularization: bool = False,  # noqa: ARG002
     ) -> MorphingOutput:
         """Morph a shape using the rigid motion model.
 
@@ -71,25 +71,25 @@ class RigidMotion(BaseModel):
             the path if needed.
         """
         if parameter.device != shape.device:
-            raise DeviceError(
-                "The shape and the parameter must be on the same device."
-            )
+            msg = "The shape and the parameter must be on the same device."
+            raise DeviceError(msg)
 
         if shape.dim == 2:
-            return self._morph2d(
+            output = self._morph2d(
                 shape=shape,
                 parameter=parameter,
                 return_path=return_path,
-                return_regularization=return_regularization,
             )
 
         elif shape.dim == 3:
-            return self._morph3d(
+            output = self._morph3d(
                 shape=shape,
                 parameter=parameter,
                 return_path=return_path,
-                return_regularization=return_regularization,
             )
+
+        output.regularization = torch.tensor(0.0, device=shape.device)
+        return output
 
     @convert_inputs
     @typecheck
@@ -98,7 +98,6 @@ class RigidMotion(BaseModel):
         shape: polydata_type,
         parameter: Float2dTensor,
         return_path: bool = False,
-        return_regularization: bool = False,
     ) -> MorphingOutput:
         """Morphing for 3D shapes."""
         rotation_angles = parameter[0]
@@ -111,7 +110,6 @@ class RigidMotion(BaseModel):
 
         morphed_shape = shape.copy()
         morphed_shape.points = newpoints
-        regularization = torch.tensor(0.0, device=parameter.device)
 
         path = None
         if return_path:
@@ -133,7 +131,6 @@ class RigidMotion(BaseModel):
 
         output = MorphingOutput(
             morphed_shape=morphed_shape,
-            regularization=regularization,
             path=path,
         )
 
@@ -151,7 +148,6 @@ class RigidMotion(BaseModel):
         shape: polydata_type,
         parameter: Float1dTensor,
         return_path: bool = False,
-        return_regularization: bool = False,
     ) -> MorphingOutput:
         """Morphing for 2D shapes."""
         assert parameter.shape == (3,)
@@ -180,8 +176,6 @@ class RigidMotion(BaseModel):
         morphed_shape = shape.copy()
         morphed_shape.points = newpoints
 
-        regularization = torch.tensor(0.0, device=parameter.device)
-
         path = None
         if return_path:
             if self.n_steps == 1:
@@ -205,7 +199,6 @@ class RigidMotion(BaseModel):
 
         output = MorphingOutput(
             morphed_shape=morphed_shape,
-            regularization=regularization,
             path=path,
         )
 
@@ -277,6 +270,7 @@ class RigidMotion(BaseModel):
             return (2, 3)
         elif shape.dim == 2:
             return (3,)
+        return None
 
 
 @convert_inputs
@@ -310,11 +304,10 @@ def axis_angle_to_quaternion(axis_angle: torch.Tensor) -> torch.Tensor:
     sin_half_angles_over_angles[small_angles] = (
         0.5 - (angles[small_angles] * angles[small_angles]) / 48
     )
-    quaternions = torch.cat(
+    return torch.cat(
         [torch.cos(half_angles), axis_angle * sin_half_angles_over_angles],
         dim=-1,
     )
-    return quaternions
 
 
 @convert_inputs

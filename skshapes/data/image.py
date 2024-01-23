@@ -4,5 +4,3 @@ from ..types import image_type
 
 class Image(image_type):
     """Image shape class."""
-
-    pass

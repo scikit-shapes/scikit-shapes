@@ -1,21 +1,21 @@
 """Squared distances between points."""
 
+from collections.abc import Callable
+from typing import Literal, Optional
+
 import numpy as np
 import torch
 from pykeops.torch import LazyTensor
 from pykeops.torch.cluster import (
-    grid_cluster,
     cluster_ranges_centroids,
     from_matrix,
+    grid_cluster,
 )
 
-
+from ..input_validation import typecheck
 from ..types import (
     Number,
 )
-from ..input_validation import typecheck
-from typing import Optional, Literal
-from collections.abc import Callable
 
 
 class KeOpsSquaredDistances:
@@ -90,11 +90,6 @@ class KeOpsSquaredDistances:
             ).sum(2)
             cutoff_distance = np.sqrt(cutoff) + np.sqrt(D) * bin_size
             keep = D2_c < cutoff_distance**2
-            print(
-                f"Cutoff distance: {cutoff_distance:.2f} sigma, "
-                + f"keep {(100. * keep).mean():.2f}% of a"
-                + f"{keep.shape[0]:,}^2 cluster matrix"
-            )
             ranges = from_matrix(x_ranges, x_ranges, keep)
 
             x = sorted_points
@@ -191,9 +186,8 @@ def squared_distances(
     assert target_points.shape == (M, D)
 
     if geodesic:
-        raise NotImplementedError(
-            "Geodesic distances are not implemented yet."
-        )
+        msg = "Geodesic distances are not implemented yet."
+        raise NotImplementedError(msg)
 
     if window is None:
         return KeOpsSquaredDistances(

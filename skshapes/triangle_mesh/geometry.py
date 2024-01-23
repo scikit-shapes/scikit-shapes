@@ -17,20 +17,20 @@ Arguments points can be either a tensor of shape:
 - (n_meshes, n_poses, dim) for a sequence of poses of the same mesh
 """
 
-import torch
-from typing import Union, Optional
+from typing import Optional, Union
 
-from .edge_topology import EdgeTopology
+import torch
+
+from ..input_validation import convert_inputs, typecheck
 from ..types import (
-    Points,
-    PointsSequence,
-    Triangles,
     Float1dTensor,
     Float2dTensor,
     Float3dTensor,
+    Points,
+    PointsSequence,
+    Triangles,
 )
-
-from ..input_validation import typecheck, convert_inputs
+from .edge_topology import EdgeTopology
 
 
 @convert_inputs
@@ -39,7 +39,6 @@ def triangle_normals(
     *,
     points: Union[Points, PointsSequence],
     triangles: Triangles,
-    **kwargs,
 ) -> Union[Float2dTensor, Float3dTensor]:
     """Triangle normals of a triangular mesh.
 
@@ -76,7 +75,6 @@ def triangle_areas(
     *,
     points: Union[Points, PointsSequence],
     triangles: Triangles,
-    **kwargs,
 ) -> Union[Float1dTensor, Float2dTensor]:
     """Areas of the triangles of a triangular mesh.
 
@@ -135,7 +133,6 @@ def triangle_centers(
     *,
     points: Union[Points, PointsSequence],
     triangles: Triangles,
-    **kwargs,
 ) -> Union[Float2dTensor, Float3dTensor]:
     """Centers of the triangles of a triangular mesh.
 

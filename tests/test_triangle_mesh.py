@@ -1,18 +1,18 @@
 """Test the triangle mesh module."""
 
-from pyvista import examples
 from math import sqrt
-import torch
 
 import skshapes as sks
+import torch
+from pyvista import examples
 from skshapes.triangle_mesh import (
-    triangle_normals,
-    triangle_areas,
-    triangle_centers,
+    EdgeTopology,
+    dihedral_angles,
     edge_centers,
     edge_lengths,
-    dihedral_angles,
-    EdgeTopology,
+    triangle_areas,
+    triangle_centers,
+    triangle_normals,
 )
 from skshapes.triangle_mesh.geometry import _get_geometry
 
@@ -190,20 +190,20 @@ def test_geometry():
     triangles = mesh.triangles
     edge_topology = EdgeTopology(triangles)
 
-    # Make sure that functions works with a list of tensors as input
+    # Make sure that geometry functions works with a list of tensors as input
     # points can be either of shape (n_points, dim)
     # or a list of tensors of shape (n_points, n_frames, dim)
 
     n_frames = 7
     points_list, frames = _create_points_list_and_frame(n_frames, points)
 
-    for f in (
-        triangle_normals,
-        triangle_areas,
-        triangle_centers,
-        edge_lengths,
-        edge_centers,
-        dihedral_angles,
+    for f, kwargs in (
+        (triangle_normals, {}),
+        (triangle_areas, {}),
+        (triangle_centers, {}),
+        (edge_lengths, {"edge_topology": edge_topology}),
+        (edge_centers, {"edge_topology": edge_topology}),
+        (dihedral_angles, {"edge_topology": edge_topology}),
     ):
         # Apply the function to the list of tensors with frame format
         f_frames = f(points=frames, triangles=triangles)
@@ -212,7 +212,7 @@ def test_geometry():
             f_points = f(
                 points=points_list[i],
                 triangles=triangles,
-                edge_topology=edge_topology,
+                **kwargs,
             )
             assert torch.allclose(f_frames[:, i], f_points)
 

@@ -1,8 +1,9 @@
 """Lp losses for PolyData."""
 
 import torch
-from ..types import FloatScalar, Number, polydata_type
+
 from ..input_validation import typecheck
+from ..types import FloatScalar, Number, polydata_type
 from .baseloss import BaseLoss
 
 
@@ -29,7 +30,8 @@ class LpLoss(BaseLoss):
             the indice of the Lp Norm. Default to 2
         """
         if p <= 0:
-            raise ValueError("p must be positive")
+            msg = "p must be positive"
+            raise ValueError(msg)
 
         self.p = p
 

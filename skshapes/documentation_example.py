@@ -135,4 +135,3 @@ def foo(
     # separate following codes (according to PEP257).
     # But for function, method and module, there should be no blank lines
     # after closing the docstring.
-    pass

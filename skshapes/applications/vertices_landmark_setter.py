@@ -1,10 +1,12 @@
 """Landmark setter application."""
 
-import vedo
-import torch
-from ..types import polydata_type
-from ..input_validation import typecheck
 from typing import Union
+
+import torch
+import vedo
+
+from ..input_validation import typecheck
+from ..types import polydata_type
 
 
 class LandmarkSetter:
@@ -86,19 +88,15 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
 
         It is used to add or delete landmarks and update the display.
         """
-        if evt.keypress == "e":
-            if evt.picked3d is not None:
-                pt = vedo.Points(self.actor.vertices).closest_point(
-                    evt.picked3d
-                )
-                indice = closest_vertex(self.actor.vertices.copy(), pt)
-                self.lpoints.append(pt)
-                self.landmarks.append(indice)
+        if evt.keypress == "e" and evt.picked3d is not None:
+            pt = vedo.Points(self.actor.vertices).closest_point(evt.picked3d)
+            indice = closest_vertex(self.actor.vertices.copy(), pt)
+            self.lpoints.append(pt)
+            self.landmarks.append(indice)
 
-        if evt.keypress == "d":
-            if len(self.lpoints) > 0:
-                self.lpoints.pop()
-                self.landmarks.pop()
+        if evt.keypress == "d" and len(self.lpoints) > 0:
+            self.lpoints.pop()
+            self.landmarks.pop()
 
         if evt.keypress == "z" and len(self.lpoints) > 0:
             # Store the landmarks in the shape
@@ -328,21 +326,17 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
         used to add or delete landmarks.
         """
         if self.mode == "reference" and evt.actor == self.reference:
-            if evt.keypress == "e":
-                if evt.picked3d is not None:
-                    pt = vedo.Points(self.active_actor.vertices).closest_point(
-                        evt.picked3d
-                    )
-                    indice = closest_vertex(
-                        self.active_actor.vertices.copy(), pt
-                    )
-                    self.reference_lpoints.append(pt)
-                    self.reference_indices.append(indice)
+            if evt.keypress == "e" and evt.picked3d is not None:
+                pt = vedo.Points(self.active_actor.vertices).closest_point(
+                    evt.picked3d
+                )
+                indice = closest_vertex(self.active_actor.vertices.copy(), pt)
+                self.reference_lpoints.append(pt)
+                self.reference_indices.append(indice)
 
-            if evt.keypress == "d":
-                if len(self.reference_lpoints) > 0:
-                    self.reference_lpoints.pop()
-                    self.reference_indices.pop()
+            if evt.keypress == "d" and len(self.reference_lpoints) > 0:
+                self.reference_lpoints.pop()
+                self.reference_indices.pop()
 
             if evt.keypress == "z" and len(self.reference_lpoints) > 0:
                 self._done()
@@ -353,21 +347,17 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
             if (
                 evt.keypress == "e"
                 and len(self.other_lpoints) < self.n_landmarks
-            ):
-                if evt.picked3d is not None:
-                    pt = vedo.Points(self.active_actor.vertices).closest_point(
-                        evt.picked3d
-                    )
-                    indice = closest_vertex(
-                        self.active_actor.vertices.copy(), pt
-                    )
-                    self.other_lpoints.append(pt)
-                    self.other_indices.append(indice)
+            ) and evt.picked3d is not None:
+                pt = vedo.Points(self.active_actor.vertices).closest_point(
+                    evt.picked3d
+                )
+                indice = closest_vertex(self.active_actor.vertices.copy(), pt)
+                self.other_lpoints.append(pt)
+                self.other_indices.append(indice)
 
-            if evt.keypress == "d":
-                if len(self.other_lpoints) > 0:
-                    self.other_lpoints.pop()
-                    self.other_indices.pop()
+            if evt.keypress == "d" and len(self.other_lpoints) > 0:
+                self.other_lpoints.pop()
+                self.other_indices.pop()
 
             if (
                 evt.keypress == "z"
@@ -408,4 +398,6 @@ def closest_vertex(points, point):
     else:
         # Error if the point is not on the shape
         if torch.sum(norms < tol) == 0:
-            raise ValueError("The point is not a vertex of the shape")
+            msg = "The point is not a vertex of the shape"
+            raise ValueError(msg)
+        return None

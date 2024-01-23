@@ -1,23 +1,23 @@
 """Curvature estimators for point clouds and triangular meshes."""
 
+import colorsys
+from typing import NamedTuple, Optional
+
 import numpy as np
 import torch
 from pykeops.torch import LazyTensor
-import colorsys
-from typing import NamedTuple
 
-from ..utils import diagonal_ranges
+from ..input_validation import typecheck
 from ..types import (
-    float_dtype,
-    Points,
-    Triangles,
-    Number,
     Float1dTensor,
     Float2dTensor,
     FloatTensor,
+    Number,
+    Points,
+    Triangles,
+    float_dtype,
 )
-from ..input_validation import typecheck
-from typing import Optional
+from ..utils import diagonal_ranges
 from .normals import smooth_normals, tangent_vectors
 from .structure_tensors import structure_tensors
 
@@ -447,7 +447,7 @@ def _point_quadratic_fits(
     VV = coefs[:, 2]
     U = coefs[:, 3]
     V = coefs[:, 4]
-    O = coefs[:, 5]
+    O = coefs[:, 5]  # noqa: E741 (ambiguous variable name)
 
     quadratic = torch.stack(
         [UU, UV / 2, U / 2, UV / 2, VV, V / 2, U / 2, V / 2, O], dim=-1
@@ -595,5 +595,4 @@ def _point_curvature_colors(
         colors = [colorsys.hsv_to_rgb(*hsv) for hsv in HSV.cpu().numpy()]
 
     # Output the colors as expected by Vedo:
-    colors = [(255 * a, 255 * b, 255 * c, 255) for a, b, c in colors]
-    return colors
+    return [(255 * a, 255 * b, 255 * c, 255) for a, b, c in colors]

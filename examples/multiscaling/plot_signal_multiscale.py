@@ -7,9 +7,9 @@ representation.
 """
 
 
-import skshapes as sks
-import pyvista.examples
 import pyvista as pv
+import pyvista.examples
+import skshapes as sks
 
 bunny = sks.PolyData(pyvista.examples.download_bunny())
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])

@@ -12,6 +12,6 @@ will cause problems with beartype, which relies on the metadata to perform
 type checking.
 """
 
-from .notnone_rules import one_and_only_one, no_more_than_one
-from .typechecking import typecheck
 from .converters import convert_inputs
+from .notnone_rules import no_more_than_one, one_and_only_one
+from .typechecking import typecheck

@@ -1,6 +1,7 @@
 """Wrapper for vedo.applications.Browser."""
 
 import vedo
+
 from ..types import shape_type
 
 

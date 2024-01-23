@@ -1,18 +1,18 @@
 """Scikit-Shapes: shape analysis in python."""
 
-from .types import *
-from .features import *
-from .convolutions import *
 from .applications import *
+from .convolutions import *
 from .data import *
-from .triangle_mesh import *
+from .decimation import *
+from .features import *
+from .input_validation import *
 from .loss import *
 from .morphing import *
-from .optimization import *
 from .multiscaling import *
-from .decimation import *
+from .optimization import *
 from .tasks import *
-from .input_validation import *
+from .triangle_mesh import *
+from .types import *
 
 __all__ = [
     "types",

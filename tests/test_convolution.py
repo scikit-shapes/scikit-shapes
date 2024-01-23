@@ -1,8 +1,8 @@
 """Tests for the convolution module."""
 
+import pytest
 import skshapes as sks
 import torch
-import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
@@ -85,8 +85,6 @@ def test_convolution_simple():
     )
 
     a = torch.rand(4).to(sks.float_dtype)
-    print(gaussian_kernel_torch @ a)
-    print(gaussian_kernel_sks @ a)
     assert torch.allclose(gaussian_kernel_torch @ a, gaussian_kernel_sks @ a)
 
     #
@@ -206,10 +204,10 @@ def test_multidimensional_matrix_multiplication():
     A a tensor of shape (m, *t), then M @ A is well defined and results in a
     (n, *t) tensor, t being a tuple of integers.
     """
+
     # Define a LinearOperator of shape (n, m)
-    randint = (
-        lambda up, low=1: torch.randint(low, up, (1,))[0] if up > low else low
-    )
+    def randint(up, low=1):
+        return torch.randint(low, up, (1,))[0] if up > low else low
 
     n, m = randint(10, low=2), randint(10, low=2)
     a, b, c = randint(10, low=2), randint(10, low=2), randint(10, low=2)
@@ -225,9 +223,7 @@ def test_multidimensional_matrix_multiplication():
 
     # take a random index (i, j, k, l) and assert that the output is correct
     # at this index
-    i, j, k, l = randint(n), randint(a), randint(b), randint(c)
-    print(result.shape)
-    print(result[i, j, k, l])
+    i, j, k, l = randint(n), randint(a), randint(b), randint(c)  # noqa: E741
     assert torch.isclose(
         result[i, j, k, l],
         sum([matrix[i, ii] * A[ii, j, k, l] for ii in range(m)]).to(
