@@ -71,8 +71,9 @@ class RigidMotion(BaseModel):
             the path if needed.
         """
         if parameter.device != shape.device:
+            msg = "The shape and the parameter must be on the same device."
             raise DeviceError(
-                "The shape and the parameter must be on the same device."
+                msg
             )
 
         if shape.dim == 2:
@@ -90,6 +91,7 @@ class RigidMotion(BaseModel):
                 return_path=return_path,
                 return_regularization=return_regularization,
             )
+        return None
 
     @convert_inputs
     @typecheck
@@ -277,6 +279,7 @@ class RigidMotion(BaseModel):
             return (2, 3)
         elif shape.dim == 2:
             return (3,)
+        return None
 
 
 @convert_inputs
@@ -310,11 +313,10 @@ def axis_angle_to_quaternion(axis_angle: torch.Tensor) -> torch.Tensor:
     sin_half_angles_over_angles[small_angles] = (
         0.5 - (angles[small_angles] * angles[small_angles]) / 48
     )
-    quaternions = torch.cat(
+    return torch.cat(
         [torch.cos(half_angles), axis_angle * sin_half_angles_over_angles],
         dim=-1,
     )
-    return quaternions
 
 
 @convert_inputs

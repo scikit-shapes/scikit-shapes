@@ -595,5 +595,4 @@ def _point_curvature_colors(
         colors = [colorsys.hsv_to_rgb(*hsv) for hsv in HSV.cpu().numpy()]
 
     # Output the colors as expected by Vedo:
-    colors = [(255 * a, 255 * b, 255 * c, 255) for a, b, c in colors]
-    return colors
+    return [(255 * a, 255 * b, 255 * c, 255) for a, b, c in colors]

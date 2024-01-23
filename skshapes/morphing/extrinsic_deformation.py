@@ -10,10 +10,10 @@ at q.
 
 from __future__ import annotations
 
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
 import torch
-from torchdiffeq import odeint as odeint
+from torchdiffeq import odeint
 
 from ..errors import DeviceError
 from ..input_validation import typecheck
@@ -58,8 +58,8 @@ class ExtrinsicDeformation(BaseModel):
     def __init__(
         self,
         n_steps: int = 1,
-        integrator: Optional[Integrator] = None,
-        kernel: Optional[Kernel] = None,
+        integrator: Integrator | None = None,
+        kernel: Kernel | None = None,
         control_points: bool = True,
         backend: Literal["sks", "torchdiffeq"] = "sks",
         solver: Literal["euler", "midpoint", "rk4"] = "euler",
@@ -108,8 +108,9 @@ class ExtrinsicDeformation(BaseModel):
             the path if needed.
         """
         if parameter.device != shape.device:
+            msg = "The shape and the parameter must be on the same device."
             raise DeviceError(
-                "The shape and the parameter must be on the same device."
+                msg
             )
 
         p = parameter

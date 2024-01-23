@@ -204,7 +204,6 @@ def test_geometry_features():
         torch.tensor([[1 / 3, 1 / 3]], dtype=sks.float_dtype),
     )
 
-    print(triangle.triangle_normals)
     assert torch.allclose(
         triangle.triangle_normals,
         torch.tensor([[0, 0, 1]], dtype=sks.float_dtype),
@@ -262,7 +261,6 @@ def test_interaction_with_pyvista():
 
     # back to pyvista, check that the mesh is the same
     mesh2 = polydata.to_pyvista()
-    print(np.max(np.abs(mesh.points - mesh2.points)))
     assert np.allclose(mesh.points, mesh2.points)
     assert np.allclose(mesh.faces, mesh2.faces)
 
@@ -351,12 +349,11 @@ def test_point_data():
     }
 
     mesh.point_data = new_point_data  # Replace the point_data
-    for key, _ in mesh.point_data.items():
-        print(key)
+    for _key, _ in mesh.point_data.items():
+        pass
     mesh.point_data.append(torch.rand(mesh.n_points, 2))  # Add a new feature
-    print("")
-    for key, _ in mesh.point_data.items():
-        print(key)
+    for _key, _ in mesh.point_data.items():
+        pass
     assert list(mesh.point_data.keys()) == [
         "rotations",
         "colors",
@@ -420,7 +417,7 @@ def test_point_data2():
     assert type(back_to_pyvista) is PyvistaPolyData
 
     # Assert that the point_data attributes are correctly copied
-    assert "color" in back_to_pyvista.point_data.keys()
+    assert "color" in back_to_pyvista.point_data
     assert np.allclose(
         back_to_pyvista.point_data["normals"],
         sks_mesh.point_data["normals"].numpy(),

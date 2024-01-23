@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
 from warnings import warn
 
 import numpy as np
@@ -50,15 +50,15 @@ class PolyData(polydata_type):
     @typecheck
     def __init__(
         self,
-        points: Union[Points, vedo.Mesh, pyvista.PolyData, str],
+        points: Points | vedo.Mesh | pyvista.PolyData | str,
         *,
-        edges: Optional[Edges] = None,
-        triangles: Optional[Triangles] = None,
-        device: Optional[Union[str, torch.device]] = None,
-        landmarks: Optional[Union[Landmarks, IntSequence]] = None,
-        control_points: Optional[polydata_type] = None,
-        point_data: Optional[DataAttributes] = None,
-        cache_size: Optional[int] = None,
+        edges: Edges | None = None,
+        triangles: Triangles | None = None,
+        device: str | torch.device | None = None,
+        landmarks: Landmarks | IntSequence | None = None,
+        control_points: polydata_type | None = None,
+        point_data: DataAttributes | None = None,
+        cache_size: int | None = None,
     ) -> None:
         """Class constructor.
 
@@ -109,7 +109,7 @@ class PolyData(polydata_type):
                         "Mesh has been cleaned and points were removed."
                         + " Landmarks are ignored."
                     )
-                    for i in mesh.field_data.keys():
+                    for i in mesh.field_data:
                         if i.startswith("landmarks"):
                             mesh.field_data.remove(i)
                     landmarks = None
@@ -163,7 +163,7 @@ class PolyData(polydata_type):
                 point_data = DataAttributes.from_pyvista_datasetattributes(
                     mesh.point_data
                 )
-                for key in point_data.keys():
+                for key in point_data:
                     if str(key) + "_shape" in mesh.field_data:
                         shape = tuple(mesh.field_data[str(key) + "_shape"])
                         point_data[key] = point_data[key].reshape(shape)
@@ -287,9 +287,9 @@ class PolyData(polydata_type):
     def decimate(
         self,
         *,
-        target_reduction: Optional[Number] = None,
-        n_points: Optional[int] = None,
-        ratio: Optional[Number] = None,
+        target_reduction: Number | None = None,
+        n_points: int | None = None,
+        ratio: Number | None = None,
     ) -> PolyData:
         """Decimation of the shape.
 
@@ -323,8 +323,9 @@ class PolyData(polydata_type):
             d = Decimation(**kwargs)
             return d.fit_transform(self)
         else:
+            msg = "Decimation is only implemented for triangle meshes so far."
             raise NotImplementedError(
-                "Decimation is only implemented for triangle meshes so far."
+                msg
             )
 
     @typecheck
@@ -370,7 +371,7 @@ class PolyData(polydata_type):
         return PolyData(**kwargs, device=self.device)
 
     @typecheck
-    def to(self, device: Union[str, torch.device]) -> PolyData:
+    def to(self, device: str | torch.device) -> PolyData:
         """Copy the shape on a given device."""
         torch_device = torch.Tensor().to(device).device
         if self.device == torch_device:
@@ -488,7 +489,7 @@ class PolyData(polydata_type):
     #############################
     @property
     @typecheck
-    def edges(self) -> Optional[Edges]:
+    def edges(self) -> Edges | None:
         """Edges getter.
 
         Returns
@@ -513,6 +514,7 @@ class PolyData(polydata_type):
 
             self._edges = edges
             return edges
+        return None
 
     @edges.setter
     @convert_inputs
@@ -533,7 +535,7 @@ class PolyData(polydata_type):
     #################################
     @property
     @typecheck
-    def triangles(self) -> Optional[Triangles]:
+    def triangles(self) -> Triangles | None:
         """Triangles getter."""
         return self._triangles
 
@@ -579,7 +581,8 @@ class PolyData(polydata_type):
             points in the shape.
         """
         if points.shape[0] != self.n_points:
-            raise ValueError("The number of points cannot be changed.")
+            msg = "The number of points cannot be changed."
+            raise ValueError(msg)
 
         self._points = points.clone().to(self.device)
         self.cache_clear()
@@ -595,7 +598,7 @@ class PolyData(polydata_type):
 
     @device.setter
     @typecheck
-    def device(self, device: Union[str, torch.device]) -> None:
+    def device(self, device: str | torch.device) -> None:
         """Device setter.
 
         Parameters
@@ -625,7 +628,7 @@ class PolyData(polydata_type):
 
     @point_data.setter
     @typecheck
-    def point_data(self, point_data_dict: Optional[dict]) -> None:
+    def point_data(self, point_data_dict: dict | None) -> None:
         """Point data setter.
 
         Parameters
@@ -657,7 +660,8 @@ class PolyData(polydata_type):
     def __getitem__(self, key: Any) -> NumericalTensor:
         """Return the point data corresponding to the key."""
         if key not in self._point_data:
-            raise KeyError(f"Point data {key} is not defined.")
+            msg = f"Point data {key} is not defined."
+            raise KeyError(msg)
         return self._point_data[key]
 
     @convert_inputs
@@ -671,7 +675,7 @@ class PolyData(polydata_type):
     #################################
     @property
     @typecheck
-    def landmarks(self) -> Optional[Landmarks]:
+    def landmarks(self) -> Landmarks | None:
         """Get the landmarks of the shape.
 
         The format is a sparse tensor of shape (n_landmarks, n_points), each
@@ -709,7 +713,7 @@ class PolyData(polydata_type):
 
     @property
     @typecheck
-    def landmark_points(self) -> Optional[Points]:
+    def landmark_points(self) -> Points | None:
         """Landmarks in spatial coordinates."""
         if self.landmarks is None:
             return None
@@ -718,7 +722,7 @@ class PolyData(polydata_type):
 
     @property
     @typecheck
-    def landmark_indices(self) -> Optional[IntTensor]:
+    def landmark_indices(self) -> IntTensor | None:
         """Indices of the landmarks.
 
         Raises
@@ -741,7 +745,8 @@ class PolyData(polydata_type):
             indices = coalesced_landmarks.indices()[1][values == 1]
 
             if len(indices) != self.n_landmarks:
-                raise ValueError("Landmarks are not indices.")
+                msg = "Landmarks are not indices."
+                raise ValueError(msg)
 
             return indices[values == 1]
 
@@ -749,7 +754,7 @@ class PolyData(polydata_type):
     @convert_inputs
     @typecheck
     def landmark_indices(
-        self, landmarks: Union[Int1dTensor, list[int]]
+        self, landmarks: Int1dTensor | list[int]
     ) -> None:
         """Landmarks setter with indices list.
 
@@ -780,7 +785,7 @@ class PolyData(polydata_type):
             device=self.device,
         )
 
-    def add_landmarks(self, indices: Union[IntSequence, int]) -> None:
+    def add_landmarks(self, indices: IntSequence | int) -> None:
         """Add vertices landmarks to the shape.
 
         Parameters
@@ -901,7 +906,8 @@ class PolyData(polydata_type):
         """Center of each edge."""
         # Raise an error if edges are not defined
         if self.edges is None:
-            raise AttributeError("Edges are not defined")
+            msg = "Edges are not defined"
+            raise AttributeError(msg)
 
         return (
             self.points[self.edges[:, 0]] + self.points[self.edges[:, 1]]
@@ -913,7 +919,8 @@ class PolyData(polydata_type):
         """Length of each edge."""
         # Raise an error if edges are not defined
         if self.edges is None:
-            raise AttributeError("Edges are not defined")
+            msg = "Edges are not defined"
+            raise AttributeError(msg)
 
         return (
             self.points[self.edges[:, 0]] - self.points[self.edges[:, 1]]
@@ -925,7 +932,8 @@ class PolyData(polydata_type):
         """Center of the triangles."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
-            raise AttributeError("Triangles are not defined")
+            msg = "Triangles are not defined"
+            raise AttributeError(msg)
 
         A = self.points[self.triangles[:, 0]]
         B = self.points[self.triangles[:, 1]]
@@ -946,7 +954,8 @@ class PolyData(polydata_type):
         """Normal of each triangle."""
         # Raise an error if triangles are not defined
         if self.triangles is None:
-            raise AttributeError("Triangles are not defined")
+            msg = "Triangles are not defined"
+            raise AttributeError(msg)
 
         A = self.points[self.triangles[:, 0]]
         B = self.points[self.triangles[:, 1]]
@@ -1050,14 +1059,14 @@ class PolyData(polydata_type):
 
     @property
     @typecheck
-    def control_points(self) -> Optional[polydata_type]:
+    def control_points(self) -> polydata_type | None:
         """Control points of the shape."""
         return self._control_points
 
     @control_points.setter
     @convert_inputs
     @typecheck
-    def control_points(self, control_points: Optional[polydata_type]) -> None:
+    def control_points(self, control_points: polydata_type | None) -> None:
         """Set the control points of the shape.
 
         The control points are a PolyData object. The principal use case of

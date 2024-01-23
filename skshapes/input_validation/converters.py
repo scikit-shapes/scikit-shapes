@@ -39,7 +39,8 @@ def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
         if torch.is_floating_point(x) and x.dtype != float_dtype:
             return x.to(float_dtype)
         elif torch.is_complex(x):
-            raise ValueError("Complex tensors are not supported")
+            msg = "Complex tensors are not supported"
+            raise ValueError(msg)
         elif not torch.is_floating_point(x) and x.dtype != int_dtype:
             return x.to(int_dtype)
 

@@ -30,7 +30,8 @@ class LpLoss(BaseLoss):
             the indice of the Lp Norm. Default to 2
         """
         if p <= 0:
-            raise ValueError("p must be positive")
+            msg = "p must be positive"
+            raise ValueError(msg)
 
         self.p = p
 

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 
 import torch
 
@@ -36,8 +36,9 @@ class BaseLoss:
         NotImplementedError
             this class is abstract and should not be instantiated
         """
+        msg = "BaseLoss is an abstract class and should not be instantiated"
         raise NotImplementedError(
-            "BaseLoss is an abstract class and should not be instantiated"
+            msg
         )
 
     @typecheck
@@ -143,8 +144,8 @@ class SumLoss(BaseLoss):
     @typecheck
     def __init__(
         self,
-        loss1: Optional[BaseLoss] = None,
-        loss2: Optional[BaseLoss] = None,
+        loss1: BaseLoss | None = None,
+        loss2: BaseLoss | None = None,
     ) -> None:
         """Class constructor.
 
@@ -198,7 +199,7 @@ class ProductLoss(BaseLoss):
 
     @typecheck
     def __init__(
-        self, loss: Optional[BaseLoss] = None, scalar: Number = 1.0
+        self, loss: BaseLoss | None = None, scalar: Number = 1.0
     ) -> None:
         """Class constructor.
 

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 import torch
 
 from ..decimation import Decimation
@@ -95,9 +93,9 @@ class Multiscale:
     def __init__(
         self,
         shape: shape_type,
-        ratios: Optional[NumberSequence] = None,
-        n_points: Optional[IntSequence] = None,
-        scales: Optional[NumberSequence] = None,
+        ratios: NumberSequence | None = None,
+        n_points: IntSequence | None = None,
+        scales: NumberSequence | None = None,
         decimation_module=None,
     ) -> None:
         self.shape = shape
@@ -107,12 +105,14 @@ class Multiscale:
         elif n_points is not None:
             ratios = [n / shape.n_points for n in n_points]
         elif scales is not None:
-            raise NotImplementedError("Scales are not implemented yet")
+            msg = "Scales are not implemented yet"
+            raise NotImplementedError(msg)
 
         if decimation_module is not None:
             if not hasattr(decimation_module, "ref_mesh_"):
+                msg = "The decimation module has not been fitted."
                 raise NotFittedError(
-                    "The decimation module has not been fitted."
+                    msg
                 )
             self._decimation_module = decimation_module
 
@@ -122,8 +122,9 @@ class Multiscale:
                 decimation_module = Decimation(n_points=min_n_points)
 
             else:
+                msg = "Only triangle meshes are supported for now"
                 raise NotImplementedError(
-                    "Only triangle meshes are supported for now"
+                    msg
                 )
 
             decimation_module.fit(shape)
@@ -141,9 +142,9 @@ class Multiscale:
     def append(
         self,
         *,
-        ratio: Optional[Number] = None,
-        n_points: Optional[int] = None,
-        scale: Optional[Number] = None,
+        ratio: Number | None = None,
+        n_points: int | None = None,
+        scale: Number | None = None,
     ) -> None:
         """Append a new shape.
 
@@ -163,9 +164,10 @@ class Multiscale:
         if n_points is not None:
             ratio = n_points / self.shape.n_points
         elif scale is not None:
-            raise NotImplementedError("Scales are not implemented yet")
+            msg = "Scales are not implemented yet"
+            raise NotImplementedError(msg)
 
-        if ratio in self.shapes.keys():
+        if ratio in self.shapes:
             # ratio already exists, do nothing
             pass
         else:
@@ -183,15 +185,16 @@ class Multiscale:
     def at(
         self,
         *,
-        ratio: Optional[Number] = None,
-        n_points: Optional[int] = None,
-        scale: Optional[Number] = None,
+        ratio: Number | None = None,
+        n_points: int | None = None,
+        scale: Number | None = None,
     ) -> shape_type:
         """Get the shape at a given ratio, number of points or scale."""
         if n_points is not None:
             ratio = n_points / self.shape.n_points
         elif scale is not None:
-            raise NotImplementedError("Scales are not implemented yet")
+            msg = "Scales are not implemented yet"
+            raise NotImplementedError(msg)
 
         # find clostest n_points
         available_ratios = self.shapes.keys()
@@ -204,11 +207,11 @@ class Multiscale:
     def propagate(
         self,
         signal_name: str,
-        from_scale: Optional[Number] = None,
-        from_ratio: Optional[Number] = None,
-        from_n_points: Optional[int] = None,
-        fine_to_coarse_policy: Optional[FineToCoarsePolicy] = None,
-        coarse_to_fine_policy: Optional[CoarseToFinePolicy] = None,
+        from_scale: Number | None = None,
+        from_ratio: Number | None = None,
+        from_n_points: int | None = None,
+        fine_to_coarse_policy: FineToCoarsePolicy | None = None,
+        coarse_to_fine_policy: CoarseToFinePolicy | None = None,
     ) -> None:
         """Propagate a signal to the other scales.
 
@@ -250,11 +253,12 @@ class Multiscale:
         if from_n_points is not None:
             from_ratio = from_n_points / self.shape.n_points
         elif from_scale is not None:
-            raise NotImplementedError("Scales are not implemented yet")
+            msg = "Scales are not implemented yet"
+            raise NotImplementedError(msg)
 
         from_ratio = min(available_ratios, key=lambda x: abs(x - from_ratio))
 
-        if signal_name not in self.shapes[from_ratio].point_data.keys():
+        if signal_name not in self.shapes[from_ratio].point_data:
             raise ValueError(
                 f"The signal {signal_name} is not available at the scale"
                 + f" {from_ratio}"
@@ -264,8 +268,8 @@ class Multiscale:
         ratio_lower = [r for r in available_ratios if r < from_ratio]
         ratio_higher = [r for r in available_ratios if r > from_ratio]
 
-        ratio_lower = [from_ratio] + sorted(ratio_lower, reverse=True)
-        ratio_higher = [from_ratio] + sorted(ratio_higher)
+        ratio_lower = [from_ratio, *sorted(ratio_lower, reverse=True)]
+        ratio_higher = [from_ratio, *sorted(ratio_higher)]
 
         for i in range(len(ratio_lower) - 1):
             source_ratio = ratio_lower[i]
@@ -338,8 +342,9 @@ class Multiscale:
                 for _ in range(n_smoothing_steps):
                     fine_ratio_signal = convolution @ fine_ratio_signal
             else:
+                msg = "This function is not implemented yet"
                 raise NotImplementedError(
-                    "This function is not implemented yet"
+                    msg
                 )
 
             return fine_ratio_signal

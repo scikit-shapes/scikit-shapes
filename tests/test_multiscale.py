@@ -94,7 +94,6 @@ def test_scatter_multidim(n, n_dim):
     d = torch.randint(1, 10, (n_dim,))
 
     src = torch.rand(n, *d)
-    print(src.shape)
 
     index = torch.randint(0, n, (n,)).view(-1)
 
@@ -290,7 +289,7 @@ def test_multiscale_signal_api(smoothing):
 
     n = M.at(ratio=0.1).n_points
     M.at(ratio=0.1)["test_signal"] = torch.rand(n)
-    assert "test_signal" not in M.at(ratio=0.5).point_data.keys()
+    assert "test_signal" not in M.at(ratio=0.5).point_data
 
     M.propagate(
         signal_name="test_signal",
@@ -301,8 +300,8 @@ def test_multiscale_signal_api(smoothing):
 
     M.at(ratio=0.5)["test_signal"] = torch.rand(M.at(ratio=0.5).n_points)
 
-    assert "test_signal" in M.at(ratio=0.5).point_data.keys()
+    assert "test_signal" in M.at(ratio=0.5).point_data
 
     M.append(ratio=0.2)
 
-    assert "test_signal" not in M.at(ratio=0.2).point_data.keys()
+    assert "test_signal" not in M.at(ratio=0.2).point_data

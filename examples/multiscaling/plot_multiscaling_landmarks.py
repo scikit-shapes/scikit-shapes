@@ -56,7 +56,7 @@ cpos = [
 p = pyvista.Plotter()
 p.enable_hidden_line_removal()
 p.open_gif("animation.gif", fps=2)
-for ratio in [1] + ratios:
+for ratio in [1, *ratios]:
     p.clear_actors()
     p.add_mesh(
         multiscale.at(ratio=ratio).to_pyvista(),

@@ -138,12 +138,8 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
     for i, s in enumerate(scales):
         Xm = shape.point_moments(order=1, scale=s)
         curvedness = shape.point_curvedness(scale=s)
-        r2 = shape.point_quadratic_coefficients(scale=s).r2
+        shape.point_quadratic_coefficients(scale=s).r2
         kmax, kmin = shape.point_principal_curvatures(scale=s)
-        print(
-            f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]},"
-            + f" R2: {r2[highlight]}"
-        )
         quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
         assert quadratic_fit.shape == (3, 3, 3)
 
@@ -273,7 +269,6 @@ if __name__ == "__main__":
     if mode == "display":
         for s in shapes:
             display_curvatures(**s)
-            print("")
 
     elif mode == "profile":
         from .utils import profiler
@@ -289,15 +284,11 @@ if __name__ == "__main__":
 
         start = time.time()
         kmax, kmin = shape.point_principal_curvatures(scale=scale)
-        print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
         stop = time.time()
-        print(f"First run, elapsed time = {stop - start:.3f}s")
 
         with myprof as prof:
             kmax, kmin = shape.point_principal_curvatures(scale=scale)
-            print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
 
-        print(shape.point_moments.cache_info())
 
         # Create an "output/" folder if it doesn't exist
         import os

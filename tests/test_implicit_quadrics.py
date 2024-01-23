@@ -43,8 +43,6 @@ def test_quadratic_function(*, n_points: int):
         scale=sigma,
     )
 
-    print(self_scores)
-    print(quadrics[0])
     assert self_scores.abs().max() < 1e-2
 
 

@@ -1,7 +1,7 @@
 """Registration between two shapes."""
 from __future__ import annotations
 
-from typing import Optional, Union, get_args
+from typing import get_args
 
 import torch
 
@@ -32,8 +32,8 @@ class Registration:
         *,
         model: Model,
         loss: Loss,
-        optimizer: Optional[Optimizer] = None,
-        regularization: Union[int, float] = 1,
+        optimizer: Optimizer | None = None,
+        regularization: int | float = 1,
         n_iter: int = 10,
         verbose: int = 0,
         gpu: bool = True,
@@ -74,10 +74,6 @@ class Registration:
             if torch.cuda.is_available():
                 self.optim_device = "cuda"
             else:
-                print(
-                    "Warning : gpu is set to True but no cuda device is "
-                    + "available. The optimization will be performed on cpu."
-                )
                 self.optim_device = "cpu"
 
         else:
@@ -90,7 +86,7 @@ class Registration:
         *,
         source: shape_type,
         target: shape_type,
-        initial_parameter: Optional[FloatTensor] = None,
+        initial_parameter: FloatTensor | None = None,
     ) -> Registration:
         """Fit the registration between the source and target shapes.
 
@@ -142,7 +138,7 @@ class Registration:
 
         # Define the loss function
         def loss_fn(parameter):
-            return_regularization = False if self.regularization == 0 else True
+            return_regularization = self.regularization != 0
             morphing = self.model.morph(
                 shape=source,
                 parameter=parameter,
@@ -189,20 +185,10 @@ class Registration:
 
         loss_value = loss_fn(parameter)
         if self.verbose > 0:
-            print(f"Initial loss : {loss_fn(parameter):.2e}")
-            print(f"  = {self.current_loss:.2e}", end="")
             if self.regularization != 0:
-                print(
-                    f" + {self.regularization} * "
-                    f"{self.current_path_length:.2e}",
-                    end="",
-                )
+                pass
             else:
-                print(
-                    " + 0",
-                    end="",
-                )
-            print(" (fidelity + regularization * path length)")
+                pass
 
         fidelity_history = []
         path_length_history = []
@@ -210,26 +196,16 @@ class Registration:
         fidelity_history.append(self.current_loss)
         path_length_history.append(self.current_path_length)
         # Run the optimization
-        for i in range(self.n_iter):
+        for _i in range(self.n_iter):
             loss_value = optimizer.step(closure)
             fidelity_history.append(self.current_loss)
             path_length_history.append(self.current_path_length)
             if self.verbose > 0:
                 loss_value = loss_fn(parameter)
-                print(f"Loss after {i + 1} iteration(s) : {loss_value:.2e}")
-                print(f"  = {self.current_loss:.2e}", end="")
                 if self.regularization != 0:
-                    print(
-                        f" + {self.regularization} * "
-                        f"{self.current_path_length:.2e}",
-                        end="",
-                    )
+                    pass
                 else:
-                    print(
-                        " + 0",
-                        end="",
-                    )
-                print(" (fidelity + regularization * path length)")
+                    pass
 
         # Store the device type of the parameter (useful for testing purposes)
         self.internal_parameter_device_type = parameter.device.type
@@ -295,8 +271,9 @@ class Registration:
             the transformed shape.
         """
         if not hasattr(self, "morphed_shape_"):
+            msg = "The registration must be fitted before calling transform"
             raise NotFittedError(
-                "The registration must be fitted before calling transform"
+                msg
             )
         return self.model.morph(
             shape=source,
@@ -312,7 +289,7 @@ class Registration:
         *,
         source: shape_type,
         target: shape_type,
-        initial_parameter: Optional[FloatTensor] = None,
+        initial_parameter: FloatTensor | None = None,
     ) -> shape_type:
         """Fit the registration and apply it to the source shape."""
         self.fit(

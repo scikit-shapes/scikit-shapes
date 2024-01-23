@@ -52,7 +52,8 @@ def symmetric_sum(a, b):
         return res
 
     else:
-        raise ValueError(f"Invalid shapes: {a.shape}, {b.shape}")
+        msg = f"Invalid shapes: {a.shape}, {b.shape}"
+        raise ValueError(msg)
 
 
 @typecheck
@@ -82,7 +83,7 @@ def _point_moments(
     # We use a recursive formulation to best leverage our cache!
     def recursion(*, k: int):
         assert (k < order) or (central and k == order)
-        mom = self.point_moments(
+        return self.point_moments(
             order=k,
             features=features,
             central=False,
@@ -91,7 +92,6 @@ def _point_moments(
             dtype=dtype,
             **kwargs,
         )
-        return mom
 
     # Thanks to caching, Conv will only be used if central=False
     if not central:
@@ -188,14 +188,16 @@ def _point_moments(
         assert moments.shape == (N, D, D, D, D)
 
     else:
+        msg = f"Moments of order {order} have not been implemented."
         raise NotImplementedError(
-            f"Moments of order {order} have not been implemented."
+            msg
         )
 
     if rescale:
         if scale is None:
+            msg = "A finite scale must be provided if rescale is True"
             raise ValueError(
-                "A finite scale must be provided if rescale is True"
+                msg
             )
 
         moments = moments / scale**order

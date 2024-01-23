@@ -59,5 +59,4 @@ def structure_tensors(
         ST_ij.ranges = ranges
 
     ST = ST_ij.sum(1)  # (N, 3, 3)
-    ST = ST.view(N, 3, 3) / wsum.view(N, 1, 1)
-    return ST
+    return ST.view(N, 3, 3) / wsum.view(N, 1, 1)

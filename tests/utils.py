@@ -48,8 +48,8 @@ def create_point_cloud(
 def create_shape(
     *,
     shape: Optional[Literal["sphere"]] = None,
-    file_name: str = None,
-    function: callable = None,
+    file_name: Optional[str] = None,
+    function: Optional[callable] = None,
     n_points=20,
     noise=0,
     radius=1,
@@ -73,7 +73,6 @@ def create_shape(
 
     else:
         shape = sks.PolyData(file_name).decimate(n_points=n_points)
-        print(f"Loaded shape with {shape.n_points:,} points")
 
     shape.points = shape.points + offset * torch.randn(1, 3).to(
         sks.float_dtype
@@ -124,7 +123,7 @@ def profiler():
     if torch.cuda.is_available():
         activities.append(ProfilerActivity.CUDA)
 
-    myprof = profile(
+    return profile(
         activities=activities,
         record_shapes=True,
         profile_memory=True,
@@ -133,4 +132,3 @@ def profiler():
             verbose=True
         ),
     )
-    return myprof

@@ -99,7 +99,7 @@ plotter.add_mesh(
     target.to_pyvista(), color="red", show_edges=True, line_width=5
 )
 plotter.open_gif("rigid_registration.gif", fps=3)
-for i, shape in enumerate(path):
+for _i, shape in enumerate(path):
     plotter.remove_actor(actor)
     actor = plotter.add_mesh(
         shape.to_pyvista(), color="blue", show_edges=True, line_width=5

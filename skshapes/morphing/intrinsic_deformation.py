@@ -74,8 +74,9 @@ class IntrinsicDeformation(BaseModel):
             the path if requested.
         """
         if parameter.device != shape.device:
+            msg = "The shape and the parameter must be on the same device."
             raise DeviceError(
-                "The shape and the parameter must be on the same device."
+                msg
             )
 
         assert parameter.shape == self.parameter_shape(shape)

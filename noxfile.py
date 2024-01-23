@@ -21,7 +21,7 @@ def print_installed_package_version(
     pip_list: str = session.run("pip", "list", silent=True)
     for line in pip_list.split("\n"):
         if package_name in line:
-            print(f"Installed {package_name} version: {line}")
+            pass
 
 
 # TODO the test does not work: it does not install cython modules

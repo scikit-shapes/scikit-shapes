@@ -78,8 +78,9 @@ def scatter(
         referenced by the index tensor.
     """
     if src.device != index.device:
+        msg = "The src and index tensors must be on the same device."
         raise DeviceError(
-            "The src and index tensors must be on the same device."
+            msg
         )
     device = src.device
 
@@ -117,7 +118,6 @@ def scatter(
         output = torch.full((length,), blank_value, dtype=src.dtype).to(device)
 
     # Scatter syntax for pytorch > 1.11
-    output = output.scatter_reduce(
+    return output.scatter_reduce(
         index=index, src=src, dim=0, reduce=reduce, include_self=False
     )
-    return output

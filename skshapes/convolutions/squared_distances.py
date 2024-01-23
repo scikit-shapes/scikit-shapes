@@ -90,11 +90,6 @@ class KeOpsSquaredDistances:
             ).sum(2)
             cutoff_distance = np.sqrt(cutoff) + np.sqrt(D) * bin_size
             keep = D2_c < cutoff_distance**2
-            print(
-                f"Cutoff distance: {cutoff_distance:.2f} sigma, "
-                + f"keep {(100. * keep).mean():.2f}% of a"
-                + f"{keep.shape[0]:,}^2 cluster matrix"
-            )
             ranges = from_matrix(x_ranges, x_ranges, keep)
 
             x = sorted_points
@@ -191,8 +186,9 @@ def squared_distances(
     assert target_points.shape == (M, D)
 
     if geodesic:
+        msg = "Geodesic distances are not implemented yet."
         raise NotImplementedError(
-            "Geodesic distances are not implemented yet."
+            msg
         )
 
     if window is None:

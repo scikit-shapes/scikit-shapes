@@ -6,7 +6,7 @@ import functools
 import weakref
 from collections.abc import Callable
 from functools import cached_property, lru_cache, partial, update_wrapper
-from typing import Any, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 import numpy as np
 import pyvista
@@ -43,7 +43,7 @@ class DataAttributes(dict):
     """
 
     @typecheck
-    def __init__(self, *, n: int, device: Union[str, torch.device]) -> None:
+    def __init__(self, *, n: int, device: str | torch.device) -> None:
         """Class constructor.
 
         Parameters
@@ -115,7 +115,7 @@ class DataAttributes(dict):
     @convert_inputs
     @typecheck
     def __setitem__(
-        self, key: Any, value: Union[NumericalTensor, NumericalArray]
+        self, key: Any, value: NumericalTensor | NumericalArray
     ) -> None:
         """Set an attribute of the DataAttributes object.
 
@@ -131,7 +131,7 @@ class DataAttributes(dict):
 
     @convert_inputs
     @typecheck
-    def append(self, value: Union[FloatTensor, IntTensor]) -> None:
+    def append(self, value: FloatTensor | IntTensor) -> None:
         """Append an attribute to the DataAttributes object.
 
         The key of the attribute will be "attribute_{i}" where i is the minimum
@@ -164,7 +164,7 @@ class DataAttributes(dict):
         return clone
 
     @typecheck
-    def to(self, device: Union[str, torch.device]) -> DataAttributes:
+    def to(self, device: str | torch.device) -> DataAttributes:
         """Move the DataAttributes object on a given device.
 
         Parameters
@@ -186,8 +186,8 @@ class DataAttributes(dict):
     @classmethod
     def from_dict(
         cls,
-        attributes: dict[Any, Union[NumericalTensor, NumericalArray]],
-        device: Optional[Union[str, torch.device]] = None,
+        attributes: dict[Any, NumericalTensor | NumericalArray],
+        device: str | torch.device | None = None,
     ) -> DataAttributes:
         """From dictionary constructor."""
         if len(attributes) == 0:
@@ -197,7 +197,7 @@ class DataAttributes(dict):
             )
 
         # Ensure that the number of elements of the attributes is the same
-        n = list(attributes.values())[0].shape[0]
+        n = next(iter(attributes.values())).shape[0]
         for value in attributes.values():
             if value.shape[0] != n:
                 raise ValueError(
@@ -209,8 +209,8 @@ class DataAttributes(dict):
             # Ensure that the attributes are on the same device (if they are
             # torch.Tensor, unless they have no device attribute and we set
             # device to cpu)
-            if hasattr(list(attributes.values())[0], "device"):
-                device = list(attributes.values())[0].device
+            if hasattr(next(iter(attributes.values())), "device"):
+                device = next(iter(attributes.values())).device
                 for value in attributes.values():
                     if value.device != device:
                         raise ValueError(
@@ -230,13 +230,13 @@ class DataAttributes(dict):
     def from_pyvista_datasetattributes(
         cls,
         attributes: pyvista.DataSetAttributes,
-        device: Optional[Union[str, torch.device]] = None,
+        device: str | torch.device | None = None,
     ) -> DataAttributes:
         """From pyvista.DataSetAttributes constructor."""
         # First, convert the pyvista.DataSetAttributes object to a dictionary
         dict_attributes = {}
 
-        for key in attributes.keys():
+        for key in attributes:
             if isinstance(attributes[key], np.ndarray):
                 dict_attributes[key] = np.array(attributes[key])
             else:
@@ -283,7 +283,7 @@ class DataAttributes(dict):
 
     @property
     @typecheck
-    def device(self) -> Union[str, torch.device]:
+    def device(self) -> str | torch.device:
         """Device getter."""
         return self._device
 
@@ -335,11 +335,11 @@ T = TypeVar("T")
 
 
 def instance_lru_cache(
-    method: Optional[Callable[..., T]] = None,
+    method: Callable[..., T] | None = None,
     *,
-    maxsize: Optional[int] = 128,
+    maxsize: int | None = 128,
     typed: bool = False,
-) -> Union[Callable[..., T], Callable[[Callable[..., T]], Callable[..., T]]]:
+) -> Callable[..., T] | Callable[[Callable[..., T]], Callable[..., T]]:
     """Least-recently-used cache decorator for instance methods.
 
     The cache follows the lifetime of an object (it is stored on the object,

@@ -1,3 +1,5 @@
+from typing import Optional
+
 shape1 = MultiShape(
     {
         "heart": {
@@ -45,7 +47,7 @@ shape_4 = Shape(
 
 
 class KernelLoss:
-    def __init__(self, kernel, subshape: str = None):
+    def __init__(self, kernel, subshape: Optional[str] = None):
         self.kernel = kernel
         self.subshape = subshape
 

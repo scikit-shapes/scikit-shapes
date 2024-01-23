@@ -23,10 +23,8 @@ shape2 = sks.PolyData(examples.download_doorman())
 shape1.point_data.clear()
 shape2.point_data.clear()
 
-bounds = (
-    lambda shape: torch.max(shape.points, dim=0).values
-    - torch.min(shape.points, dim=0).values
-)
+def bounds(shape):
+    return torch.max(shape.points, dim=0).values - torch.min(shape.points, dim=0).values
 
 lims1 = bounds(shape1)
 lims2 = bounds(shape2)

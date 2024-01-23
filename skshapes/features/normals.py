@@ -20,8 +20,9 @@ def _point_normals(
 ) -> Points:
     if scale is None:
         if self.triangles is None:
+            msg = "If no triangles are provided, you must specify a scale."
             raise ValueError(
-                "If no triangles are provided, you must specify a scale."
+                msg
             )
 
         tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
@@ -58,8 +59,7 @@ def _point_normals(
         n = (n_0 * n).sum(-1).sign().view(-1, 1) * n
 
     # Try to enforce some consistency...
-    if False and self.edges is not None:
-        print("Hi")
+    if False:
         n = F.normalize(n, p=2, dim=-1)
         # n_e = n[self.edges[0]] + n[self.edges[1]]
         # The backward of torch.index_select is much faster than that of
@@ -208,9 +208,8 @@ def smooth_normals(
         U = (K_ij.tensorprod(v_j)).sum(dim=1)  # (N, S*3)
         U = U.view(-1, len(scales), 3)  # (N, S, 3)
 
-    normals = F.normalize(U, p=2, dim=-1)  # (N, 3) or (N, S, 3)
+    return F.normalize(U, p=2, dim=-1)  # (N, 3) or (N, S, 3)
 
-    return normals  # , areas
 
 
 def tangent_vectors(normals) -> FloatTensor:
@@ -244,6 +243,5 @@ def tangent_vectors(normals) -> FloatTensor:
     uv = torch.stack(
         (1 + s * x * x * a, s * b, -s * x, b, s + y * y * a, -y), dim=-1
     )
-    uv = uv.view(uv.shape[:-1] + (2, 3))
+    return uv.view(uv.shape[:-1] + (2, 3))
 
-    return uv

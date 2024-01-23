@@ -41,20 +41,13 @@ def test_moments_1(*, n_points: int, scale: float, offset: float):
     shape = sks.PolyData(points=points)
 
     for central in [False, True]:
-        print(f"Central: {central}")
-        if central:
-            gt = moments(points - points.mean(0))
-        else:
-            gt = moments(points)
+        gt = moments(points - points.mean(0)) if central else moments(points)
 
         for order in [1, 2, 3, 4]:
-            print(f"order: {order}")
-            print(f"gt: {gt[order - 1]}")
             mom = shape.point_moments(
                 order=order, scale=None, central=central, dtype="double"
             )
             mom = mom[0]
-            print(f"mom: {mom}")
             assert torch.allclose(
                 mom.double(), gt[order - 1], atol=1e-4, rtol=1e-2
             )
