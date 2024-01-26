@@ -24,7 +24,6 @@ def print_installed_package_version(
             pass
 
 
-# TODO the test does not work: it does not install cython modules
 @nox.session(python=["3.11"])
 def tests(session: nox.Session) -> None:
     """
