@@ -25,20 +25,11 @@ def print_installed_package_version(
 
 
 # TODO the test does not work: it does not install cython modules
-# @nox.session(python=["3.11"])
-# def tests(session: nox.Session) -> None:
-#     """
-#     Run the unit and regular tests.
-#     """
-#     install_cpu_torch(session)
-#     session.install(".[dev]")
-#     session.run("pytest", *session.posargs)
-
-
 @nox.session(python=["3.11"])
-def lint(session: nox.Session) -> None:
+def tests(session: nox.Session) -> None:
     """
-    Run the linter.
+    Run the unit and regular tests.
     """
-    session.install("flake8", "flake8-black", "flake8-bugbear")
-    session.run("flake8", "skshapes", "tests", "examples", "noxfile.py")
+    install_cpu_torch(session)
+    session.install(".[dev]")
+    session.run("pytest", *session.posargs)
