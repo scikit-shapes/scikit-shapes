@@ -28,8 +28,17 @@ def print_installed_package_version(
 @nox.session(python=["3.11"])
 def tests(session: nox.Session) -> None:
     """
-    Run the unit and regular tests.
+    Run the tests.
     """
     install_cpu_torch(session)
     session.install(".[dev]")
     session.run("pytest", *session.posargs)
+
+@nox.session(python=["3.11"])
+def docs(session: nox.Session) -> None:
+    """
+    Build the docs.
+    """
+    install_cpu_torch(session)
+    session.install(".[dev]")
+    session.run("mkdocs", "serve")
