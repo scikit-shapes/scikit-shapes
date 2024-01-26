@@ -9,6 +9,7 @@ representation.
 
 import pyvista as pv
 import pyvista.examples
+
 import skshapes as sks
 
 bunny = sks.PolyData(pyvista.examples.download_bunny())

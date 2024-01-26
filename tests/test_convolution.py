@@ -1,10 +1,11 @@
 """Tests for the convolution module."""
 
 import pytest
-import skshapes as sks
 import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
+
+import skshapes as sks
 
 
 def test_mesh_convolution_point_cloud():

@@ -1,8 +1,9 @@
 """A bunch of tests for some expected errors."""
 
 import pytest
-import skshapes as sks
 import torch
+
+import skshapes as sks
 from skshapes.errors import ShapeError
 
 

@@ -2,8 +2,9 @@
 
 import pytest
 import pyvista
-import skshapes as sks
 import torch
+
+import skshapes as sks
 from skshapes.errors import InputStructureError
 
 

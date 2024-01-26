@@ -23,9 +23,10 @@ conversion.
 # triangular, an automatic triangulation is performed when importing the mesh.
 
 import pyvista as pv
-import skshapes as sks
 import torch
 from pyvista import examples
+
+import skshapes as sks
 
 mesh_pyvista = examples.download_cow()
 mesh_sks = sks.PolyData(mesh_pyvista)

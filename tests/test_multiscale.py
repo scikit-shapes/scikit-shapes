@@ -1,10 +1,11 @@
 """Tests for the multiscale module."""
 
-import skshapes as sks
 import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
 from pyvista import examples
+
+import skshapes as sks
 from skshapes.utils import scatter
 
 

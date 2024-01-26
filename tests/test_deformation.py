@@ -4,8 +4,9 @@
 import os
 
 import pytest
-import skshapes as sks
 import torch
+
+import skshapes as sks
 from skshapes.errors import DeviceError
 
 deformation_models = [

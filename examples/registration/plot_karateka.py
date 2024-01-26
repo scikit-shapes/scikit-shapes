@@ -15,13 +15,14 @@ This example shows how both approaches differ on a simple 2D example.
 import sys
 
 import pykeops
-import skshapes as sks
 from utils_karateka import (
     load_data,
     plot_extrinsic_deformation,
     plot_intrinsic_deformation,
     plot_karatekas,
 )
+
+import skshapes as sks
 
 sys.path.append(pykeops.get_build_folder())
 

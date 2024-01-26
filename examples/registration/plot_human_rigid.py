@@ -14,9 +14,10 @@ adding landmarks.
 # to lie in the unit cube to avoid dealing with scale issues.
 
 import pyvista as pv
-import skshapes as sks
 import torch
 from pyvista import examples
+
+import skshapes as sks
 
 shape1 = sks.PolyData(examples.download_human())
 shape2 = sks.PolyData(examples.download_doorman())

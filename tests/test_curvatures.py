@@ -6,11 +6,12 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-import skshapes as sks
 import torch
 import vedo as vd
 from hypothesis import given, settings
 from hypothesis import strategies as st
+
+import skshapes as sks
 
 from .utils import create_point_cloud, create_shape
 

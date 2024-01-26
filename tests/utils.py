@@ -3,10 +3,11 @@
 import sys
 from typing import Literal, Optional
 
-import skshapes as sks
 import torch
 import vedo as vd
 from torch.profiler import ProfilerActivity, profile
+
+import skshapes as sks
 
 sys.path.append(sys.path[0][:-4])
 

@@ -4,6 +4,7 @@ from logging import info
 from typing import Optional
 
 import pytest
+
 import skshapes as sks
 from skshapes.errors import InputStructureError, InputTypeError
 

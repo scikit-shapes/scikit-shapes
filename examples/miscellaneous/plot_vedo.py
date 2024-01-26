@@ -19,9 +19,10 @@ conversion.
 # We load a quadrangulated cow mesh from Vedo. As scikit-shapes meshes are
 # triangular, an automatic triangulation is performed when importing the mesh.
 
-import skshapes as sks
 import torch
 import vedo
+
+import skshapes as sks
 
 mesh_vedo = vedo.Mesh(vedo.dataurl + "spider.ply")
 mesh_sks = sks.PolyData(mesh_vedo)

@@ -2,8 +2,9 @@ from math import sqrt
 
 import numpy as np
 import pyvista
-import skshapes as sks
 import torch
+
+import skshapes as sks
 
 sqrt2 = sqrt(2)
 pyvista.OFF_SCREEN = True

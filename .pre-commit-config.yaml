@@ -46,7 +46,7 @@ repos:
     rev: "v0.1.13"
     hooks:
       - id: ruff
-        args: ["--show-fixes"]
+        args: ["--fix", "--show-fixes"]
         # args: ["--fix", "--unsafe-fixes", "--show-fixes"]
 
   - repo: https://github.com/scientific-python/cookie

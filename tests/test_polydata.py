@@ -5,10 +5,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 import pyvista
-import skshapes as sks
 import torch
 import vedo
 from pyvista.core.pointset import PolyData as PyvistaPolyData
+
+import skshapes as sks
 from skshapes.errors import DeviceError, InputTypeError, ShapeError
 
 

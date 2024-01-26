@@ -12,6 +12,7 @@ import sys
 
 import pykeops
 import pyvista as pv
+
 import skshapes as sks
 
 sys.path.append(pykeops.get_build_folder())

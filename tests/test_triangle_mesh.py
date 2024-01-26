@@ -2,9 +2,10 @@
 
 from math import sqrt
 
-import skshapes as sks
 import torch
 from pyvista import examples
+
+import skshapes as sks
 from skshapes.triangle_mesh import (
     EdgeTopology,
     dihedral_angles,

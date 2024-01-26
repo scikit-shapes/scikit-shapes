@@ -7,9 +7,10 @@ This is an example of rigid motion registration, or alignment, in 2D.
 """
 
 import pyvista as pv
-import skshapes as sks
 import torch
 from pyvista import examples
+
+import skshapes as sks
 
 # %%
 # ## Load data

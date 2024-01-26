@@ -4,8 +4,9 @@ from typing import get_args
 
 import pytest
 import pyvista.examples
-import skshapes as sks
 import torch
+
+import skshapes as sks
 from skshapes.errors import DeviceError
 
 shape1 = sks.PolyData(pyvista.Sphere())

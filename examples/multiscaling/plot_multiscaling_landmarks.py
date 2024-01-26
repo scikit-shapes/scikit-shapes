@@ -10,8 +10,9 @@ Landmarks are preserved during the multiscale representation.
 
 
 import pyvista
-import skshapes as sks
 from pyvista import examples
+
+import skshapes as sks
 
 # %%
 # Load a mesh and define landmarks

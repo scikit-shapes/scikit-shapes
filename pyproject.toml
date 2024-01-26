@@ -70,14 +70,14 @@ ignore = [
     "PC180", # Prettier
     "PC901", # pre-commit CI, TODO remove when the repo is public (https://learn.scientific-python.org/development/guides/style/#PC901)
     "MY", # MyPy
-    "RF", # Ruff
     "RTD" # ReadTheDocs
     ]
 
 
 # See: https://learn.scientific-python.org/development/guides/style/#PC190
 [tool.ruff]
-src = ["src/skshapes"]
+src = ["src"]
+target-version = "py38"
 exclude = ["src/skshapes/documentation_example.py"]
 
 [tool.ruff.lint]
