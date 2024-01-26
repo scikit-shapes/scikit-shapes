@@ -48,14 +48,14 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 # Installation
 
 
-## From source (library only)
+## From source (skshapes only)
 
 To install scikit-shapes directly from the source code, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
 
 ```bash
 pip install .
 ```
-## From source (for developers)
+## From source (skshapes + developers dependencies)
 
 To install scikit-shapes as well as developer dependencies, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
 ```bash
@@ -63,28 +63,30 @@ pip install -e .[dev]
 ```
 Then, you will have the possibility to interactively edit the code, run the linting tool and syntax checker, run the tests and build the documentation. From scikit-shapes directory, use the following commands :
 ```bash
-# Install pre-commit config
+# Install the pre-commit hookds and run the pre-commit suite (style, syntax checking)
 pre-commit install
-# Lint wityh black + check syntax
 pre-commit run --all-files
+
 # Run tests and show code coverage
-pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html tests/
-firefox htmlcov/index.html
+pytest
+
 # Build documentation
 mkdocs serve
 ```
 
-To build the documentation, from scikit-shapes directory:
+# Nox sessions
+
+From the scikit-shapes main directory, the test suite and the documentation build process can be run with [nox](https://nox.thea.codes/en/stable/)
+
 ```
-# Make sure to have the latest mkdocs-gallery patch
-# pip uninstall mkdocs-gallery
-# pip install mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@latest"
-
-# Optional, clean generated examples
-# rm -r docs/generated
-
-# Build documentation and serve
-mkdocs serve
+# Install nox
+pip install nox
+# Run all sessions
+nox
+# Run tests
+nox -s tests 
+# Build documentation
+nox-s docs
 ```
 
 ## Contributing
