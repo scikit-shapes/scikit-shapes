@@ -1,5 +1,9 @@
 import nox
 
+# If a package is not installed in the virtualenv, raise an error
+# (default is False and the package is loaded from the system)
+nox.options.error_on_external_run = True
+
 
 # From https://github.com/facebookresearch/hydra/blob/main/noxfile.py
 def install_cpu_torch(session: nox.Session) -> None:
@@ -41,3 +45,12 @@ def docs(session: nox.Session) -> None:
     install_cpu_torch(session)
     session.install(".[dev]")
     session.run("mkdocs", "serve")
+
+@nox.session(python=["3.11"])
+def precommit(session: nox.Session) -> None:
+    """
+    Run pre-commit hooks on all files
+    """
+    session.install("pre-commit")
+    session.run("pre-commit", "install")
+    session.run("pre-commit", "run", "--all-files")

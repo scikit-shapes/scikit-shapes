@@ -84,7 +84,7 @@ pip install nox
 # Run all sessions
 nox
 # Run tests
-nox -s tests 
+nox -s tests
 # Build documentation
 nox-s docs
 ```
