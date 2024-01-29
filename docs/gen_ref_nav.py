@@ -6,9 +6,9 @@ import mkdocs_gen_files
 
 nav = mkdocs_gen_files.Nav()
 
-for path in sorted(Path("skshapes").rglob("*.py")):
-    module_path = path.relative_to("skshapes").with_suffix("")
-    doc_path = path.relative_to("skshapes").with_suffix(".md")
+for path in sorted(Path("src/skshapes").rglob("*.py")):
+    module_path = path.relative_to("src/skshapes").with_suffix("")
+    doc_path = path.relative_to("src/skshapes").with_suffix(".md")
 
     full_doc_path = Path("reference", doc_path)
 

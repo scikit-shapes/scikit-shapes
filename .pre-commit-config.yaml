@@ -18,7 +18,6 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
 
-
   - repo: https://github.com/psf/black-pre-commit-mirror
     rev: "23.12.1"
     hooks:
@@ -42,11 +41,16 @@ repos:
       - id: codespell
         args: ["-L", "sur,nd", "--skip", "devdoc/*"]
 
+  # - repo: https://github.com/numpy/numpydoc
+  #   rev: "v1.6.0"
+  #   hooks:
+  #     - id: numpydoc-validation
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.1.13"
     hooks:
       - id: ruff
-        args: ["--fix", "--show-fixes"]
+        args: ["--fix", "--unsafe-fixes", "--show-fixes"]
         # args: ["--fix", "--unsafe-fixes", "--show-fixes"]
 
   - repo: https://github.com/scientific-python/cookie
