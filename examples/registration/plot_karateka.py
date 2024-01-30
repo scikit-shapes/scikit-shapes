@@ -49,7 +49,7 @@ plot_karatekas()
 #
 # Intituively, you can think that you are twisting a sheet of paper on which
 # the shape is drawn.
-source.control_points = source.bounding_grid(N=15, offset=0.05)
+source.control_points = source.bounding_grid(N=10, offset=0.05)
 
 model = sks.ExtrinsicDeformation(
     n_steps=6,

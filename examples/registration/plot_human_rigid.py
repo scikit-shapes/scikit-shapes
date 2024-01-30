@@ -13,9 +13,14 @@ adding landmarks.
 # We load two meshes from the `pyvista` example datasets. We then rescale them
 # to lie in the unit cube to avoid dealing with scale issues.
 
+import sys
+
+import pykeops
 import pyvista as pv
 import torch
 from pyvista import examples
+
+sys.path.append(pykeops.get_build_folder())
 
 import skshapes as sks
 

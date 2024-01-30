@@ -1,0 +1,42 @@
+# Workflow to build documentation
+# On pull request: build documentation but do not publish it
+# On push to main: build documentation and publish it
+name: Documentation builder
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+
+    build_documentation:
+        name: Build Documentation
+        runs-on: ubuntu-20.04
+
+        steps:
+        - uses: actions/checkout@v4
+
+        - uses: actions/setup-python@v5
+          with:
+            python-version: "3.11"
+            cache: "pip"
+
+        - name: Install package (with dev dependencies)
+          run: |
+            pip install --upgrade pip
+            pip install -e .[dev]
+
+        # https://github.com/pyvista/setup-headless-display-action
+        - name: Setup headless display
+          uses: pyvista/setup-headless-display-action@v2
+
+        - name: build documentation (pull request)
+          if: github.event_name == 'pull_request'
+          run: mkdocs build
+
+        - name: publish documentation (push to main)
+          if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+          run: mkdocs gh-deploy --force
