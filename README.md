@@ -1,5 +1,5 @@
 # Scikit-Shapes
-Shape processing in Python. (This is an alpha version for the moment)
+Shape processing in Python. (This is an alpha version for the moment) Dummy addition to README
 
 ![](docs/animation.gif)
 
