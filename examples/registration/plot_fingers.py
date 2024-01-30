@@ -23,7 +23,7 @@ sys.path.append(pykeops.get_build_folder())
 source = sks.PolyData("data/fingers/finger0.ply")
 target = sks.PolyData("data/fingers/finger1.ply")
 
-source.control_points = source.bounding_grid(N=15, offset=0.15)
+source.control_points = source.bounding_grid(N=5, offset=0.15)
 
 # %%
 # Prepare the model
