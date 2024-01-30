@@ -10,15 +10,16 @@ on:
   pull_request:
   workflow_dispatch:
 
-permissions:
-  deployments: write
-
 
 jobs:
 
     build_documentation:
         name: Build Documentation
         runs-on: ubuntu-20.04
+
+        permissions:
+          deployments: write
+          contents: write
 
         steps:
         - uses: actions/checkout@v4
