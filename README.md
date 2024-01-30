@@ -1,5 +1,5 @@
 # Scikit-Shapes
-Shape processing in Python.
+Shape processing in Python. (This is an alpha version for the moment)
 
 ![](docs/animation.gif)
 
