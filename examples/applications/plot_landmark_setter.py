@@ -10,6 +10,7 @@ In this example, we demonstrate how to use the landmark setter application.
 #
 
 from pyvista import examples
+
 a = 2
 import skshapes as sks
 
