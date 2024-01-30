@@ -38,4 +38,19 @@ jobs:
       - name: Test with pytest
         run: |
           export SKSHAPES_FLOAT_DTYPE=float32
-          pytest
+          pytest --cov-report xml:coverage.xml
+
+      - name: Generate coverage report
+        run: |
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          files: ./coverage.xml,
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true
