@@ -13,13 +13,13 @@ on:
 
 
 jobs:
-  build:
+  build_and_test:
 
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         # os: [ubuntu-latest, macos-latest]
-        python-version: ["3.11"]
+        python-version: ["3.9", "3.10", "3.11"]
         os: [ubuntu-latest]
 
     steps:
@@ -30,10 +30,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
-      - name : Create artifacts directory
-        run: |
-          mkdir -p artifacts/
-
       - name: Install package (with dependencies for linting, testing and building doc)
         run: |
           pip install --upgrade pip
@@ -43,20 +39,3 @@ jobs:
         run: |
           export SKSHAPES_FLOAT_DTYPE=float32
           pytest
-          cp -r htmlcov artifacts/
-
-      # https://github.com/pyvista/setup-headless-display-action
-      - name: Setup headless display
-        uses: pyvista/setup-headless-display-action@v2
-
-      # - name: build documentation
-      #   if: matrix.python-version == '3.11'
-      #   run: |
-      #     mkdocs build
-      #     cp -r site artifacts/
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}-py${{ matrix.python-version }}
-          path: artifacts/
