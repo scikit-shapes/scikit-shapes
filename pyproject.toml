@@ -108,3 +108,9 @@ ignore = [
 "**examples/**" = ["RUF003", "E402"]
 # RUF003: Ambiguous no-break spaces
 # E402: module level import not at top of file
+
+[tool.cibuildwheel]
+build = ["cp310-manylinux*", "cp310-manylinux*"]
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64"]
