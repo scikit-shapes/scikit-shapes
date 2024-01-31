@@ -1,6 +1,15 @@
+[build-system]
+requires = ["numpy", "cython", "setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "skshapes"
-version = "0.1"
+version = "0.0.1"
+dynamic = ["version"]
+description = "Shape analysis in python"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">= 3.10"
 dependencies = [
     "torch",
     "torchdiffeq",
@@ -14,10 +23,10 @@ dependencies = [
     "fast-simplification",
 ]
 
+[project.urls]
+Documentation = "https://scikit-shapes.github.io/scikit-shapes/"
+Repository = "https://github.com/scikit-shapes/scikit-shapes"
 
-[build-system]
-requires = ["numpy", "cython", "setuptools"]
-build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
 dev = [
