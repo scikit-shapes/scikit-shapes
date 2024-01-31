@@ -110,7 +110,7 @@ ignore = [
 # E402: module level import not at top of file
 
 [tool.cibuildwheel]
-build = ["cp310-manylinux*", "cp310-manylinux*"]
+build = ["cp310-manylinux*", "cp311-manylinux*"]
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64"]
