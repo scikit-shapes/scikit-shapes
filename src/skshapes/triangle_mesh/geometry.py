@@ -66,7 +66,7 @@ def triangle_normals(
         B = torch.cat((B, torch.zeros_like(B[:, 0]).view(-1, 1)), dim=1)
         C = torch.cat((C, torch.zeros_like(C[:, 0]).view(-1, 1)), dim=1)
 
-    return torch.cross(B - A, C - A)
+    return torch.linalg.cross(B - A, C - A)
 
 
 @convert_inputs
@@ -274,12 +274,12 @@ def dihedral_angles(
         edge_topology=edge_topology,
     )
 
-    nk = torch.cross(Pk - Pj, Pi - Pk, dim=-1)
+    nk = torch.linalg.cross(Pk - Pj, Pi - Pk, dim=-1)
     nk = nk / nk.norm(dim=-1).unsqueeze(-1)
-    nl = torch.cross(Pl - Pi, Pj - Pl, dim=-1)
+    nl = torch.linalg.cross(Pl - Pi, Pj - Pl, dim=-1)
     nl = nl / nl.norm(dim=-1).unsqueeze(-1)
 
-    cross_prod = torch.cross(nk, nl, dim=-1)
+    cross_prod = torch.linalg.cross(nk, nl, dim=-1)
     edge_dir = Pj - Pi
     edge_dir = edge_dir / edge_dir.norm(dim=-1).unsqueeze(-1)
 
