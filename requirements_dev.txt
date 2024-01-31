@@ -1,0 +1,7 @@
+black
+flake8
+hypothesis
+pre-commit
+pytest
+pytest-cov
+pytorch_shell @ git+https://github.com/Louis-Pujol/shell-energy-pytorch@main

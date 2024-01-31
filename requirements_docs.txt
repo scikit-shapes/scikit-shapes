@@ -1,0 +1,12 @@
+imageio
+jupyterlab
+mkdocs
+mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@latest
+mkdocs-gen-files
+mkdocs-literate-nav
+mkdocs-material
+mkdocstrings-python
+pytkdocs[numpy-style]
+trame
+trame_vtk
+trame_vuetify

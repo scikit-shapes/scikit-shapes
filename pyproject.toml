@@ -1,6 +1,14 @@
+[build-system]
+requires = ["numpy", "cython", "setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "skshapes"
-version = "0.1"
+version = "0.0.1"
+description = "Shape analysis in python"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">= 3.10"
 dependencies = [
     "torch",
     "torchdiffeq",
@@ -14,33 +22,9 @@ dependencies = [
     "fast-simplification",
 ]
 
-
-[build-system]
-requires = ["numpy", "cython", "setuptools"]
-build-backend = "setuptools.build_meta"
-
-[project.optional-dependencies]
-dev = [
-    "pre-commit",
-    "black",
-    "flake8",
-    "pytest",
-    "pytest-cov",
-    "hypothesis",
-    "pytorch_shell @ git+https://github.com/Louis-Pujol/shell-energy-pytorch@main",
-    "mkdocs",
-    "mkdocs-material",
-    "mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@latest",
-    "trame",
-    "trame_vtk",
-    "trame_vuetify",
-    "jupyterlab",
-    "imageio",
-    "mkdocs-gen-files",
-    "mkdocs-literate-nav",
-    "mkdocstrings-python",
-    "pytkdocs[numpy-style]",
-]
+[project.urls]
+Documentation = "https://scikit-shapes.github.io/scikit-shapes/"
+Repository = "https://github.com/scikit-shapes/scikit-shapes"
 
 [tool.black]
 line-length = 79
@@ -124,3 +108,9 @@ ignore = [
 "**examples/**" = ["RUF003", "E402"]
 # RUF003: Ambiguous no-break spaces
 # E402: module level import not at top of file
+
+[tool.cibuildwheel]
+build = ["cp310-manylinux*", "cp311-manylinux*"]
+
+[tool.cibuildwheel.linux]
+archs = ["x86_64"]

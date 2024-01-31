@@ -959,7 +959,7 @@ class PolyData(polydata_type):
             C = torch.cat((C, torch.zeros_like(C[:, 0]).view(-1, 1)), dim=1)
 
         # TODO: Normalize?
-        return torch.cross(B - A, C - A)
+        return torch.linalg.cross(B - A, C - A)
 
     @typecheck
     def is_triangle_mesh(self) -> bool:

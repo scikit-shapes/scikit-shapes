@@ -1,7 +1,11 @@
 # Workflow to build documentation
 # On pull request: build documentation but do not publish it
 # On push to main: build documentation and publish it
-name: Documentation builder
+name: Documentation
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   push:
@@ -33,10 +37,11 @@ jobs:
             python-version: "3.11"
             cache: "pip"
 
-        - name: Install package (with dev dependencies)
+        - name: Install package (with dependencies for docs)
           run: |
             pip install --upgrade pip
-            pip install -e .[dev]
+            pip install -r requirements_docs.txt
+            pip install .
 
         # https://github.com/pyvista/setup-headless-display-action
         - name: Setup headless display
