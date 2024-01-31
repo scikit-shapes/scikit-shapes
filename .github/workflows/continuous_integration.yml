@@ -109,7 +109,9 @@ jobs:
 
 
     needs: build_wheels
-    environment: pypi
+    environment:
+      name: TestPyPI
+      url: https://test.pypi.org/p/skshapes
     permissions:
       id-token: write
     runs-on: ubuntu-latest
