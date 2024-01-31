@@ -13,7 +13,7 @@ on:
 
 
 jobs:
-  build_and_test:
+  test:
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -55,22 +55,35 @@ jobs:
           name: codecov-umbrella
           verbose: true
 
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.16.5
+  build_wheels:
+    name: Wheel on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs:
+      - test
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
 
-      - name: Build wheels
-        run: python -m cibuildwheel --output-dir dist
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
 
-      - name: Store the distribution packages
+      - uses: pypa/cibuildwheel@v2.16
+
+      - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: python-package-distributions
-          path: dist/
+          name: cibw-wheels-${{ matrix.os }}
+          path: dist/*.whl
+
 
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     needs:
-      - build_and_test
+      - build_wheels
     runs-on: ubuntu-latest
 
     environment:
