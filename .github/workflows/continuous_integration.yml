@@ -76,7 +76,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          path: wheelhouse/*.whl
+          path: wheelhouse/
           if-no-files-found: error
 
 
