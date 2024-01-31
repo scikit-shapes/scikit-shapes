@@ -1,7 +1,11 @@
 # Workflow to build documentation
 # On pull request: build documentation but do not publish it
 # On push to main: build documentation and publish it
-name: Documentation builder
+name: Documentation
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   push:

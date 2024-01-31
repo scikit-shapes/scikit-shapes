@@ -1,0 +1,53 @@
+name: Python package
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install package (with dependencies for linting, testing and building doc)
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements_dev.txt
+          pip install .
+
+      - name: Test with pytest
+        run: |
+          export SKSHAPES_FLOAT_DTYPE=float32
+          pytest --cov-report xml:coverage.xml
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v3
+        with:
+          token: \$\{\{ secrets.CODECOV_TOKEN \}\}
+          directory: ./
+          env_vars: OS,PYTHON
+          fail_ci_if_error: true
+          files: ./coverage.xml,
+          flags: unittests
+          name: codecov-umbrella
+          verbose: true
