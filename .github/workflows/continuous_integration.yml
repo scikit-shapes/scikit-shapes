@@ -76,33 +76,50 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: python-package-distributions
-          path: wheelhouse/
+          name: cibw-wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
           if-no-files-found: error
 
 
   publish-to-testpypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
-    needs:
-      - build_wheels
-    runs-on: ubuntu-latest
+    # needs:
+    #   - build_wheels
+    # runs-on: ubuntu-latest
 
-    environment:
-      name: TestPyPI
-      url: https://test.pypi.org/p/skshapes
+    # environment:
+    #   name: TestPyPI
+    #   url: https://test.pypi.org/p/skshapes
 
+    # permissions:
+    #   id-token: write  # IMPORTANT: mandatory for trusted publishing
+
+    # steps:
+    #   - uses: actions/checkout@v4
+
+    #   - name: Download all the dists
+    #     uses: actions/download-artifact@v3
+    #     with:
+    #       name: python-package-distributions
+
+    #   - name: Publish distribution 📦 to TestPyPI
+    #     uses: pypa/gh-action-pypi-publish@release/v1
+    #     with:
+    #       repository-url: https://test.pypi.org/legacy/
+
+
+    needs: build_wheels
+    environment: pypi
     permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-
+      id-token: write
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Download all the dists
-        uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
-          name: python-package-distributions
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
 
-      - name: Publish distribution 📦 to TestPyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
