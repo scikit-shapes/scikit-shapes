@@ -5,7 +5,6 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "skshapes"
 version = "0.0.1"
-dynamic = ["version"]
 description = "Shape analysis in python"
 readme = "README.md"
 license = {file = "LICENSE"}
