@@ -215,7 +215,7 @@ class RigidMotion(BaseModel):
         *,
         shape: polydata_type,
         small_rotation_matrix: Float2dTensor,
-        small_translation: Float1dTensor
+        small_translation: Float1dTensor,
     ) -> list[polydata_type]:
         """Create the path from the rotation matrix and the translation.
 
