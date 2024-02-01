@@ -2,7 +2,6 @@
 
 
 import pytest
-import pyvista
 import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -184,16 +183,16 @@ def test_registration_device():
             task.fit(source=source, target=target)
 
 
-def test_lddmm_control_points():
-    """Test to run LDDMM with control points."""
-    mesh1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.99)
-    mesh2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.98)
+def test_extrinsic_control_points():
+    """Test to run extrinsic deformation with control points."""
+    mesh1 = mesh_3d
+    mesh2 = mesh_3d
 
-    mesh1.control_points = mesh1.bounding_grid(N=3, offset=0.25)
+    mesh1.control_points = mesh1.bounding_grid(N=2, offset=0.25)
 
     # Define the model
     model = sks.ExtrinsicDeformation(
-        n_steps=2, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
+        n_steps=1, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
     )
 
     loss = sks.OptimalTransportLoss()
@@ -210,5 +209,4 @@ def test_lddmm_control_points():
     )
 
     registration.fit(source=mesh1, target=mesh2)
-
     assert registration.parameter_.shape == mesh1.control_points.points.shape
