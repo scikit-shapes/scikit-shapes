@@ -43,7 +43,7 @@ list_optimizers = [
     provide_initial_parameter=st.booleans(),
     dim=st.integers(min_value=2, max_value=3),
 )
-@settings(deadline=None, max_examples=5)
+@settings(deadline=None)
 def test_registration_hypothesis(
     model,
     n_steps,
