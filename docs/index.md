@@ -45,4 +45,4 @@ Then, you can have a look at our [gallery of examples](generated/gallery/).
 
 Scikit-shapes development is aimed to be community-driven. We warmly are welcome every contributions. Could it be for a new feature, a bug fixing, a typo in the documentation or any kind of feedback, we strongly encourage you to reach us if you think something must be changed.
 
-Have a look at the [contributing](contributing) section to learn more about contribution to scikit-shapes.
+Have a look at the [contributing](https://scikit-shapes.github.io/scikit-shapes/contributing) section to learn more about how to contribute to scikit-shapes.
