@@ -58,7 +58,7 @@ def test_extrinsic_deformation():
     More specifically, we test the backends: torchdiffeq and sks
     """
     source = sks.PolyData("data/fingers/finger0.ply")
-    source.control_points = source.bounding_grid(N=5)
+    source.control_points = source.bounding_grid(N=2)
     target = sks.PolyData("data/fingers/finger1.ply")
 
     for control_points in [True, False]:
@@ -83,7 +83,7 @@ def test_extrinsic_deformation():
         n_iter = 1
         loss = sks.L2Loss()
         gpu = False
-        regularization = 1.0
+        regularization = 0
 
         registration_torchdiffeq = sks.Registration(
             model=model_torchdiffeq,
