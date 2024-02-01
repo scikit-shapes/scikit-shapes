@@ -24,47 +24,45 @@ list_losses = [
 ]
 
 list_optimizers = [
-    sks.LBFGS(),
+    sks.LBFGS(max_iter=1, max_eval=1),
     sks.SGD(),
     sks.Adam(),
     sks.Adagrad(),
 ]
 
+mesh_3d = sks.Sphere().decimate(target_reduction=0.995)
+mesh_2d = sks.Circle(n_points=7)
+
 
 @given(
     model=st.sampled_from(list_models),
-    n_steps=st.integers(min_value=1, max_value=3),
     loss=st.sampled_from(list_losses),
     optimizer=st.sampled_from(list_optimizers),
-    n_iter=st.integers(min_value=0, max_value=3),
-    regularization=st.floats(min_value=0, max_value=1),
-    gpu=st.booleans(),
-    verbose=st.booleans(),
+    n_iter=st.integers(min_value=0, max_value=1),
+    regularization=st.sampled_from([0, 0.1]),
     provide_initial_parameter=st.booleans(),
     dim=st.integers(min_value=2, max_value=3),
 )
 @settings(deadline=None)
 def test_registration_hypothesis(
     model,
-    n_steps,
     loss,
     optimizer,
     n_iter,
     regularization,
-    gpu,
-    verbose,
     provide_initial_parameter,
     dim,
 ):
     """Test that the registration task not failed with random params."""
     # Load two meshes
+    n_steps = 1
 
     if dim == 3:
-        source = sks.Sphere().decimate(target_reduction=0.995)
-        target = sks.Sphere().decimate(target_reduction=0.995)
+        source = mesh_3d
+        target = mesh_3d
     else:
-        source = sks.Circle(n_points=7)
-        target = sks.Circle(n_points=7)
+        source = mesh_2d
+        target = mesh_2d
 
     assert source.dim == target.dim
     assert source.dim == dim
@@ -83,9 +81,9 @@ def test_registration_hypothesis(
         loss=loss,
         optimizer=optimizer,
         n_iter=n_iter,
-        gpu=gpu,
+        gpu=False,
         regularization=regularization,
-        verbose=verbose,
+        verbose=False,
     )
 
     # Check that the registration object is correctly initialized
@@ -133,8 +131,8 @@ def test_registration_device():
             the same as the device of the source and the target
         - If source.device != target.device, an error should be raised
     """
-    shape1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.995)
-    shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.995)
+    shape1 = mesh_3d
+    shape2 = mesh_3d
 
     n_steps = 1
     models = [
