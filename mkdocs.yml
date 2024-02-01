@@ -26,8 +26,8 @@ theme:
 
 nav:
   - Home: index.md
-  - Installation guide: installation.md
-  - Scikit-Shapes guide: user_guide/
+  # - Installation guide: installation.md
+  # - Scikit-Shapes guide: user_guide/
     # - Data:
     #   - PolyData: user_guide/data_structures/polydata.md
     #   - Images: user_guide/data_structures/images.md
@@ -43,9 +43,8 @@ nav:
   - Gallery of examples: generated/gallery
   - API Reference:
     - skshapes: reference/
-  - Contribution guide: contributing.md
-  - About: about.md
-  - License: license.md
+  - Contributing : contributing.md
+  # - About: about.md
 
 plugins:
   - search
