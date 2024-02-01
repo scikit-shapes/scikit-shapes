@@ -1,6 +1,8 @@
 :construction_worker: scikit-shapes development is in pre-alpha stage, the [documentation](https://scikit-shapes.github.io/scikit-shapes/) may be incomplete, and the interface could be subject to important changes in a near future.
 
 # Scikit-Shapes
+[![codecov](https://codecov.io/gh/scikit-shapes/scikit-shapes/graph/badge.svg?token=RLM6HOH2QI)](https://codecov.io/gh/scikit-shapes/scikit-shapes)
+
 Shape processing in Python
 
 ![](docs/animation.gif)
