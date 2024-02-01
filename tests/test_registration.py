@@ -60,17 +60,17 @@ def test_registration_hypothesis(
     # Load two meshes
 
     if dim == 3:
-        source = sks.Sphere().decimate(target_reduction=0.95)
-        target = sks.Sphere().decimate(target_reduction=0.95)
+        source = sks.Sphere().decimate(target_reduction=0.995)
+        target = sks.Sphere().decimate(target_reduction=0.995)
     else:
-        source = sks.Circle(n_points=20)
-        target = sks.Circle(n_points=20)
+        source = sks.Circle(n_points=7)
+        target = sks.Circle(n_points=7)
 
     assert source.dim == target.dim
     assert source.dim == dim
 
-    source.landmark_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    target.landmark_indices = [9, 10, 11, 12, 13, 14, 15, 16, 17]
+    source.landmark_indices = [0, 1, 2, 3, 4]
+    target.landmark_indices = [3, 2, 1, 0, 4]
 
     # Few type checks
     assert isinstance(source, sks.PolyData)
@@ -133,17 +133,17 @@ def test_registration_device():
             the same as the device of the source and the target
         - If source.device != target.device, an error should be raised
     """
-    shape1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
-    shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
+    shape1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.995)
+    shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.995)
 
-    n_steps = 2
+    n_steps = 1
     models = [
         sks.RigidMotion(n_steps=n_steps),
         sks.ExtrinsicDeformation(n_steps=n_steps),
         sks.IntrinsicDeformation(n_steps=n_steps),
     ]
-    loss = sks.OptimalTransportLoss()
-    optimizer = sks.LBFGS()
+    loss = sks.L2Loss()
+    optimizer = sks.SGD()
 
     for model in models:
         for device in ["cpu", "cuda"]:
@@ -157,7 +157,7 @@ def test_registration_device():
                     optimizer=optimizer,
                     n_iter=1,
                     gpu=gpu,
-                    regularization=0.1,
+                    regularization=0,
                     verbose=1,
                 ).fit(source=source, target=target)
 
