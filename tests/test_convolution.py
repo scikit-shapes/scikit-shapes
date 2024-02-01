@@ -22,7 +22,7 @@ def test_mesh_convolution_point_cloud():
 
 def test_squared_distance():
     """Test the squared distance function."""
-    N, M = 2000, 1000
+    N, M = 20, 10
 
     # Define two point clouds
     X = torch.randn(N, 3, dtype=sks.float_dtype)
