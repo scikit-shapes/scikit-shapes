@@ -48,35 +48,43 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 # Installation
 
 
-## From source (skshapes only)
+## From source
 
 To install scikit-shapes directly from the source code, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
 
 ```bash
 pip install .
 ```
-## From source (skshapes + developers dependencies)
 
-To install scikit-shapes as well as developer dependencies, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
+## For developers
+
+Once scikit-shapes is installed, you may want to run the pre-commit hooks (linter), the tests or build the documentation locally.
+
+### Run the pre-commit hooks
+
 ```bash
-pip install -e .[dev]
-```
-Then, you will have the possibility to interactively edit the code, run the linting tool and syntax checker, run the tests and build the documentation. From scikit-shapes directory, use the following commands :
-```bash
-# Install the pre-commit hookds and run the pre-commit suite (style, syntax checking)
+pip install -e requirements_dev.txt
 pre-commit install
 pre-commit run --all-files
+```
 
-# Run tests and show code coverage
+### Run the tests
+
+```bash
+pip install -e requirements_dev.txt
 pytest
+```
 
-# Build documentation
+### Build the documentation (and serve it locally)
+
+```bash
+pip install -r requirement_docs.txt
 mkdocs serve
 ```
 
 # Nox sessions
 
-From the scikit-shapes main directory, the test suite and the documentation build process can be run with [nox](https://nox.thea.codes/en/stable/)
+From the scikit-shapes main directory, tests, pre-commit-hooks and the documentation build process can be run with [nox](https://nox.thea.codes/en/stable/)
 
 ```
 # Install nox
@@ -87,6 +95,8 @@ nox
 nox -s tests
 # Build documentation
 nox-s docs
+# Run pre-commit hooks
+nox -s precommit
 ```
 
 ## Contributing
