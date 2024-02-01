@@ -1,3 +1,6 @@
+# This wokflow builds and publishes the package to TestPyPI
+# Trigger on: release published and manually
+# See: https://learn.scientific-python.org/development/guides/gha-wheels/
 name: Wheels
 
 on:

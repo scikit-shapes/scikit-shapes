@@ -1,6 +1,6 @@
 # Workflow to build documentation
-# On pull request: build documentation but do not publish it
-# On push to main: build documentation and publish it
+# On pull request/push: build documentation but do not publish it (test it)
+# On release/manual trigger: build and publish documentation
 name: Documentation
 
 concurrency:
@@ -13,7 +13,7 @@ on:
       - main
   pull_request:
   workflow_dispatch:
-
+  release:
 
 jobs:
 
@@ -51,6 +51,6 @@ jobs:
           if: github.event_name == 'pull_request'
           run: mkdocs build
 
-        - name: publish documentation (push to main)
-          if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        - name: publish documentation (release or manual trigger)
+          if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
           run: mkdocs gh-deploy --force

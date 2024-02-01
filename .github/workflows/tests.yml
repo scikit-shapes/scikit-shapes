@@ -1,4 +1,6 @@
-name: Python package
+# Install scikit-shapes from source, run the tests and upload the coverage to Codecov
+# this workflow is triggered on pull request  and push to main branch
+name: Tests
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -12,7 +14,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  install_and_run_tests:
 
     runs-on: ${{ matrix.os }}
     strategy:
