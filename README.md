@@ -1,5 +1,7 @@
+:construction_worker: scikit-shapes development is in pre-alpha stage, the [documentation](https://scikit-shapes.github.io/scikit-shapes/) may be incomplete, and the interface could be subject to important changes in a near future.
+
 # Scikit-Shapes
-Shape processing in Python. (This is an alpha version for the moment)
+Shape processing in Python
 
 ![](docs/animation.gif)
 
@@ -47,58 +49,41 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 
 # Installation
 
+For now, the recommended way to install scikit-shapes is directly from the main branch
+```bash
+pip install 'skshapes @ git+https://github.com/scikit-shapes/scikit-shapes@main'
+```
 
-## From source
-
-To install scikit-shapes directly from the source code, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
+If you consider contrinuting to the codebase, you can also install scikit-shapes locally from a clone of the repository. On a terminal, navigate to the scikit-shapes directory and run :
 
 ```bash
 pip install .
 ```
 
-## For developers
+Then you can :
 
-Once scikit-shapes is installed, you may want to run the pre-commit hooks (linter), the tests or build the documentation locally.
-
-### Run the pre-commit hooks
-
+-  run the pre-commit hooks:
 ```bash
 pip install -e requirements_dev.txt
 pre-commit install
 pre-commit run --all-files
 ```
 
-### Run the tests
-
+- run the tests:
 ```bash
 pip install -e requirements_dev.txt
 pytest
 ```
-
-### Build the documentation (and serve it locally)
-
+- build the documentation (and serve it locally)
 ```bash
 pip install -r requirement_docs.txt
 mkdocs serve
 ```
 
-# Nox sessions
+# Contributing
 
-From the scikit-shapes main directory, tests, pre-commit-hooks and the documentation build process can be run with [nox](https://nox.thea.codes/en/stable/)
+We warmly welcome all contribution, if you found a bug, a typo or want to contribute with a new feature, please open an [issue](https://github.com/scikit-shapes/scikit-shapes/issues).
 
-```
-# Install nox
-pip install nox
-# Run all sessions
-nox
-# Run tests
-nox -s tests
-# Build documentation
-nox-s docs
-# Run pre-commit hooks
-nox -s precommit
-```
+You can also open a [discussion](https://github.com/scikit-shapes/scikit-shapes/discussions) if you have any question regarding the project.
 
-## Contributing
-
-TBA
+For more information about contributing with new code, see the [dedicated section](https://scikit-shapes.github.io/scikit-shapes/contributing/) of the documentation.
