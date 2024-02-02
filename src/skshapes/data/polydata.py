@@ -1003,7 +1003,7 @@ class PolyData(polydata_type):
 
     @typecheck
     def bounding_grid(
-        self, N: int = 10, offset: float = 0.05
+        self, N: int = 10, offset: float | int = 0.05
     ) -> polydata_type:
         """Bounding grid of the shape.
 

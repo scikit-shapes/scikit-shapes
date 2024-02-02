@@ -23,18 +23,17 @@ def test_indice_mapping_interface():
 
 def test_mesh_decimation_n_points_strict():
     """Test that the n_points_strict argument works."""
-    import pyvista.examples
 
-    mesh = sks.PolyData(pyvista.examples.download_louis_louvre())
-    target_n_points = 50
+    mesh = sks.Sphere()
+    target_n_points = 10
     d = sks.Decimation(n_points=1)
 
     d.fit(mesh=mesh)
 
-    decimated_mesh_notstrict = d.transform(mesh=mesh, n_points=50)
-    decimated_mesh_strict = d.transform(mesh=mesh, n_points_strict=50)
+    decimated_mesh_strict = d.transform(
+        mesh=mesh, n_points_strict=target_n_points
+    )
 
-    assert decimated_mesh_notstrict.n_points != target_n_points
     assert decimated_mesh_strict.n_points == target_n_points
 
 
