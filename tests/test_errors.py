@@ -189,3 +189,43 @@ def test_error_decimation_not_fitted(property_name):
     decimator = sks.Decimation(target_reduction=0.5)
     with pytest.raises(NotFittedError):
         getattr(decimator, property_name)
+
+
+def test_multiscale_not_implemented():
+    mesh = sks.Sphere()
+    ratios = [0.01, 0.5]
+    M = sks.Multiscale(mesh, ratios=ratios)
+
+    with pytest.raises(NotImplementedError):
+        M.at(scale=0.2)
+
+    with pytest.raises(NotImplementedError):
+        sks.Multiscale(mesh, scales=[0.1, 0.5])
+
+    with pytest.raises(NotImplementedError):
+        M.append(scale=0.2)
+
+    d = sks.Decimation(n_points=1)
+    with pytest.raises(NotFittedError):
+        # The decimation module is not fitted before passed to the Multiscale
+        # object
+        M = sks.Multiscale(mesh, ratios=ratios, decimation_module=d)
+
+    with pytest.raises(
+        NotImplementedError, match="Only triangle meshes are supported for now"
+    ):
+        M = sks.Multiscale(sks.Circle(n_points=4), ratios=ratios)
+
+    M.at(ratio=0.5)["signal"] = torch.zeros(M.at(ratio=0.5).n_points)
+
+    with pytest.raises(NotImplementedError):
+        M.propagate(
+            signal_name="signal",
+            from_scale=0.5,
+        )
+
+    with pytest.raises(KeyError, match="unknown_signal not available"):
+        M.propagate(
+            signal_name="unknown_signal",
+            from_ratio=0.5,
+        )
