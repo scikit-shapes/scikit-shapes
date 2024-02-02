@@ -69,16 +69,22 @@ class Decimation:
             if none of them is provided.
         """
         if target_reduction is not None:
-            assert (
-                0 < target_reduction < 1
-            ), "The target reduction must be between 0 and 1"
+            if not (0 < target_reduction < 1):
+                msg = "target_reduction must be in the range (0, 1)"
+                raise ValueError(msg)
             self.target_reduction = target_reduction
 
         if n_points is not None:
+            if n_points <= 0:
+                msg = "n_points must be positive"
+                raise ValueError(msg)
+
             self.n_points = n_points
 
         if ratio is not None:
-            assert 0 < ratio < 1, "The ratio must be between 0 and 1"
+            if not (0 < ratio < 1):
+                msg = "ratio must be in the range (0, 1)"
+                raise ValueError(msg)
             self.target_reduction = 1 - ratio
 
     @typecheck
@@ -102,19 +108,15 @@ class Decimation:
 
         """
         if hasattr(self, "n_points"):
-            if not (1 <= self.n_points <= mesh.n_points):
-                raise ValueError(
-                    "The n_points must be positive and lower"
-                    + " than the number of points of the mesh"
-                    + " to decimate"
-                )
+            if not (self.n_points <= mesh.n_points):
+                msg = "n_points must be lower than mesh.n_points"
+                raise ValueError(msg)
 
             self.target_reduction = 1 - self.n_points / mesh.n_points
 
         if not mesh.is_triangle_mesh():
-            raise ValueError(
-                "Quadric decimation only works for triangular" + " meshes"
-            )
+            msg = "Quadric decimation only works on triangle meshes"
+            raise ValueError(msg)
 
         points = mesh.points.clone().cpu().numpy().astype(np.float32)
         triangles = mesh.triangles.clone().cpu().numpy().astype(np.int64)
@@ -236,49 +238,45 @@ class Decimation:
             # default, target_reduction is the same as in __init__
             target_reduction = self.target_reduction
 
-        if self.collapses_ is None:
+        if not hasattr(self, "collapses_") or self.collapses_ is None:
             msg = "The decimation object has not been fitted yet."
             raise NotFittedError(msg)
 
         if target_reduction is not None:
             if not (0 <= target_reduction <= 1):
-                msg = "The target reduction must be between 0 and 1"
+                msg = "target_reduction must be in the range (0, 1)"
                 raise ValueError(msg)
             ratio = 1 - target_reduction
             n_target_points = int(ratio * self.ref_mesh.n_points)
 
         elif ratio is not None:
             if not (0 <= ratio <= 1):
-                msg = "The ratio must be between 0 and 1"
+                msg = "ratio must be in the range (0, 1)"
                 raise ValueError(msg)
             n_target_points = int(ratio * self.ref_mesh.n_points)
 
         elif n_points is not None:
-            if not (1 <= n_points <= self.ref_mesh.n_points):
-                raise ValueError(
-                    "The n_points must be positive and lower"
-                    + " than the number of points of the mesh"
-                    + " to decimate"
-                )
+            if n_points <= 0:
+                msg = "n_points must be positive"
+                raise ValueError(msg)
+            if n_points > self.ref_mesh.n_points:
+                msg = "n_points must be lower than mesh.n_points"
+                raise ValueError(msg)
+
             n_target_points = n_points
         else:
             # No target reduction, no n_points, no ratio
             # We use the same target reduction as in __init__
             n_target_points = self.ref_mesh.n_points - len(self.collapses_)
 
-        if mesh.n_points != self.ref_mesh.n_points:
-            raise ValueError(
-                "The number of points of the mesh to decimate must be the same"
-                + " as the reference mesh"
-            )
-
-        if not torch.allclose(
+        if mesh.n_points != self.ref_mesh.n_points or not torch.allclose(
             mesh.triangles.cpu(), self.ref_mesh.triangles.cpu()
         ):
-            raise ValueError(
-                "The triangles of the mesh to decimate must be the same as the"
-                + " reference mesh"
+            msg = (
+                "mesh.n_points and mesh.triangles must be the same as the"
+                " the mesh used in fit"
             )
+            raise ValueError(msg)
 
         device = mesh.device
 

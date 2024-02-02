@@ -4,7 +4,7 @@ import pytest
 import torch
 
 import skshapes as sks
-from skshapes.errors import ShapeError
+from skshapes.errors import NotFittedError, ShapeError
 
 
 def test_errors_metrics():
@@ -121,3 +121,71 @@ def test_errors_polydata():
 
     with pytest.raises(IndexError):
         polydata.triangles = triangles
+
+
+def test_errors_decimation():
+    """Trigger some errors for the decimation class."""
+    mesh_1 = sks.Sphere().decimate(target_reduction=0.9)
+    mesh_2 = sks.Sphere().decimate(target_reduction=0.5)
+    pointcloud = sks.PolyData(points=mesh_1.points)
+
+    with pytest.raises(ValueError, match="only works on triangle meshes"):
+        pointcloud.decimate(target_reduction=0.9)
+
+    with pytest.raises(
+        ValueError, match="n_points must be lower than mesh.n_points"
+    ):
+        mesh_1.decimate(n_points=100000)
+
+    with pytest.raises(ValueError, match="n_points must be positive"):
+        d = sks.Decimation(n_points=0)
+
+    with pytest.raises(
+        ValueError, match=r"target_reduction must be in the range \(0, 1\)"
+    ):
+        d = sks.Decimation(target_reduction=1.2)
+
+    with pytest.raises(
+        ValueError, match=r"ratio must be in the range \(0, 1\)"
+    ):
+        d = sks.Decimation(ratio=-0.2)
+
+    d = sks.Decimation(ratio=0.5)
+
+    with pytest.raises(NotFittedError):
+        d.transform(mesh_1)
+
+    d.fit(mesh_1)
+
+    with pytest.raises(ValueError, match=r"n_points must be positive"):
+        d.transform(mesh_1, n_points=-1)
+
+    with pytest.raises(
+        ValueError, match=r"target_reduction must be in the range \(0, 1\)"
+    ):
+        d.transform(mesh_1, target_reduction=1.2)
+
+    with pytest.raises(
+        ValueError, match=r"ratio must be in the range \(0, 1\)"
+    ):
+        d.transform(mesh_1, ratio=-0.2)
+
+    with pytest.raises(
+        ValueError, match=r"n_points must be lower than mesh.n_points"
+    ):
+        d.transform(mesh_1, n_points=100000)
+
+    with pytest.raises(
+        ValueError, match=r"mesh.n_points and mesh.triangles must be the same"
+    ):
+        d.transform(mesh_2, target_reduction=0.5)
+
+
+@pytest.mark.parametrize(
+    "property_name", ["collapses", "actual_reduction", "ref_mesh"]
+)
+def test_error_decimation_not_fitted(property_name):
+    """Test that an error is raised if a property is accessed before fitting."""
+    decimator = sks.Decimation(target_reduction=0.5)
+    with pytest.raises(NotFittedError):
+        getattr(decimator, property_name)
