@@ -79,7 +79,7 @@ def test_extrinsic_deformation():
         # For both models, we register with only one iteration of gradient
         # descent we expect the same result (tolerance of 0.5%)
         optimizer = sks.SGD(lr=1.0)
-        n_iter = 2
+        n_iter = 1
         loss = sks.L2Loss()
         gpu = False
         regularization = 0
