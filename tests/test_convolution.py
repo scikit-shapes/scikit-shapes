@@ -261,3 +261,13 @@ def test_multidimensional_signal_convolution():
     assert M.shape == (n_points, n_points)
     assert mesh["signal"].shape == (n_points, a, b, c)
     assert (M @ data).shape == (n_points, a, b, c)
+
+
+def test_constant_kernel():
+    n = 10
+    points = torch.rand(n, 3)
+    kernel = sks.convolutions.constant_kernel.constant_1_kernel(points=points)
+
+    signal = torch.rand(n)
+    # Assert that the transpose of the kernel is the same as the kernel
+    assert torch.allclose(kernel @ signal, kernel.T @ signal)

@@ -29,6 +29,7 @@ def test_multiscale_api():
     M2 = sks.Multiscale(
         mesh2, n_points=n_points, decimation_module=decimation_module
     )
+    M2.append(n_points=50)
 
     ratio = torch.rand(1).item()
     assert torch.allclose(
