@@ -1,8 +1,6 @@
 """Tests for the deformation modules."""
 
 
-import os
-
 import pytest
 import torch
 
@@ -15,6 +13,10 @@ deformation_models = [
     sks.RigidMotion,
 ]
 
+mesh_1 = sks.Sphere().decimate(target_reduction=0.99)
+mesh_2 = mesh_1.copy()
+mesh_2.points += 0.2
+
 
 def test_deformation():
     """Compatibility of deformations modules wrt autograd."""
@@ -24,9 +26,8 @@ def test_deformation():
 
 def _test(deformation_model):
     # Define a pair of shapes and a loss function
-    shape = sks.Sphere().decimate(target_reduction=0.99)
-    target = shape.copy()
-    target.points += 1
+    shape = mesh_1
+    target = mesh_2
     loss = sks.L2Loss()
 
     # Initialize the deformation model
@@ -48,18 +49,16 @@ def _test(deformation_model):
             model.morph(shape=shape, parameter=p).morphed_shape  # noqa: B018
 
 
-@pytest.mark.skipif(
-    "data" not in os.listdir(),
-    reason="Data folder is not present",
-)
 def test_extrinsic_deformation():
     """Test for extrinsic deformation.
 
     More specifically, we test the backends: torchdiffeq and sks
     """
-    source = sks.PolyData("data/fingers/finger0.ply")
-    source.control_points = source.bounding_grid(N=2)
-    target = sks.PolyData("data/fingers/finger1.ply")
+    source = mesh_1
+    source.control_points = source.bounding_grid(N=3, offset=0.0)
+    target = mesh_2
+
+    assert not torch.allclose(source.points, target.points, rtol=5e-3)
 
     for control_points in [True, False]:
         n_steps = 2
@@ -79,8 +78,8 @@ def test_extrinsic_deformation():
 
         # For both models, we register with only one iteration of gradient
         # descent we expect the same result (tolerance of 0.5%)
-        optimizer = sks.SGD(lr=10.0)
-        n_iter = 1
+        optimizer = sks.SGD(lr=1.0)
+        n_iter = 2
         loss = sks.L2Loss()
         gpu = False
         regularization = 0
@@ -110,6 +109,7 @@ def test_extrinsic_deformation():
 
         # Make sure that something happened, ie the points are not the same
         # after registration than before
+
         assert not torch.allclose(
             out_torchdiffeq.points,
             source.points,
@@ -122,3 +122,7 @@ def test_extrinsic_deformation():
             out_sks.points,
             rtol=5e-3,
         )
+
+
+if __name__ == "__main__":
+    test_extrinsic_deformation()
