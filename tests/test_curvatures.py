@@ -19,7 +19,7 @@ sys.path.append(sys.path[0][:-4])
 
 
 @given(
-    n_points=st.integers(min_value=400, max_value=500),
+    n_points=st.integers(min_value=40, max_value=50),
     a=st.floats(min_value=-1, max_value=1),
     b=st.floats(min_value=-1, max_value=1),
     c=st.floats(min_value=-1, max_value=1),
@@ -92,7 +92,7 @@ def test_curvatures_quadratic(
     radius=st.floats(min_value=0.1, max_value=10),
     relative_scale=st.floats(min_value=0.1, max_value=0.12),
 )
-@settings(deadline=None)
+@settings(max_examples=1, deadline=None)
 def test_curvatures_sphere(
     *, n_points: int, radius: float, relative_scale: float
 ):

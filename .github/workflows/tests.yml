@@ -39,7 +39,7 @@ jobs:
       - name: Test with pytest
         run: |
           export SKSHAPES_FLOAT_DTYPE=float32
-          pytest --cov-report xml:coverage.xml
+          pytest --cov-report xml:coverage.xml --durations=0
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'

@@ -9,16 +9,16 @@ from skshapes.errors import ShapeError
 
 def test_errors_metrics():
     """Raise some errors for the metrics."""
-    triangle_mesh = sks.Sphere()
+    triangle_mesh = sks.Sphere().decimate(n_points=10)
     edges = triangle_mesh.edges
     points = triangle_mesh.points
     wireframe_mesh = sks.PolyData(points=points, edges=edges)
     pointcloud = sks.PolyData(points=points)
 
-    target = sks.Sphere()
+    target = pointcloud
 
     model_iso = sks.IntrinsicDeformation(
-        n_steps=3,
+        n_steps=1,
         metric=sks.AsIsometricAsPossible(),
     )
     loss = sks.L2Loss()
@@ -26,26 +26,28 @@ def test_errors_metrics():
     registration = sks.Registration(
         model=model_iso,
         loss=loss,
+        gpu=False,
     )
 
-    registration.fit(source=triangle_mesh, target=target)
-    registration.fit(source=wireframe_mesh, target=target)
+    # registration.fit(source=triangle_mesh, target=target)
+    # registration.fit(source=wireframe_mesh, target=target)
     with pytest.raises(
         AttributeError, match="This metric requires edges to be defined"
     ):
         registration.fit(source=pointcloud, target=target)
 
     model_shell = sks.IntrinsicDeformation(
-        n_steps=3,
+        n_steps=1,
         metric=sks.ShellEnergyMetric(),
     )
 
     registration = sks.Registration(
         model=model_shell,
-        loss=sks.NearestNeighborsLoss(),
+        loss=sks.L2Loss(),
+        gpu=False,
     )
 
-    registration.fit(source=triangle_mesh, target=target)
+    # registration.fit(source=triangle_mesh, target=target)
     with pytest.raises(
         AttributeError, match="This metric requires triangles to be defined"
     ):

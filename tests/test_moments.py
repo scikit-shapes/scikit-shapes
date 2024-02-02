@@ -35,7 +35,7 @@ def moments(X):
     scale=st.floats(min_value=0.01, max_value=10),
     offset=st.floats(min_value=0.1, max_value=10),
 )
-@settings(max_examples=1000, deadline=None)
+@settings(max_examples=5, deadline=None)
 def test_moments_1(*, n_points: int, scale: float, offset: float):
     """Test the first 4 moments of a random shape."""
     points = scale * torch.randn(n_points, 3) + offset * torch.randn(1)

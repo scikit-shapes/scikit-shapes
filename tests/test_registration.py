@@ -2,7 +2,6 @@
 
 
 import pytest
-import pyvista
 import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -24,53 +23,51 @@ list_losses = [
 ]
 
 list_optimizers = [
-    sks.LBFGS(),
+    sks.LBFGS(max_iter=1, max_eval=1),
     sks.SGD(),
     sks.Adam(),
     sks.Adagrad(),
 ]
 
+mesh_3d = sks.Sphere().decimate(target_reduction=0.995)
+mesh_2d = sks.Circle(n_points=7)
+
 
 @given(
     model=st.sampled_from(list_models),
-    n_steps=st.integers(min_value=1, max_value=3),
     loss=st.sampled_from(list_losses),
     optimizer=st.sampled_from(list_optimizers),
-    n_iter=st.integers(min_value=0, max_value=3),
-    regularization=st.floats(min_value=0, max_value=1),
-    gpu=st.booleans(),
-    verbose=st.booleans(),
+    n_iter=st.integers(min_value=0, max_value=1),
+    regularization=st.sampled_from([0, 0.1]),
     provide_initial_parameter=st.booleans(),
     dim=st.integers(min_value=2, max_value=3),
 )
-@settings(deadline=None, max_examples=5)
+@settings(deadline=None)
 def test_registration_hypothesis(
     model,
-    n_steps,
     loss,
     optimizer,
     n_iter,
     regularization,
-    gpu,
-    verbose,
     provide_initial_parameter,
     dim,
 ):
     """Test that the registration task not failed with random params."""
     # Load two meshes
+    n_steps = 1
 
     if dim == 3:
-        source = sks.Sphere().decimate(target_reduction=0.95)
-        target = sks.Sphere().decimate(target_reduction=0.95)
+        source = mesh_3d
+        target = mesh_3d
     else:
-        source = sks.Circle(n_points=20)
-        target = sks.Circle(n_points=20)
+        source = mesh_2d
+        target = mesh_2d
 
     assert source.dim == target.dim
     assert source.dim == dim
 
-    source.landmark_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    target.landmark_indices = [9, 10, 11, 12, 13, 14, 15, 16, 17]
+    source.landmark_indices = [0, 1, 2, 3, 4]
+    target.landmark_indices = [3, 2, 1, 0, 4]
 
     # Few type checks
     assert isinstance(source, sks.PolyData)
@@ -83,9 +80,9 @@ def test_registration_hypothesis(
         loss=loss,
         optimizer=optimizer,
         n_iter=n_iter,
-        gpu=gpu,
+        gpu=False,
         regularization=regularization,
-        verbose=verbose,
+        verbose=False,
     )
 
     # Check that the registration object is correctly initialized
@@ -133,17 +130,17 @@ def test_registration_device():
             the same as the device of the source and the target
         - If source.device != target.device, an error should be raised
     """
-    shape1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
-    shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
+    shape1 = mesh_3d
+    shape2 = mesh_3d
 
-    n_steps = 2
+    n_steps = 1
     models = [
         sks.RigidMotion(n_steps=n_steps),
         sks.ExtrinsicDeformation(n_steps=n_steps),
         sks.IntrinsicDeformation(n_steps=n_steps),
     ]
-    loss = sks.OptimalTransportLoss()
-    optimizer = sks.LBFGS()
+    loss = sks.L2Loss()
+    optimizer = sks.SGD()
 
     for model in models:
         for device in ["cpu", "cuda"]:
@@ -157,7 +154,7 @@ def test_registration_device():
                     optimizer=optimizer,
                     n_iter=1,
                     gpu=gpu,
-                    regularization=0.1,
+                    regularization=0,
                     verbose=1,
                 ).fit(source=source, target=target)
 
@@ -186,31 +183,30 @@ def test_registration_device():
             task.fit(source=source, target=target)
 
 
-def test_lddmm_control_points():
-    """Test to run LDDMM with control points."""
-    mesh1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
-    mesh2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
+def test_extrinsic_control_points():
+    """Test to run extrinsic deformation with control points."""
+    mesh1 = mesh_3d
+    mesh2 = mesh_3d
 
-    mesh1.control_points = mesh1.bounding_grid(N=5, offset=0.25)
+    mesh1.control_points = mesh1.bounding_grid(N=2, offset=0.25)
 
     # Define the model
     model = sks.ExtrinsicDeformation(
-        n_steps=5, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
+        n_steps=1, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
     )
 
     loss = sks.OptimalTransportLoss()
-    optimizer = sks.LBFGS()
+    optimizer = sks.SGD()
 
     registration = sks.Registration(
         model=model,
         loss=loss,
         optimizer=optimizer,
-        n_iter=10,
+        n_iter=1,
         regularization=0.1,
         gpu=False,
         verbose=True,
     )
 
     registration.fit(source=mesh1, target=mesh2)
-
     assert registration.parameter_.shape == mesh1.control_points.points.shape

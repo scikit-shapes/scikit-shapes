@@ -3,7 +3,6 @@
 import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
-from pyvista import examples
 
 import skshapes as sks
 from skshapes.utils import scatter
@@ -43,7 +42,7 @@ def test_multiscale_api():
     )
 
 
-def test_scattrer_toy():
+def test_scatter_toy():
     """A toy example to test the scatter function."""
     # dimension 1
     src = torch.tensor([1, -1, 0.5], dtype=sks.float_dtype)
@@ -85,13 +84,13 @@ def test_scattrer_toy():
 
 
 @given(
-    n=st.integers(min_value=1, max_value=500),
     n_dim=st.integers(min_value=0, max_value=2),
 )
 @settings(deadline=None)
-def test_scatter_multidim(n, n_dim):
+def test_scatter_multidim(n_dim):
     """Assert scatter function works as expected for multidim signals."""
     # dimension d
+    n = 15
     d = torch.randint(1, 10, (n_dim,))
 
     src = torch.rand(n, *d)
@@ -129,23 +128,20 @@ def test_scatter_multidim(n, n_dim):
 def test_multiscale(init_type):
     """Test the multiscale class for triangle meshes.
 
-    This test is based on the bunny example from pyvista.examples (~34K points)
-
     We initialize a multiscale object with 10 random ratios, pick two random
     ratios and test the signal propagation from high to low resolution and
     back, specifically the composition of two propagations.
     """
-    # Load a triangle mesh (~34k points)
-    mesh = sks.PolyData(examples.download_bunny())
+    mesh = sks.Sphere()
 
     if init_type == "ratios":
         # Pick 10 random ratios
-        ratios = torch.rand(10)
+        ratios = 0.9 * torch.rand(10) + 0.1  # between 0.1 and 1
         # Create the multiscale object
         M = sks.Multiscale(mesh, ratios=ratios)
     elif init_type == "n_points":
         # Pick 10 random n_points
-        n_points = torch.randint(1, mesh.n_points, (10,))
+        n_points = torch.randint(10, mesh.n_points, (10,))
         # Create the multiscale object
         M = sks.Multiscale(mesh, n_points=n_points)
 
@@ -255,20 +251,6 @@ def test_multiscale(init_type):
     assert torch.allclose(back2, low_resol_signal)
     assert torch.allclose(back3, low_resol_signal)
 
-    return
-
-    signal = torch.rand(M.at(1).n_points)
-    signal_out = M.signal_convolution(
-        signal,
-        signal_ratio=1,
-        target_ratio=coarse_ratio,
-        kernel="gaussian",
-        scale=0.01,
-        normalize=True,
-    )
-
-    assert signal_out.shape[0] == M.at(coarse_ratio).n_points
-
 
 @given(
     smoothing=st.sampled_from(["mesh_convolution", "constant"]),
@@ -276,7 +258,7 @@ def test_multiscale(init_type):
 @settings(deadline=None)
 def test_multiscale_signal_api(smoothing):
     """Test the multiscale signal API."""
-    mesh = sks.PolyData(examples.download_bunny())
+    mesh = sks.Sphere()
     ratios = [0.01, 0.1, 0.5, 1]
 
     coarse_to_fine_policy = sks.CoarseToFinePolicy(

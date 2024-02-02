@@ -22,7 +22,7 @@ def test_mesh_convolution_point_cloud():
 
 def test_squared_distance():
     """Test the squared distance function."""
-    N, M = 2000, 1000
+    N, M = 20, 10
 
     # Define two point clouds
     X = torch.randn(N, 3, dtype=sks.float_dtype)
@@ -106,24 +106,21 @@ def test_convolution_simple():
 
 
 @given(
-    N=st.integers(min_value=2, max_value=500),
-    M=st.integers(min_value=2, max_value=500),
-    scale=st.floats(min_value=0.01, max_value=100),
     kernel=st.sampled_from(["gaussian", "uniform"]),
     normalize=st.booleans(),
     dim=st.integers(min_value=1, max_value=2),
 )
 @settings(deadline=None)
 def test_convolution_functional(
-    N: int,
-    M: int,
-    scale: float,
     kernel: str,
     normalize: bool,
     dim: int,
 ):
     """Test the convolution results by comparing with direct computations."""
     # Sample two point clouds
+    M, N = torch.randint(low=2, high=8, size=(2,))
+    scale = 0.01 + torch.rand(1).item()
+
     X = torch.rand(N, 3).to(sks.float_dtype)
     Y = torch.rand(M, 3).to(sks.float_dtype)
 

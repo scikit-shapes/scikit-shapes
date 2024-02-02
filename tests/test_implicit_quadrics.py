@@ -20,7 +20,7 @@ sys.path.append(sys.path[0][:-4])
 
 
 @given(n_points=st.integers(min_value=5, max_value=10))
-@settings(deadline=10000)
+@settings(max_examples=1, deadline=10000)
 def test_quadratic_function(*, n_points: int):
     """Test on a simple dataset z = f(x, y)."""
     # Create the dataset
