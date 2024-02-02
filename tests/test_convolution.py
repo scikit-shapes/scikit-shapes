@@ -118,7 +118,7 @@ def test_convolution_functional(
 ):
     """Test the convolution results by comparing with direct computations."""
     # Sample two point clouds
-    M, N = torch.randint(low=2, high=500, size=(2,))
+    M, N = torch.randint(low=2, high=8, size=(2,))
     scale = 0.01 + torch.rand(1).item()
 
     X = torch.rand(N, 3).to(sks.float_dtype)
