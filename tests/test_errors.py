@@ -66,7 +66,7 @@ def test_errors_metrics():
         sks.IntrinsicDeformation(),
     ],
 )
-def tests_error_registration(model):
+def test_error_registration(model):
     """Raise some errors for the Registration class."""
     source = sks.Sphere()
     target = sks.Sphere()
@@ -121,6 +121,27 @@ def test_errors_polydata():
 
     with pytest.raises(IndexError):
         polydata.triangles = triangles
+
+
+def test_errors_dataset_attributes():
+    """Raise some errors for the DatasetAttributes class."""
+    attributes = sks.data.utils.DataAttributes(n=50, device="cpu")
+
+    # add two attributes
+    attributes.append(torch.rand(50, 3))
+    attributes.append(torch.rand(50, 3))
+    print(attributes)  # noqa: T201
+
+    with pytest.raises(ValueError, match="should not be empty"):
+        sks.data.utils.DataAttributes.from_dict({})
+
+    with pytest.raises(
+        ValueError, match="cannot change the number of elements"
+    ):
+        attributes.n = 51
+
+    with pytest.raises(ValueError, match="cannot change the device"):
+        attributes.device = "cuda"
 
 
 def test_errors_decimation():
@@ -229,3 +250,11 @@ def test_multiscale_not_implemented():
             signal_name="unknown_signal",
             from_ratio=0.5,
         )
+
+
+def test_error_loss():
+    with pytest.raises(NotImplementedError):
+        sks.loss.baseloss.BaseLoss()
+
+    with pytest.raises(ValueError, match="p must be positive"):
+        sks.LpLoss(p=-1)
