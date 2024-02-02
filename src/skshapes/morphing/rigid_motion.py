@@ -268,9 +268,8 @@ class RigidMotion(BaseModel):
         """
         if shape.dim == 3:
             return (2, 3)
-        elif shape.dim == 2:
+        else:  # shape.dim == 2
             return (3,)
-        return None
 
 
 @convert_inputs

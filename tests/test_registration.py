@@ -195,7 +195,7 @@ def test_extrinsic_control_points():
         n_steps=1, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
     )
 
-    loss = sks.OptimalTransportLoss()
+    loss = sks.OptimalTransportLoss() + 2 * sks.EmptyLoss()
     optimizer = sks.SGD()
 
     registration = sks.Registration(

@@ -10,8 +10,8 @@ from skshapes.utils import scatter
 
 def test_multiscale_api():
     """Test the multiscale API."""
-    # Initialize with n_points
-    n_points = [10, 100]
+    # Initialize with n_points (and repeated n_points values, this should work)
+    n_points = [10, 10, 100, 100]
 
     # Parallel initialization
     mesh1 = sks.Sphere()
@@ -22,9 +22,14 @@ def test_multiscale_api():
         mesh1, n_points=n_points, decimation_module=decimation_module
     )
 
+    assert len(M1) == 3  # (10, 100, mesh1.n_points)
+    M1.append(n_points=50)
+    assert len(M1) == 4
+
     M2 = sks.Multiscale(
         mesh2, n_points=n_points, decimation_module=decimation_module
     )
+    M2.append(n_points=50)
 
     ratio = torch.rand(1).item()
     assert torch.allclose(
@@ -39,6 +44,16 @@ def test_multiscale_api():
     M1.propagate(
         signal_name="test_signal",
         from_n_points=100,
+    )
+
+    # test that indice mapping from a ratio to the same ratio is the identity
+    ratio = torch.rand(1).item()
+    assert torch.allclose(
+        M1.indice_mapping(
+            fine_ratio=ratio,
+            coarse_ratio=ratio,
+        ),
+        torch.arange(M1.at(ratio=ratio).n_points),
     )
 
 

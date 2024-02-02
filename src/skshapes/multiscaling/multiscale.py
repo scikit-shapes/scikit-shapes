@@ -255,10 +255,8 @@ class Multiscale:
         from_ratio = min(available_ratios, key=lambda x: abs(x - from_ratio))
 
         if signal_name not in self.shapes[from_ratio].point_data:
-            raise ValueError(
-                f"The signal {signal_name} is not available at the scale"
-                + f" {from_ratio}"
-            )
+            msg = f"{signal_name} not available at ratio {from_ratio}"
+            raise KeyError(msg)
 
         # propagate the signal from the origin to the other scales
         ratio_lower = [r for r in available_ratios if r < from_ratio]
@@ -389,3 +387,8 @@ class Multiscale:
         tmp = self.mappings_from_origin[fine_ratio]
         tmp = scatter(src=torch.arange(len(tmp)), index=tmp, reduce="min")
         return self.mappings_from_origin[coarse_ratio][tmp]
+
+    @typecheck
+    def __len__(self) -> int:
+        """Return the number of scales."""
+        return len(self.shapes)

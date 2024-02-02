@@ -4,7 +4,7 @@ import pytest
 import torch
 
 import skshapes as sks
-from skshapes.errors import ShapeError
+from skshapes.errors import NotFittedError, ShapeError
 
 
 def test_errors_metrics():
@@ -66,7 +66,7 @@ def test_errors_metrics():
         sks.IntrinsicDeformation(),
     ],
 )
-def tests_error_registration(model):
+def test_error_registration(model):
     """Raise some errors for the Registration class."""
     source = sks.Sphere()
     target = sks.Sphere()
@@ -121,3 +121,140 @@ def test_errors_polydata():
 
     with pytest.raises(IndexError):
         polydata.triangles = triangles
+
+
+def test_errors_dataset_attributes():
+    """Raise some errors for the DatasetAttributes class."""
+    attributes = sks.data.utils.DataAttributes(n=50, device="cpu")
+
+    # add two attributes
+    attributes.append(torch.rand(50, 3))
+    attributes.append(torch.rand(50, 3))
+    print(attributes)  # noqa: T201
+
+    with pytest.raises(ValueError, match="should not be empty"):
+        sks.data.utils.DataAttributes.from_dict({})
+
+    with pytest.raises(
+        ValueError, match="cannot change the number of elements"
+    ):
+        attributes.n = 51
+
+    with pytest.raises(ValueError, match="cannot change the device"):
+        attributes.device = "cuda"
+
+
+def test_errors_decimation():
+    """Trigger some errors for the decimation class."""
+    mesh_1 = sks.Sphere().decimate(target_reduction=0.9)
+    mesh_2 = sks.Sphere().decimate(target_reduction=0.5)
+    pointcloud = sks.PolyData(points=mesh_1.points)
+
+    with pytest.raises(ValueError, match="only works on triangle meshes"):
+        pointcloud.decimate(target_reduction=0.9)
+
+    with pytest.raises(
+        ValueError, match="n_points must be lower than mesh.n_points"
+    ):
+        mesh_1.decimate(n_points=100000)
+
+    with pytest.raises(ValueError, match="n_points must be positive"):
+        d = sks.Decimation(n_points=0)
+
+    with pytest.raises(
+        ValueError, match=r"target_reduction must be in the range \(0, 1\)"
+    ):
+        d = sks.Decimation(target_reduction=1.2)
+
+    with pytest.raises(
+        ValueError, match=r"ratio must be in the range \(0, 1\)"
+    ):
+        d = sks.Decimation(ratio=-0.2)
+
+    d = sks.Decimation(ratio=0.5)
+
+    with pytest.raises(NotFittedError):
+        d.transform(mesh_1)
+
+    d.fit(mesh_1)
+
+    with pytest.raises(ValueError, match=r"n_points must be positive"):
+        d.transform(mesh_1, n_points=-1)
+
+    with pytest.raises(
+        ValueError, match=r"target_reduction must be in the range \(0, 1\)"
+    ):
+        d.transform(mesh_1, target_reduction=1.2)
+
+    with pytest.raises(
+        ValueError, match=r"ratio must be in the range \(0, 1\)"
+    ):
+        d.transform(mesh_1, ratio=-0.2)
+
+    with pytest.raises(
+        ValueError, match=r"n_points must be lower than mesh.n_points"
+    ):
+        d.transform(mesh_1, n_points=100000)
+
+    with pytest.raises(
+        ValueError, match=r"mesh.n_points and mesh.triangles must be the same"
+    ):
+        d.transform(mesh_2, target_reduction=0.5)
+
+
+@pytest.mark.parametrize(
+    "property_name", ["collapses", "actual_reduction", "ref_mesh"]
+)
+def test_error_decimation_not_fitted(property_name):
+    """Test that an error is raised if a property is accessed before fitting."""
+    decimator = sks.Decimation(target_reduction=0.5)
+    with pytest.raises(NotFittedError):
+        getattr(decimator, property_name)
+
+
+def test_multiscale_not_implemented():
+    mesh = sks.Sphere()
+    ratios = [0.01, 0.5]
+    M = sks.Multiscale(mesh, ratios=ratios)
+
+    with pytest.raises(NotImplementedError):
+        M.at(scale=0.2)
+
+    with pytest.raises(NotImplementedError):
+        sks.Multiscale(mesh, scales=[0.1, 0.5])
+
+    with pytest.raises(NotImplementedError):
+        M.append(scale=0.2)
+
+    d = sks.Decimation(n_points=1)
+    with pytest.raises(NotFittedError):
+        # The decimation module is not fitted before passed to the Multiscale
+        # object
+        M = sks.Multiscale(mesh, ratios=ratios, decimation_module=d)
+
+    with pytest.raises(
+        NotImplementedError, match="Only triangle meshes are supported for now"
+    ):
+        M = sks.Multiscale(sks.Circle(n_points=4), ratios=ratios)
+
+    M.at(ratio=0.5)["signal"] = torch.zeros(M.at(ratio=0.5).n_points)
+
+    with pytest.raises(NotImplementedError):
+        M.propagate(
+            signal_name="signal",
+            from_scale=0.5,
+        )
+
+    with pytest.raises(KeyError, match="unknown_signal not available"):
+        M.propagate(
+            signal_name="unknown_signal",
+            from_ratio=0.5,
+        )
+
+
+def test_error_loss():
+    with pytest.raises(NotImplementedError):
+        sks.loss.baseloss.BaseLoss()
+
+    with pytest.raises(ValueError, match="p must be positive"):
+        sks.LpLoss(p=-1)

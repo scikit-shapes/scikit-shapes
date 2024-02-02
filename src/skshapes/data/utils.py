@@ -103,10 +103,11 @@ class DataAttributes(dict):
     @typecheck
     def _check_value(self, value: NumericalTensor) -> NumericalTensor:
         if value.shape[0] != self._n:
-            raise ShapeError(
+            msg = (
                 f"First dimension of the tensor should be {self._n}, got"
-                + f"{value.shape[0]}"
+                f"{value.shape[0]}"
             )
+            raise ShapeError(msg)
 
         if value.device != self._device:
             value = value.to(self._device)
@@ -192,19 +193,21 @@ class DataAttributes(dict):
     ) -> DataAttributes:
         """From dictionary constructor."""
         if len(attributes) == 0:
-            raise ValueError(
+            msg = (
                 "The dictionary of attributes should not be empty to"
-                + " initialize a DataAttributes object"
+                " initialize a DataAttributes object"
             )
+            raise ValueError(msg)
 
         # Ensure that the number of elements of the attributes is the same
         n = next(iter(attributes.values())).shape[0]
         for value in attributes.values():
             if value.shape[0] != n:
-                raise ShapeError(
+                msg = (
                     "The number of rows of each value the dictionary must be"
-                    + " the same to be convert to a DataAttributes object"
+                    " the same to be convert to a DataAttributes object"
                 )
+                raise ShapeError(msg)
 
         if device is None:
             # Ensure that the attributes are on the same device (if they are
@@ -214,10 +217,11 @@ class DataAttributes(dict):
                 device = next(iter(attributes.values())).device
                 for value in attributes.values():
                     if value.device != device:
-                        raise DeviceError(
+                        msg = (
                             "The attributes should be on the same device to be"
-                            + " converted into a DataAttributes object"
+                            " converted into a DataAttributes object"
                         )
+                        raise DeviceError(msg)
             else:
                 device = torch.device("cpu")
 
@@ -277,10 +281,11 @@ class DataAttributes(dict):
         ValueError
             If this setter is called.
         """
-        raise ValueError(
+        msg = (
             "You cannot change the number of elements of the set after the"
-            + " creation of the DataAttributes object"
+            " creation of the DataAttributes object"
         )
+        raise ValueError(msg)
 
     @property
     @typecheck
@@ -302,11 +307,12 @@ class DataAttributes(dict):
         ValueError
             If this setter is called.
         """
-        raise ValueError(
-            "You cannot change the device of the set after the creation of the"
-            + " DataAttributes object, use .to(device) to make a copy of the"
-            + " DataAttributes object on the new device"
+        msg = (
+            "You cannot change the device of the DataAttributes object after"
+            " its creation, use .to(device) to make a copy of the"
+            " DataAttributes object on the new device"
         )
+        raise ValueError(msg)
 
 
 def cached_method(*lru_args, **lru_kwargs):
