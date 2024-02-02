@@ -1,5 +1,6 @@
 # Workflow to build documentation
-# On pull request/push: build documentation but do not publish it (test it)
+# On pull request: build documentation but do not publish it if docs or examples are modified
+# On push to main: build documentation but do not publish it (test it)
 # On release/manual trigger: build and publish documentation
 name: Documentation
 
@@ -12,6 +13,10 @@ on:
     branches:
       - main
   pull_request:
+    paths:
+      - 'docs/**'
+      - 'examples/**'
+      - 'mkdocs.yml'
   workflow_dispatch:
   release:
 
@@ -47,8 +52,8 @@ jobs:
         - name: Setup headless display
           uses: pyvista/setup-headless-display-action@v2
 
-        - name: build documentation (pull request)
-          if: github.event_name == 'pull_request'
+        - name: build documentation (pull request or push)
+          if: github.event_name == 'pull_request' || github.event_name == 'push'
           run: mkdocs build
 
         - name: publish documentation (release or manual trigger)

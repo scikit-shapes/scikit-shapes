@@ -1,5 +1,6 @@
 # This wokflow builds and publishes the package to TestPyPI
-# Trigger on: release published and manually
+# Trigger on: release published, manually, scheduled
+# Publish only when release
 # See: https://learn.scientific-python.org/development/guides/gha-wheels/
 name: Wheels
 
@@ -8,6 +9,8 @@ on:
   release:
     types:
       - published
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html#tag_20_25_07
 
 jobs:
 
@@ -59,6 +62,7 @@ jobs:
 
   publish-to-testpypi:
 
+    if: github.event_name == 'release'
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     needs: [make_sdist, build_wheels]
     environment:
