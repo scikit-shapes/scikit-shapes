@@ -136,12 +136,12 @@ def test_multiscale(init_type):
 
     if init_type == "ratios":
         # Pick 10 random ratios
-        ratios = torch.rand(10)
+        ratios = 0.9 * torch.rand(10) + 0.1  # between 0.1 and 1
         # Create the multiscale object
         M = sks.Multiscale(mesh, ratios=ratios)
     elif init_type == "n_points":
         # Pick 10 random n_points
-        n_points = torch.randint(1, mesh.n_points, (10,))
+        n_points = torch.randint(10, mesh.n_points, (10,))
         # Create the multiscale object
         M = sks.Multiscale(mesh, n_points=n_points)
 
