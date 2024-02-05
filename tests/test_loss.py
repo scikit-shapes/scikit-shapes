@@ -1,4 +1,5 @@
 """Tests for the loss functions."""
+
 import torch
 
 import skshapes as sks

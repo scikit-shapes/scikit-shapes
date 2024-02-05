@@ -1,4 +1,5 @@
 """PolyData class."""
+
 from __future__ import annotations
 
 import functools
@@ -448,16 +449,16 @@ class PolyData(polydata_type):
         # Add the landmarks if any
         if hasattr(self, "_landmarks") and self.landmarks is not None:
             coalesced_landmarks = self.landmarks.coalesce()
-            polydata.field_data[
-                "landmarks_values"
-            ] = coalesced_landmarks.values()
-            polydata.field_data[
-                "landmarks_indices"
-            ] = coalesced_landmarks.indices()
+            polydata.field_data["landmarks_values"] = (
+                coalesced_landmarks.values()
+            )
+            polydata.field_data["landmarks_indices"] = (
+                coalesced_landmarks.indices()
+            )
             polydata.field_data["landmarks_size"] = coalesced_landmarks.size()
-            polydata.field_data[
-                "landmark_points"
-            ] = self.landmark_points.detach()
+            polydata.field_data["landmark_points"] = (
+                self.landmark_points.detach()
+            )
 
         return polydata
 

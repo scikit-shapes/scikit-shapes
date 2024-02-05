@@ -1,4 +1,5 @@
 """Functions related to triangle meshes."""
+
 from .edge_topology import EdgeTopology
 from .energy import (
     bending_energy,

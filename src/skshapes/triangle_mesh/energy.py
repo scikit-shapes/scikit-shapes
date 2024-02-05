@@ -1,4 +1,5 @@
 """Energy functions for triangle meshes."""
+
 from typing import Optional, Union
 
 import torch
