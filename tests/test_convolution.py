@@ -252,14 +252,14 @@ def test_multidimensional_signal_convolution():
 
     a, b, c = randtriplet(10)
     data = torch.rand(n_points, a, b, c).to(sks.float_dtype)
-    mesh["signal"] = data
+    mesh.point_data["signal"] = data
 
     # Compute the mesh convolution operator
     M = mesh.mesh_convolution()
     # assert that the @ operator is well defined
     # and that the output signal has the expected shape
     assert M.shape == (n_points, n_points)
-    assert mesh["signal"].shape == (n_points, a, b, c)
+    assert mesh.point_data["signal"].shape == (n_points, a, b, c)
     assert (M @ data).shape == (n_points, a, b, c)
 
 
