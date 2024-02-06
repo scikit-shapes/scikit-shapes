@@ -229,10 +229,10 @@ class PolyData(polydata_type):
         else:
             self._control_points = None
 
+        self.device = device
+
         # Initialize
         self.point_data = point_data
-
-        self.device = device
 
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
@@ -595,9 +595,12 @@ class PolyData(polydata_type):
                 if isinstance(attribute, torch.Tensor):
                     setattr(self, attr, attribute.to(device))
 
-        if self._point_data is not None:
+        if hasattr(self, "_point_data") and self._point_data is not None:
             self._point_data = self._point_data.to(device)
-        if self._control_points is not None:
+        if (
+            hasattr(self, "_control_points")
+            and self._control_points is not None
+        ):
             self._control_points = self._control_points.to(device)
 
     ################################
