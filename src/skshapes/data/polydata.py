@@ -97,8 +97,8 @@ class PolyData(polydata_type):
                 mesh = pyvista.read(points)
             elif type(points) is PyvistaPolyData:
                 mesh = points
-            # Now, mesh is a pyvista mesh
 
+            # Now, mesh is a pyvista mesh
             cleaned_mesh = mesh.clean()
 
             if cleaned_mesh.n_points != mesh.n_points:
@@ -120,7 +120,7 @@ class PolyData(polydata_type):
                 if point_data is not None or len(mesh.point_data) > 0:
                     warn(
                         "Mesh has been cleaned and points were removed."
-                        + " Points data are ignored.",
+                        + " point_data is ignored.",
                         stacklevel=3,
                     )
                     mesh.point_data.clear()
@@ -183,6 +183,26 @@ class PolyData(polydata_type):
                     size=tuple(mesh.field_data["landmarks_size"]),
                     dtype=float_dtype,
                 )
+
+            if any(x.startswith("edge_data") for x in mesh.field_data):
+                edge_data = DataAttributes()
+                prefix = "edge_data_"
+                for key in mesh.field_data:
+                    if key.startswith(prefix) and not key.endswith("_shape"):
+                        shape = tuple(mesh.field_data[key + "_shape"])
+                        edge_data[key[len(prefix) :]] = mesh.field_data[
+                            key
+                        ].reshape(shape)
+
+            if any(x.startswith("triangle_data") for x in mesh.field_data):
+                triangle_data = DataAttributes()
+                prefix = "triangle_data_"
+                for key in mesh.field_data:
+                    if key.startswith(prefix) and not key.endswith("_shape"):
+                        shape = tuple(mesh.field_data[key + "_shape"])
+                        triangle_data[key[len(prefix) :]] = mesh.field_data[
+                            key
+                        ].reshape(shape)
 
         if device is None:
             device = points.device
@@ -440,6 +460,26 @@ class PolyData(polydata_type):
                     polydata.field_data[str(key) + "_shape"] = point_data_dict[
                         key
                     ].shape
+
+        # Add edge_data as field_data
+        if len(self.edge_data) > 0:
+            edge_data_dict = self.edge_data.to_numpy_dict()
+            for key in edge_data_dict:
+                shape = edge_data_dict[key].shape
+                flat = edge_data_dict[key].reshape(self.n_edges, -1)
+                polydata.field_data["edge_data_" + str(key)] = flat
+                polydata.field_data["edge_data_" + str(key) + "_shape"] = shape
+
+        # Add triangle_data as field_data
+        if len(self.triangle_data) > 0:
+            triangle_data_dict = self.triangle_data.to_numpy_dict()
+            for key in triangle_data_dict:
+                shape = triangle_data_dict[key].shape
+                flat = triangle_data_dict[key].reshape(self.n_triangles, -1)
+                polydata.field_data["triangle_data_" + str(key)] = flat
+                polydata.field_data["triangle_data_" + str(key) + "_shape"] = (
+                    shape
+                )
 
         # Add the landmarks if any
         if hasattr(self, "_landmarks") and self.landmarks is not None:

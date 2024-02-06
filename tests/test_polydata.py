@@ -417,6 +417,19 @@ def test_edge_triangle_data():
         copy.triangle_data["fake_areas"], mesh.triangle_data["fake_areas"]
     )
 
+    # back and forth with pyvista/vedo
+
+    for mesh_ext in [mesh.to_pyvista(), mesh.to_vedo()]:
+        mesh_back = sks.PolyData(mesh_ext)
+
+        assert torch.allclose(
+            mesh_back.edge_data["fake_lengths"], mesh.edge_data["fake_lengths"]
+        )
+        assert torch.allclose(
+            mesh_back.triangle_data["fake_areas"],
+            mesh.triangle_data["fake_areas"],
+        )
+
 
 def test_point_data2():
     """Test the PointData (signals) interface: higher dimension."""
