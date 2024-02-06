@@ -621,7 +621,7 @@ class PolyData(polydata_type):
 
     @point_data.setter
     @typecheck
-    def point_data(self, point_data_dict: dict | None) -> None:
+    def point_data(self, point_data: DataAttributes | dict | None) -> None:
         """Point data setter.
 
         Parameters
@@ -629,25 +629,25 @@ class PolyData(polydata_type):
         point_data_dict
             The new point data of the shape.
         """
-        if point_data_dict is None:
+        if point_data is None:
             self._point_data = DataAttributes(
                 n=self.n_points,
                 device=self.device,
             )
 
+        elif not isinstance(point_data, DataAttributes):
+            self._point_data = DataAttributes.from_dict(point_data).to(
+                self.device
+            )
+
         else:
-            if not isinstance(point_data_dict, DataAttributes):
-                # Convert the point_data to a DataAttributes object
-                # the from_dict method will check that the point_data are valid
-                point_data_dict = DataAttributes.from_dict(point_data_dict)
+            self._point_data = point_data.to(self.device)
 
-            if point_data_dict.n != self.n_points:
-                raise ShapeError(
-                    "The number of points in the point_data entries should be"
-                    + " the same as the number of points in the shape."
-                )
-
-            self._point_data = point_data_dict.to(self.device)
+        if self._point_data.n != self.n_points:
+            raise ShapeError(
+                "The number of points in the point_data entries should be"
+                + " the same as the number of points in the shape."
+            )
 
     @typecheck
     def __getitem__(self, key: Any) -> NumericalTensor:
