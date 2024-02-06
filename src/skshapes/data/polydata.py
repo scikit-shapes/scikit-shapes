@@ -604,6 +604,10 @@ class PolyData(polydata_type):
 
         if hasattr(self, "_point_data") and self._point_data is not None:
             self._point_data = self._point_data.to(device)
+        if hasattr(self, "_edge_data") and self._edge_data is not None:
+            self._edge_data = self._edge_data.to(device)
+        if hasattr(self, "_triangle_data") and self._triangle_data is not None:
+            self._triangle_data = self._triangle_data.to(device)
         if (
             hasattr(self, "_control_points")
             and self._control_points is not None

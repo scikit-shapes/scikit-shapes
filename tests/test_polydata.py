@@ -631,6 +631,35 @@ def test_point_data_cuda():
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"
 
 
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Cuda is required for this test"
+)
+def test_edge_triangle_data_cuda():
+
+    # Load a mesh and set edge and triangle data
+    mesh = sks.Sphere()
+    mesh.edge_data["edge_signal"] = torch.rand(mesh.n_edges, 3)
+    mesh.edge_data["edge_signal2"] = torch.rand(mesh.n_edges, 3)
+    mesh.triangle_data["triangle_signal"] = torch.rand(mesh.n_triangles, 2)
+    assert mesh.device.type == "cpu"
+
+    # Convert the mesh to cuda and assert signals are still there
+    mesh_cuda = mesh.to("cuda")
+    assert mesh_cuda.device.type == "cuda"
+    assert len(mesh_cuda.edge_data) == 2
+    assert len(mesh_cuda.triangle_data) == 1
+
+    # Back to cpu, assert signals are still the same as before
+    back = mesh_cuda.to("cpu")
+    assert torch.allclose(
+        back.edge_data["edge_signal"], mesh.edge_data["edge_signal"]
+    )
+    assert torch.allclose(
+        back.triangle_data["triangle_signal"],
+        mesh.triangle_data["triangle_signal"],
+    )
+
+
 @pytest.mark.filterwarnings("ignore::UserWarning")
 def test_polydata_signal_and_landmarks():
     """Test preservation of landmarks and signal when converting."""
