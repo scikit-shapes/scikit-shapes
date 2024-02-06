@@ -1,4 +1,5 @@
 """Decimation module."""
+
 from __future__ import annotations
 
 import fast_simplification

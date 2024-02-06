@@ -1,6 +1,5 @@
 """Test the registration task."""
 
-
 import pytest
 import torch
 from hypothesis import given, settings

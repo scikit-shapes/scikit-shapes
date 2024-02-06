@@ -1,4 +1,5 @@
 """Registration between two shapes."""
+
 from __future__ import annotations
 
 from typing import get_args

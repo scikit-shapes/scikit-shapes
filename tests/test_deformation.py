@@ -1,6 +1,5 @@
 """Tests for the deformation modules."""
 
-
 import pytest
 import torch
 

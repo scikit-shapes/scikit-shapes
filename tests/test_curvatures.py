@@ -51,9 +51,7 @@ def test_curvatures_quadratic(
     e = 0 * e
 
     def poly(x, y):
-        return (
-            0.5 * a * x**2 + b * x * y + 0.5 * c * y**2 + d * x + e * y + f
-        )
+        return 0.5 * a * x**2 + b * x * y + 0.5 * c * y**2 + d * x + e * y + f
 
     # See Example 4.2 in Curvature formulas for implicit curves and surfaces,
     # Goldman, 2005, for reference on those formulas, keeping in mind that
@@ -223,8 +221,7 @@ if __name__ == "__main__":
             "highlight": 0 if False else int(31**2 / 2),
         },
         {
-            "function": lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt()
-            - 1,
+            "function": lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
             "scale": 0.05,
             "n_points": 15,
             "noise": 0.01,
