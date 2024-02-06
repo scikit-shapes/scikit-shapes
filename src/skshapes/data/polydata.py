@@ -58,6 +58,8 @@ class PolyData(polydata_type):
         landmarks: Landmarks | IntSequence | None = None,
         control_points: polydata_type | None = None,
         point_data: DataAttributes | None = None,
+        edge_data: DataAttributes | None = None,
+        triangle_data: DataAttributes | None = None,
         cache_size: int | None = None,
     ) -> None:
         """Class constructor.
@@ -617,25 +619,59 @@ class PolyData(polydata_type):
         point_data_dict
             The new point data of the shape.
         """
-        if point_data is None:
-            self._point_data = DataAttributes(
-                n=self.n_points,
-                device=self.device,
-            )
+        self._point_data = self._generic_data_attribute_setter(
+            value=point_data, n=self.n_points, name="point_data"
+        )
 
-        elif not isinstance(point_data, DataAttributes):
-            self._point_data = DataAttributes.from_dict(point_data).to(
-                self.device
-            )
+    def _generic_data_attribute_setter(
+        self,
+        value: DataAttributes | dict | None,
+        n: int,
+        name: str,
+    ) -> DataAttributes:
+        """Generic data setter.
 
+        Reusable method to set the point_data, edge_data and triangle_data
+
+        Parameters
+        ----------
+        value
+            The data initializer, can be a DataAttributes, a dictionary or None.
+        n
+            The expected first dimension of the data (typically the number of
+            points, edges or triangles).
+        name
+            The name of the attribute (point_data, edge_data or triangle_data).
+            Used for error messages.
+
+        Returns
+        -------
+        DataAttributes
+            The data attributes.
+
+        Raises
+        ------
+        ShapeError
+            If the first dimension of the data is different from the
+            expected one.
+        """
+
+        if value is None:
+            data_attr = DataAttributes(n=n, device=self.device)
+        elif not isinstance(value, DataAttributes):
+            data_attr = DataAttributes.from_dict(value).to(self.device)
         else:
-            self._point_data = point_data.to(self.device)
+            data_attr = value.to(self.device)
 
-        if self._point_data.n != self.n_points:
-            raise ShapeError(
-                "The number of points in the point_data entries should be"
-                + " the same as the number of points in the shape."
+        if data_attr.n != n:
+            error_message = (
+                f"The expected first dimension of {name} entries should be {n}"
+                + f" but got {data_attr.n}."
             )
+            raise ShapeError(error_message)
+        return data_attr
+
+    ######## getitem : TODO remove them !! ########
 
     @typecheck
     def __getitem__(self, key: Any) -> NumericalTensor:
