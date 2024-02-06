@@ -227,20 +227,8 @@ class PolyData(polydata_type):
         else:
             self._control_points = None
 
-        # Initialize the point_data if it was not done before
-        if point_data is None:
-            self._point_data = DataAttributes(
-                n=self.n_points,
-                device=self.device,
-            )
-        else:
-            assert (
-                point_data.n == self.n_points
-            ), "point_data must have the same number of points as the shape"
-            if point_data.device != self.device:
-                point_data = point_data.to(self.device)
-
-            self._point_data = point_data
+        # Initialize
+        self.point_data = point_data
 
         self.device = device
 
