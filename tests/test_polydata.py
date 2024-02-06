@@ -83,11 +83,8 @@ def test_polydata_creation():
     assert isinstance(triangle.points, torch.Tensor)
     assert triangle.triangles.dtype == sks.int_dtype
 
-    # edges are computed on the fly when the getter is called
-    assert triangle._edges is None
     assert triangle.edges is not None
     assert triangle._edges is not None
-    assert triangle._triangles is not None
     assert triangle.n_triangles == 1
     assert triangle.n_edges == 3
     assert triangle.n_points == 3
@@ -388,6 +385,27 @@ def test_point_data():
     # Same through the __getitem__ interface
     with pytest.raises(KeyError):
         mesh["dummy"]
+
+
+def test_edge_triangle_data():
+    mesh = sks.Sphere()
+
+    n_edges = mesh.n_edges
+    n_triangles = mesh.n_triangles
+
+    # Add some edge_data
+    mesh.edge_data["fake_lengths"] = torch.rand(n_edges)
+    mesh.edge_data["multidim"] = torch.rand(n_edges, 2, 2, 2)
+
+    # Add some triangle_data
+    mesh.triangle_data["fake_areas"] = torch.rand(n_triangles)
+    mesh.triangle_data["multidim"] = torch.rand(n_triangles, 2, 2, 2)
+
+    with pytest.raises(ShapeError):
+        mesh.edge_data.append(torch.rand(n_edges + 1))
+
+    with pytest.raises(ShapeError):
+        mesh.triangle_data.append(torch.rand(n_triangles + 1))
 
 
 def test_point_data2():

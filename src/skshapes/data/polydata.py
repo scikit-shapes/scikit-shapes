@@ -233,6 +233,8 @@ class PolyData(polydata_type):
 
         # Initialize
         self.point_data = point_data
+        self.edge_data = edge_data
+        self.triangle_data = triangle_data
 
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
@@ -624,6 +626,56 @@ class PolyData(polydata_type):
         """
         self._point_data = self._generic_data_attribute_setter(
             value=point_data, n=self.n_points, name="point_data"
+        )
+
+    ################################
+    #### edge_data getter/setter ###
+    ################################
+
+    @property
+    @typecheck
+    def edge_data(self) -> DataAttributes:
+        """Edge data getter."""
+        return self._edge_data
+
+    @edge_data.setter
+    @typecheck
+    def edge_data(self, edge_data: DataAttributes | dict | None) -> None:
+        """Edge data setter.
+
+        Parameters
+        ----------
+        edge_data
+            The new edge data of the shape.
+        """
+        self._edge_data = self._generic_data_attribute_setter(
+            value=edge_data, n=self.n_edges, name="edge_data"
+        )
+
+    ####################################
+    #### triangle_data getter/setter ###
+    ####################################
+
+    @property
+    @typecheck
+    def triangle_data(self) -> DataAttributes:
+        """Triangle data getter."""
+        return self._triangle_data
+
+    @triangle_data.setter
+    @typecheck
+    def triangle_data(
+        self, triangle_data: DataAttributes | dict | None
+    ) -> None:
+        """Triangle data setter.
+
+        Parameters
+        ----------
+        triangle_data
+            The new triangle data of the shape.
+        """
+        self._triangle_data = self._generic_data_attribute_setter(
+            value=triangle_data, n=self.n_triangles, name="triangle_data"
         )
 
     def _generic_data_attribute_setter(
