@@ -268,7 +268,7 @@ class Multiscale:
         for i in range(len(ratio_lower) - 1):
             source_ratio = ratio_lower[i]
             target_ratio = ratio_lower[i + 1]
-            source_signal = self.at(ratio=source_ratio)[signal_name]
+            source_signal = self.at(ratio=source_ratio).point_data[signal_name]
             target_signal = self._signal_from_one_scale_to_another(
                 source_signal=source_signal,
                 source_ratio=source_ratio,
@@ -276,12 +276,12 @@ class Multiscale:
                 fine_to_coarse_policy=fine_to_coarse_policy,
                 coarse_to_fine_policy=coarse_to_fine_policy,
             )
-            self.at(ratio=target_ratio)[signal_name] = target_signal
+            self.at(ratio=target_ratio).point_data[signal_name] = target_signal
 
         for i in range(len(ratio_higher) - 1):
             source_ratio = ratio_higher[i]
             target_ratio = ratio_higher[i + 1]
-            source_signal = self.at(ratio=source_ratio)[signal_name]
+            source_signal = self.at(ratio=source_ratio).point_data[signal_name]
             target_signal = self._signal_from_one_scale_to_another(
                 source_signal=source_signal,
                 source_ratio=source_ratio,
@@ -289,7 +289,7 @@ class Multiscale:
                 fine_to_coarse_policy=fine_to_coarse_policy,
                 coarse_to_fine_policy=coarse_to_fine_policy,
             )
-            self.at(ratio=target_ratio)[signal_name] = target_signal
+            self.at(ratio=target_ratio).point_data[signal_name] = target_signal
 
     @convert_inputs
     @typecheck

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Any, Literal
+from typing import Literal
 from warnings import warn
 
 import numpy as np
@@ -24,7 +24,6 @@ from ..types import (
     IntTensor,
     Landmarks,
     Number,
-    NumericalTensor,
     Points,
     Triangles,
     float_dtype,
@@ -458,6 +457,10 @@ class PolyData(polydata_type):
 
         return polydata
 
+    ###########################
+    #### Plotting utilities ###
+    ###########################
+
     def plot(
         self,
         backend: Literal["pyvista", "vedo"] = "pyvista",
@@ -735,21 +738,21 @@ class PolyData(polydata_type):
             raise ShapeError(error_message)
         return data_attr
 
-    ######## getitem : TODO remove them !! ########
+    ######## getitem : TODO remove it !! ########
 
-    @typecheck
-    def __getitem__(self, key: Any) -> NumericalTensor:
-        """Return the point data corresponding to the key."""
-        if key not in self._point_data:
-            msg = f"Point data {key} is not defined."
-            raise KeyError(msg)
-        return self._point_data[key]
+    # @typecheck
+    # def __getitem__(self, key: Any) -> NumericalTensor:
+    #     """Return the point data corresponding to the key."""
+    #     if key not in self._point_data:
+    #         msg = f"Point data {key} is not defined."
+    #         raise KeyError(msg)
+    #     return self._point_data[key]
 
-    @convert_inputs
-    @typecheck
-    def __setitem__(self, key: Any, value: NumericalTensor) -> None:
-        """Set the point data corresponding to the key."""
-        self._point_data[key] = value
+    # @convert_inputs
+    # @typecheck
+    # def __setitem__(self, key: Any, value: NumericalTensor) -> None:
+    #     """Set the point data corresponding to the key."""
+    #     self._point_data[key] = value
 
     #################################
     #### Landmarks getter/setter ####

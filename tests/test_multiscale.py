@@ -38,7 +38,7 @@ def test_multiscale_api():
     )
 
     # propagate a signal with default policies
-    M1.at(n_points=100)["test_signal"] = torch.rand(
+    M1.at(n_points=100).point_data["test_signal"] = torch.rand(
         M1.at(n_points=100).n_points
     )
     M1.propagate(
@@ -286,7 +286,7 @@ def test_multiscale_signal_api(smoothing):
     M = sks.Multiscale(mesh, ratios=ratios)
 
     n = M.at(ratio=0.1).n_points
-    M.at(ratio=0.1)["test_signal"] = torch.rand(n)
+    M.at(ratio=0.1).point_data["test_signal"] = torch.rand(n)
     assert "test_signal" not in M.at(ratio=0.5).point_data
 
     M.propagate(
@@ -296,7 +296,9 @@ def test_multiscale_signal_api(smoothing):
         fine_to_coarse_policy=fine_to_coarse_policy,
     )
 
-    M.at(ratio=0.5)["test_signal"] = torch.rand(M.at(ratio=0.5).n_points)
+    M.at(ratio=0.5).point_data["test_signal"] = torch.rand(
+        M.at(ratio=0.5).n_points
+    )
 
     assert "test_signal" in M.at(ratio=0.5).point_data
 

@@ -335,7 +335,7 @@ def test_point_data():
         copy.point_data["hessians"], mesh.point_data["hessians"]
     )
     copy.point_data["hessians"] = torch.rand(
-        *mesh["hessians"].shape
+        *mesh.point_data["hessians"].shape
     )  # If the copy was not correct, this would also change the point_data of
     # the original mesh
     assert not torch.allclose(
@@ -384,7 +384,7 @@ def test_point_data():
 
     # Same through the __getitem__ interface
     with pytest.raises(KeyError):
-        mesh["dummy"]
+        mesh.point_data["dummy"]
 
 
 def test_edge_triangle_data():
@@ -475,7 +475,9 @@ def test_point_data2():
 
     # Check that signal can be transferred back and forth with pyvista
     # and vedo if ndims is high
-    sks_mesh["many_dims_signal"] = torch.rand(sks_mesh.n_points, 2, 2, 2, 2)
+    sks_mesh.point_data["many_dims_signal"] = torch.rand(
+        sks_mesh.n_points, 2, 2, 2, 2
+    )
 
     to_pv = sks_mesh.to_pyvista()
     to_vedo = sks_mesh.to_vedo()
@@ -484,10 +486,12 @@ def test_point_data2():
     back_from_vedo = sks.PolyData(to_vedo)
 
     assert torch.allclose(
-        back_from_pv["many_dims_signal"], sks_mesh["many_dims_signal"]
+        back_from_pv.point_data["many_dims_signal"],
+        sks_mesh.point_data["many_dims_signal"],
     )
     assert torch.allclose(
-        back_from_vedo["many_dims_signal"], sks_mesh["many_dims_signal"]
+        back_from_vedo.point_data["many_dims_signal"],
+        sks_mesh.point_data["many_dims_signal"],
     )
 
     # Reset signals
@@ -668,13 +672,13 @@ def test_polydata_signal_and_landmarks():
     signal = torch.rand(sphere.n_points, dtype=sks.float_dtype)
 
     sphere.landmark_indices = landmarks
-    sphere["signal"] = signal
+    sphere.point_data["signal"] = signal
 
     sphere_pv = sphere.to_pyvista()
 
     sphere_back = sks.PolyData(sphere_pv)
     assert torch.allclose(sphere_back.landmark_indices, landmarks)
-    assert torch.allclose(sphere_back["signal"], signal)
+    assert torch.allclose(sphere_back.point_data["signal"], signal)
 
     # Add a point not connected to the mesh
     import numpy as np
