@@ -358,6 +358,10 @@ class PolyData(polydata_type):
             kwargs["landmarks"] = self._landmarks.clone()
         if self._point_data is not None:
             kwargs["point_data"] = self._point_data.clone()
+        if self._edge_data is not None:
+            kwargs["edge_data"] = self._edge_data.clone()
+        if self._triangle_data is not None:
+            kwargs["triangle_data"] = self._triangle_data.clone()
         if self._control_points is not None:
             kwargs["control_points"] = self.control_points.copy()
 

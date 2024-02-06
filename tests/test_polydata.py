@@ -407,6 +407,16 @@ def test_edge_triangle_data():
     with pytest.raises(ShapeError):
         mesh.triangle_data.append(torch.rand(n_triangles + 1))
 
+    copy = mesh.copy()
+
+    assert torch.allclose(
+        copy.edge_data["fake_lengths"], mesh.edge_data["fake_lengths"]
+    )
+
+    assert torch.allclose(
+        copy.triangle_data["fake_areas"], mesh.triangle_data["fake_areas"]
+    )
+
 
 def test_point_data2():
     """Test the PointData (signals) interface: higher dimension."""
