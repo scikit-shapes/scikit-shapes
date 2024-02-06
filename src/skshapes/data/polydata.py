@@ -513,7 +513,10 @@ class PolyData(polydata_type):
     @convert_inputs
     @typecheck
     def edges(self, edges: Edges) -> None:
-        """Set the edges of the shape and the triangles to None."""
+        """Set the edges of the shape and set the triangles to None.
+
+        Also reinitialize edge_data, triangle_data and the cache.
+        """
         if edges.max() >= self.n_points:
             raise IndexError(
                 "The maximum vertex index in edges array is larger than the"
@@ -521,6 +524,8 @@ class PolyData(polydata_type):
             )
         self._edges = edges.clone().to(self.device)
         self._triangles = None
+        self.edge_data = None
+        self.triangle_data = None
         self.cache_clear()
 
     #################################
@@ -536,7 +541,10 @@ class PolyData(polydata_type):
     @convert_inputs
     @typecheck
     def triangles(self, triangles: Triangles) -> None:
-        """Set the triangles of the shape and edges to None."""
+        """Set the triangles of the shape and set edges to None.
+
+        Also reinitialize edge_data, triangle_data and the cache.
+        """
         if triangles.max() >= self.n_points:
             raise IndexError(
                 "The maximum vertex index in triangles array is larger than"
@@ -545,6 +553,8 @@ class PolyData(polydata_type):
 
         self._triangles = triangles.clone().to(self.device)
         self._edges = None
+        self.edge_data = None
+        self.triangle_data = None
         self.cache_clear()
 
     ##############################
