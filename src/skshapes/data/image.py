@@ -1,4 +1,5 @@
 """Image shape class."""
+
 from ..types import image_type
 
 

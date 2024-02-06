@@ -1,4 +1,5 @@
 """Basic types aliases and utility functions for scikit-shapes."""
+
 import os
 from typing import Literal, NamedTuple, Optional, Union
 from warnings import warn

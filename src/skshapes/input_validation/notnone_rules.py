@@ -21,6 +21,7 @@ Decorators already implemented:
 - `one_and_only_one` : one and only one of the parameters must be not None
 - `no_more_than_one` : no more than one of the parameters must be not None
 """
+
 from functools import wraps
 
 from ..errors import InputStructureError
