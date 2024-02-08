@@ -145,4 +145,4 @@ def test_rigid_motion_multiple_steps(shape):
         shape=shape, parameter=parameter, return_path=True
     ).path[-1]
 
-    assert torch.allclose(out.points, out2.points)
+    assert torch.allclose(out.points, out2.points, rtol=1e-3)

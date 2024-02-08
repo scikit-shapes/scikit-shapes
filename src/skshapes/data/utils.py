@@ -44,19 +44,29 @@ class DataAttributes(dict):
     """
 
     @typecheck
-    def __init__(self, *, n: int, device: str | torch.device) -> None:
+    def __init__(
+        self,
+        *,
+        n: int | None = None,
+        device: str | torch.device | None = None,
+    ) -> None:
         """Class constructor.
 
         Parameters
         ----------
         n
-            The number of elements of the set.
+            The number of elements of the set. If None, it will be determined
+            by the first attribute added to the DataAttributes object.
         device
-            The device on which the attributes should be stored.
+            The device on which the attributes should be stored. If None, it
+            will be determined by the first attribute added to the
         """
-        self._n = n
-        device = torch.Tensor().to(device).device
-        self._device = device
+        if n is not None:
+            self._n = n
+
+        if device is not None:
+            device = torch.Tensor().to(device).device
+            self._device = device
 
     @typecheck
     def __getitem__(self, key: Any) -> NumericalTensor:
@@ -102,6 +112,12 @@ class DataAttributes(dict):
     @convert_inputs
     @typecheck
     def _check_value(self, value: NumericalTensor) -> NumericalTensor:
+
+        if not hasattr(self, "_n"):
+            self._n = value.shape[0]
+        if not hasattr(self, "_device"):
+            self._device = value.device
+
         if value.shape[0] != self._n:
             msg = (
                 f"First dimension of the tensor should be {self._n}, got"

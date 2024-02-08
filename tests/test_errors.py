@@ -237,7 +237,9 @@ def test_multiscale_not_implemented():
     ):
         M = sks.Multiscale(sks.Circle(n_points=4), ratios=ratios)
 
-    M.at(ratio=0.5)["signal"] = torch.zeros(M.at(ratio=0.5).n_points)
+    M.at(ratio=0.5).point_data["signal"] = torch.zeros(
+        M.at(ratio=0.5).n_points
+    )
 
     with pytest.raises(NotImplementedError):
         M.propagate(

@@ -29,6 +29,7 @@ target = sks.Circle()
 source.edges = source.edges[:-1]
 target.edges = target.edges[:-1]
 
+
 # %%
 # ## Apply a rigid motion to one of the circles
 #

@@ -32,7 +32,7 @@ assert mesh_vedo.nvertices == mesh_sks.n_points
 # %%
 # ## Add point data to the mesh
 
-mesh_sks["signal"] = mesh_sks.points[:, 0]
+mesh_sks.point_data["signal"] = mesh_sks.points[:, 0]
 # Now, export the mesh to Vedo
 mesh_vedo2 = mesh_sks.to_vedo()
 # The signal is transferred to the Vedo mesh as a point data array
@@ -42,7 +42,10 @@ vedo.show(mesh_vedo2, offscreen=True)
 
 # Back to scikit-shapes, the signal is preserved
 mesh_sks_back = sks.PolyData(mesh_vedo2)
-assert torch.allclose(mesh_sks_back["signal"], mesh_sks["signal"])
+assert torch.allclose(
+    mesh_sks_back.point_data["signal"],
+    mesh_sks.point_data["signal"]
+    )
 
 # %%
 # ## Landmarks are also preserved

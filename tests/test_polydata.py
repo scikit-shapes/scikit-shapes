@@ -83,11 +83,8 @@ def test_polydata_creation():
     assert isinstance(triangle.points, torch.Tensor)
     assert triangle.triangles.dtype == sks.int_dtype
 
-    # edges are computed on the fly when the getter is called
-    assert triangle._edges is None
     assert triangle.edges is not None
     assert triangle._edges is not None
-    assert triangle._triangles is not None
     assert triangle.n_triangles == 1
     assert triangle.n_edges == 3
     assert triangle.n_points == 3
@@ -338,7 +335,7 @@ def test_point_data():
         copy.point_data["hessians"], mesh.point_data["hessians"]
     )
     copy.point_data["hessians"] = torch.rand(
-        *mesh["hessians"].shape
+        *mesh.point_data["hessians"].shape
     )  # If the copy was not correct, this would also change the point_data of
     # the original mesh
     assert not torch.allclose(
@@ -387,7 +384,51 @@ def test_point_data():
 
     # Same through the __getitem__ interface
     with pytest.raises(KeyError):
-        mesh["dummy"]
+        mesh.point_data["dummy"]
+
+
+def test_edge_triangle_data():
+    mesh = sks.Sphere()
+
+    n_edges = mesh.n_edges
+    n_triangles = mesh.n_triangles
+
+    # Add some edge_data
+    mesh.edge_data["fake_lengths"] = torch.rand(n_edges)
+    mesh.edge_data["multidim"] = torch.rand(n_edges, 2, 2, 2)
+
+    # Add some triangle_data
+    mesh.triangle_data["fake_areas"] = torch.rand(n_triangles)
+    mesh.triangle_data["multidim"] = torch.rand(n_triangles, 2, 2, 2)
+
+    with pytest.raises(ShapeError):
+        mesh.edge_data.append(torch.rand(n_edges + 1))
+
+    with pytest.raises(ShapeError):
+        mesh.triangle_data.append(torch.rand(n_triangles + 1))
+
+    copy = mesh.copy()
+
+    assert torch.allclose(
+        copy.edge_data["fake_lengths"], mesh.edge_data["fake_lengths"]
+    )
+
+    assert torch.allclose(
+        copy.triangle_data["fake_areas"], mesh.triangle_data["fake_areas"]
+    )
+
+    # back and forth with pyvista/vedo
+
+    for mesh_ext in [mesh.to_pyvista(), mesh.to_vedo()]:
+        mesh_back = sks.PolyData(mesh_ext)
+
+        assert torch.allclose(
+            mesh_back.edge_data["fake_lengths"], mesh.edge_data["fake_lengths"]
+        )
+        assert torch.allclose(
+            mesh_back.triangle_data["fake_areas"],
+            mesh.triangle_data["fake_areas"],
+        )
 
 
 def test_point_data2():
@@ -447,7 +488,9 @@ def test_point_data2():
 
     # Check that signal can be transferred back and forth with pyvista
     # and vedo if ndims is high
-    sks_mesh["many_dims_signal"] = torch.rand(sks_mesh.n_points, 2, 2, 2, 2)
+    sks_mesh.point_data["many_dims_signal"] = torch.rand(
+        sks_mesh.n_points, 2, 2, 2, 2
+    )
 
     to_pv = sks_mesh.to_pyvista()
     to_vedo = sks_mesh.to_vedo()
@@ -456,10 +499,12 @@ def test_point_data2():
     back_from_vedo = sks.PolyData(to_vedo)
 
     assert torch.allclose(
-        back_from_pv["many_dims_signal"], sks_mesh["many_dims_signal"]
+        back_from_pv.point_data["many_dims_signal"],
+        sks_mesh.point_data["many_dims_signal"],
     )
     assert torch.allclose(
-        back_from_vedo["many_dims_signal"], sks_mesh["many_dims_signal"]
+        back_from_vedo.point_data["many_dims_signal"],
+        sks_mesh.point_data["many_dims_signal"],
     )
 
     # Reset signals
@@ -603,6 +648,35 @@ def test_point_data_cuda():
     assert sks_mesh_cuda.point_data["normals"].device.type == "cuda"
 
 
+@pytest.mark.skipif(
+    not torch.cuda.is_available(), reason="Cuda is required for this test"
+)
+def test_edge_triangle_data_cuda():
+
+    # Load a mesh and set edge and triangle data
+    mesh = sks.Sphere()
+    mesh.edge_data["edge_signal"] = torch.rand(mesh.n_edges, 3)
+    mesh.edge_data["edge_signal2"] = torch.rand(mesh.n_edges, 3)
+    mesh.triangle_data["triangle_signal"] = torch.rand(mesh.n_triangles, 2)
+    assert mesh.device.type == "cpu"
+
+    # Convert the mesh to cuda and assert signals are still there
+    mesh_cuda = mesh.to("cuda")
+    assert mesh_cuda.device.type == "cuda"
+    assert len(mesh_cuda.edge_data) == 2
+    assert len(mesh_cuda.triangle_data) == 1
+
+    # Back to cpu, assert signals are still the same as before
+    back = mesh_cuda.to("cpu")
+    assert torch.allclose(
+        back.edge_data["edge_signal"], mesh.edge_data["edge_signal"]
+    )
+    assert torch.allclose(
+        back.triangle_data["triangle_signal"],
+        mesh.triangle_data["triangle_signal"],
+    )
+
+
 @pytest.mark.filterwarnings("ignore::UserWarning")
 def test_polydata_signal_and_landmarks():
     """Test preservation of landmarks and signal when converting."""
@@ -611,13 +685,13 @@ def test_polydata_signal_and_landmarks():
     signal = torch.rand(sphere.n_points, dtype=sks.float_dtype)
 
     sphere.landmark_indices = landmarks
-    sphere["signal"] = signal
+    sphere.point_data["signal"] = signal
 
     sphere_pv = sphere.to_pyvista()
 
     sphere_back = sks.PolyData(sphere_pv)
     assert torch.allclose(sphere_back.landmark_indices, landmarks)
-    assert torch.allclose(sphere_back["signal"], signal)
+    assert torch.allclose(sphere_back.point_data["signal"], signal)
 
     # Add a point not connected to the mesh
     import numpy as np

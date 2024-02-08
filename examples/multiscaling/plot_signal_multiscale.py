@@ -19,9 +19,8 @@ multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
 # %%
 # Define a signal on the high resolution mesh
 
-multiscale_bunny.at(ratio=1)["height"] = multiscale_bunny.at(ratio=1).points[
-    :, 1
-]
+signal = multiscale_bunny.at(ratio=1).points[:, 1]
+multiscale_bunny.at(ratio=1).point_data["height"] = signal
 
 
 # %%
@@ -39,13 +38,9 @@ multiscale_bunny.propagate(
     fine_to_coarse_policy=fine_to_coarse_policy,
 )
 
-multiscale_bunny.at(ratio=0.005)["height_low_constant"] = multiscale_bunny.at(
-    ratio=0.005
-).points[:, 1]
-
-multiscale_bunny.at(ratio=0.005)["height_low_smoothing"] = multiscale_bunny.at(
-    ratio=0.005
-).points[:, 1]
+signal_low = multiscale_bunny.at(ratio=0.005).points[:, 1]
+multiscale_bunny.at(ratio=0.005).point_data["height_low_constant"] = signal_low
+multiscale_bunny.at(ratio=0.005).point_data["height_low_smoothing"] = signal_low
 
 # define a coarse_to_fine propagation scheme
 coarse_to_fine_policy = sks.CoarseToFinePolicy(

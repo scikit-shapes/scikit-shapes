@@ -36,7 +36,7 @@ assert mesh_pyvista.n_points == mesh_sks.n_points
 # %%
 # ## Add point data to the mesh
 
-mesh_sks["signal"] = mesh_sks.points[:, 0]
+mesh_sks.point_data["signal"] = mesh_sks.points[:, 0]
 # Now, export the mesh to PyVista
 mesh_pv2 = mesh_sks.to_pyvista()
 # The signal is transferred to the PyVista mesh as a point data array
@@ -45,7 +45,10 @@ mesh_pv2.plot(scalars="signal", cpos="xy")
 
 # Back to scikit-shapes, the signal is preserved
 mesh_sks_back = sks.PolyData(mesh_pv2)
-assert torch.allclose(mesh_sks_back["signal"], mesh_sks["signal"])
+assert torch.allclose(
+    mesh_sks_back.point_data["signal"],
+    mesh_sks.point_data["signal"]
+    )
 
 # %%
 # ## Landmarks are also preserved

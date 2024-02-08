@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import functools
-from typing import Any, Literal
+from typing import Literal
 from warnings import warn
 
 import numpy as np
@@ -24,7 +24,6 @@ from ..types import (
     IntTensor,
     Landmarks,
     Number,
-    NumericalTensor,
     Points,
     Triangles,
     float_dtype,
@@ -59,6 +58,8 @@ class PolyData(polydata_type):
         landmarks: Landmarks | IntSequence | None = None,
         control_points: polydata_type | None = None,
         point_data: DataAttributes | None = None,
+        edge_data: DataAttributes | None = None,
+        triangle_data: DataAttributes | None = None,
         cache_size: int | None = None,
     ) -> None:
         """Class constructor.
@@ -96,8 +97,8 @@ class PolyData(polydata_type):
                 mesh = pyvista.read(points)
             elif type(points) is PyvistaPolyData:
                 mesh = points
-            # Now, mesh is a pyvista mesh
 
+            # Now, mesh is a pyvista mesh
             cleaned_mesh = mesh.clean()
 
             if cleaned_mesh.n_points != mesh.n_points:
@@ -119,7 +120,7 @@ class PolyData(polydata_type):
                 if point_data is not None or len(mesh.point_data) > 0:
                     warn(
                         "Mesh has been cleaned and points were removed."
-                        + " Points data are ignored.",
+                        + " point_data is ignored.",
                         stacklevel=3,
                     )
                     mesh.point_data.clear()
@@ -183,6 +184,26 @@ class PolyData(polydata_type):
                     dtype=float_dtype,
                 )
 
+            if any(x.startswith("edge_data") for x in mesh.field_data):
+                edge_data = DataAttributes()
+                prefix = "edge_data_"
+                for key in mesh.field_data:
+                    if key.startswith(prefix) and not key.endswith("_shape"):
+                        shape = tuple(mesh.field_data[key + "_shape"])
+                        edge_data[key[len(prefix) :]] = mesh.field_data[
+                            key
+                        ].reshape(shape)
+
+            if any(x.startswith("triangle_data") for x in mesh.field_data):
+                triangle_data = DataAttributes()
+                prefix = "triangle_data_"
+                for key in mesh.field_data:
+                    if key.startswith(prefix) and not key.endswith("_shape"):
+                        shape = tuple(mesh.field_data[key + "_shape"])
+                        triangle_data[key[len(prefix) :]] = mesh.field_data[
+                            key
+                        ].reshape(shape)
+
         if device is None:
             device = points.device
 
@@ -228,22 +249,12 @@ class PolyData(polydata_type):
         else:
             self._control_points = None
 
-        # Initialize the point_data if it was not done before
-        if point_data is None:
-            self._point_data = DataAttributes(
-                n=self.n_points,
-                device=self.device,
-            )
-        else:
-            assert (
-                point_data.n == self.n_points
-            ), "point_data must have the same number of points as the shape"
-            if point_data.device != self.device:
-                point_data = point_data.to(self.device)
-
-            self._point_data = point_data
-
         self.device = device
+
+        # Initialize
+        self.point_data = point_data
+        self.edge_data = edge_data
+        self.triangle_data = triangle_data
 
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
@@ -366,6 +377,10 @@ class PolyData(polydata_type):
             kwargs["landmarks"] = self._landmarks.clone()
         if self._point_data is not None:
             kwargs["point_data"] = self._point_data.clone()
+        if self._edge_data is not None:
+            kwargs["edge_data"] = self._edge_data.clone()
+        if self._triangle_data is not None:
+            kwargs["triangle_data"] = self._triangle_data.clone()
         if self._control_points is not None:
             kwargs["control_points"] = self.control_points.copy()
 
@@ -446,6 +461,26 @@ class PolyData(polydata_type):
                         key
                     ].shape
 
+        # Add edge_data as field_data
+        if len(self.edge_data) > 0:
+            edge_data_dict = self.edge_data.to_numpy_dict()
+            for key in edge_data_dict:
+                shape = edge_data_dict[key].shape
+                flat = edge_data_dict[key].reshape(self.n_edges, -1)
+                polydata.field_data["edge_data_" + str(key)] = flat
+                polydata.field_data["edge_data_" + str(key) + "_shape"] = shape
+
+        # Add triangle_data as field_data
+        if len(self.triangle_data) > 0:
+            triangle_data_dict = self.triangle_data.to_numpy_dict()
+            for key in triangle_data_dict:
+                shape = triangle_data_dict[key].shape
+                flat = triangle_data_dict[key].reshape(self.n_triangles, -1)
+                polydata.field_data["triangle_data_" + str(key)] = flat
+                polydata.field_data["triangle_data_" + str(key) + "_shape"] = (
+                    shape
+                )
+
         # Add the landmarks if any
         if hasattr(self, "_landmarks") and self.landmarks is not None:
             coalesced_landmarks = self.landmarks.coalesce()
@@ -461,6 +496,10 @@ class PolyData(polydata_type):
             )
 
         return polydata
+
+    ###########################
+    #### Plotting utilities ###
+    ###########################
 
     def plot(
         self,
@@ -514,7 +553,10 @@ class PolyData(polydata_type):
     @convert_inputs
     @typecheck
     def edges(self, edges: Edges) -> None:
-        """Set the edges of the shape and the triangles to None."""
+        """Set the edges of the shape and set the triangles to None.
+
+        Also reinitialize edge_data, triangle_data and the cache.
+        """
         if edges.max() >= self.n_points:
             raise IndexError(
                 "The maximum vertex index in edges array is larger than the"
@@ -522,6 +564,8 @@ class PolyData(polydata_type):
             )
         self._edges = edges.clone().to(self.device)
         self._triangles = None
+        self.edge_data = None
+        self.triangle_data = None
         self.cache_clear()
 
     #################################
@@ -537,7 +581,10 @@ class PolyData(polydata_type):
     @convert_inputs
     @typecheck
     def triangles(self, triangles: Triangles) -> None:
-        """Set the triangles of the shape and edges to None."""
+        """Set the triangles of the shape and set edges to None.
+
+        Also reinitialize edge_data, triangle_data and the cache.
+        """
         if triangles.max() >= self.n_points:
             raise IndexError(
                 "The maximum vertex index in triangles array is larger than"
@@ -546,6 +593,8 @@ class PolyData(polydata_type):
 
         self._triangles = triangles.clone().to(self.device)
         self._edges = None
+        self.edge_data = None
+        self.triangle_data = None
         self.cache_clear()
 
     ##############################
@@ -606,9 +655,16 @@ class PolyData(polydata_type):
                 if isinstance(attribute, torch.Tensor):
                     setattr(self, attr, attribute.to(device))
 
-        if self._point_data is not None:
+        if hasattr(self, "_point_data") and self._point_data is not None:
             self._point_data = self._point_data.to(device)
-        if self._control_points is not None:
+        if hasattr(self, "_edge_data") and self._edge_data is not None:
+            self._edge_data = self._edge_data.to(device)
+        if hasattr(self, "_triangle_data") and self._triangle_data is not None:
+            self._triangle_data = self._triangle_data.to(device)
+        if (
+            hasattr(self, "_control_points")
+            and self._control_points is not None
+        ):
             self._control_points = self._control_points.to(device)
 
     ################################
@@ -622,7 +678,7 @@ class PolyData(polydata_type):
 
     @point_data.setter
     @typecheck
-    def point_data(self, point_data_dict: dict | None) -> None:
+    def point_data(self, point_data: DataAttributes | dict | None) -> None:
         """Point data setter.
 
         Parameters
@@ -630,39 +686,123 @@ class PolyData(polydata_type):
         point_data_dict
             The new point data of the shape.
         """
-        if point_data_dict is None:
-            self._point_data = DataAttributes(
-                n=self.n_points,
-                device=self.device,
-            )
+        self._point_data = self._generic_data_attribute_setter(
+            value=point_data, n=self.n_points, name="point_data"
+        )
 
+    ################################
+    #### edge_data getter/setter ###
+    ################################
+
+    @property
+    @typecheck
+    def edge_data(self) -> DataAttributes:
+        """Edge data getter."""
+        return self._edge_data
+
+    @edge_data.setter
+    @typecheck
+    def edge_data(self, edge_data: DataAttributes | dict | None) -> None:
+        """Edge data setter.
+
+        Parameters
+        ----------
+        edge_data
+            The new edge data of the shape.
+        """
+        self._edge_data = self._generic_data_attribute_setter(
+            value=edge_data, n=self.n_edges, name="edge_data"
+        )
+
+    ####################################
+    #### triangle_data getter/setter ###
+    ####################################
+
+    @property
+    @typecheck
+    def triangle_data(self) -> DataAttributes:
+        """Triangle data getter."""
+        return self._triangle_data
+
+    @triangle_data.setter
+    @typecheck
+    def triangle_data(
+        self, triangle_data: DataAttributes | dict | None
+    ) -> None:
+        """Triangle data setter.
+
+        Parameters
+        ----------
+        triangle_data
+            The new triangle data of the shape.
+        """
+        self._triangle_data = self._generic_data_attribute_setter(
+            value=triangle_data, n=self.n_triangles, name="triangle_data"
+        )
+
+    def _generic_data_attribute_setter(
+        self,
+        value: DataAttributes | dict | None,
+        n: int,
+        name: str,
+    ) -> DataAttributes:
+        """Generic data setter.
+
+        Reusable method to set the point_data, edge_data and triangle_data
+
+        Parameters
+        ----------
+        value
+            The data initializer, can be a DataAttributes, a dictionary or None.
+        n
+            The expected first dimension of the data (typically the number of
+            points, edges or triangles).
+        name
+            The name of the attribute (point_data, edge_data or triangle_data).
+            Used for error messages.
+
+        Returns
+        -------
+        DataAttributes
+            The data attributes.
+
+        Raises
+        ------
+        ShapeError
+            If the first dimension of the data is different from the
+            expected one.
+        """
+
+        if value is None:
+            data_attr = DataAttributes(n=n, device=self.device)
+        elif not isinstance(value, DataAttributes):
+            data_attr = DataAttributes.from_dict(value).to(self.device)
         else:
-            if not isinstance(point_data_dict, DataAttributes):
-                # Convert the point_data to a DataAttributes object
-                # the from_dict method will check that the point_data are valid
-                point_data_dict = DataAttributes.from_dict(point_data_dict)
+            data_attr = value.to(self.device)
 
-            if point_data_dict.n != self.n_points:
-                raise ShapeError(
-                    "The number of points in the point_data entries should be"
-                    + " the same as the number of points in the shape."
-                )
+        if data_attr.n != n:
+            error_message = (
+                f"The expected first dimension of {name} entries should be {n}"
+                + f" but got {data_attr.n}."
+            )
+            raise ShapeError(error_message)
+        return data_attr
 
-            self._point_data = point_data_dict.to(self.device)
+    ######## getitem : TODO remove it !! ########
 
-    @typecheck
-    def __getitem__(self, key: Any) -> NumericalTensor:
-        """Return the point data corresponding to the key."""
-        if key not in self._point_data:
-            msg = f"Point data {key} is not defined."
-            raise KeyError(msg)
-        return self._point_data[key]
+    # @typecheck
+    # def __getitem__(self, key: Any) -> NumericalTensor:
+    #     """Return the point data corresponding to the key."""
+    #     if key not in self._point_data:
+    #         msg = f"Point data {key} is not defined."
+    #         raise KeyError(msg)
+    #     return self._point_data[key]
 
-    @convert_inputs
-    @typecheck
-    def __setitem__(self, key: Any, value: NumericalTensor) -> None:
-        """Set the point data corresponding to the key."""
-        self._point_data[key] = value
+    # @convert_inputs
+    # @typecheck
+    # def __setitem__(self, key: Any, value: NumericalTensor) -> None:
+    #     """Set the point data corresponding to the key."""
+    #     self._point_data[key] = value
 
     #################################
     #### Landmarks getter/setter ####
