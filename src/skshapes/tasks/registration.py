@@ -186,10 +186,21 @@ class Registration:
 
         loss_value = loss_fn(parameter)
         if self.verbose > 0:
+            loss_value = loss_fn(parameter)
+            print(f"Initial loss : {loss_fn(parameter):.2e}")  # noqa: T201
+            print(f"  = {self.current_loss:.2e}", end="")  # noqa: T201
             if self.regularization != 0:
-                pass
+                print(  # noqa: T201
+                    f" + {self.regularization} * "
+                    f"{self.current_path_length:.2e}",
+                    end="",
+                )
             else:
-                pass
+                print(  # noqa: T201
+                    " + 0",
+                    end="",
+                )
+            print(" (fidelity + regularization * path length)")  # noqa: T201
 
         fidelity_history = []
         path_length_history = []
@@ -203,10 +214,24 @@ class Registration:
             path_length_history.append(self.current_path_length)
             if self.verbose > 0:
                 loss_value = loss_fn(parameter)
+                print(  # noqa: T201
+                    f"Loss after {_i + 1} iteration(s) : {loss_value:.2e}"
+                )
+                print(f"  = {self.current_loss:.2e}", end="")  # noqa: T201
                 if self.regularization != 0:
-                    pass
+                    print(  # noqa: T201
+                        f" + {self.regularization} * "
+                        f"{self.current_path_length:.2e}",
+                        end="",
+                    )
                 else:
-                    pass
+                    print(  # noqa: T201
+                        " + 0",
+                        end="",
+                    )
+                print(  # noqa: T201
+                    " (fidelity + regularization * path length)"
+                )
 
         # Store the device type of the parameter (useful for testing purposes)
         self.internal_parameter_device_type = parameter.device.type
