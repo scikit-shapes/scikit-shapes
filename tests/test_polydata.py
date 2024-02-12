@@ -144,6 +144,18 @@ def test_polydata_creation():
         sks.PolyData(mixed_mesh)
 
 
+def test_load_from_file():
+
+    from pathlib import Path
+
+    file = Path("sphere.vtk")
+    mesh = sks.Sphere()
+    mesh.save(file)
+    mesh2 = sks.PolyData(file)
+    assert torch.allclose(mesh.points, mesh2.points)
+    Path.unlink(file)
+
+
 def test_geometry_features():
     """Test some geometry features on a simple mesh."""
     square_points = torch.tensor(

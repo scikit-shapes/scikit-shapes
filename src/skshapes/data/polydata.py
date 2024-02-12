@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+from pathlib import Path
 from typing import Literal
 from warnings import warn
 
@@ -50,7 +51,7 @@ class PolyData(polydata_type):
     @typecheck
     def __init__(
         self,
-        points: Points | vedo.Mesh | pyvista.PolyData | str,
+        points: Points | vedo.Mesh | pyvista.PolyData | Path | str,
         *,
         edges: Edges | None = None,
         triangles: Triangles | None = None,
@@ -90,13 +91,14 @@ class PolyData(polydata_type):
         # triangles from it
         # If the user provides a path to a mesh, we read it with pyvista and
         # extract the points, edges and triangles from it
-        if type(points) in [vedo.Mesh, pyvista.PolyData, str]:
+
+        if not isinstance(points, torch.Tensor):
             if type(points) is vedo.Mesh:
                 mesh = pyvista.PolyData(points.dataset)
-            elif isinstance(points, str):
-                mesh = pyvista.read(points)
             elif type(points) is PyvistaPolyData:
                 mesh = points
+            else:
+                mesh = pyvista.read(points)
 
             # Now, mesh is a pyvista mesh
             cleaned_mesh = mesh.clean()
@@ -341,7 +343,7 @@ class PolyData(polydata_type):
             raise NotImplementedError(msg)
 
     @typecheck
-    def save(self, filename: str) -> None:
+    def save(self, filename: Path | str) -> None:
         """Save the shape to a file.
 
         Format accepted by PyVista are supported (.ply, .stl, .vtk)
