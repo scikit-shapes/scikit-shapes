@@ -284,6 +284,9 @@ class Registration:
         self.path_length_history_ = torch.stack(path_length_history).to(
             self.output_device
         )
+
+        self.fidelity_ = self.fidelity_history_[-1]
+        self.regularization_ = self.path_length_history_[-1]
         return self
 
     @typecheck
