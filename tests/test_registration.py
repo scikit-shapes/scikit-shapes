@@ -37,7 +37,7 @@ mesh_2d = sks.Circle(n_points=7)
     loss=st.sampled_from(list_losses),
     optimizer=st.sampled_from(list_optimizers),
     n_iter=st.integers(min_value=0, max_value=1),
-    regularization=st.sampled_from([0, 0.1]),
+    regularization_weight=st.sampled_from([0, 0.1]),
     provide_initial_parameter=st.booleans(),
     dim=st.integers(min_value=2, max_value=3),
 )
@@ -47,7 +47,7 @@ def test_registration_hypothesis(
     loss,
     optimizer,
     n_iter,
-    regularization,
+    regularization_weight,
     provide_initial_parameter,
     dim,
 ):
@@ -80,7 +80,7 @@ def test_registration_hypothesis(
         optimizer=optimizer,
         n_iter=n_iter,
         gpu=False,
-        regularization=regularization,
+        regularization_weight=regularization_weight,
         verbose=False,
     )
 
@@ -89,7 +89,7 @@ def test_registration_hypothesis(
     assert r.loss == loss
     assert r.optimizer == optimizer
     assert r.n_iter == n_iter
-    assert r.regularization == regularization
+    assert r.regularization_weight == regularization_weight
 
     # If applicable, provide an initial parameter
     if provide_initial_parameter:
@@ -153,7 +153,7 @@ def test_registration_device():
                     optimizer=optimizer,
                     n_iter=1,
                     gpu=gpu,
-                    regularization=0,
+                    regularization_weight=0,
                     verbose=1,
                 ).fit(source=source, target=target)
 
@@ -202,7 +202,7 @@ def test_extrinsic_control_points():
         loss=loss,
         optimizer=optimizer,
         n_iter=1,
-        regularization=0.1,
+        regularization_weight=0.1,
         gpu=False,
         verbose=True,
     )

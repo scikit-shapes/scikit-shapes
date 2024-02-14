@@ -34,7 +34,7 @@ class Registration:
         model: Model,
         loss: Loss,
         optimizer: Optimizer | None = None,
-        regularization: int | float = 1,
+        regularization_weight: int | float = 1,
         n_iter: int = 10,
         verbose: int = 0,
         gpu: bool = True,
@@ -49,9 +49,9 @@ class Registration:
             a loss object (from skshapes.loss)
         optimizer
             an optimizer object (from skshapes.optimization)
-        regularization
-            the regularization parameter for the criterion :
-            loss + regularization * reg.
+        regularization_weight
+            the regularization_weight parameter for the criterion :
+            loss + regularization_weight * reg.
         n_iter
             number of iteration for optimization process.
         verbose
@@ -68,7 +68,7 @@ class Registration:
         self.optimizer = optimizer
         self.verbose = verbose
         self.n_iter = n_iter
-        self.regularization = regularization
+        self.regularization_weight = regularization_weight
 
         if gpu:
             if torch.cuda.is_available():
@@ -138,7 +138,7 @@ class Registration:
 
         # Define the loss function
         def loss_fn(parameter):
-            return_regularization = self.regularization != 0
+            return_regularization = self.regularization_weight != 0
             morphing = self.model.morph(
                 shape=source,
                 parameter=parameter,
@@ -147,7 +147,9 @@ class Registration:
             )
 
             loss = self.loss(source=morphing.morphed_shape, target=target)
-            total_loss = loss + self.regularization * morphing.regularization
+            total_loss = (
+                loss + self.regularization_weight * morphing.regularization
+            )
 
             self.current_loss = loss.clone().detach()
             self.current_path_length = morphing.regularization.clone().detach()
@@ -189,9 +191,9 @@ class Registration:
             loss_value = loss_fn(parameter)
             print(f"Initial loss : {loss_fn(parameter):.2e}")  # noqa: T201
             print(f"  = {self.current_loss:.2e}", end="")  # noqa: T201
-            if self.regularization != 0:
+            if self.regularization_weight != 0:
                 print(  # noqa: T201
-                    f" + {self.regularization} * "
+                    f" + {self.regularization_weight} * "
                     f"{self.current_path_length:.2e}",
                     end="",
                 )
@@ -200,7 +202,9 @@ class Registration:
                     " + 0",
                     end="",
                 )
-            print(" (fidelity + regularization * path length)")  # noqa: T201
+            print(  # noqa: T201
+                " (fidelity + regularization_weight * regularization)"
+            )
 
         fidelity_history = []
         path_length_history = []
@@ -218,9 +222,9 @@ class Registration:
                     f"Loss after {_i + 1} iteration(s) : {loss_value:.2e}"
                 )
                 print(f"  = {self.current_loss:.2e}", end="")  # noqa: T201
-                if self.regularization != 0:
+                if self.regularization_weight != 0:
                     print(  # noqa: T201
-                        f" + {self.regularization} * "
+                        f" + {self.regularization_weight} * "
                         f"{self.current_path_length:.2e}",
                         end="",
                     )
@@ -230,7 +234,7 @@ class Registration:
                         end="",
                     )
                 print(  # noqa: T201
-                    " (fidelity + regularization * path length)"
+                    " (fidelity + regularization_weight * regularization)"
                 )
 
         # Store the device type of the parameter (useful for testing purposes)
