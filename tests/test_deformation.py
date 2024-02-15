@@ -88,7 +88,7 @@ def test_extrinsic_deformation():
             loss=loss,
             optimizer=optimizer,
             n_iter=n_iter,
-            regularization=regularization,
+            regularization_weight=regularization,
             gpu=gpu,
         )
 
@@ -97,7 +97,7 @@ def test_extrinsic_deformation():
             loss=loss,
             optimizer=optimizer,
             n_iter=n_iter,
-            regularization=regularization,
+            regularization_weight=regularization,
             gpu=gpu,
         )
 

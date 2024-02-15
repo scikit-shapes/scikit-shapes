@@ -83,7 +83,7 @@ intrinsic_registration = sks.Registration(
     optimizer=optimizer,
     verbose=True,
     n_iter=5,
-    regularization=0,
+    regularization_weight=0,
 )
 
 intrinsic_registration.fit(source=source, target=target)
@@ -115,7 +115,7 @@ intrinsic_registration = sks.Registration(
     optimizer=optimizer,
     verbose=True,
     n_iter=5,
-    regularization=100,
+    regularization_weight=100,
 )
 
 intrinsic_registration.fit(source=source, target=target)

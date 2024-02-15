@@ -25,6 +25,63 @@ class Registration:
     performed by calling the fit method with the source and target shapes as
     arguments. The transform method can then be used to transform a new shape
     using the learned registration's parameter.
+
+    It must be initialized with a model, a loss and an optimizer. The
+    registration is performed by calling the fit method with the source and
+    target shapes as arguments. The transform method can then be used to
+    transform the source shape using the learned registration's parameter.
+
+    The optimization criterion is the sum of the fidelity and the regularization
+    term, weighted by the regularization_weight parameter:
+
+    $$ \\text{loss}(\\theta) = \\text{fid}(\\text{Morph}(\\theta, \\text{source}), \\text{target}) + \\text{regularization_weight} \\times \\text{reg}(\\theta)$$
+
+    The fidelity term $\\text{fid}$ is given by the loss object, the
+    regularization term $\\text{reg}$ and the morphing $\\text{Morph}$ are
+    given by the model.
+
+    Parameters
+    ----------
+    model
+        a model object (from skshapes.morphing)
+    loss
+        a loss object (from skshapes.loss)
+    optimizer
+        an optimizer object (from skshapes.optimization)
+    regularization_weight
+        the regularization_weight parameter for the criterion :
+        fidelity + regularization_weight * regularization.
+    n_iter
+        number of iteration for optimization loop.
+    verbose
+        positive to print the losses after each optimization loop iteration
+    gpu:
+        do intensive numerical computations on a nvidia gpu with a cuda
+        backend if available.
+
+    Examples
+    --------
+
+    >>> model = sks.RigidMotion()
+    >>> loss = sks.OptimalTransportLoss()
+    >>> optimizer = sks.SGD(lr=0.1)
+    >>> registration = sks.Registration(
+    ...     model=model, loss=loss, optimizer=optimizer
+    ... )
+    >>> registration.fit(source=source, target=target)
+    >>> transformed_source = registration.transform(source=source)
+    >>> # Access the parameter
+    >>> parameter = registration.parameter_
+    >>> # Access the loss
+    >>> loss = registration.loss_
+    >>> # Access the fidelity term
+    >>> fidelity = registration.fidelity_
+    >>> # Access the regularization term
+    >>> regularization = registration.regularization_
+
+    More examples can be found in the
+    [gallery](../../../generated/gallery/#registration).
+
     """
 
     @typecheck
@@ -34,32 +91,11 @@ class Registration:
         model: Model,
         loss: Loss,
         optimizer: Optimizer | None = None,
-        regularization: int | float = 1,
+        regularization_weight: int | float = 1,
         n_iter: int = 10,
         verbose: int = 0,
         gpu: bool = True,
     ) -> None:
-        """Initialize the registration object.
-
-        Parameters
-        ----------
-        model
-            a model object (from skshapes.morphing)
-        loss
-            a loss object (from skshapes.loss)
-        optimizer
-            an optimizer object (from skshapes.optimization)
-        regularization
-            the regularization parameter for the criterion :
-            loss + regularization * reg.
-        n_iter
-            number of iteration for optimization process.
-        verbose
-            positive to print the losses after each optimization loop iteration
-        gpu:
-            do intensive numerical computations on a nvidia gpu with a cuda
-            backend if available.
-        """
         if optimizer is None:
             optimizer = LBFGS()
 
@@ -68,7 +104,7 @@ class Registration:
         self.optimizer = optimizer
         self.verbose = verbose
         self.n_iter = n_iter
-        self.regularization = regularization
+        self.regularization_weight = regularization_weight
 
         if gpu:
             if torch.cuda.is_available():
@@ -102,8 +138,8 @@ class Registration:
         target
             a shape object (from skshapes.shapes)
         initial_parameter
-            an initial parameter tensor for the optimization process.
-            Defaults to None.
+            an initial parameter tensor for the optimization process. If None,
+            the parameter is initialized with zeros. Defaults to None.
 
         Raises
         ------
@@ -138,7 +174,7 @@ class Registration:
 
         # Define the loss function
         def loss_fn(parameter):
-            return_regularization = self.regularization != 0
+            return_regularization = self.regularization_weight != 0
             morphing = self.model.morph(
                 shape=source,
                 parameter=parameter,
@@ -147,7 +183,9 @@ class Registration:
             )
 
             loss = self.loss(source=morphing.morphed_shape, target=target)
-            total_loss = loss + self.regularization * morphing.regularization
+            total_loss = (
+                loss + self.regularization_weight * morphing.regularization
+            )
 
             self.current_loss = loss.clone().detach()
             self.current_path_length = morphing.regularization.clone().detach()
@@ -189,9 +227,9 @@ class Registration:
             loss_value = loss_fn(parameter)
             print(f"Initial loss : {loss_fn(parameter):.2e}")  # noqa: T201
             print(f"  = {self.current_loss:.2e}", end="")  # noqa: T201
-            if self.regularization != 0:
+            if self.regularization_weight != 0:
                 print(  # noqa: T201
-                    f" + {self.regularization} * "
+                    f" + {self.regularization_weight} * "
                     f"{self.current_path_length:.2e}",
                     end="",
                 )
@@ -200,7 +238,9 @@ class Registration:
                     " + 0",
                     end="",
                 )
-            print(" (fidelity + regularization * path length)")  # noqa: T201
+            print(  # noqa: T201
+                " (fidelity + regularization_weight * regularization)"
+            )
 
         fidelity_history = []
         path_length_history = []
@@ -218,9 +258,9 @@ class Registration:
                     f"Loss after {_i + 1} iteration(s) : {loss_value:.2e}"
                 )
                 print(f"  = {self.current_loss:.2e}", end="")  # noqa: T201
-                if self.regularization != 0:
+                if self.regularization_weight != 0:
                     print(  # noqa: T201
-                        f" + {self.regularization} * "
+                        f" + {self.regularization_weight} * "
                         f"{self.current_path_length:.2e}",
                         end="",
                     )
@@ -230,7 +270,7 @@ class Registration:
                         end="",
                     )
                 print(  # noqa: T201
-                    " (fidelity + regularization * path length)"
+                    " (fidelity + regularization_weight * regularization)"
                 )
 
         # Store the device type of the parameter (useful for testing purposes)
@@ -280,6 +320,9 @@ class Registration:
         self.path_length_history_ = torch.stack(path_length_history).to(
             self.output_device
         )
+
+        self.fidelity_ = self.fidelity_history_[-1]
+        self.regularization_ = self.path_length_history_[-1]
         return self
 
     @typecheck

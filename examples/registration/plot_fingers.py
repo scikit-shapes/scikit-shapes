@@ -51,7 +51,7 @@ registration = sks.Registration(
     verbose=True,
     gpu=gpu,
     n_iter=3,
-    regularization=1,
+    regularization_weight=1,
 )
 
 # %%
