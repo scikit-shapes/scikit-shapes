@@ -25,6 +25,55 @@ class Registration:
     performed by calling the fit method with the source and target shapes as
     arguments. The transform method can then be used to transform a new shape
     using the learned registration's parameter.
+
+    It must be initialized with a model, a loss and an optimizer. The
+    registration is performed by calling the fit method with the source and
+    target shapes as arguments. The transform method can then be used to
+    transform the source shape using the learned registration's parameter.
+
+    The optimization criterion is the sum of the fidelity and the regularization
+    term, weighted by the regularization_weight parameter:
+
+    $$ \\text{loss}(\\theta) = \\text{fid}(\\text{Morph}(\\theta, \\text{source}), \\text{target}) + \\text{regularization_weight} \\times \\text{reg}(\\theta)$$
+
+    The fidelity term $\\text{fid}$ is given by the loss object, the
+    regularization term $\\text{reg}$ and the morphing $\\text{Morph}$ are
+    given by the model.
+
+    Parameters
+    ----------
+    model
+        a model object (from skshapes.morphing)
+    loss
+        a loss object (from skshapes.loss)
+    optimizer
+        an optimizer object (from skshapes.optimization)
+    regularization_weight
+        the regularization_weight parameter for the criterion :
+        fidelity + regularization_weight * regularization.
+    n_iter
+        number of iteration for optimization loop.
+    verbose
+        positive to print the losses after each optimization loop iteration
+    gpu:
+        do intensive numerical computations on a nvidia gpu with a cuda
+        backend if available.
+
+    Examples
+    --------
+
+    >>> model = sks.RigidMotion()
+    >>> loss = sks.OptimalTransportLoss()
+    >>> optimizer = sks.SGD(lr=0.1)
+    >>> registration = sks.Registration(
+    ...     model=model, loss=loss, optimizer=optimizer
+    ... )
+    >>> registration.fit(source=source, target=target)
+    >>> transformed_source = registration.transform(source=source)
+
+    More examples can be found in the
+    [gallery](../../../generated/gallery/#registration).
+
     """
 
     @typecheck
@@ -39,27 +88,6 @@ class Registration:
         verbose: int = 0,
         gpu: bool = True,
     ) -> None:
-        """Initialize the registration object.
-
-        Parameters
-        ----------
-        model
-            a model object (from skshapes.morphing)
-        loss
-            a loss object (from skshapes.loss)
-        optimizer
-            an optimizer object (from skshapes.optimization)
-        regularization_weight
-            the regularization_weight parameter for the criterion :
-            loss + regularization_weight * reg.
-        n_iter
-            number of iteration for optimization process.
-        verbose
-            positive to print the losses after each optimization loop iteration
-        gpu:
-            do intensive numerical computations on a nvidia gpu with a cuda
-            backend if available.
-        """
         if optimizer is None:
             optimizer = LBFGS()
 
@@ -102,8 +130,8 @@ class Registration:
         target
             a shape object (from skshapes.shapes)
         initial_parameter
-            an initial parameter tensor for the optimization process.
-            Defaults to None.
+            an initial parameter tensor for the optimization process. If None,
+            the parameter is initialized with zeros. Defaults to None.
 
         Raises
         ------
