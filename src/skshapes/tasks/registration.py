@@ -70,6 +70,14 @@ class Registration:
     ... )
     >>> registration.fit(source=source, target=target)
     >>> transformed_source = registration.transform(source=source)
+    >>> # Access the parameter
+    >>> parameter = registration.parameter_
+    >>> # Access the loss
+    >>> loss = registration.loss_
+    >>> # Access the fidelity term
+    >>> fidelity = registration.fidelity_
+    >>> # Access the regularization term
+    >>> regularization = registration.regularization_
 
     More examples can be found in the
     [gallery](../../../generated/gallery/#registration).
