@@ -86,6 +86,9 @@ class Multiscale:
     multiscale = sks.Multiscale(shape=shape, ratios=ratios)
     ```
 
+    See the [gallery](../../../generated/gallery/#multiscaling) for more
+    examples.
+
     """
 
     @one_and_only_one(parameters=["ratios", "n_points", "scales"])
