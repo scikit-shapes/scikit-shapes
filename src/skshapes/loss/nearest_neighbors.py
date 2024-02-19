@@ -22,7 +22,7 @@ class NearestNeighborsLoss(BaseLoss):
 
     @typecheck
     def __init__(self) -> None:
-        """Initialize the NearestNeighborsLoss class."""
+        pass
 
     @typecheck
     def __call__(
@@ -39,6 +39,7 @@ class NearestNeighborsLoss(BaseLoss):
 
         Returns
         -------
+        FloatScalar
             the loss
         """
         super().__call__(source=source, target=target)

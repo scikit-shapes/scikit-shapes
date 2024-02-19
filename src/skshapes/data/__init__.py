@@ -14,8 +14,11 @@ Shape = Union[PolyData, Image]
 
 @typecheck
 def Sphere() -> polydata_type:
-    """Create a sphere."""
-    return PolyData(pyvista.Sphere())
+    """Return a sphere."""
+
+    sphere = PolyData(pyvista.Sphere())
+    sphere.point_data.clear()  # Remove the normals
+    return sphere
 
 
 @typecheck

@@ -15,16 +15,15 @@ class Kernel:
 
 
 class GaussianKernel(Kernel):
-    """Gaussian kernel for spline models."""
+    """Gaussian kernel.
+
+    Parameters
+    ----------
+    sigma
+        Bandwidth parameter.
+    """
 
     def __init__(self, sigma=0.1):
-        """Initialize the kernel.
-
-        Parameters
-        ----------
-        sigma
-            Bandwidth parameter.
-        """
         self.sigma = sigma
 
     def operator(

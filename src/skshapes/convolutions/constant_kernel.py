@@ -4,18 +4,17 @@ from ..input_validation import typecheck
 
 
 class Constant1Kernel:
-    """A summation operator that stands for torch.ones(N, N)."""
+    """A summation operator that stands for torch.ones(N, N).
+
+    Parameters
+    ----------
+    points
+        The points in the source space.
+    target_points
+        The points in the target space.
+    """
 
     def __init__(self, points, target_points=None):
-        """Kernel constructor.
-
-        Parameters
-        ----------
-        points
-            The points in the source space.
-        target_points
-            The points in the target space.
-        """
         if target_points is None:
             target_points = points
 

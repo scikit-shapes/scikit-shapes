@@ -25,17 +25,15 @@ class BaseLoss:
 
     This class is not meant to be used directly, if the constructor is called
     it raises an error.
+
+    Raises
+    ------
+    NotImplementedError
+        this class is abstract and should not be instantiated
     """
 
     @typecheck
     def __init__(self) -> None:
-        """Class constructor.
-
-        Raises
-        ------
-        NotImplementedError
-            this class is abstract and should not be instantiated
-        """
         msg = "BaseLoss is an abstract class and should not be instantiated"
         raise NotImplementedError(msg)
 
@@ -117,7 +115,7 @@ class EmptyLoss(BaseLoss):
 
     @typecheck
     def __init__(self) -> None:
-        """Class constructor."""
+        pass
 
     @typecheck
     def __call__(
@@ -139,6 +137,13 @@ class SumLoss(BaseLoss):
     and a loss for meshes) will not raise an error at the time of the addition.
     However it will raise an error when the __call__ method is used, thanks
     to the runtime type checker.
+
+    Parameters
+    ----------
+    loss1
+        First loss to be added.
+    loss2
+        Second loss to be added.
     """
 
     @typecheck
@@ -147,15 +152,6 @@ class SumLoss(BaseLoss):
         loss1: BaseLoss | None = None,
         loss2: BaseLoss | None = None,
     ) -> None:
-        """Class constructor.
-
-        It saves the two losses as attributes of the class.
-
-        Parameters
-        ----------
-        loss1
-        loss2
-        """
         if loss1 is None:
             loss1 = EmptyLoss()
         if loss2 is None:

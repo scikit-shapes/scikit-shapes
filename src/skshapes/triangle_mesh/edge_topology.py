@@ -28,6 +28,11 @@ class EdgeTopology:
 
     The indices of manifold edges and boundary edges can be accessed using the
     attributes `is_manifold` and `is_boundary`.
+
+    Parameters
+    ----------
+    triangles
+        Triangles of the mesh
     """
 
     def __init__(
