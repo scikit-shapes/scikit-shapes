@@ -28,7 +28,7 @@ class AsIsometricAsPossible(Metric):
     """
 
     def __init__(self) -> None:
-        """Class constructor."""
+        pass
 
     @typecheck
     def __call__(
@@ -78,6 +78,12 @@ class AsIsometricAsPossible(Metric):
 class ShellEnergyMetric(Metric):
     """Shell energy metric.
 
+    This metric is the sum of a membrane contribution, measuring the local
+    stretching and a bending contribution, measuring the change in curvature.
+    The parameter weight controls the importance of the bending energy.
+
+    See https://ddg.math.uni-goettingen.de/pub/HeRuSc14.pdf for more details.
+
     Parameters
     ----------
     weight
@@ -86,7 +92,6 @@ class ShellEnergyMetric(Metric):
 
     @typecheck
     def __init__(self, weight: Number = 0.001) -> None:
-        """Class constructor."""
         self.weight = weight
 
     @typecheck
