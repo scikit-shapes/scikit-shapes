@@ -43,11 +43,11 @@ class Multiscale:
     [`at`][skshapes.multiscaling.Multiscale.at] # noqa E501 method. The scale
     is defined by one of the three parameters described above.
 
-    Signals defined at any scale can be propagated to the other scales. The
-    propagation is performed in both directions from the origin to the coarser
-    scales and from the origin to the finer scales. The propagation is done by
-    interpolation or smoothing depending on the policies defined by the
-    `fine_to_coarse_policy` and `coarse_to_fine_policy` parameters of the
+    Signals (point_data )defined at any scale can be propagated to the other
+    scales. The propagation is performed in both directions from the origin to
+    the coarser scales and from the origin to the finer scales. The propagation
+    is done by interpolation or smoothing depending on the policies defined by
+    the `fine_to_coarse_policy` and `coarse_to_fine_policy` parameters of the
     [`propagate`][skshapes.multiscaling.Multiscale.propagate] method.
 
     Most of the methods of this class can be called with one of the `ratio`,
