@@ -22,9 +22,13 @@ class AsIsometricAsPossible(Metric):
     """
     As isometric as possible metric.
 
-    This metric penalizes the non-isometricity of the mesh. See
-    https://dmg.tuwien.ac.at/geom/ig/publications/oldpub/2007/kilian-2007-gmss/paper_docs/shape_space_sig_07.pdf # noqa E501
-    for more details.
+    This metric penalizes the non-isometricity of the mesh.
+
+    References
+    ----------
+    [KILIAN, Martin, MITRA, Niloy J., et POTTMANN, Helmut. Geometric
+    modeling in shape space. In : ACM SIGGRAPH 2007 papers. 2007. p. 64-es.](https://dmg.tuwien.ac.at/geom/ig/publications/oldpub/2007/kilian-2007-gmss/paper_docs/shape_space_sig_07.pdf)
+
     """
 
     def __init__(self) -> None:
@@ -82,12 +86,16 @@ class ShellEnergyMetric(Metric):
     stretching and a bending contribution, measuring the change in curvature.
     The parameter weight controls the importance of the bending energy.
 
-    See https://ddg.math.uni-goettingen.de/pub/HeRuSc14.pdf for more details.
-
     Parameters
     ----------
     weight
         Weight of the bending energy.
+
+    References
+    ----------
+    [HEEREN, Behrend, RUMPF, Martin, SCHRÖDER, Peter, et al. Exploring the
+    geometry of the space of shells. In : Computer Graphics Forum. 2014.
+    p. 247-256.](https://ddg.math.uni-goettingen.de/pub/HeRuSc14.pdf)
     """
 
     @typecheck
