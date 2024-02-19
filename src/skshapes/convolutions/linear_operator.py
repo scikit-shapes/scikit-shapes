@@ -2,20 +2,20 @@
 
 
 class LinearOperator:
-    """A simple wrapper for scaled linear operators."""
+    """A simple wrapper for scaled linear operators.
+
+    Parameters
+    ----------
+    matrix
+        The matrix to wrap.
+    input_scaling
+        _description_
+    output_scaling
+        _description_
+    """
 
     def __init__(self, matrix, input_scaling=None, output_scaling=None):
-        """Class constructor.
-
-        Parameters
-        ----------
-        matrix
-            The matrix to wrap.
-        input_scaling
-            _description_
-        output_scaling
-            _description_
-        """
+        """Class constructor."""
         M, N = matrix.shape
         assert matrix.shape == (M, N)
         assert input_scaling is None or input_scaling.shape == (N,)
