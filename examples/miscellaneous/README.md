@@ -1,3 +1,0 @@
-# Miscellaneous
-
-Examples about i/o, interactions with other tools...
