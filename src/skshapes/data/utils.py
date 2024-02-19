@@ -41,6 +41,15 @@ class DataAttributes(dict):
             A.append(attribute)) which will automatically set "attribute_{i}"
             where i is the minimum integer such that "attribute_{i}" is not
             already in the dictionary
+
+    Parameters
+    ----------
+    n
+        The number of elements of the set. If None, it will be determined
+        by the first attribute added to the DataAttributes object.
+    device
+        The device on which the attributes should be stored. If None, it
+        will be determined by the first attribute added to the
     """
 
     @typecheck
@@ -50,17 +59,6 @@ class DataAttributes(dict):
         n: int | None = None,
         device: str | torch.device | None = None,
     ) -> None:
-        """Class constructor.
-
-        Parameters
-        ----------
-        n
-            The number of elements of the set. If None, it will be determined
-            by the first attribute added to the DataAttributes object.
-        device
-            The device on which the attributes should be stored. If None, it
-            will be determined by the first attribute added to the
-        """
         if n is not None:
             self._n = n
 
