@@ -18,17 +18,15 @@ class LpLoss(BaseLoss):
     be in correspondence, i.e. x_i and y_i must correspond to the same point.
     If this is not the case, the loss will be meaningless, consider using
     a loss function based on Optimal Transport or Nearest Neighbors instead.
+
+    Parameters
+    ----------
+    p
+        the indice of the Lp Norm. Default to 2.
     """
 
     @typecheck
     def __init__(self, p: Number = 2) -> None:
-        """Class constructor.
-
-        Parameters
-        ----------
-        p
-            the indice of the Lp Norm. Default to 2
-        """
         if p <= 0:
             msg = "p must be positive"
             raise ValueError(msg)
@@ -65,13 +63,6 @@ class L2Loss(BaseLoss):
     """
 
     def __new__(cls) -> LpLoss:
-        """Create a new instance of the LpLoss class with p=2.
-
-        Returns
-        -------
-        LpLoss
-            the LpLoss class with p=2
-        """
         return LpLoss(p=2)
 
 
@@ -80,26 +71,26 @@ class LandmarkLoss(BaseLoss):
 
     This class defines the Lp loss between the landmarks of two PolyData
     objects.
-    If X = (x_i) and Y = (y_i) are the landmarks of two PolyData objects, the
+    If $X = (x_i)$ and $Y = (y_i)$ are the landmarks of two PolyData objects, the
     Lp loss is defined as:
-    Lp(X, Y) = sum_i ||x_i - y_i||_p
+
+    $$Lp(X, Y) = \sum_i \Vert x_i - y_i \Vert_p$$
 
     X and Y must have the same number of landmarks. What is more, the landmarks
-    must be in correspondence, i.e. x_i and y_i must correspond to the same
+    must be in correspondence, i.e. $x_i$ and $y_i$ must correspond to the same
     landmark. If this is not the case, the loss will be meaningless, consider
     using a loss function based on Optimal Transport or Nearest Neighbors
     instead.
+
+    Parameters
+    ----------
+    p
+        the indice of the Lp Norm. Defaults to 2.
     """
 
     @typecheck
     def __init__(self, p: Number = 2) -> None:
-        """Initialize the LandmarkLoss class.
-
-        Parameters
-        ----------
-        p
-            the indice of the Lp Norm. Defaults to 2.
-        """
+        """Initialize the LandmarkLoss class."""
         assert p > 0, "p must be positive"
         self.p = p
 

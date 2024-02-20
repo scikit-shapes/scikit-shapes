@@ -21,17 +21,16 @@ from .basemodel import BaseModel
 
 
 class RigidMotion(BaseModel):
-    """Rigid motion morphing."""
+    """Rigid motion morphing.
+
+    Parameters
+    ----------
+    n_steps
+        Number of steps.
+    """
 
     @typecheck
     def __init__(self, n_steps: int = 1) -> None:
-        """Initialize the model.
-
-        Parameters
-        ----------
-        n_steps
-            Number of steps.
-        """
         self.n_steps = n_steps
 
     @convert_inputs

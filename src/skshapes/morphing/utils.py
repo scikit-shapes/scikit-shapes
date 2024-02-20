@@ -14,7 +14,7 @@ class EulerIntegrator(Integrator):
     """A basic Euler integrator for Hamiltonian systems."""
 
     def __init__(self) -> None:
-        """Initialize the integrator."""
+        pass
 
     @typecheck
     def __call__(

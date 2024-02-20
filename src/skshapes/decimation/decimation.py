@@ -19,18 +19,43 @@ class Decimation:
     decimation is to reduce the number of points of a triangular mesh while
     preserving the global aspect of the shape.
 
+    Parameters
+    ----------
+    target_reduction
+        The target rate of triangles to delete during decimation. Must
+        be between 0 and 1.
+    n_points
+        The desired number of points in the decimated mesh.
+
+    Raises
+    ------
+    InputStructureError
+        If both target_reduction and n_points are provided or
+        if none of them is provided.
+
     Examples
     --------
+    Decimate a mesh with a target reduction:
+    ```python
+    import skshapes as sks
+
+    mesh = sks.Sphere()
+    decimator = sks.Decimation(target_reduction=0.5)
+    decimated_mesh = decimator.fit_transform(mesh)
+    ```
+
+    Decimate two meshes with the same connectivity (same triangles):
     ```python
     # assume that pose1 and pose2 are two meshes with the same connectivity:
 
     pose1, pose2 = sks.PolyData("data/pose1.vtk", "data/pose2.vtk")
-    decimator = sks.Decimation(target_reduction=0.5)
+    decimator = sks.Decimation(n_points=50)
     decimator.fit(cat1)
     pose1_decimated = decimator.transform(cat1)
     pose2_decimated = decimator.transform(cat2)
-    assert torch.allclose(pose1_decimated.triangles, pose2_decimated.triangles)
+
     # pose1_decimated and pose2_decimated have the same connectivity
+    assert torch.allclose(pose1_decimated.triangles, pose2_decimated.triangles)
 
     # if landmarks are present in the meshes, they are kept after the
     # decimation
@@ -39,6 +64,10 @@ class Decimation:
     if pose2.landmarks is not None:
         assert pose2_decimated.landmarks is not None
     ```
+
+    Decimation is often used through the [`Multiscale`](../../multiscaling/multiscale)
+    interface, see the associated [examples](../../../generated/gallery/#multiscaling).
+
     """
 
     @one_and_only_one(parameters=["target_reduction", "n_points", "ratio"])
@@ -50,25 +79,6 @@ class Decimation:
         n_points: int | None = None,
         ratio: Number | None = None,
     ) -> None:
-        """Class constructor.
-
-        Initialize the quadric decimation algorithm with a target reduction or
-        the desired number for decimated mesh.
-
-        Parameters
-        ----------
-        target_reduction
-            The target rate of triangles to delete during decimation. Must
-            be between 0 and 1.
-        n_points
-            The desired number of points in the decimated mesh.
-
-        Raises
-        ------
-        InputStructureError
-            If both target_reduction and n_points are provided or
-            if none of them is provided.
-        """
         if target_reduction is not None:
             if not (0 < target_reduction < 1):
                 msg = "target_reduction must be in the range (0, 1)"

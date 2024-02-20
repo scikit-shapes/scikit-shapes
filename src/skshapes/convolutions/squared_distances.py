@@ -19,7 +19,20 @@ from ..types import (
 
 
 class KeOpsSquaredDistances:
-    """Squared distances between points using KeOps."""
+    """Squared distances between points using KeOps.
+
+    Parameters
+    ----------
+    points
+        The points in the source space.
+    cutoff
+        The cutoff value for the window.
+    kernel
+        The kernel to use.
+    target_points
+        The points in the target space.
+
+    """
 
     def __init__(
         self,
@@ -29,19 +42,6 @@ class KeOpsSquaredDistances:
         kernel: Optional[Callable] = None,
         target_points=None,
     ):
-        """Kernel constructor.
-
-        Parameters
-        ----------
-        points
-            The points in the source space.
-        cutoff
-            The cutoff value for the window.
-        kernel
-            The kernel to use.
-        target_points
-            The points in the target space.
-        """
         if target_points is None:
             target_points = points
 

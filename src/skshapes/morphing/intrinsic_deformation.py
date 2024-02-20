@@ -22,22 +22,20 @@ from .metrics import AsIsometricAsPossible, Metric
 
 
 class IntrinsicDeformation(BaseModel):
-    """Vector field deformation model."""
+    """Vector field deformation model.
+
+    Parameters
+    ----------
+    n_steps
+        Number of integration steps.
+    metric
+        Riemannian metric used to regularize the morphing.
+    """
 
     @typecheck
     def __init__(
         self, n_steps: int = 1, metric: Optional[Metric] = None
     ) -> None:
-        """Initialize the model.
-
-        Parameters
-        ----------
-        n_steps
-            Number of integration steps.
-        metric
-            Riemannian metric used to regularize the morphing.
-
-        """
         if metric is None:
             metric = AsIsometricAsPossible()
 

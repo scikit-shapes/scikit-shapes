@@ -12,8 +12,8 @@ from ..types import polydata_type
 class LandmarkSetter:
     """Landmark setter for a PolyData or a list of PolyData.
 
-    It could be used to select landmarks on a single shape or on a set of
-    shapes.
+    Select landmarks on a single shape or corresponding landmarks on a set of
+    shapes. Landmarks are vertices of the shape(s).
 
     If a list is provided, the first shape is considered as the reference shape
     and the landmarks are selected on this shape. Then, the same landmarks must
@@ -23,13 +23,34 @@ class LandmarkSetter:
     ----------
     shapes
         The shape or list of shapes on which the landmarks are selected.
+
+    Examples
+    --------
+
+    ```python
+    import skshapes as sks
+    from pyvista import examples
+
+    shape1 = sks.PolyData(examples.download_human())
+    shape2 = sks.PolyData(examples.download_doorman())
+
+    app = sks.LandmarkSetter([shape1, shape2])
+    app.start()
+
+    # Landmarks are now stored in the shapes
+    shape1.landmark_indices  # The indices of the landmarks on shape1
+    shape2.landmark_points  # The coordinates of the landmarks on shape2
+    ```
+
+    See [here](../../../generated/gallery/applications/plot_landmark_setter/)
+    for the full example.
+
     """
 
     @typecheck
     def __init__(
         self, shapes: Union[list[polydata_type], polydata_type]
     ) -> None:
-        """Class constructor."""
         super().__init__()
 
         if hasattr(shapes, "__iter__") and len(shapes) > 1:
@@ -46,6 +67,7 @@ class LandmarkSetter:
 
 class LandmarkSetterSingleMesh(vedo.Plotter):
     """Single PolyData landmark setter.
+
 
     Parameters
     ----------
@@ -126,17 +148,15 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
     The same number of landmarks must be selected on each shape, and the
     landmarks must be selected in the same order on each shape, in order
     to use the landmarks for registration between these.
+
+    Parameters
+    ----------
+    shapes
+        The list of PolyData on which the landmarks are selected.
     """
 
     @typecheck
     def __init__(self, shapes: list[polydata_type]) -> None:
-        """Class constructor.
-
-        Parameters
-        ----------
-        shapes
-            The list of PolyData on which the landmarks are selected.
-        """
         super().__init__(N=2, sharecam=False)
 
         # The landmarks (list of indices) are stored in a list of lists of

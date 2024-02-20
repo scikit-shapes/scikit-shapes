@@ -38,13 +38,69 @@ class PolyData(polydata_type):
     """A polygonal data object. It is composed of points, edges and triangles.
 
     Three types of objects can be provided to initialize a PolyData object:
+
     - a vedo mesh
     - a pyvista mesh
     - a path to a mesh
     - points, edges and triangles as torch tensors
 
-    For all these cases, it is possible to provide landmarks as a sparse tensor
-    and device as a string or a torch device ("cpu" by default)
+    PolyData object has support for data attributes: point_data,
+    edge_data and triangle_data. These are dictionaries of torch tensors that
+    can be used to store any kind of data associated with the points, edges or
+    triangles of the shape.
+
+    Landmarks can be defined on the shape. The easiest way to define landmarks
+    is to provide a list of indices.
+
+    Landmarks can also be defined as a sparse
+    tensor of shape (n_landmarks, n_points) where each line is a landmark in
+    barycentric coordinates. It allows to define landmarks in a continuous
+    space (on a triangle or an edge) and not only on the vertices of the shape.
+
+    Control Points can be defined on the shape. Control Points is another
+    PolyData that is used to control the deformation of the shape. It is used
+    in the context of the [`ExtrinsicDeformation`](../../morphing/extrinsic_deformation)
+    model.
+
+    For visualization, PolyData can be converted into a pyvista PolyData or a
+    vedo Mesh with the `to_pyvista` and `to_vedo` methods.
+
+    Also, PolyData can be saved to a file with the `save` method. The format
+    accepted by PyVista are supported (.ply, .stl, .vtk).
+
+    Parameters
+    ----------
+    points
+        The points of the shape. Could also be a vedo mesh, a pyvista mesh or a
+        path to a file. If it is a mesh or a path, the edges and triangles are
+        inferred from it.
+    edges
+        The edges of the shape.
+    triangles
+        The triangles of the shape.
+    device
+        The device on which the shape is stored. If None it is inferred
+        from the points.
+    landmarks
+        The landmarks of the shape.
+    control_points
+        The control points of the shape.
+    point_data
+        The point data of the shape.
+    edge_data
+        The edge data of the shape.
+    triangle_data
+        The triangle data of the shape.
+    cache_size
+        Size of the cache for memoized properties. Defaults to None (= no
+        cache limit). Use a smaller value if you intend to e.g. compute
+        point curvatures at many different scales.
+
+    Examples
+    --------
+
+    See the corresponding [examples](../../../generated/gallery/#data)
+
     """
 
     @convert_inputs
@@ -63,30 +119,6 @@ class PolyData(polydata_type):
         triangle_data: DataAttributes | None = None,
         cache_size: int | None = None,
     ) -> None:
-        """Class constructor.
-
-        Parameters
-        ----------
-        points
-            The points of the shape.
-        edges
-            The edges of the shape.
-        triangles
-            The triangles of the shape.
-        device
-            The device on which the shape is stored. If None it is inferred
-            from the points.
-        landmarks
-            The landmarks of the shape.
-        control_points
-            The control points of the shape.
-        point_data
-            The point data of the shape.
-        cache_size
-            Size of the cache for memoized properties. Defaults to None (= no
-            cache limit). Use a smaller value if you intend to e.g. compute
-            point curvatures at many different scales.
-        """
         # If the user provides a pyvista mesh, we extract the points, edges and
         # triangles from it
         # If the user provides a path to a mesh, we read it with pyvista and

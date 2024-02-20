@@ -15,27 +15,23 @@ class OptimalTransportLoss(BaseLoss):
     """Loss based on optimal transport for PolyData.
 
     This class defines a loss based on optimal transport for PolyData. More
-    precisely, it initializes a SamplesLoss object from the geomloss library
-    (https://www.kernel-operations.io/geomloss/). See the documentation of
-    this library for more details. The default loss is the Sinkhorn loss.
+    precisely, it initializes a SamplesLoss object from the geomloss library.
+    See its [documentation]((https://www.kernel-operations.io/geomloss/))
+    for more details. The default loss is the Sinkhorn loss.
+
+
+    Parameters
+    ----------
+    loss
+        The loss function to compute. Supported values are "sinkhorn",
+        "hausdorff", "energy", "gaussian" and "laplacian".
+    **kwargs
+        additional arguments passed to the geomloss.SamplesLoss object.
+
     """
 
     @typecheck
     def __init__(self, loss: losses = "sinkhorn", **kwargs) -> None:
-        """Initialize the OptimalTransportLoss class.
-
-        For more details on the arguments, see the documentation of geomloss:
-        https://www.kernel-operations.io/geomloss/api/pytorch-api.html
-
-        Parameters
-        ----------
-        loss
-            The loss function to compute. Supported values are "sinkhorn",
-            "hausdorff", "energy", "gaussian" and "laplacian".
-        **kwargs
-            additional arguments passed to the geomloss.SamplesLoss object.
-
-        """
         self.kwargs = kwargs
         self.loss = loss
 
@@ -59,6 +55,7 @@ class OptimalTransportLoss(BaseLoss):
 
         Returns
         -------
+        FloatScalar
             the loss
         """
         super().__call__(source=source, target=target)
