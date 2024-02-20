@@ -186,5 +186,5 @@ docs/generated/
 *edges_extraction.cpp
 skshapes/data/edges_extraction.cpp
 
-# To store anythong that is not supposed to be pushed to github
+# To store anything that is not supposed to be pushed to github
 **/local/*
