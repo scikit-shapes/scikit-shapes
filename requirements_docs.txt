@@ -10,3 +10,4 @@ pytkdocs[numpy-style]
 trame
 trame_vtk
 trame_vuetify
+vedo==2023.5.0
