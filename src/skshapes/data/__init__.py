@@ -1,3 +1,5 @@
+"""Module with data types."""
+
 from math import pi
 from typing import Union
 
@@ -9,7 +11,7 @@ from ..types import polydata_type
 from .image import Image
 from .polydata import PolyData
 
-Shape = Union[PolyData, Image]
+Shape = PolyData | Image
 
 
 @typecheck

@@ -17,8 +17,6 @@ Arguments points can be either a tensor of shape:
 - (n_meshes, n_poses, dim) for a sequence of poses of the same mesh
 """
 
-from typing import Optional, Union
-
 import torch
 
 from ..input_validation import convert_inputs, typecheck
@@ -37,9 +35,9 @@ from .edge_topology import EdgeTopology
 @typecheck
 def triangle_normals(
     *,
-    points: Union[Points, PointsSequence],
+    points: Points | PointsSequence,
     triangles: Triangles,
-) -> Union[Float2dTensor, Float3dTensor]:
+) -> Float2dTensor | Float3dTensor:
     """Triangle normals of a triangular mesh.
 
     Parameters
@@ -73,9 +71,9 @@ def triangle_normals(
 @typecheck
 def triangle_areas(
     *,
-    points: Union[Points, PointsSequence],
+    points: Points | PointsSequence,
     triangles: Triangles,
-) -> Union[Float1dTensor, Float2dTensor]:
+) -> Float1dTensor | Float2dTensor:
     """Areas of the triangles of a triangular mesh.
 
     Parameters
@@ -100,10 +98,10 @@ def triangle_areas(
 @typecheck
 def edge_lengths(
     *,
-    points: Union[Points, PointsSequence],
+    points: Points | PointsSequence,
     triangles: Triangles,
-    edge_topology: Optional[EdgeTopology] = None,
-) -> Union[Float1dTensor, Float2dTensor]:
+    edge_topology: EdgeTopology | None = None,
+) -> Float1dTensor | Float2dTensor:
     """Lengths of the edges of a triangular mesh.
 
     Parameters
@@ -131,9 +129,9 @@ def edge_lengths(
 @typecheck
 def triangle_centers(
     *,
-    points: Union[Points, PointsSequence],
+    points: Points | PointsSequence,
     triangles: Triangles,
-) -> Union[Float2dTensor, Float3dTensor]:
+) -> Float2dTensor | Float3dTensor:
     """Centers of the triangles of a triangular mesh.
 
     Parameters
@@ -157,10 +155,10 @@ def triangle_centers(
 
 @typecheck
 def edge_centers(
-    points: Union[Points, PointsSequence],
+    points: Points | PointsSequence,
     triangles: Triangles,
-    edge_topology: Optional[EdgeTopology] = None,
-) -> Union[Float2dTensor, Float3dTensor]:
+    edge_topology: EdgeTopology | None = None,
+) -> Float2dTensor | Float3dTensor:
     """Centers of the edges of a triangular mesh.
 
     Parameters
@@ -186,13 +184,13 @@ def edge_centers(
 
 @typecheck
 def _get_geometry(
-    points: Union[Points, PointsSequence],
+    points: Points | PointsSequence,
     triangles: Triangles,
-    edge_topology: Optional[EdgeTopology] = None,
-) -> Union[
-    tuple[Float2dTensor, Float2dTensor, Float2dTensor, Float2dTensor],
-    tuple[Float3dTensor, Float3dTensor, Float3dTensor, Float3dTensor],
-]:
+    edge_topology: EdgeTopology | None = None,
+) -> (
+    tuple[Float2dTensor, Float2dTensor, Float2dTensor, Float2dTensor]
+    | tuple[Float3dTensor, Float3dTensor, Float3dTensor, Float3dTensor]
+):
     """Get the geometry of the edges of a triangular mesh.
 
     The geometry of an edge is defined by the four points Pi, Pj, Pk, Pl
@@ -244,10 +242,10 @@ def _get_geometry(
 @typecheck
 def dihedral_angles(
     *,
-    points: Union[Points, PointsSequence],
+    points: Points | PointsSequence,
     triangles: Triangles,
-    edge_topology: Optional[EdgeTopology] = None,
-) -> Union[Float1dTensor, Float2dTensor]:
+    edge_topology: EdgeTopology | None = None,
+) -> Float1dTensor | Float2dTensor:
     """Dihedral angles of the edges of a triangular mesh.
 
     Parameters

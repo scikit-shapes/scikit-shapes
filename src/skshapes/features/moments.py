@@ -1,6 +1,6 @@
 """Moments for point clouds."""
 
-from typing import Literal, Optional
+from typing import Literal
 
 import torch
 
@@ -11,7 +11,6 @@ from ..types import (
     Float2dTensor,
     FloatTensor,
     Number,
-    Union,
 )
 
 
@@ -61,13 +60,13 @@ def _point_moments(
     self,
     *,
     order: int = 2,
-    features: Optional[Union[Float2dTensor, Double2dTensor]] = None,
+    features: Float2dTensor | Double2dTensor | None = None,
     central: bool = False,
     rescale: bool = False,
-    scale: Optional[Number] = None,
-    dtype: Optional[Literal["float", "double"]] = None,
+    scale: Number | None = None,
+    dtype: Literal["float", "double"] | None = None,
     **kwargs,
-) -> Union[FloatTensor, DoubleTensor]:
+) -> FloatTensor | DoubleTensor:
     """Compute the local moments of a point cloud."""
     X = self.points if features is None else features
 

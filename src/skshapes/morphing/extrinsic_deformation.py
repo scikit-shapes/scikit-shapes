@@ -10,7 +10,7 @@ at q.
 
 from __future__ import annotations
 
-from typing import Literal, Union
+from typing import Literal
 
 import torch
 from torchdiffeq import odeint
@@ -261,7 +261,7 @@ class ExtrinsicDeformation(BaseModel):
 
 # Type for the ODE function, can be a couple of tensors (moment, points) or
 # a triple (moment, control_points, points)
-type_y = Union[tuple[Points, Points], tuple[Points, Points, Points]]
+type_y = tuple[Points, Points] | tuple[Points, Points, Points]
 
 
 class ODEModule(torch.nn.Module):

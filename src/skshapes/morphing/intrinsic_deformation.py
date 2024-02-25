@@ -6,8 +6,6 @@ to obtain the sequence of points of the morphed shape. The morphing is
 regularized by a Riemannian metric on the shape space.
 """
 
-from typing import Optional
-
 import torch
 
 from ..errors import DeviceError
@@ -33,9 +31,7 @@ class IntrinsicDeformation(BaseModel):
     """
 
     @typecheck
-    def __init__(
-        self, n_steps: int = 1, metric: Optional[Metric] = None
-    ) -> None:
+    def __init__(self, n_steps: int = 1, metric: Metric | None = None) -> None:
         if metric is None:
             metric = AsIsometricAsPossible()
 

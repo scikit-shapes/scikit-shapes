@@ -105,12 +105,12 @@ def rule_no_more_than_one(not_none: int, parameters: list[str]) -> None:
         )
 
 
-def one_and_only_one(parameters):
+def one_and_only_one(parameters: list[str]):
     """Checker for only one not None parameter.
 
     Parameters
     ----------
-    parameters : list[str]
+    parameters
         the list of parameters to check
 
     Returns

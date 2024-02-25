@@ -4,8 +4,6 @@ This module contains the implementation of the rigid motion model. This model
 is described by a translation and a rotation. The morphing is not regularized.
 """
 
-from typing import Union
-
 import torch
 
 from ..errors import DeviceError
@@ -38,7 +36,7 @@ class RigidMotion(BaseModel):
     def morph(
         self,
         shape: polydata_type,
-        parameter: Union[Float2dTensor, Float1dTensor],
+        parameter: Float2dTensor | Float1dTensor,
         return_path: bool = False,
         return_regularization: bool = False,  # noqa: ARG002
     ) -> MorphingOutput:
@@ -252,7 +250,7 @@ class RigidMotion(BaseModel):
     @typecheck
     def parameter_shape(
         self, shape: shape_type
-    ) -> Union[tuple[int, int], tuple[int]]:
+    ) -> tuple[int, int] | tuple[int]:
         """Return the shape of the parameter.
 
         Parameters

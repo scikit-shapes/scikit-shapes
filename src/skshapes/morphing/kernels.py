@@ -1,7 +1,6 @@
 """Kernels used in the ExtrinsicDeformation class."""
 
 from math import sqrt
-from typing import Optional
 
 from pykeops.torch import LazyTensor
 
@@ -26,9 +25,7 @@ class GaussianKernel(Kernel):
     def __init__(self, sigma=0.1):
         self.sigma = sigma
 
-    def operator(
-        self, q0: Points, q1: Optional[Points] = None
-    ) -> LinearOperator:
+    def operator(self, q0: Points, q1: Points | None = None) -> LinearOperator:
         r"""Compute the operator $K_{q_0}^{q_1}$.
 
         The operator is a $(n_{q_0} x n_{q_1})$ matrix where $n_{q_0}$ is the

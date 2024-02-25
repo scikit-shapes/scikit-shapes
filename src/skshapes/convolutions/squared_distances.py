@@ -1,7 +1,7 @@
 """Squared distances between points."""
 
 from collections.abc import Callable
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 import torch
@@ -38,8 +38,8 @@ class KeOpsSquaredDistances:
         self,
         *,
         points,
-        cutoff: Optional[Number] = None,
-        kernel: Optional[Callable] = None,
+        cutoff: Number | None = None,
+        kernel: Callable | None = None,
         target_points=None,
     ):
         if target_points is None:
@@ -146,9 +146,9 @@ def squared_distances(
     *,
     points,
     window: Literal[None, "ball", "knn", "spectral"] = None,
-    cutoff: Optional[Number] = None,
+    cutoff: Number | None = None,
     geodesic: bool = False,
-    kernel: Optional[Callable] = None,
+    kernel: Callable | None = None,
     target_points=None,
 ):
     """Matrix of squared distances between points.

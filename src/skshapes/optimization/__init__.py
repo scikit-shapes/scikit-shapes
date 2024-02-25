@@ -37,4 +37,4 @@ class SGD(BaseOptimizer):
         super().__init__("SGD", lr=lr, **kwargs)
 
 
-Optimizer = Union[LBFGS, Adam, Adagrad, SGD]
+Optimizer = LBFGS | Adam | Adagrad | SGD

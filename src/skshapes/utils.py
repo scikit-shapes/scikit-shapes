@@ -1,6 +1,6 @@
 """Utility functions for the skshapes package."""
 
-from typing import Literal, Optional
+from typing import Literal
 
 import torch
 
@@ -54,7 +54,7 @@ def scatter(
     src: NumericalTensor,
     index: Int1dTensor,
     reduce: Literal["sum", "min", "max", "mean"] = "mean",
-    min_length: Optional[int] = None,
+    min_length: int | None = None,
     blank_value: Number = 0,
 ):
     """Scatter operation on a tensor.

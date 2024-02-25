@@ -1,7 +1,5 @@
 """Metrics."""
 
-from typing import Optional
-
 import torch
 
 from ..input_validation import typecheck
@@ -39,8 +37,8 @@ class AsIsometricAsPossible(Metric):
         self,
         points_sequence: Float3dTensor,
         velocities_sequence: Float3dTensor,
-        edges: Optional[Edges] = None,
-        triangles: Optional[Triangles] = None,  # noqa: ARG002
+        edges: Edges | None = None,
+        triangles: Triangles | None = None,  # noqa: ARG002
     ) -> FloatScalar:
         """Compute the mean velocities' metric along the sequence of points.
 
@@ -107,8 +105,8 @@ class ShellEnergyMetric(Metric):
         self,
         points_sequence: Float3dTensor,
         velocities_sequence: Float3dTensor,
-        edges: Optional[Edges] = None,  # noqa: ARG002
-        triangles: Optional[Triangles] = None,
+        edges: Edges | None = None,  # noqa: ARG002
+        triangles: Triangles | None = None,
     ) -> FloatScalar:
         """Compute shell energy along the sequence of points.
 

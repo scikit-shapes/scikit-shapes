@@ -1,7 +1,7 @@
 """Utils for the tests."""
 
 import sys
-from typing import Literal, Optional
+from typing import Literal
 
 import torch
 import vedo as vd
@@ -48,9 +48,10 @@ def create_point_cloud(
 
 def create_shape(
     *,
-    shape: Optional[Literal["sphere"]] = None,
-    file_name: Optional[str] = None,
-    function: Optional[callable] = None,
+    shape: Literal["sphere"] | None = None,
+    file_name: str | None = None,
+    # function: callable | None = None,
+    function=None,
     n_points=20,
     noise=0,
     radius=1,

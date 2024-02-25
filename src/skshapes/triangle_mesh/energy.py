@@ -1,7 +1,5 @@
 """Energy functions for triangle meshes."""
 
-from typing import Optional, Union
-
 import torch
 
 from ..input_validation import typecheck
@@ -24,11 +22,11 @@ from .geometry import (
 @typecheck
 def bending_energy(
     *,
-    points_undef: Union[Points, PointsSequence],
-    points_def: Union[Points, PointsSequence],
+    points_undef: Points | PointsSequence,
+    points_def: Points | PointsSequence,
     triangles: Triangles,
-    edge_topology: Optional[EdgeTopology] = None,
-) -> Union[FloatScalar, Float1dTensor]:
+    edge_topology: EdgeTopology | None = None,
+) -> FloatScalar | Float1dTensor:
     """Compute the bending energy of the mesh.
 
     The mathematical formulation is given in page 4 of:
@@ -91,10 +89,10 @@ def bending_energy(
 @typecheck
 def membrane_energy(
     *,
-    points_undef: Union[Points, PointsSequence],
-    points_def: Union[Points, PointsSequence],
+    points_undef: Points | PointsSequence,
+    points_def: Points | PointsSequence,
     triangles: Triangles,
-) -> Union[FloatScalar, Float1dTensor]:
+) -> FloatScalar | Float1dTensor:
     """Compute the membrane energy of the mesh.
 
     The mathematical formulation is given by equation (8) of:
@@ -174,12 +172,12 @@ def membrane_energy(
 @typecheck
 def shell_energy(
     *,
-    points_undef: Union[Points, PointsSequence],
-    points_def: Union[Points, PointsSequence],
+    points_undef: Points | PointsSequence,
+    points_def: Points | PointsSequence,
     triangles: Triangles,
-    edge_topology: Optional[EdgeTopology] = None,
+    edge_topology: EdgeTopology | None = None,
     weight: Number = 0.001,
-) -> Union[FloatScalar, Float1dTensor]:
+) -> FloatScalar | Float1dTensor:
     """Compute the shell energy.
 
     The shell energy is defined as the sum of the membrane and weight * bending
