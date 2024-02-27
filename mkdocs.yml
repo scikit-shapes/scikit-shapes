@@ -26,20 +26,19 @@ theme:
 
 nav:
   - Home: index.md
-  # - Installation guide: installation.md
-  # - Scikit-Shapes guide: user_guide/
-    # - Data:
-    #   - PolyData: user_guide/data_structures/polydata.md
-    #   - Images: user_guide/data_structures/images.md
-    #   - What makes PolyData and Images different: user_guide/data_structures/differences.md
-    # - Single Shape analysis:
-    #   - MultiScaling: user_guide/single_shape/multiscale.md
-    #   - Features:
-    #     - Curvature: user_guide/single_shape/features/curvature.md
-    # - Registration:
-    #   - Registration: user_guide/registration/registration.md
-    #   - Loss functions: user_guide/registration/loss.md
-    #   - Deformation models: user_guide/registration/deformations.md
+  - Scikit-Shapes guide:
+    - Data:
+      - PolyData: user_guide/data_structures/polydata.md
+      - Images: user_guide/data_structures/images.md
+      - What makes PolyData and Images different: user_guide/data_structures/differences.md
+    - Single Shape analysis:
+      - MultiScaling: user_guide/single_shape/multiscale.md
+      - Features:
+        - Curvature: user_guide/single_shape/features/curvature.md
+    - Registration:
+      - Registration: user_guide/registration/registration.md
+      - Loss functions: user_guide/registration/loss.md
+      - Deformation models: user_guide/registration/deformations.md
   - Gallery of examples: generated/gallery
   - API Reference:
     - skshapes: reference/
