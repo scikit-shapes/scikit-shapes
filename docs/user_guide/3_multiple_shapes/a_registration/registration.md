@@ -4,10 +4,10 @@
 
 Registration is the task of finding a suitable transformation from a source to a target shape.
 
-A registration task must be at least parametrized with a `deformation model` and a `loss function`
+A registration task must be parametrized with a `deformation model` and a `loss object`
 
 - The deformation model specifies constrains about the way source can be transformed to match target.
-- The loss function measure the discrepancy between the morphed source and the target
+- The loss, or fidelity, measure the discrepancy between the morphed source and the target
 
 ```python
 import skshapes as sks
@@ -36,9 +36,9 @@ print(r.translation_)
 tensor([1., 2.])
 ```
 
-## Choosing a Loss function
+## Loss function
 
-A loss function is a way to quantify the difference between two shapes. In scikit-shapes a loss function is represented by a class that can be initialized with some hyperparameters
+A loss function is a way to quantify the discrepancy between two shapes. In scikit-shapes a loss function is represented by a class that can be initialized with some hyperparameters
 ```python
 import skshapes as sks
 
@@ -59,20 +59,14 @@ Some losses requires that `source` and `target` fulfill certains conditions:
 | `LpLoss`               | Lp loss for vertices                 | `source` and `target` must be in correspondence         |
 | `L2Loss`               | L2 loss for vertices                 | `source` and `target` must be in correspondence         |
 | `LandmarkLoss`         | Lp loss for landmarks                | `source` and `target` must have corresponding landmarks |
-| `NearestNeighborsLoss` | Nearest neighbors distance           | NA                                                      |
-
-- for images
-
-| Loss function          | Description                          | Restrictions                                            |
-| ---------------------- | ------------------------------------ | ------------------------------------------------------- |
+| `NearestNeighborsLoss` | Nearest neighbors distance           | No restriction                                          |
 
 
 
 ## Choosing a Registration model
 
 | Deformation model      | Description
-| ---------------------- | ------------------------------------------------- |
-| `RigidMotion`          | Rotation + translation                            |
-| `AffineDeformation`    | Affine transformation                             |
-| `IntrinsicDeformation` | Sequence of                                       |
-| `ExtrinsicDeformation` | Distord the ambiant space to make the shape move  |
+| ---------------------- | -------------------------------------------------------------------- |
+| `RigidMotion`          | Rotation + translation                                               |
+| `IntrinsicDeformation` | Sequence of vector fields (displacements) defined over the points    |
+| `ExtrinsicDeformation` | Distord the ambiant space to make the shape move                     |
