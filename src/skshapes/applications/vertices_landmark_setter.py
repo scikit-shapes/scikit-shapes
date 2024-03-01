@@ -25,20 +25,20 @@ class LandmarkSetter:
     Examples
     --------
 
-    ```python
-    import skshapes as sks
-    from pyvista import examples
+    .. code-block:: python
 
-    shape1 = sks.PolyData(examples.download_human())
-    shape2 = sks.PolyData(examples.download_doorman())
+        import skshapes as sks
+        from pyvista import examples
 
-    app = sks.LandmarkSetter([shape1, shape2])
-    app.start()
+        shape1 = sks.PolyData(examples.download_human())
+        shape2 = sks.PolyData(examples.download_doorman())
 
-    # Landmarks are now stored in the shapes
-    shape1.landmark_indices  # The indices of the landmarks on shape1
-    shape2.landmark_points  # The coordinates of the landmarks on shape2
-    ```
+        app = sks.LandmarkSetter([shape1, shape2])
+        app.start()
+
+        # Landmarks are now stored in the shapes
+        shape1.landmark_indices  # The indices of the landmarks on shape1
+        shape2.landmark_points  # The coordinates of the landmarks on shape2
 
     See [here](../../../generated/gallery/applications/plot_landmark_setter/)
     for the full example.

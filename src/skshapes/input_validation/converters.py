@@ -17,7 +17,7 @@ def _convert_arg(x: np.ndarray | torch.Tensor):
 
     Parameters
     ----------
-    x : Union[np.ndarray, torch.Tensor])
+    x
         the input array
 
     Raises
@@ -57,29 +57,30 @@ def convert_inputs(func: callable):
 
     If used in combination with the typecheck decorator, it must be called
     first :
-    ```python
-    import numpy as np
-    import skshapes as sks
-    from skshapes.types import NumericalTensor
+
+    .. code-block:: python
+
+        import numpy as np
+        import skshapes as sks
+        from skshapes.types import NumericalTensor
 
 
-    @sks.convert_inputs
-    @sks.typecheck
-    def foo(a: NumericalTensor) -> NumericalTensor:
-        return a
+        @sks.convert_inputs
+        @sks.typecheck
+        def foo(a: NumericalTensor) -> NumericalTensor:
+            return a
 
 
-    foo(np.zeros(10))  # OK
+        foo(np.zeros(10))  # OK
 
 
-    @sks.typecheck
-    @sks.convert_inputs
-    def bar(a: NumericalTensor) -> NumericalTensor:
-        return a
+        @sks.typecheck
+        @sks.convert_inputs
+        def bar(a: NumericalTensor) -> NumericalTensor:
+            return a
 
 
-    bar(np.zeros(10))  # Beartype error
-    ```
+        bar(np.zeros(10))  # Beartype error
 
     TODO: so far, it only works with numpy arrays and torch tensors.
     Is it relevant to add support for lists and tuples ? -> must be careful

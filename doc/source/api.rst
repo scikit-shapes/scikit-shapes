@@ -14,3 +14,12 @@ Modules
     data
     loss
     morphing
+    tasks
+    features
+    decimation
+    multiscaling
+
+.. toctree::
+    :hidden:
+
+    api/modules

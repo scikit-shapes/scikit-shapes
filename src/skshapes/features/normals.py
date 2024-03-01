@@ -112,15 +112,13 @@ def smooth_normals(
 ) -> FloatTensor:
     """Smooth field of normals, possibly at different scales.
 
-    points, triangles or normals, scale(s)  ->      normals
-    (N, 3),    (3, T) or (N,3),      (S,)   ->  (N, 3) or (N, S, 3)
+    points, triangles or normals, scale(s) -> normals
+    (N, 3), (3, T) or (N,3), (S,) -> (N, 3) or (N, S, 3)
 
     Simply put - if `triangles` are provided:
-      1. Normals are first computed for every triangle using simple 3D geometry
-        and are weighted according to surface area.
-      2. The normal at any given vertex is then computed as the weighted
-        average of the normals of all triangles in a neighborhood specified
-        by Gaussian windows whose radii are given in the list of "scales".
+
+    - Normals are first computed for every triangle using simple 3D geometry and are weighted according to surface area.
+    - The normal at any given vertex is then computed as the weighted average of the normals of all triangles in a neighborhood specified by Gaussian windows whose radii are given in the list of "scales".
 
     If `normals` are provided instead, we simply smooth the discrete vector
     field using Gaussian windows whose radii are given in the list of "scales".
@@ -213,8 +211,8 @@ def tangent_vectors(normals) -> FloatTensor:
     Returns a pair of vector fields u and v to complete the orthonormal basis
     [n,u,v].
 
-          normals        ->             uv
-    (N, 3) or (N, S, 3)  ->  (N, 2, 3) or (N, S, 2, 3)
+    normals -> uv
+    (N, 3) or (N, S, 3) -> (N, 2, 3) or (N, S, 2, 3)
 
     This routine assumes that the 3D "normal" vectors are normalized.
     It is based on the 2017 paper from Pixar,
@@ -229,7 +227,7 @@ def tangent_vectors(normals) -> FloatTensor:
     -------
     FloatTensor
         (N,2,3) or (N,S,2,3) unit vectors `u_i` and `v_i` to complete
-        the tangent coordinate systems `[n_i,u_i,v_i].
+        the tangent coordinate systems `[n_i,u_i,v_i]`.
     """
     x, y, z = normals[..., 0], normals[..., 1], normals[..., 2]
     s = (2 * (z >= 0)) - 1.0  # = z.sign(), but =1. if z=0.

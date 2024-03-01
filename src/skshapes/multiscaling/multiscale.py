@@ -77,14 +77,15 @@ class Multiscale:
 
     Examples
     --------
-    ```python
-    import skshapes as sks
 
-    # load a shape
-    shape = sks.Sphere()
-    ratios = [0.5, 0.25, 0.125]
-    multiscale = sks.Multiscale(shape=shape, ratios=ratios)
-    ```
+    .. code-block:: python
+
+        import skshapes as sks
+
+        # load a shape
+        shape = sks.Sphere()
+        ratios = [0.5, 0.25, 0.125]
+        multiscale = sks.Multiscale(shape=shape, ratios=ratios)
 
     See the [gallery](../../../generated/gallery/#multiscaling) for more
     examples.

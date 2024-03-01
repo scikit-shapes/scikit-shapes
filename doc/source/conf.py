@@ -68,6 +68,8 @@ extensions = [
     'sphinx_gallery.gen_gallery',
 ]
 
+pygments_style = 'sphinx'
+
 myst_enable_extensions = [
     "amsmath",
     "attrs_inline",

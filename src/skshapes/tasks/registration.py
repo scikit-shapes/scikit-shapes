@@ -127,9 +127,9 @@ class Registration:
         """Fit the registration between the source and target shapes.
 
         After calling this method, the registration's parameter can be accessed
-        with the parameter_ attribute, the transformed shape with the
-        transformed_shape_ attribute and the list of successives shapes during
-        the registration process with the path_ attribute.
+        with the ``parameter_`` attribute, the transformed shape with the
+        ``transformed_shape_`` attribute and the list of successives shapes during
+        the registration process with the ``path_`` attribute.
 
         Parameters
         ----------
