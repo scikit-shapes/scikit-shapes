@@ -65,8 +65,7 @@ class Decimation:
         assert pose2_decimated.landmarks is not None
     ```
 
-    Decimation is often used through the [`Multiscale`](../../multiscaling/multiscale)
-    interface, see the associated [examples](../../../generated/gallery/#multiscaling).
+    Decimation is often used through the Multiscale interface.
 
     """
 

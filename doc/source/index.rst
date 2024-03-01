@@ -6,13 +6,6 @@
 Scikit-Shapes: Shape analysis in Python
 =======================================
 
-
-Documentation & Examples
-------------------------
-
-Documentation about the main HiDimStat functions is available
-`here <api.html>`_ and examples are available `here <auto_examples/index.html>`_.
-
 Content
 -------
 

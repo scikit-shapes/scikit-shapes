@@ -3,10 +3,6 @@ Rigid Deformation
 
 Rigid motion corresponds corresponds to a change of shape position and/or orientation while the size and the form of the shape stays the same. Using rigid motion for registration is particularly useful for aligning data.
 
-Examples :
-
-- [alignment of 3D triangle meshes (with and without landmarks)](../../../generated/gallery/registration/plot_human_rigid.md)
-- [alignment of 2D wireframe meshes in dense correspondence](../../../generated/gallery/registration/plot_circles_rigid.md)
 
 Math
 ----

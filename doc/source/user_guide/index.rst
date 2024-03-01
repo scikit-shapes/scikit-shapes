@@ -41,4 +41,4 @@ Add your own models/losses
     :maxdepth: 1
 
     dev/deformations
-    dev/losses
+    dev/loss

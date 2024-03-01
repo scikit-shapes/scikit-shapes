@@ -51,17 +51,20 @@ pip install -r requirements_doc.txt
 Then, you can run :
 
 - the precommit hooks:
+
 ```bash
 pre-commit install
 pre-commit run --all-files
 ```
 
 - the tests (and see code coverage report in your browser)
+
 ```bash
 pytest
 firefox htmlcov/index.html # replace firefox by your web browser
 ```
 - the documentation building
+
 ```bash
 # simply build the documentation and save it in a site/ folder
 mkdocs build

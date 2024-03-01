@@ -1,6 +1,6 @@
 """Landmark setter with barycentric coordinates.
 
-!! Not usable at the moment.
+Not usable at the moment.
 """
 
 # flake8: noqa

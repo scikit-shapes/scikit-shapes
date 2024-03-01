@@ -544,7 +544,8 @@ class PolyData(polydata_type):
 
         Available backends are "pyvista" and "vedo". See the documentation of
         the corresponding plot method for the available arguments:
-        - https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html # noqa: E501
+
+        - https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html
         - https://vedo.embl.es/docs/vedo/plotter.html#show
 
         Parameters

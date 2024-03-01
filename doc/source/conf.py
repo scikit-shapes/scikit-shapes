@@ -55,15 +55,34 @@ version = release = importlib.metadata.version("skshapes")
 
 extensions = [
     "myst_parser",
+    "sphinx_design",
+    "pyvista.ext.plot_directive",
+    "pyvista.ext.viewer_directive",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "numpydoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     'sphinx_gallery.gen_gallery',
+]
+
+myst_enable_extensions = [
+    "amsmath",
+    "attrs_inline",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "linkify",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
 ]
 
 source_suffix = [".rst", ".md"]
@@ -123,4 +142,4 @@ sphinx_gallery_conf = {
     "reset_modules_order": "both",
 }
 
-always_document_param_types = True
+always_document_param_types = False

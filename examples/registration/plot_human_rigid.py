@@ -45,7 +45,7 @@ shape2.points /= rescale2
 
 # %% [markdown]
 # Plot the data
-# ------------
+# -------------
 # Let us have a look at the two shapes we want to align. Clearly, they are not
 # aligned and a rigid transformation is needed.
 
