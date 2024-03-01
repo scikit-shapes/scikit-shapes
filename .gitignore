@@ -188,3 +188,6 @@ skshapes/data/edges_extraction.cpp
 
 # To store anything that is not supposed to be pushed to github
 **/local/*
+**/_build/*
+**/auto_examples/*
+doc/source/api/*

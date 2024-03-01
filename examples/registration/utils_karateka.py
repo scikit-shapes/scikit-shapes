@@ -1,3 +1,5 @@
+"""Utils for the karateka example."""
+
 from math import sqrt
 
 import numpy as np

@@ -7,8 +7,9 @@ alignment) of two 3D meshes. We also show how to improve the registration by
 adding landmarks.
 """
 
-# %%
-# ## Load data
+# %% [markdown]
+# Load data
+# ---------
 #
 # We load two meshes from the `pyvista` example datasets. We then rescale them
 # to lie in the unit cube to avoid dealing with scale issues.
@@ -42,9 +43,9 @@ rescale2 = torch.max(lims2)
 shape2.points -= torch.min(shape2.points, dim=0).values
 shape2.points /= rescale2
 
-# %%
-# ## Plot the data
-#
+# %% [markdown]
+# Plot the data
+# ------------
 # Let us have a look at the two shapes we want to align. Clearly, they are not
 # aligned and a rigid transformation is needed.
 
@@ -53,9 +54,9 @@ plotter.add_mesh(shape1.to_pyvista())
 plotter.add_mesh(shape2.to_pyvista())
 plotter.show()
 
-# %%
-# ## Apply the registration
-#
+# %% [markdown]
+# Apply the registration
+# ----------------------
 # We now apply the registration. The meshes points are not in correspondence
 # and we need to use a loss function that can handle this. We use the nearest
 # neighbors loss.
@@ -80,8 +81,9 @@ registration = Registration(
 
 registration.fit(source=shape2, target=shape1)
 
-# %%
-# ## Plot an animation of the registration
+# %% [markdown]
+# Plot an animation of the registration
+# -------------------------------------
 #
 # We can now plot an animation of the registration. We observe that the
 # registration is not perfect. This is due to the fact that the nearest
@@ -102,8 +104,9 @@ for shape in path:
 
 plotter.show()
 
-# %%
-# ## Add landmarks
+# %% [markdown]
+# Add landmarks
+# -------------
 #
 # We now add landmarks to the two shapes. Three landmarks (head, left hand,
 # right hand) are enough to greatly improve the registration.
@@ -131,8 +134,9 @@ for i in range(3):
     )
 plotter.show()
 
-# %%
-# ## Apply the registration with landmarks
+# %% [markdown]
+# Apply the registration with landmarks
+# -------------------------------------
 #
 # We now apply the registration. We use the landmarks to define a landmark
 # loss. We use the nearest neighbors loss to match the rest of the points.
@@ -153,9 +157,9 @@ registration = Registration(
 registration.fit(source=shape2, target=shape1)
 
 
-# %%
-# ## Animation of the registration with landmarks
-#
+# %% [markdown]
+# Animation of the registration with landmarks
+# --------------------------------------------
 
 path = registration.path_
 plotter = pv.Plotter()

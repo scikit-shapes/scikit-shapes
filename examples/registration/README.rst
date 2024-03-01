@@ -1,0 +1,4 @@
+Registration
+------------
+
+Examples using registration.

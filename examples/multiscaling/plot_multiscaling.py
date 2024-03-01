@@ -7,7 +7,7 @@ quadric decimation and how to propagate a signal on the multiscale
 representation.
 """
 
-# %%
+# %% [markdown]
 # The Multiscale class is used to create a multiscale representation of a
 # triangle mesh using quadric decimation. Quadric decimation reduces the number
 # of points of a mesh by iteratively collapsing the edge with the smallest
@@ -17,7 +17,7 @@ representation.
 #
 # We use the implementation proposed by [fast-simplification](https://github.com/pyvista/fast-simplification)
 
-
+# %%
 import pyvista.examples
 
 import skshapes as sks
@@ -26,8 +26,12 @@ bunny = sks.PolyData(pyvista.examples.download_bunny())
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
 
 
-# %%
+# %% [markdown]
 # Visualize the multiscale representation
+# ---------------------------------------
+#
+
+# %%
 import pyvista as pv
 
 plotter = pv.Plotter(shape=(1, 4))

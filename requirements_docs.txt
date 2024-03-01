@@ -1,13 +1,11 @@
-imageio
-jupyterlab
-mkdocs
-mkdocs-gallery @ git+https://github.com/Louis-Pujol/mkdocs-gallery.git@latest
-mkdocs-gen-files
-mkdocs-literate-nav
-mkdocs-material
-mkdocstrings-python
-pytkdocs[numpy-style]
+furo
+myst_parser >=0.13
+numpydoc
+sphinx >=4.0
+sphinx-autodoc-typehints
+sphinx-copybutton
+sphinx-gallery
+
 trame
 trame_vtk
 trame_vuetify
-vedo==2023.5.0

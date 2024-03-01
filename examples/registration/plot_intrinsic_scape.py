@@ -5,9 +5,10 @@ This examples shows the registration of two triangle meshes using an intrinsic
 registration model.
 """
 
-# %%
+# %% [markdown]
 # Load useful packages
 
+# %%
 import sys
 
 import pykeops
@@ -17,10 +18,13 @@ import skshapes as sks
 
 sys.path.append(pykeops.get_build_folder())
 
-# %%
-# ## Load and align data
+# %% [markdown]
+# Load and align data
+# -------------------
+#
 
 
+# %%
 source = sks.Sphere()
 target = sks.Sphere()
 
@@ -52,9 +56,12 @@ plotter.add_mesh(source.to_pyvista(), color="tan")
 plotter.add_mesh(target.to_pyvista(), color="purple", opacity=0.5)
 plotter.show()
 
-# %%
-# ## Decimate
+# %% [markdown]
+# Decimate
+# --------
 
+
+# %%
 decimation_module = sks.Decimation(n_points=200)
 decimation_module.fit(source)
 
@@ -66,9 +73,11 @@ plotter.add_mesh(source.to_pyvista(), color="tan")
 plotter.add_mesh(target.to_pyvista(), color="purple", opacity=0.5)
 plotter.show()
 
-# %%
-# ## Intrinsic registration
+# %% [markdown]
+# Intrinsic registration
+# ----------------------
 
+# %%
 model = sks.IntrinsicDeformation(
     n_steps=20,
     metric=sks.AsIsometricAsPossible(),
@@ -106,9 +115,12 @@ path = intrinsic_registration.path_
 # plotter.add_mesh(path[14].to_pyvista(), color="tan")
 # plotter.show()
 
-# %%
-# ## Add regularization
+# %% [markdown]
+# Add regularization
+# ------------------
+#
 
+# %%
 intrinsic_registration = sks.Registration(
     model=model,
     loss=loss,

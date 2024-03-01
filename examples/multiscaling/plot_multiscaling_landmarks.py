@@ -5,18 +5,22 @@ Multiscaling and landmarks
 Landmarks are preserved during the multiscale representation.
 """
 
-# %%
+# %% [markdown]
 # Imports
+# -------
+#
 
-
+# %%
 import pyvista
 from pyvista import examples
 
 import skshapes as sks
 
-# %%
+# %% [markdown]
 # Load a mesh and define landmarks
+#
 
+# %%
 mesh = sks.PolyData(examples.download_louis_louvre().clean())
 
 landmarks = [
@@ -38,9 +42,12 @@ landmarks = [
 
 mesh.landmark_indices = landmarks
 
-# %%
+# %% [markdown]
 # Create the multiscale representation
+# ------------------------------------
+#
 
+# %%
 ratios = [0.1, 0.01, 0.001]
 multiscale = sks.Multiscale(shape=mesh, ratios=ratios)
 

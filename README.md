@@ -7,7 +7,7 @@
 
 Shape processing in Python
 
-![](docs/animation.gif)
+![](doc/animation.gif)
 
 ## Presentation
 
