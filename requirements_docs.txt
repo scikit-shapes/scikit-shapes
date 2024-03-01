@@ -15,6 +15,7 @@ sphinx-copybutton
 sphinx-copybutton
 sphinx-design
 sphinx-gallery
+sphinx-math-dollar
 
 # To generate interactive scenes
 trame
