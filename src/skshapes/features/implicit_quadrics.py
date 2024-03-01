@@ -1,7 +1,5 @@
 """Implicit quadrics."""
 
-from typing import Optional
-
 import numpy as np
 import torch
 from pykeops.torch import LazyTensor
@@ -38,7 +36,7 @@ def normalize_point_cloud(
 def implicit_quadrics(
     *,
     points: Points,
-    weights: Optional[Float1dTensor] = None,
+    weights: Float1dTensor | None = None,
     scale: Number = 1.0,
     batch=None,
     reg: Number = 0.0001,

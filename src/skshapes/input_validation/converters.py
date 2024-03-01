@@ -1,7 +1,6 @@
 """Converters for arguments."""
 
 from functools import wraps
-from typing import Union
 
 import numpy as np
 import torch
@@ -9,7 +8,7 @@ import torch
 from ..types import float_dtype, int_dtype
 
 
-def _convert_arg(x: Union[np.ndarray, torch.Tensor]):
+def _convert_arg(x: np.ndarray | torch.Tensor):
     """Convert an array to the right type.
 
     Depending on the type of the input, it converts the input to the right

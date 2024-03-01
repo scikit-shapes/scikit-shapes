@@ -1,7 +1,7 @@
 """Basic types aliases and utility functions for scikit-shapes."""
 
 import os
-from typing import Literal, NamedTuple, Optional, Union
+from typing import Literal, NamedTuple
 from warnings import warn
 
 import numpy as np
@@ -29,7 +29,7 @@ int_dtype = torch.int64
 
 
 # Type aliases
-Number = Union[int, float]
+Number = int | float
 
 correspondence = {
     torch.float32: Float32,
@@ -46,7 +46,7 @@ JaxInt = correspondence[int_dtype]
 # Numpy array types
 FloatArray = Float[np.ndarray, "..."]  # Any float format numpy array
 IntArray = Int[np.ndarray, "..."]  # Any int format numpy array
-NumericalArray = Union[FloatArray, IntArray]
+NumericalArray = FloatArray | IntArray
 Float1dArray = Float[np.ndarray, "_"]
 Int1dArray = Int[np.ndarray, "_"]
 
@@ -55,7 +55,7 @@ FloatTensor = JaxFloat[
     torch.Tensor, "..."
 ]  # Only Float32 tensors are FloatTensors
 IntTensor = JaxInt[torch.Tensor, "..."]  # Only Int64 tensors are IntTensors
-NumericalTensor = Union[FloatTensor, IntTensor]
+NumericalTensor = FloatTensor | IntTensor
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]
 IntTensorArray = JaxInt[torch.Tensor, "_"]
 Float1dTensor = JaxFloat[torch.Tensor, "_"]
@@ -64,24 +64,16 @@ Float3dTensor = JaxFloat[torch.Tensor, "_ _ _"]
 FloatScalar = JaxFloat[torch.Tensor, ""]
 Int1dTensor = JaxInt[torch.Tensor, "_"]
 
-FloatSequence = Union[
-    Float[torch.Tensor, "_"],  # noqa: F821
-    Float[np.ndarray, "_"],  # noqa: F821
-    list[float],
-    list[Number],
-]
+FloatSequence = (
+    Float[torch.Tensor, "_"]
+    | Float[np.ndarray, "_"]
+    | list[float]
+    | list[Number]
+)
 
-IntSequence = Union[
-    Int[torch.Tensor, "_"],  # noqa: F821
-    Int[np.ndarray, "_"],  # noqa: F821
-    list[int],
-]
+IntSequence = Int[torch.Tensor, "_"] | Int[np.ndarray, "_"] | list[int]
 
-NumberSequence = Union[
-    FloatSequence,
-    IntSequence,
-]
-
+NumberSequence = FloatSequence | IntSequence
 
 DoubleTensor = JaxDouble[torch.Tensor, "..."]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
@@ -90,10 +82,7 @@ Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 Points2d = JaxFloat[torch.Tensor, "_ 2"]
 Points3d = JaxFloat[torch.Tensor, "_ 3"]
 
-Points = Union[
-    Points2d,
-    Points3d,
-]  # 3D or 2D points
+Points = Points2d | Points3d  # 3D or 2D points
 
 # Points sequences for sequence of poses (i.e. sequence of shapes)
 # The first dimension is the number of points
@@ -101,7 +90,7 @@ Points = Union[
 # The third dimension is the dimension of the points
 PointsSequence2D = JaxFloat[torch.Tensor, "_ _ 2"]
 PointsSequence3D = JaxFloat[torch.Tensor, "_ _ 3"]
-PointsSequence = Union[PointsSequence2D, PointsSequence3D]
+PointsSequence = PointsSequence2D | PointsSequence3D
 
 Edges = JaxInt[torch.Tensor, "_ 2"]
 Triangles = JaxInt[torch.Tensor, "_ 3"]
@@ -126,7 +115,7 @@ class image_type:
     """Class for image shapes."""
 
 
-shape_type = Union[polydata_type, image_type]
+shape_type = polydata_type | image_type
 
 
 @beartype
@@ -191,10 +180,10 @@ class MorphingOutput:
 
     def __init__(
         self,
-        morphed_shape: Optional[shape_type] = None,
-        regularization: Optional[FloatScalar] = None,
-        path: Optional[list[shape_type]] = None,
-        path_length: Optional[FloatScalar] = None,
+        morphed_shape: shape_type | None = None,
+        regularization: FloatScalar | None = None,
+        path: list[shape_type] | None = None,
+        path_length: FloatScalar | None = None,
         **kwargs,
     ) -> None:
         # Define the attributes (common to all morphing algorithms)

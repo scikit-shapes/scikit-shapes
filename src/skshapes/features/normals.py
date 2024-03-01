@@ -1,7 +1,5 @@
 """Point normals and tangent vectors."""
 
-from typing import Optional
-
 import torch
 import torch.nn.functional as F
 from pykeops.torch import LazyTensor
@@ -15,7 +13,7 @@ from ..utils import diagonal_ranges
 def _point_normals(
     self,
     *,
-    scale: Optional[Number] = None,
+    scale: Number | None = None,
     **kwargs,
 ) -> Points:
     if scale is None:
@@ -89,7 +87,7 @@ def _point_normals(
 def _point_frames(
     self,
     *,
-    scale: Optional[Number] = None,
+    scale: Number | None = None,
     **kwargs,
 ) -> FloatTensor:
     N = self.n_points
@@ -107,10 +105,10 @@ def _point_frames(
 def smooth_normals(
     *,
     vertices: Points,
-    triangles: Optional[Triangles] = None,
+    triangles: Triangles | None = None,
     scale=None,
     batch=None,
-    normals: Optional[Points] = None,
+    normals: Points | None = None,
 ) -> FloatTensor:
     """Smooth field of normals, possibly at different scales.
 

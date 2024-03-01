@@ -1,7 +1,7 @@
 """Curvature estimators for point clouds and triangular meshes."""
 
 import colorsys
-from typing import NamedTuple, Optional
+from typing import NamedTuple
 
 import numpy as np
 import torch
@@ -26,10 +26,10 @@ from .structure_tensors import structure_tensors
 def smooth_curvatures(
     *,
     vertices: Points,
-    triangles: Optional[Triangles] = None,
+    triangles: Triangles | None = None,
     scales=None,
     batch=None,
-    normals: Optional[Points] = None,
+    normals: Points | None = None,
     reg: Number = 0.01,
 ) -> FloatTensor:
     """Mean (H) and Gauss (K) curvatures at different scales.
@@ -170,10 +170,10 @@ def smooth_curvatures(
 def smooth_curvatures_2(
     *,
     points: Points,
-    triangles: Optional[Triangles] = None,
+    triangles: Triangles | None = None,
     scale=1.0,
     batch=None,
-    normals: Optional[Points] = None,
+    normals: Points | None = None,
     reg: Number = 0.01,
 ) -> dict[FloatTensor]:
     """Curvature as a dictionary of tensors for mean and Gauss."""
@@ -289,7 +289,7 @@ class QuadraticCoefficients(NamedTuple):
 def _point_quadratic_coefficients(
     self,
     *,
-    scale: Optional[Number] = None,
+    scale: Number | None = None,
     **kwargs,
 ) -> QuadraticCoefficients:
     """Point-wise principal curvatures."""
@@ -389,7 +389,7 @@ def _point_quadratic_coefficients(
 def _point_quadratic_fits(
     self,
     *,
-    scale: Optional[Number] = None,
+    scale: Number | None = None,
     **kwargs,
 ) -> FloatTensor:
     N = self.n_points
@@ -474,7 +474,7 @@ class PrincipalCurvatures(NamedTuple):
 def _point_principal_curvatures(
     self,
     *,
-    scale: Optional[Number] = None,
+    scale: Number | None = None,
     **kwargs,
 ) -> PrincipalCurvatures:
     """Point-wise principal curvatures.
@@ -575,7 +575,7 @@ def _point_curvedness(self, **kwargs) -> Float1dTensor:
 @typecheck
 def _point_curvature_colors(
     self,
-    scale: Optional[Number] = None,
+    scale: Number | None = None,
 ):
     r2 = self.point_quadratic_coefficients(scale=scale).r2
 

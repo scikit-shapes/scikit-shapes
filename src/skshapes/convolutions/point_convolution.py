@@ -1,6 +1,6 @@
 """Point convolutions kernel."""
 
-from typing import Literal, Optional
+from typing import Literal
 
 import numpy as np
 
@@ -16,13 +16,13 @@ def _point_convolution(
     self,
     *,
     kernel: Literal["uniform", "gaussian"] = "gaussian",
-    scale: Optional[Number] = None,
+    scale: Number | None = None,
     window: Literal[None, "ball", "knn", "spectral"] = None,
-    cutoff: Optional[Number] = None,
+    cutoff: Number | None = None,
     geodesic: bool = False,
     normalize: bool = False,
-    dtype: Optional[Literal["float", "double"]] = None,
-    target: Optional[polydata_type] = None,
+    dtype: Literal["float", "double"] | None = None,
+    target: polydata_type | None = None,
 ) -> LinearOperator:
     """Convolution kernel on a PolyData.
 

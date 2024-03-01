@@ -1,7 +1,5 @@
 """Landmark setter application."""
 
-from typing import Union
-
 import torch
 import vedo
 
@@ -48,9 +46,7 @@ class LandmarkSetter:
     """
 
     @typecheck
-    def __init__(
-        self, shapes: Union[list[polydata_type], polydata_type]
-    ) -> None:
+    def __init__(self, shapes: list[polydata_type] | polydata_type) -> None:
         super().__init__()
 
         if hasattr(shapes, "__iter__") and len(shapes) > 1:

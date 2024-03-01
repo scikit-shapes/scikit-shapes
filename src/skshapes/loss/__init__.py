@@ -13,13 +13,13 @@ from .optimal_transport import OptimalTransportLoss
 # Note that BaseLoss is not included in the union, as it is an abstract class
 # Therefore, passing a BaseLoss object to a function expecting a Loss object
 # will raise an error
-Loss = Union[
-    OptimalTransportLoss,
-    LandmarkLoss,
-    NearestNeighborsLoss,
-    L2Loss,
-    LpLoss,
-    EmptyLoss,
-    SumLoss,
-    ProductLoss,
-]
+Loss = (
+    OptimalTransportLoss
+    | LandmarkLoss
+    | NearestNeighborsLoss
+    | L2Loss
+    | LpLoss
+    | EmptyLoss
+    | SumLoss
+    | ProductLoss
+)

@@ -14,4 +14,4 @@ from .metrics import (
 from .rigid_motion import RigidMotion
 from .utils import EulerIntegrator
 
-Model = Union[IntrinsicDeformation, RigidMotion, ExtrinsicDeformation]
+Model = IntrinsicDeformation | RigidMotion | ExtrinsicDeformation
