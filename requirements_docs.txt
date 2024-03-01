@@ -1,11 +1,20 @@
 furo
+
+# To generate GIFs
+imageio
+
+# To generate interactive scenes
+ipython
+jupyterlab
 myst_parser >=0.13
 numpydoc
+# Sphinx + theme/plugins
 sphinx >=4.0
 sphinx-autodoc-typehints
 sphinx-copybutton
+sphinx-copybutton
+sphinx-design
 sphinx-gallery
-
 trame
 trame_vtk
 trame_vuetify
