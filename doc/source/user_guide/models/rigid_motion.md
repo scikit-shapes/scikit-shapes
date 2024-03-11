@@ -17,7 +17,7 @@ $$\text{Morph}(X_i) = \bar{X} + R (X_i - \bar{X}) + t$$
 Code
 ----
 
-Rigid motion is accessible in scikit-shapes through the class [`RigidMotion`][skshapes.morphing.RigidMotion]. The only argument is `n_steps`. Note that this argument has no influence at all on the optimization step, its only influence is if you want to create an animation and have intermediate steps
+Rigid motion is accessible in scikit-shapes through the class [`RigidMotion`](skshapes.morphing.rigid_motion.RigidMotion). The only argument is `n_steps`. Note that this argument has no influence at all on the optimization step, its only influence is if you want to create an animation and have intermediate steps
 
 ```python
 import skshapes as sks

@@ -69,19 +69,6 @@ extensions = [
     'sphinx_gallery.gen_gallery',
 ]
 
-mathjax_config = {
-    'tex2jax': {
-        'inlineMath': [ ["\\(","\\)"] ],
-        'displayMath': [["\\[","\\]"] ],
-    },
-}
-
-mathjax3_config = {
-  "tex": {
-    "inlineMath": [['\\(', '\\)']],
-    "displayMath": [["\\[", "\\]"]],
-  }
-}
 
 pygments_style = 'sphinx'
 

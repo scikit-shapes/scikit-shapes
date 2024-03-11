@@ -39,7 +39,7 @@ $$<P, K_Q^Q P> / 2$$
 Code
 ----
 
-Extrinsic Deformation is accessible in scikit-shapes through the class [`ExtrinsicDeformation`][skshapes.morphing.ExtrinsicDeformation].
+Extrinsic Deformation is accessible in scikit-shapes through the class [`ExtrinsicDeformation`](skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation).
 
 
 ```python
