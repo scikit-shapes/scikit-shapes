@@ -54,7 +54,6 @@ jobs:
             sphinx-build -b html doc/source/ doc/_build/html
 
         - name: upload artifact
-          if: github.event_name == 'pull_request' || github.event_name == 'push'
           uses: actions/upload-artifact@v4
           with:
             path:
@@ -67,5 +66,5 @@ jobs:
           with:
             publish_branch: gh-pages
             github_token: ${{ secrets.GITHUB_TOKEN }}
-            publish_dir: _build/
+            publish_dir: doc/_build/html
             force_orphan: true
