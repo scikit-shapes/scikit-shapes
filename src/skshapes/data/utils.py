@@ -205,7 +205,17 @@ class DataAttributes(dict):
         attributes: dict[Any, NumericalTensor | NumericalArray],
         device: str | torch.device | None = None,
     ) -> DataAttributes:
-        """From dictionary constructor."""
+        """From dictionary constructor.
+
+        Parameters
+        ----------
+        attributes
+            The dictionary of attributes to initialize the DataAttributes
+            object.
+        device
+            The device on which the attributes should be stored. If None, it
+            will be determined from attributes.
+        """
         if len(attributes) == 0:
             msg = (
                 "The dictionary of attributes should not be empty to"

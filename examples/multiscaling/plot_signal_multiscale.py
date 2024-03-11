@@ -16,16 +16,18 @@ bunny = sks.PolyData(pyvista.examples.download_bunny())
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
 
 
-# %%
+# %% [markdown]
 # Define a signal on the high resolution mesh
 
+# %%
 signal = multiscale_bunny.at(ratio=1).points[:, 1]
 multiscale_bunny.at(ratio=1).point_data["height"] = signal
 
 
-# %%
+# %% [markdown]
 # Propagate the signal to the lower resolutions
 
+# %%
 # define a fine_to_coarse propagation scheme
 fine_to_coarse_policy = sks.FineToCoarsePolicy(
     reduce="mean",

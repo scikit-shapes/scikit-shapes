@@ -9,9 +9,10 @@ registration process.
 This example shows how both approaches differ on a simple 2D example.
 """
 
-# %%
+# %% [markdown]
 # Useful imports
 
+# %%
 import sys
 
 import pykeops
@@ -34,14 +35,16 @@ kwargs = {
     "verbose": True,
 }
 
-# %%
+# %% [markdown]
 # Load the data
 
+# %%
 source, target = load_data()
 plot_karatekas()
 
-# %%
-# ## Extrinsic deformation
+# %% [markdown]
+# Extrinsic deformation
+# ---------------------
 #
 # Extrinsic deformation is a kind of deformation that is transferable from one
 # shape to another. A typical application is to deform a grid of control points
@@ -49,6 +52,8 @@ plot_karatekas()
 #
 # Intituively, you can think that you are twisting a sheet of paper on which
 # the shape is drawn.
+
+# %%
 source.control_points = source.bounding_grid(N=10, offset=0.05)
 
 model = sks.ExtrinsicDeformation(
@@ -61,21 +66,24 @@ registration = sks.Registration(model=model, regularization_weight=0.1, **kwargs
 
 registration.fit(source=source, target=target)
 
-# %%
+# %% [markdown]
 # Visualize the deformation
 
+# %%
 plot_extrinsic_deformation(
     source=source, target=target, registration=registration, animation=True
 )
 
-# %%
-# ## Intrinsic deformation
+# %% [markdown]
+# Intrinsic deformation
+# ---------------------
 #
 # An intrinsic deformation is a deformation that is not transferable from one
 # shape to another. It is defined as a sequence of small displacements of the
 # points of the shape. In this setting, you can think of the shape as a puppet
 # that you can deform thanks to a set of strings attached to its vertices.
 
+# %%
 model = sks.IntrinsicDeformation(
     n_steps=8,
 )
@@ -85,9 +93,10 @@ registration = sks.Registration(model=model, regularization_weight=500, **kwargs
 registration.fit(source=source, target=target)
 
 
-# %%
+# %% [markdown]
 # Visualize the deformation
 
+# %%
 plot_intrinsic_deformation(
     source=source, target=target, registration=registration, animation=True
 )

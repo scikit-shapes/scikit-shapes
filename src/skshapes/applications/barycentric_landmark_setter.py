@@ -1,6 +1,6 @@
 """Landmark setter with barycentric coordinates.
 
-!! Not usable at the moment.
+Not usable at the moment.
 """
 
 # flake8: noqa
@@ -15,7 +15,8 @@ from ..data import PolyData
 
 
 class BarycentricLandmarkSetter(vedo.Plotter):
-    """!! This class has bugs and is not used in the library. !!
+    """This class has bugs and is not used in the library.
+
     A LandmarkSetter is a vedo application that allows the user to select
     landmarks on a set of meshes.
 
@@ -23,9 +24,12 @@ class BarycentricLandmarkSetter(vedo.Plotter):
     the vertices of the mesh.
 
     Parameters
-        meshes (list[vedo.Mesh]): The meshes on which the landmarks are
-            selected.
-        **kwargs: Keyword arguments passed to the vedo.Plotter constructor.
+    ----------
+    meshes
+        The meshes on which the landmarks are selected.
+    **kwargs
+        Keyword arguments passed to the vedo.Plotter constructor.
+
     """
 
     @typecheck

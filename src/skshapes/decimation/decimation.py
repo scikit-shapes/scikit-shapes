@@ -36,37 +36,38 @@ class Decimation:
     Examples
     --------
     Decimate a mesh with a target reduction:
-    ```python
-    import skshapes as sks
 
-    mesh = sks.Sphere()
-    decimator = sks.Decimation(target_reduction=0.5)
-    decimated_mesh = decimator.fit_transform(mesh)
-    ```
+    .. code-block:: python
+
+        import skshapes as sks
+
+        mesh = sks.Sphere()
+        decimator = sks.Decimation(target_reduction=0.5)
+        decimated_mesh = decimator.fit_transform(mesh)
 
     Decimate two meshes with the same connectivity (same triangles):
-    ```python
-    # assume that pose1 and pose2 are two meshes with the same connectivity:
 
-    pose1, pose2 = sks.PolyData("data/pose1.vtk", "data/pose2.vtk")
-    decimator = sks.Decimation(n_points=50)
-    decimator.fit(cat1)
-    pose1_decimated = decimator.transform(cat1)
-    pose2_decimated = decimator.transform(cat2)
+    .. code-block:: python
 
-    # pose1_decimated and pose2_decimated have the same connectivity
-    assert torch.allclose(pose1_decimated.triangles, pose2_decimated.triangles)
+        # assume that pose1 and pose2 are two meshes with the same connectivity:
 
-    # if landmarks are present in the meshes, they are kept after the
-    # decimation
-    if pose1.landmarks is not None:
-        assert pose1_decimated.landmarks is not None
-    if pose2.landmarks is not None:
-        assert pose2_decimated.landmarks is not None
-    ```
+        pose1, pose2 = sks.PolyData("data/pose1.vtk", "data/pose2.vtk")
+        decimator = sks.Decimation(n_points=50)
+        decimator.fit(cat1)
+        pose1_decimated = decimator.transform(cat1)
+        pose2_decimated = decimator.transform(cat2)
 
-    Decimation is often used through the [`Multiscale`](../../multiscaling/multiscale)
-    interface, see the associated [examples](../../../generated/gallery/#multiscaling).
+        # pose1_decimated and pose2_decimated have the same connectivity
+        assert torch.allclose(pose1_decimated.triangles, pose2_decimated.triangles)
+
+        # if landmarks are present in the meshes, they are kept after the
+        # decimation
+        if pose1.landmarks is not None:
+            assert pose1_decimated.landmarks is not None
+        if pose2.landmarks is not None:
+            assert pose2_decimated.landmarks is not None
+
+    Decimation is often used through the Multiscale interface.
 
     """
 
@@ -178,8 +179,8 @@ class Decimation:
         The decimation must have been fitted to a mesh before calling this
         method. The mesh to decimate could be:
         - the same mesh as the one used to fit the decimation object
-        - a mesh with the same connectivity as the one used to fit the
-            decimation object (same number of points and same triangles)
+        - a mesh with the same connectivity as the one used to fit the decimation
+        object (same number of points and same triangles)
 
         Parameters
         ----------

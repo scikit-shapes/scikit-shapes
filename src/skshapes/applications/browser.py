@@ -19,38 +19,38 @@ class Browser:
     --------
     You can visualize any sequence of shapes with a slider to navigate through:
 
-    ```python
-    import skshapes as sks
+    .. code-block:: python
 
-    # Create a sequence of translated spheres to visualize
-    meshes = [sks.Sphere() for _ in range(5)]
-    for i in range(5):
-        meshes[i].points += torch.tensor([i / 5, 0, 0])
-    # Create a browser to visualize the sequence
-    browser = sks.Browser(meshes)
-    browser.show()
-    ```
+        import skshapes as sks
+
+        # Create a sequence of translated spheres to visualize
+        meshes = [sks.Sphere() for _ in range(5)]
+        for i in range(5):
+            meshes[i].points += torch.tensor([i / 5, 0, 0])
+        # Create a browser to visualize the sequence
+        browser = sks.Browser(meshes)
+        browser.show()
 
     This application is useful to visualize the intermediate shapes in a
     registration task:
 
-    ```python
-    import skshapes as sks
-    import torch
+    .. code-block:: python
 
-    source, target = sks.Sphere(), sks.Sphere()
-    # Translate the target
-    target.points += torch.tensor([1, 0, 0])
-    # Create a registration task with a rigid motion model and L2 loss
-    model = sks.RigidMotion(n_steps=5)
-    loss = sks.L2Loss()
-    task = sks.Registration(model=model, loss=loss, n_iter=5)
-    task.fit(source=source, target=target)
-    # Visualize the intermediate shapes
-    path = task.path_
-    browser = sks.Browser(path)
-    browser.show()
-    ```
+        import skshapes as sks
+        import torch
+
+        source, target = sks.Sphere(), sks.Sphere()
+        # Translate the target
+        target.points += torch.tensor([1, 0, 0])
+        # Create a registration task with a rigid motion model and L2 loss
+        model = sks.RigidMotion(n_steps=5)
+        loss = sks.L2Loss()
+        task = sks.Registration(model=model, loss=loss, n_iter=5)
+        task.fit(source=source, target=target)
+        # Visualize the intermediate shapes
+        path = task.path_
+        browser = sks.Browser(path)
+        browser.show()
 
     """
 

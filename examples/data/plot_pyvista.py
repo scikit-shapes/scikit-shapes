@@ -16,12 +16,14 @@ back. We also show that point data and landmarks are preserved during the
 conversion.
 """
 
-# %%
-# ## Load a mesh from PyVista
+# %% [markdown]
+# Load a mesh from PyVista
+# ------------------------
 #
 # We load a quadrangulated cow mesh from PyVista. As scikit-shapes meshes are
 # triangular, an automatic triangulation is performed when importing the mesh.
 
+# %%
 import pyvista as pv
 import torch
 from pyvista import examples
@@ -33,9 +35,12 @@ mesh_sks = sks.PolyData(mesh_pyvista)
 
 assert mesh_pyvista.n_points == mesh_sks.n_points
 
-# %%
-# ## Add point data to the mesh
+# %% [markdown]
+# Add point data to the mesh
+# --------------------------
+#
 
+# %%
 mesh_sks.point_data["signal"] = mesh_sks.points[:, 0]
 # Now, export the mesh to PyVista
 mesh_pv2 = mesh_sks.to_pyvista()
@@ -50,10 +55,12 @@ assert torch.allclose(
     mesh_sks.point_data["signal"]
     )
 
-# %%
-# ## Landmarks are also preserved
+# %% [markdown]
+# Landmarks are also preserved
+# ----------------------------
 #
 
+# %%
 # Set some landmarks
 landmarks_indices = [0, 10, 154, 125, 1544, 187, 32, 252, 1214]
 mesh_sks.landmark_indices = landmarks_indices
