@@ -62,6 +62,11 @@ jobs:
               doc/_build/html/
 
 
-        # - name: publish documentation (release or manual trigger)
-        #   if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
-        #   run: mkdocs gh-deploy --force
+        - name: Deploy to GitHub Pages
+          uses: peaceiris/actions-gh-pages@v3
+          if: github.event_name == 'workflow_dispatch' || github.event_name == 'release'
+          with:
+            publish_branch: gh-pages
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: _build/
+            force_orphan: true
