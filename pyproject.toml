@@ -1,5 +1,5 @@
 [build-system]
-requires = ["numpy", "cython", "setuptools"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -20,6 +20,7 @@ dependencies = [
     "pyvista",
     "vedo",
     "fast-simplification",
+    "fast-edges-extraction",
 ]
 
 [project.urls]

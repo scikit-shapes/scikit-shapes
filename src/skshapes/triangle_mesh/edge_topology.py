@@ -2,9 +2,9 @@
 
 import numpy as np
 import torch
+from fast_edges_extraction import extract_edges
 
 from ..types import Triangles, int_dtype
-from .edges_extraction import extract_edges
 
 
 class EdgeTopology:
@@ -48,10 +48,10 @@ class EdgeTopology:
 
         (
             edges,
+            edge_degrees,
             adjacent_triangles,
             adjacent_points,
-            edge_degrees,
-        ) = extract_edges(triangles_numpy)
+        ) = extract_edges(triangles_numpy, return_adjacency=True)
 
         edges = torch.from_numpy(edges).to(int_dtype).to(device)
         adjacent_triangles = (
