@@ -51,7 +51,7 @@ class EdgeTopology:
             edge_degrees,
             adjacent_triangles,
             adjacent_points,
-        ) = extract_edges(triangles_numpy)
+        ) = extract_edges(triangles_numpy, return_adjacency=True)
 
         edges = torch.from_numpy(edges).to(int_dtype).to(device)
         adjacent_triangles = (
