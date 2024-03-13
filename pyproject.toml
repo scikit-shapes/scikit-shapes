@@ -61,7 +61,6 @@ ignore = [
 # See: https://learn.scientific-python.org/development/guides/style/#PC190
 [tool.ruff]
 src = ["src"]
-target-version = "py310"
 exclude = ["src/skshapes/documentation_example.py"]
 
 [tool.ruff.lint]
