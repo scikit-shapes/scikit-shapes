@@ -12,73 +12,56 @@ on:
   schedule:
     - cron: '0 0 * * *' # Every day at midnight https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html#tag_20_25_07
 
+
 jobs:
-
-  make_sdist:
-
-    name: Make source distribution
+  dist:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          submodules: true
 
-      - name: build SDist
-        run: pipx run build --sdist
+      - uses: hynek/build-and-inspect-python-package@v2
 
-      - name: Upload distribution
-        uses: actions/upload-artifact@v4
-        with:
-          name: cibw-sdist
-          path: dist/*.tar.gz
-          if-no-files-found: error
-
-  build_wheels:
-
-    name: Wheel on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest]
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          submodules: true
-
-      - uses: pypa/cibuildwheel@v2.17
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: cibw-wheels-${{ matrix.os }}
-          path: wheelhouse/*.whl
-          if-no-files-found: error
-
-
-  publish-to-testpypi:
-
-    if: github.event_name == 'release'
-    name: Publish Python 🐍 distribution 📦 to TestPyPI
-    needs: [make_sdist, build_wheels]
+  publish:
+    needs: [dist]
     environment:
       name: TestPyPI
       url: https://test.pypi.org/p/skshapes
     permissions:
       id-token: write
     runs-on: ubuntu-latest
-
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: cibw-*
+          name: Packages
           path: dist
-          merge-multiple: true
 
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
+
+
+  # publish-to-testpypi:
+
+  #   : github.event_name == 'release'
+  #   name: Publish Python 🐍 distribution 📦 to TestPyPI
+  #   needs: [make_sdist, build_wheels]
+  #   environment:
+  #     name: TestPyPI
+  #     url: https://test.pypi.org/p/skshapes
+  #   permissions:
+  #     id-token: write
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         pattern: cibw-*
+  #         path: dist
+  #         merge-multiple: true
+
+  #     - uses: pypa/gh-action-pypi-publish@release/v1
+  #       with:
+  #         repository-url: https://test.pypi.org/legacy/
