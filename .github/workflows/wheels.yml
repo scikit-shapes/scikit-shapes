@@ -31,7 +31,7 @@ jobs:
     permissions:
       id-token: write
     runs-on: ubuntu-latest
-    if: github.event_name == 'release' && github.event.action == 'published'
+    if: (github.event_name == 'release' && github.event.action == 'published') || github.event_name == 'workflow_dispatch'
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -41,27 +41,3 @@ jobs:
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-
-
-  # publish-to-testpypi:
-
-  #   : github.event_name == 'release'
-  #   name: Publish Python 🐍 distribution 📦 to TestPyPI
-  #   needs: [make_sdist, build_wheels]
-  #   environment:
-  #     name: TestPyPI
-  #     url: https://test.pypi.org/p/skshapes
-  #   permissions:
-  #     id-token: write
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         pattern: cibw-*
-  #         path: dist
-  #         merge-multiple: true
-
-  #     - uses: pypa/gh-action-pypi-publish@release/v1
-  #       with:
-  #         repository-url: https://test.pypi.org/legacy/
