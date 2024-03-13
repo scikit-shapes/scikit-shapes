@@ -100,9 +100,7 @@ class BaseLoss:
         if source.device != target.device:
             raise DeviceError(
                 "Source and target shapes must be on the same device, found"
-                + "source on device {} and target on device {}".format(
-                    source.device, target.device
-                )
+                + f"source on device {source.device} and target on device {target.device}"
             )
 
 
