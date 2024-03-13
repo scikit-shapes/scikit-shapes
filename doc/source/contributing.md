@@ -23,7 +23,7 @@ The pre-commit hooks enforce some style requirements
 Then, the unit and functional tests are run:
 - run the tests with [pytest](https://docs.pytest.org/en/8.0.x/)
 - create a code coverage report with [pytest-cov](https://pytest-cov.readthedocs.io/en/latest/)
-- build the documentation with [mkdocs](https://www.mkdocs.org/)
+- build the documentation with [sphinx](https://www.sphinx-doc.org/en/master/)
 
 Contributing with new code
 --------------------------
@@ -45,7 +45,7 @@ pip install --editable .
 Once your local version of scikit-shapes is installed, install the tests and documentation dependencies by running:
 ```bash
 pip install -r requirements_dev.txt
-pip install -r requirements_doc.txt
+pip install -r requirements_docs.txt
 ```
 
 Then, you can run :
@@ -66,12 +66,13 @@ firefox htmlcov/index.html # replace firefox by your web browser
 - the documentation building
 
 ```bash
-# simply build the documentation and save it in a site/ folder
-mkdocs build
-# build the documentation and run it locally
-mkdocs serve
+# Build the documentation
+sphinx-apidoc -o doc/source/api/ --module-first --force src/skshapes
+sphinx-build -b html doc/source/ doc/_build/html
+# Serve it locally
+cd doc/_build/html
+python -m http.server
 ```
-
 
 ### Using nox
 
@@ -85,7 +86,7 @@ nox -s precommit
 nox # Run all the sessions
 ```
 
-Note that running nox sessions for scikit-shapes is very time-consuming, because the library and its dependencies must be reinstalled every time a nox session is started (and scikit-learn depends on pytorch). We recommend to configure a virtual environment.
+Note that running nox sessions for scikit-shapes is very time-consuming, because the library and its dependencies must be reinstalled every time a nox session is started (and scikit-shapes depends on pytorch). We recommend to configure a virtual environment.
 
 Open a pull request
 -------------------

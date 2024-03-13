@@ -1,5 +1,3 @@
-import argparse
-
 import nox
 
 # If a package is not installed in the virtualenv, raise an error
@@ -32,52 +30,24 @@ def print_installed_package_version(
 
 @nox.session(python=["3.11"])
 def tests(session: nox.Session) -> None:
-    """
-    Run the tests.
-    """
+    """Run the tests."""
     install_cpu_torch(session)
     session.install("-r", "requirements_dev.txt")
     session.install(".")
     session.run("pytest", *session.posargs)
 
-@nox.session(reuse_venv=True, python=["3.11"])
-def docs(session: nox.Session) -> None:
-    """
-    Build the docs. Pass "--serve" to serve. Pass "-b linkcheck" to check links.
-    """
+@nox.session(python=["3.11"])
+def precommit(session: nox.Session) -> None:
+    """Run the pre-commit hooks."""
+    session.install("-r", "requirements_dev.txt")
+    session.run("pre-commit",  "run",  "--all-files")
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--serve", action="store_true", help="Serve after building")
-    parser.add_argument(
-        "-b", dest="builder", default="html", help="Build target (default: html)"
-    )
-    args, posargs = parser.parse_known_args(session.posargs)
+@nox.session(python=["3.11"])
+def documentation(session: nox.Session) -> None:
+    """Run the pre-commit hooks."""
+    install_cpu_torch(session)
+    session.install("-r", "requirements_doc.txt")
+    session.install(".")
 
-    if args.builder != "html" and args.serve:
-        session.error("Must not specify non-HTML builder with --serve")
-
-    extra_installs = ["sphinx-autobuild"] if args.serve else []
-
-    session.install("-r", "requirements_sphinx.txt")
-    session.install(".", *extra_installs)
-    session.chdir("docs")
-
-    if args.builder == "linkcheck":
-        session.run(
-            "sphinx-build", "-b", "linkcheck", ".", "_build/linkcheck", *posargs
-        )
-        return
-
-    shared_args = (
-        "-n",  # nitpicky mode
-        "-T",  # full tracebacks
-        f"-b={args.builder}",
-        ".",
-        f"_build/{args.builder}",
-        *posargs,
-    )
-
-    if args.serve:
-        session.run("sphinx-autobuild", *shared_args)
-    else:
-        session.run("sphinx-build", "--keep-going", *shared_args)
+    session.run("sphinx-apidoc",  "-o",  "doc/source/api/", "--module-first", "--force", "src/skshapes")
+    session.run("sphinx-build", "-b", "html", "doc/source/", "doc/_build/html")
