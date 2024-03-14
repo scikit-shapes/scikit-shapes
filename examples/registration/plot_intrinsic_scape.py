@@ -80,7 +80,7 @@ plotter.show()
 # %%
 model = sks.IntrinsicDeformation(
     n_steps=20,
-    metric=sks.AsIsometricAsPossible(),
+    metric="as_isometric_as_possible",
 )
 
 loss = sks.L2Loss()

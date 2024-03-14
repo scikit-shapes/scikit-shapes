@@ -19,7 +19,7 @@ def test_errors_metrics():
 
     model_iso = sks.IntrinsicDeformation(
         n_steps=1,
-        metric=sks.AsIsometricAsPossible(),
+        metric="as_isometric_as_possible",
     )
     loss = sks.L2Loss()
 
@@ -38,7 +38,7 @@ def test_errors_metrics():
 
     model_shell = sks.IntrinsicDeformation(
         n_steps=1,
-        metric=sks.ShellEnergyMetric(),
+        metric="shell_energy",
     )
 
     registration = sks.Registration(
