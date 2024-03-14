@@ -6,7 +6,6 @@ from typing import Union
 
 from .extrinsic_deformation import ExtrinsicDeformation
 from .intrinsic_deformation import IntrinsicDeformation
-from .kernels import GaussianKernel
 from .metrics import (
     AsIsometricAsPossible,
     ShellEnergyMetric,

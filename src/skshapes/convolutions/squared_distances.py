@@ -101,6 +101,10 @@ class KeOpsSquaredDistances:
         self.K_ij = kernel(D_ij)
         self.K_ij.ranges = ranges
 
+    def sum(self, *args, **kwargs):
+        """Sum of the kernel."""
+        return self.K_ij.sum(*args, **kwargs)
+
     def __matmul__(self, other):
         """Matrix multiplication with a vector or matrix.
 

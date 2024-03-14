@@ -15,17 +15,19 @@ from typing import Literal
 import torch
 from torchdiffeq import odeint
 
+from ..convolutions import LinearOperator
+from ..convolutions.squared_distances import squared_distances
 from ..errors import DeviceError, ShapeError
 from ..input_validation import typecheck
 from ..types import (
     FloatScalar,
     MorphingOutput,
+    Number,
+    NumericalTensor,
     Points,
     polydata_type,
 )
 from .basemodel import BaseModel
-from .kernels import GaussianKernel, Kernel
-from .utils import EulerIntegrator, Integrator
 
 
 class ExtrinsicDeformation(BaseModel):
@@ -35,47 +37,40 @@ class ExtrinsicDeformation(BaseModel):
     ----------
     n_steps
         Number of integration steps.
-    integrator
-        Integrator used to integrate the momentum. If None, an Euler scheme
-        is used. See `skshapes.morphing.utils.Integrator` for more
-        information. Only used if `backend` is "sks".
     kernel
-        Kernel used to smooth the momentum.
+        Type of kernel.
+    scale
+        Scale of the kernel.
+    normalization
+        Normalization of the kernel matrix.
     control_points
         If True, the control points are the control points of the shape
         (accessible with `shape.control_points`). If False, the control
         points are the points of the shape. If `shape.control_points` is
         None, the control points are the points of the shape.
-    backend
-        The backend to use for the integration. Can be "sks" or
-        "torchdiffeq".
     solver
-        The solver to use for the integration if `backend` is
-        "torchdiffeq". Can be "euler", "midpoint" or "rk4".
+        The solver to use for the integration. Can be "euler", "midpoint" or
+        "rk4".
     """
 
     @typecheck
     def __init__(
         self,
         n_steps: int = 1,
-        integrator: Integrator | None = None,
-        kernel: Kernel | None = None,
-        control_points: bool = True,
-        backend: Literal["sks", "torchdiffeq"] = "sks",
+        kernel: Literal["gaussian", "uniform"] = "gaussian",
+        scale: Number = 0.1,
+        normalization: Literal["rows", "columns", "both"] | None = None,
+        control_points: bool = False,
         solver: Literal["euler", "midpoint", "rk4"] = "euler",
     ) -> None:
         """Class constructor."""
-        if integrator is None:
-            integrator = EulerIntegrator()
-        if kernel is None:
-            kernel = GaussianKernel()
-
-        self.integrator = integrator
-        self.cometric = kernel
         self.n_steps = n_steps
         self.control_points = control_points
-        self.backend = backend
         self.solver = solver
+
+        self.kernel = kernel
+        self.scale = scale
+        self.normalization = normalization
 
         self.ode_module = ODEModule(self.ode_func)
 
@@ -86,6 +81,7 @@ class ExtrinsicDeformation(BaseModel):
         parameter: Points,
         return_path: bool = False,
         return_regularization: bool = False,
+        final_time: float = 1.0,
     ) -> MorphingOutput:
         """Morph a shape using the kernel deformation algorithm.
 
@@ -99,6 +95,9 @@ class ExtrinsicDeformation(BaseModel):
             True if you want to have access to the sequence of polydatas.
         return_regularization
             True to have access to the regularization.
+        final_time
+            The final time of the integration. Default is 1.0, it can be set to
+            a different value for extrapolation.
 
         Returns
         -------
@@ -133,25 +132,24 @@ class ExtrinsicDeformation(BaseModel):
         # Compute the regularization
         regularization = torch.tensor(0.0, device=shape.device)
         if return_regularization:
-            regularization = self.cometric(parameter, q) / 2
+            regularization = self.H(p, q)
 
         if not return_path:
             path = None
         else:
             path = [shape.copy() for _ in range(self.n_steps + 1)]
 
-        dt = 1 / self.n_steps  # Time step
         if self.n_steps == 1:
             # If there is only one step, we can compute the transformation
             # directly without using the integrator as we do not need p_1
-            K = self.cometric.operator(shape.points, q)
+            K = self.K(shape.points, q)
             points = shape.points + (K @ p)
             if return_path:
                 path[1].points = points
 
-        elif self.backend == "torchdiffeq":
+        else:
             y_0 = (p, q) if points is None else (p, q, points)
-            time = torch.linspace(0, 1, self.n_steps + 1).to(p.device)
+            time = torch.linspace(0, final_time, self.n_steps + 1).to(p.device)
 
             if len(y_0) == 3:
                 (
@@ -186,24 +184,6 @@ class ExtrinsicDeformation(BaseModel):
                     for i, m in enumerate(path):
                         m.points = path_q[i].clone()
 
-        elif self.backend == "sks":
-            dt = 1 / self.n_steps  # Time step
-
-            for i in range(self.n_steps):
-                if not self.control_points or shape.control_points is None:
-                    # Update the points
-                    # no control points -> q = shape.points
-                    p, q = self.integrator(p, q, self.H, dt)
-                    points = q.clone()
-                else:
-                    # Update the points
-                    K = self.cometric.operator(points, q)
-                    points = points + dt * (K @ p)
-                    p, q = self.integrator(p, q, self.H, dt)
-
-                if return_path:
-                    path[i + 1].points = points
-
         morphed_shape = shape.copy()
         morphed_shape.points = points
 
@@ -235,7 +215,7 @@ class ExtrinsicDeformation(BaseModel):
     @typecheck
     def H(self, p: Points, q: Points) -> FloatScalar:
         """Hamiltonian function."""
-        K = self.cometric.operator(q, q)
+        K = self.K(q, q)
         return torch.sum(p * (K @ p)) / 2
 
     @typecheck
@@ -254,9 +234,85 @@ class ExtrinsicDeformation(BaseModel):
         if len(y) == 2:
             return pdot, qdot
         else:
-            Gp2 = self.cometric.operator(pts, q) @ p
+            Gp2 = self.K(pts, q) @ p
             ptsdot = Gp2
             return pdot, qdot, ptsdot
+
+    @typecheck
+    def K(
+        self,
+        q0: Points,
+        q1: Points | None = None,
+        weights0: NumericalTensor | None = None,
+        weights1: NumericalTensor | None = None,
+    ) -> LinearOperator:
+
+        if q1 is None:
+            q1 = q0
+
+        # Compute the kernel matrix
+        if self.kernel == "gaussian":
+
+            sqrt_2 = 1.41421356237
+            q0 = q0 / (sqrt_2 * self.scale)
+            q1 = q1 / (sqrt_2 * self.scale)
+
+            K = squared_distances(
+                points=q1,
+                target_points=q0,
+                kernel=lambda d2: (-d2).exp(),
+            )
+
+        elif self.kernel == "uniform":
+
+            q0 = q0 / self.scale
+            q1 = q1 / self.scale
+
+            K = squared_distances(
+                points=q1,
+                target_points=q0,
+                kernel=lambda d2: (d2 < 1),
+            )
+
+        # If applicable, normalize the kernel
+        if self.normalization == "rows":
+            sq = K.sum(dim=1).view(-1)
+            weights0 = (
+                weights0 if weights0 is not None else torch.ones_like(sq)
+            )
+            return LinearOperator(matrix=K, output_scaling=weights0 / sq)
+
+        elif self.normalization == "columns":
+            sq = K.sum(dim=0).view(-1)
+            weights1 = (
+                weights1 if weights1 is not None else torch.ones_like(sq)
+            )
+            return LinearOperator(matrix=K, input_scaling=weights1 / sq)
+
+        elif self.normalization == "both":
+
+            if K.shape[0] == K.shape[1]:
+                m = (
+                    weights0
+                    if weights0 is not None
+                    else torch.ones(
+                        K.shape[0], dtype=q0.dtype, device=q0.device
+                    )
+                )
+                sq = torch.ones(K.shape[1], dtype=q0.dtype, device=q0.device)
+
+                for _i in range(5):
+                    sq = (sq / ((K @ sq) * m)).sqrt()
+
+                return LinearOperator(
+                    input_scaling=sq, matrix=K, output_scaling=sq
+                )
+
+            else:
+                error_message = "The 'both' normalization can only be used with square matrices."
+                raise ValueError(error_message)
+
+        return LinearOperator(matrix=K)
 
 
 # Type for the ODE function, can be a couple of tensors (moment, points) or

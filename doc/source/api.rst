@@ -18,6 +18,7 @@ Modules
     features
     decimation
     multiscaling
+    convolutions
 
 .. toctree::
     :hidden:
