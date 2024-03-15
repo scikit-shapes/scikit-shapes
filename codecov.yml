@@ -1,3 +1,6 @@
+codecov:
+  token: 2e80fa72-9166-4d56-aa19-906b082fd314
+
 ignore:
   - "**/skshapes/applications/**/*"
   - "**/skshapes/documenation_example.py"
