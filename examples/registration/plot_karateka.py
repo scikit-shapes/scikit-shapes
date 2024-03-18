@@ -58,7 +58,8 @@ source.control_points = source.bounding_grid(N=10, offset=0.05)
 
 model = sks.ExtrinsicDeformation(
     n_steps=6,
-    kernel=sks.GaussianKernel(sigma=1.0),
+    kernel="gaussian",
+    scale=1.0,
     control_points=True,
 )
 

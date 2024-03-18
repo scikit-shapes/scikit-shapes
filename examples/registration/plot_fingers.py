@@ -38,9 +38,9 @@ optimizer = sks.LBFGS()
 
 model = sks.ExtrinsicDeformation(
     n_steps=n_steps,
-    kernel=sks.GaussianKernel(sigma=0.4),
+    kernel="gaussian",
+    scale=0.4,
     control_points=True,
-    backend="torchdiffeq",
     solver="rk4",
 )
 

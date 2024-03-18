@@ -46,7 +46,7 @@ Extrinsic Deformation is accessible in scikit-shapes through the class [`Extrins
 import skshapes as sks
 
 loss = ...
-model = sks.ExtrinsicDeformation(n_steps=1, kernel=sks.GaussianKernel(0.1))
+model = sks.ExtrinsicDeformation(n_steps=1, kernel="gaussian", scale=0.1)
 
 registration = sks.Registration(loss=loss, model=model)
 registration.fit(source=source, target=target)

@@ -182,7 +182,17 @@ def test_registration_device():
             task.fit(source=source, target=target)
 
 
-def test_extrinsic_control_points():
+@pytest.mark.parametrize(
+    ("kernel", "control_points", "normalization", "n_steps"),
+    [
+        ("gaussian", False, "both", 1),
+        ("gaussian", True, "rows", 2),
+        ("uniform", False, "columns", 2),
+    ],
+)
+def test_extrinsic_control_points(
+    kernel, control_points, normalization, n_steps
+):
     """Test to run extrinsic deformation with control points."""
     mesh1 = mesh_3d
     mesh2 = mesh_3d
@@ -191,7 +201,11 @@ def test_extrinsic_control_points():
 
     # Define the model
     model = sks.ExtrinsicDeformation(
-        n_steps=1, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
+        n_steps=n_steps,
+        kernel=kernel,
+        scale=0.1,
+        normalization=normalization,
+        control_points=control_points,
     )
 
     loss = sks.OptimalTransportLoss() + 2 * sks.EmptyLoss()
@@ -208,4 +222,9 @@ def test_extrinsic_control_points():
     )
 
     registration.fit(source=mesh1, target=mesh2)
-    assert registration.parameter_.shape == mesh1.control_points.points.shape
+    if control_points:
+        assert (
+            registration.parameter_.shape == mesh1.control_points.points.shape
+        )
+    else:
+        assert registration.parameter_.shape == mesh1.points.shape

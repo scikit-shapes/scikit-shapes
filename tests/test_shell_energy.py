@@ -75,7 +75,7 @@ def test_register_with_shellenergy():
     loss = sks.L2Loss()
     model = sks.IntrinsicDeformation(
         n_steps=3,
-        metric=sks.ShellEnergyMetric(),
+        metric="shell_energy",
     )
 
     r = sks.Registration(loss=loss, model=model)
