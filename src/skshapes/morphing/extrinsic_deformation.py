@@ -187,6 +187,14 @@ class ExtrinsicDeformation(BaseModel):
         morphed_shape = shape.copy()
         morphed_shape.points = points
 
+        # If control points are used, save the final control points
+        # as control points of the morphed shape
+        if self.control_points:
+            q = q + self.K(q, q) @ p if self.n_steps == 1 else path_q[-1]
+            control_points = shape.control_points.copy()
+            control_points.points = q.detach().clone()
+            morphed_shape.control_points = control_points
+
         return MorphingOutput(
             morphed_shape=morphed_shape,
             path=path,
