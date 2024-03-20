@@ -1,0 +1,18 @@
+skshapes.decimation package
+===========================
+
+.. automodule:: skshapes.decimation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.decimation.decimation module
+-------------------------------------
+
+.. automodule:: skshapes.decimation.decimation
+   :members:
+   :undoc-members:
+   :show-inheritance:

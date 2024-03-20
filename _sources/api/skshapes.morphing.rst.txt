@@ -1,0 +1,42 @@
+skshapes.morphing package
+=========================
+
+.. automodule:: skshapes.morphing
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.morphing.basemodel module
+----------------------------------
+
+.. automodule:: skshapes.morphing.basemodel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.morphing.extrinsic\_deformation module
+-----------------------------------------------
+
+.. automodule:: skshapes.morphing.extrinsic_deformation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.morphing.intrinsic\_deformation module
+-----------------------------------------------
+
+.. automodule:: skshapes.morphing.intrinsic_deformation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.morphing.rigid\_motion module
+--------------------------------------
+
+.. automodule:: skshapes.morphing.rigid_motion
+   :members:
+   :undoc-members:
+   :show-inheritance:

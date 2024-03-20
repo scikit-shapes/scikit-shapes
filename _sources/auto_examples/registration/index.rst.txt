@@ -1,0 +1,133 @@
+
+
+.. _sphx_glr_auto_examples_registration:
+
+Registration
+------------
+
+Examples using registration.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Intrisic and extrinsic deformations are two different ways to deform a shape. They both are non...">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_karateka_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_karateka.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Intrinsic vs Extrinsic deformation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Example of registration with LDDMM">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_fingers_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_fingers.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Example of registration with LDDMM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip=" This is an example of rigid motion registration, or alignment, in 2D.">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_circles_rigid_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_circles_rigid.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Example of rigid motion registration</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we demonstrate how to perform rigid registration (also known alignment) of two...">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_human_rigid_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_human_rigid.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Rigid registration of 3D meshes</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Example of elastic registration">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_intrinsic_scape_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_intrinsic_scape.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Example of elastic registration</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Without normalization, the carpooling artifact occurs: the sphere is contracted, then translate...">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_lddmm_normalization_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_lddmm_normalization.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">LDDMM with normalized kernel</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/registration/plot_karateka
+   /auto_examples/registration/plot_fingers
+   /auto_examples/registration/plot_circles_rigid
+   /auto_examples/registration/plot_human_rigid
+   /auto_examples/registration/plot_intrinsic_scape
+   /auto_examples/registration/plot_lddmm_normalization
+

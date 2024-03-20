@@ -1,0 +1,34 @@
+skshapes.triangle\_mesh package
+===============================
+
+.. automodule:: skshapes.triangle_mesh
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.triangle\_mesh.edge\_topology module
+---------------------------------------------
+
+.. automodule:: skshapes.triangle_mesh.edge_topology
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.triangle\_mesh.energy module
+-------------------------------------
+
+.. automodule:: skshapes.triangle_mesh.energy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.triangle\_mesh.geometry module
+---------------------------------------
+
+.. automodule:: skshapes.triangle_mesh.geometry
+   :members:
+   :undoc-members:
+   :show-inheritance:

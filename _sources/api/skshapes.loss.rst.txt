@@ -1,0 +1,42 @@
+skshapes.loss package
+=====================
+
+.. automodule:: skshapes.loss
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.loss.baseloss module
+-----------------------------
+
+.. automodule:: skshapes.loss.baseloss
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.loss.lp module
+-----------------------
+
+.. automodule:: skshapes.loss.lp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.loss.nearest\_neighbors module
+---------------------------------------
+
+.. automodule:: skshapes.loss.nearest_neighbors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.loss.optimal\_transport module
+---------------------------------------
+
+.. automodule:: skshapes.loss.optimal_transport
+   :members:
+   :undoc-members:
+   :show-inheritance:

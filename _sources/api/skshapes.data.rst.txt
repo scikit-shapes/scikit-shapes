@@ -1,0 +1,34 @@
+skshapes.data package
+=====================
+
+.. automodule:: skshapes.data
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.data.image module
+--------------------------
+
+.. automodule:: skshapes.data.image
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.data.polydata module
+-----------------------------
+
+.. automodule:: skshapes.data.polydata
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.data.utils module
+--------------------------
+
+.. automodule:: skshapes.data.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

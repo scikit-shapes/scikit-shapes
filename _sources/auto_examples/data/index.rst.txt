@@ -1,0 +1,61 @@
+
+
+.. _sphx_glr_auto_examples_data:
+
+Data
+----
+
+Examples specific to data classes (PolyData, Images)
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="[Vedo](https://vedo.embl.es/docs/vedo.html) is a Python library for 3D visualization, interacti...">
+
+.. only:: html
+
+  .. image:: /auto_examples/data/images/thumb/sphx_glr_no_plot_vedo_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_data_no_plot_vedo.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Transfer meshes between scikit-shapes and Vedo</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="[PyVista](https://docs.pyvista.org/version/stable/) is a Python library for 3D visualization an...">
+
+.. only:: html
+
+  .. image:: /auto_examples/data/images/thumb/sphx_glr_plot_pyvista_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_data_plot_pyvista.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Transfer meshes between scikit-shapes and PyVista</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/data/no_plot_vedo
+   /auto_examples/data/plot_pyvista
+

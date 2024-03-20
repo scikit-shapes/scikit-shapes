@@ -1,0 +1,61 @@
+skshapes package
+================
+
+.. automodule:: skshapes
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   skshapes.applications
+   skshapes.convolutions
+   skshapes.data
+   skshapes.decimation
+   skshapes.features
+   skshapes.input_validation
+   skshapes.loss
+   skshapes.morphing
+   skshapes.multiscaling
+   skshapes.optimization
+   skshapes.tasks
+   skshapes.triangle_mesh
+
+Submodules
+----------
+
+skshapes.documentation\_example module
+--------------------------------------
+
+.. automodule:: skshapes.documentation_example
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.errors module
+----------------------
+
+.. automodule:: skshapes.errors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.types module
+---------------------
+
+.. automodule:: skshapes.types
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.utils module
+---------------------
+
+.. automodule:: skshapes.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:

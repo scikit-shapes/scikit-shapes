@@ -1,0 +1,50 @@
+skshapes.features package
+=========================
+
+.. automodule:: skshapes.features
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.features.curvatures module
+-----------------------------------
+
+.. automodule:: skshapes.features.curvatures
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.features.implicit\_quadrics module
+-------------------------------------------
+
+.. automodule:: skshapes.features.implicit_quadrics
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.features.moments module
+--------------------------------
+
+.. automodule:: skshapes.features.moments
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.features.normals module
+--------------------------------
+
+.. automodule:: skshapes.features.normals
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.features.structure\_tensors module
+-------------------------------------------
+
+.. automodule:: skshapes.features.structure_tensors
+   :members:
+   :undoc-members:
+   :show-inheritance:
