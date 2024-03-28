@@ -1,6 +1,6 @@
 """
-Example of rigid motion registration
-====================================
+Rigid alignment in 2D
+=====================
 
 
 This is an example of rigid motion registration, or alignment, in 2D.

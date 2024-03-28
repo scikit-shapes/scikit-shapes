@@ -3,4 +3,4 @@
 Gallery of examples
 ===================
 
-Here is the gallery of examples
+The examples below shows functionalities of scikit-shapes.

@@ -65,5 +65,4 @@ morphed_source = registration.morphed_shape_
 Examples
 --------
 
-- [Extrinsic registration with control points](../../auto_examples/registration/plot_fingers)
-- [Normalizing kernels](../../auto_examples/registration/plot_lddmm_normalization)
+TBA

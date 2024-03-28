@@ -1,6 +1,6 @@
 """
-LDDMM with normalized kernel
-============================
+LDDMM with normalized kernel - 1
+================================
 This notebook illustrates the interest of normalizing the cometric in the LDDMM
 model. We consider the registration of two spheres that differ by a translation.
 

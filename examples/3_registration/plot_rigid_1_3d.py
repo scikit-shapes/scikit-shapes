@@ -1,6 +1,6 @@
 """
-Rigid registration of 3D meshes
-===============================
+Rigid alignment in 3D with landmarks
+====================================
 
 In this example, we demonstrate how to perform rigid registration (also known
 alignment) of two 3D meshes. We also show how to improve the registration by
