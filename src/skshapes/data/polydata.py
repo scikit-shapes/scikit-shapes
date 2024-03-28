@@ -874,7 +874,7 @@ class PolyData(polydata_type):
             return self.landmarks @ self.points
 
     @property
-    def landmark_points_3d(self) -> Points | None:
+    def landmark_points_3D(self) -> Points | None:
         """Landmarks in 3D coordinates.
 
         If self.dim == 3, it is equivalent to landmark_points. Otherwise, if

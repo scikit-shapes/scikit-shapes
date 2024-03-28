@@ -68,8 +68,8 @@ plotter.add_mesh(source.control_points.to_pyvista(), color="black", line_width=1
 plotter.add_mesh(source.to_pyvista(), color=source_color, line_width=10)
 plotter.add_mesh(target.to_pyvista(), color=target_color, line_width=10)
 
-source_landmarks = source.landmark_points_3d.detach().cpu().numpy()
-target_landmarks = target.landmark_points_3d.detach().cpu().numpy()
+source_landmarks = source.landmark_points_3D.detach().cpu().numpy()
+target_landmarks = target.landmark_points_3D.detach().cpu().numpy()
 
 all_landmarks = np.concatenate([source_landmarks, target_landmarks], axis=0)
 lines = []
@@ -87,7 +87,7 @@ plotter.add_mesh(morphed.control_points.to_pyvista(), color="black", line_width=
 plotter.add_mesh(morphed.to_pyvista(), color=source_color, line_width=10)
 plotter.add_mesh(target.to_pyvista(), color=target_color, line_width=10)
 
-morphed_landmarks = morphed.landmark_points_3d.detach().cpu().numpy()
+morphed_landmarks = morphed.landmark_points_3D.detach().cpu().numpy()
 all_landmarks = np.concatenate([morphed_landmarks, target_landmarks], axis=0)
 lines = []
 for i in range(len(morphed_landmarks)):
