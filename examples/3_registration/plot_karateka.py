@@ -2,17 +2,12 @@
 Intrinsic vs Extrinsic deformation
 ==================================
 
-Intrisic and extrinsic deformations are two different ways to deform a shape.
-They both are non-rigid deformations and then offer flexibility to the
-registration process.
+Intrisic and extrinsic deformations are two different approaches to non-rigid
+deformation.
 
 This example shows how both approaches differ on a simple 2D example.
 """
 
-# %% [markdown]
-# Useful imports
-
-# %%
 import sys
 
 import pykeops
@@ -42,18 +37,15 @@ kwargs = {
 source, target = load_data()
 plot_karatekas()
 
-# %% [markdown]
+###############################################################################
 # Extrinsic deformation
 # ---------------------
 #
-# Extrinsic deformation is a kind of deformation that is transferable from one
-# shape to another. A typical application is to deform a grid of control points
-# around the shape and then deform the shape using an interpolation.
-#
+# Extrinsic deformation is a kind of deformation that relies on the deformation
+# of the ambient space, which is transferred to the shape.
 # Intituively, you can think that you are twisting a sheet of paper on which
 # the shape is drawn.
 
-# %%
 source.control_points = source.bounding_grid(N=10, offset=0.05)
 
 model = sks.ExtrinsicDeformation(
@@ -67,7 +59,7 @@ registration = sks.Registration(model=model, regularization_weight=0.1, **kwargs
 
 registration.fit(source=source, target=target)
 
-# %% [markdown]
+###############################################################################
 # Visualize the deformation
 
 # %%
@@ -75,7 +67,7 @@ plot_extrinsic_deformation(
     source=source, target=target, registration=registration, animation=True
 )
 
-# %% [markdown]
+###############################################################################
 # Intrinsic deformation
 # ---------------------
 #
@@ -83,10 +75,14 @@ plot_extrinsic_deformation(
 # shape to another. It is defined as a sequence of small displacements of the
 # points of the shape. In this setting, you can think of the shape as a puppet
 # that you can deform thanks to a set of strings attached to its vertices.
+#
+# In this example, we use the "as isometric as possible" metric, which tries to
+# preserve the lengths of the edges of the shape.
 
-# %%
+
 model = sks.IntrinsicDeformation(
     n_steps=8,
+    metric="as_isometric_as_possible",
 )
 
 registration = sks.Registration(model=model, regularization_weight=500, **kwargs)
@@ -94,10 +90,9 @@ registration = sks.Registration(model=model, regularization_weight=500, **kwargs
 registration.fit(source=source, target=target)
 
 
-# %% [markdown]
+###############################################################################
 # Visualize the deformation
 
-# %%
 plot_intrinsic_deformation(
     source=source, target=target, registration=registration, animation=True
 )

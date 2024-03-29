@@ -77,8 +77,14 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
         self.shape = shape
         self.landmarks = []
 
-        self.actor = self.shape.to_vedo().linewidth(1)
-        self.actor.pickable(True)
+        # If the shape is a triangle mesh, we plot it with edges
+        # Otherwise, we plot it with points (easier to select landmarks)
+        if shape.triangle is not None:
+            self.actor = self.shape.to_vedo().linewidth(1)
+            self.actor.pickable(True)
+        else:
+            self.actor = self.shape.to_vedo().linewidth(1).point_size(10)
+            self.actor.pickable(True)
 
         self.add(self.actor)
 
@@ -161,7 +167,18 @@ class LandmarkSetterMultipleMeshes(vedo.Plotter):
 
         # Convert the shapes to vedo.Mesh objects
         self.shapes = shapes
-        self.objects = [shape.to_vedo() for shape in shapes]
+
+        self.objects = []
+
+        # If the shape is a triangle mesh, we plot it with edges
+        # Otherwise, we plot it with points (easier to select landmarks)
+        for shape in self.shapes:
+            if shape.triangles is not None:
+                self.objects.append(shape.to_vedo().linewidth(1))
+            else:
+                self.objects.append(
+                    shape.to_vedo().linewidth(1).point_size(10)
+                )
 
         # The first actor is the reference
         self.reference = self.objects[0]

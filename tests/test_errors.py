@@ -260,3 +260,39 @@ def test_error_loss():
 
     with pytest.raises(ValueError, match="p must be positive"):
         sks.LpLoss(p=-1)
+
+
+def test_error_custom_model():
+    class DummyModel1:
+        pass
+
+    shape = sks.Sphere()
+    with pytest.raises(
+        ValueError, match="The model must be an instance of BaseModel"
+    ):
+        sks.validate_polydata_morphing_model(model=DummyModel1(), shape=shape)
+
+    class DummyModel2(sks.BaseModel):
+        def __init__(self):
+            pass
+
+        def morph(self):
+            pass
+
+    with pytest.raises(
+        NotImplementedError,
+        match="The model must have a method parameter_shape",
+    ):
+        sks.validate_polydata_morphing_model(model=DummyModel2(), shape=shape)
+
+    class DummyModel3(sks.BaseModel):
+        def __init__(self):
+            pass
+
+        def parameter_shape(self):
+            pass
+
+    with pytest.raises(
+        NotImplementedError, match="The model must have a method morph"
+    ):
+        sks.validate_polydata_morphing_model(model=DummyModel3(), shape=shape)

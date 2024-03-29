@@ -31,7 +31,7 @@ Code
 Intrinsic Deformation is accessible in scikit-shapes through the class [`IntrinsicDeformation`](skshapes.morphing.intrinsic_deformation.IntrinsicDeformation). The argument `n_steps` controls the number of time steps $T$, the higher `n_steps` is, the more flexible is the model. However, the memory impact grows linearly in `n_steps` and the running time is also impacted. The Riemannian metric is given with the argument `metric`. Available metrics are:
 
 - [`as-isometric-as-possible`](skshapes.morphing.intrinsic_deformation.as_isometric_as_possible) (requires points and edges)
-- [`shell-energy`](skshapes.morphing.intrinsic_deformation.shell_energy) (requires triangles)
+- [`shell-energy`](skshapes.morphing.intrinsic_deformation.shell_energy_metric) (requires triangles)
 
 
 

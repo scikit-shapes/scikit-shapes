@@ -8,8 +8,8 @@ import torch
 
 from ..errors import DeviceError, NotFittedError, ShapeError
 from ..input_validation import convert_inputs, typecheck
-from ..loss import Loss
-from ..morphing import Model
+from ..loss.baseloss import BaseLoss
+from ..morphing.basemodel import BaseModel
 from ..optimization import LBFGS, Optimizer
 from ..types import (
     FloatTensor,
@@ -88,8 +88,8 @@ class Registration:
     def __init__(
         self,
         *,
-        model: Model,
-        loss: Loss,
+        model: BaseModel,
+        loss: BaseLoss,
         optimizer: Optimizer | None = None,
         regularization_weight: int | float = 1,
         n_iter: int = 10,
