@@ -2,7 +2,8 @@
 The `PolyData` class: point cloud, wireframe and triangle meshes
 ================================================================
 
-This notebook describes the `PolyData` class, the common class for point clouds, wireframe and triangle meshes.
+This notebook describes the `PolyData <../../api/skshapes.data.html#skshapes.data.polydata.PolyData>`_ class,
+the common class for point clouds, wireframe and triangle meshes.
 
 - Load and create `PolyData`
 - Plot `PolyData` with PyVista
@@ -19,7 +20,6 @@ This notebook describes the `PolyData` class, the common class for point clouds,
 # There are two ways to create a `PolyData` object:
 # - from a file
 # - explicitly with `points`, `edges` (optional), `triangles` (optional)
-# - plotting with PyVista
 
 import pyvista as pv
 
@@ -59,8 +59,8 @@ plotter.camera_position = cpos
 plotter.show()
 
 ###############################################################################
-# Add signals to the `PolyData`
-# -----------------------------
+# Add signals
+# -----------
 #
 # - Signals can be added to the PolyData object through `point_data`, `edge_data` or `triangle_data`.
 # - The size of the array in the first dimension is expected to match `n_points`, `n_edges` or`n_triangles`.
@@ -86,8 +86,8 @@ print(surface_mesh.triangle_data)
 surface_mesh.plot(scalars="signal_points", cpos=cpos)
 
 ###############################################################################
-# Add landmarks to the `PolyData`
-# -------------------------------
+# Add landmarks
+# -------------
 #
 # - Landmarks are distinguished points of the `PolyData`
 # - They can be selected via an interactive application (using vedo)
@@ -110,14 +110,14 @@ plotter.camera_position = cpos
 plotter.add_title(f"Landmarks : {surface_mesh.landmark_indices}")
 plotter.show()
 
-# %% [markdown]
-# Control points
-# --------------
+###############################################################################
+# Add control points
+# ------------------
 #
 # - Control points are represented by another `PolyData`, attached to the first
 # - The `bounding_grid` method offers a standard way to define control points as regular grids
 
-# %%
+
 surface_mesh.control_points = surface_mesh.bounding_grid(N=10, offset=0.05)
 
 plotter = pv.Plotter()
@@ -126,7 +126,7 @@ plotter.add_mesh(surface_mesh.control_points.to_pyvista(), color="green", opacit
 plotter.camera_position = cpos
 plotter.show()
 
-# %% [markdown]
+###############################################################################
 # Save and load
 # -------------
 #
@@ -135,7 +135,6 @@ plotter.show()
 # - it is also possible to save in `.stl` or `.obj` but signals/landmarks will be lost
 # - Control points must be saved separately
 
-# %%
 extension = ".vtk"
 
 from pathlib import Path
@@ -160,5 +159,5 @@ plotter.show()
 print("Triangle_data:")
 print(loaded_mesh.triangle_data)
 
-Path.unlink(filename_mesh)
-Path.unlink(filename_control_points)
+Path.unlink(Path(filename_mesh))
+Path.unlink(Path(filename_control_points))

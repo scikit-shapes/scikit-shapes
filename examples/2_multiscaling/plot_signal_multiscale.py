@@ -2,8 +2,11 @@
 Multiscaling and signal propagation
 ===================================
 
-Learn how to propagate a signal on the multiscale
-representation.
+This example shows how a signal a signal can be propagated across scales on
+a multiscale representation.
+
+The rules for signal propagation are defined by the `FineToCoarsePolicy <../../api/skshapes.html#skshapes.types.FineToCoarsePolicy>`_ and
+`CoarseToFinePolicy <../../api/skshapes.html#skshapes.types.FineToCoarsePolicy>`_ classes.
 """
 
 
@@ -16,18 +19,16 @@ bunny = sks.PolyData(pyvista.examples.download_bunny())
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
 
 
-# %% [markdown]
+###############################################################################
 # Define a signal on the high resolution mesh
 
-# %%
 signal = multiscale_bunny.at(ratio=1).points[:, 1]
 multiscale_bunny.at(ratio=1).point_data["height"] = signal
 
 
-# %% [markdown]
-# Propagate the signal to the lower resolutions
+###############################################################################
+# Propagate the signal from fine to coarse resolutions
 
-# %%
 # define a fine_to_coarse propagation scheme
 fine_to_coarse_policy = sks.FineToCoarsePolicy(
     reduce="mean",
@@ -39,6 +40,10 @@ multiscale_bunny.propagate(
     from_ratio=1,
     fine_to_coarse_policy=fine_to_coarse_policy,
 )
+
+###############################################################################
+# Propagate a signal from the lower resolutions to the higher resolution
+
 
 signal_low = multiscale_bunny.at(ratio=0.005).points[:, 1]
 multiscale_bunny.at(ratio=0.005).point_data["height_low_constant"] = signal_low
@@ -67,7 +72,9 @@ multiscale_bunny.propagate(
 )
 
 
-# Plot the signal on the lower resolution meshes
+###############################################################################
+# Visualize the multiscale representation
+
 plotter = pv.Plotter(shape=(3, 4))
 row = 0
 plotter.subplot(row, 0)

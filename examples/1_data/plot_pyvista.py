@@ -1,29 +1,31 @@
 """
-Transfer meshes between scikit-shapes and PyVista
-=================================================
+PolyData conversion from and to PyVista or Vedo
+===============================================
 
-[PyVista](https://docs.pyvista.org/version/stable/) is a Python library for
+`PyVista <https://docs.pyvista.org/version/stable/>`_ is a Python library for
 3D visualization and mesh manipulation. It is a python wrapper of the
-[VTK](https://vtk.org/) library. PyVista is used in scikit-shapes to load and
-save meshes in various formats.
+`VTK <https://vtk.org/>`_ library. PyVista is used in scikit-shapes as a backend
+to load and save meshes in various formats.
+
+`Vedo <https://vedo.embl.es/>`_ is another Python library for 3D visualization.
+It is also a python wrapper of the VTK library. It is used in scikit-shapes for
+interactive visualization.
 
 Scikit-shapes [PolyData](skshsapes.data.polydata.PolyData) can be exported to
-PyVista PolyData, and vice versa. This is useful to use the PyVista plotting
-capabilities.
+PyVista PolyData or Vedo Mesh, and vice versa. This allows to leverage the
+visualization and mesh manipulation capabilities of both libraries.
 
-In this example, we show how to transfer data from scikit-shapes to PyVista and
-back. We also show that point data and landmarks are preserved during the
-conversion.
+In addition to the mesh geometry, the signals and landmarks are encoded in the
+PyVista or Vedo mesh, and are preserved when the mesh is loaded back from PyVista.
 """
 
-# %% [markdown]
-# Load a mesh from PyVista
-# ------------------------
+###############################################################################
+# Load a mesh from PyVista's examples
+# -----------------------------------
 #
 # We load a quadrangulated cow mesh from PyVista. As scikit-shapes meshes are
 # triangular, an automatic triangulation is performed when importing the mesh.
 
-# %%
 import pyvista as pv
 import torch
 from pyvista import examples
@@ -35,12 +37,19 @@ mesh_sks = sks.PolyData(mesh_pyvista)
 
 assert mesh_pyvista.n_points == mesh_sks.n_points
 
-# %% [markdown]
-# Add point data to the mesh
-# --------------------------
+###############################################################################
+# Preservation of signals and landmarks
+# -------------------------------------
 #
+# The methods `.to_pyvista()` and `.to_vedo()` allow to convert a `PolyData` object
+# to a PyVista or Vedo mesh. The point data and landmarks are preserved during
+# the conversion: if the mesh is loaded back from PyVista or Vedo, the signals
+# and landmarks are still there.
+#
+# The following illustrates the preservation of signals and landmarks when
+# converting a `PolyData` object to PyVista and back.
 
-# %%
+
 mesh_sks.point_data["signal"] = mesh_sks.points[:, 0]
 # Now, export the mesh to PyVista
 mesh_pv2 = mesh_sks.to_pyvista()
@@ -55,12 +64,7 @@ assert torch.allclose(
     mesh_sks.point_data["signal"]
     )
 
-# %% [markdown]
-# Landmarks are also preserved
-# ----------------------------
-#
 
-# %%
 # Set some landmarks
 landmarks_indices = [0, 10, 154, 125, 1544, 187, 32, 252, 1214]
 mesh_sks.landmark_indices = landmarks_indices
