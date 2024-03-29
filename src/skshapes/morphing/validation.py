@@ -1,12 +1,16 @@
 """Validation utilities for morphing module."""
 
+from typing import Any
+
 import torch
 
-from ..types import float_dtype
+from ..input_validation import typecheck
+from ..types import shape_type
 from .basemodel import BaseModel
 
 
-def validate_polydata_morphing_model(model, shape):
+@typecheck
+def validate_polydata_morphing_model(model: Any, shape: shape_type) -> None:
     """Test a model with a PolyData shape.
 
     This function does basic tests on a model with a PolyData shape. In order
@@ -38,13 +42,19 @@ def validate_polydata_morphing_model(model, shape):
 
     # Check if model is an instance of BaseModel
     if not isinstance(model, BaseModel):
-        error_msg = "model must be an instance of BaseModel"
+        error_msg = "The model must be an instance of BaseModel"
         raise ValueError(error_msg)
 
+    if not hasattr(model, "morph"):
+        error_msg = "The model must have a method morph"
+        raise NotImplementedError(error_msg)
+
+    if not hasattr(model, "parameter_shape"):
+        error_msg = "The model must have a method parameter_shape"
+        raise NotImplementedError(error_msg)
+
     # Initialize parameter with zeros, inferring shape from model
-    parameter = torch.zeros(
-        size=model.parameter_shape(shape), dtype=float_dtype
-    )
+    parameter = model.inital_parameter(shape=shape)
     parameter.requires_grad = True
 
     # Apply morphing and compute a dummy loss function

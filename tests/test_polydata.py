@@ -572,6 +572,16 @@ def test_landmarks_creation():
 
     assert torch.allclose(mesh1.landmark_points, mesh2.landmark_points)
 
+    # Test the landmarks with a 2D mesh: landmark_points and landmark_points_3D
+    points_2d = torch.tensor([[0, 0], [0, 1], [1, 0]], dtype=sks.float_dtype)
+    triangles_2d = torch.tensor([[0, 1, 2]], dtype=sks.int_dtype)
+    mesh = sks.PolyData(points=points_2d, triangles=triangles_2d)
+    mesh.add_landmarks([1])
+    expected_2D = points_2d[1]
+    expected_3D = torch.cat([points_2d[1], torch.tensor([0])])
+    assert torch.allclose(mesh.landmark_points, expected_2D)
+    assert torch.allclose(mesh.landmark_points_3D, expected_3D)
+
 
 def test_landmarks_conservation():
     """Test landmarks conservation when converting to pyvista and vedo."""
