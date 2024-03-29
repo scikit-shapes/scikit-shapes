@@ -7,13 +7,6 @@ alignment) of two 3D meshes. We also show how to improve the registration by
 adding landmarks.
 """
 
-# %% [markdown]
-# Load data
-# ---------
-#
-# We load two meshes from the `pyvista` example datasets. We then rescale them
-# to lie in the unit cube to avoid dealing with scale issues.
-
 import sys
 
 import pykeops
@@ -25,7 +18,18 @@ sys.path.append(pykeops.get_build_folder())
 
 import skshapes as sks
 
-shape1 = sks.PolyData(examples.download_human())
+color_1 = 'tan'
+color_2 = 'brown'
+
+###############################################################################
+# Load data
+# ---------
+#
+# We load two meshes from the `pyvista` example datasets. We then rescale them
+# to lie in the unit cube to avoid dealing with scale issues.
+
+# shape1 = sks.PolyData(examples.download_human())
+shape1 = sks.PolyData(examples.download_woman().rotate_y(90))
 shape2 = sks.PolyData(examples.download_doorman())
 shape1.point_data.clear()
 shape2.point_data.clear()
@@ -43,111 +47,97 @@ rescale2 = torch.max(lims2)
 shape2.points -= torch.min(shape2.points, dim=0).values
 shape2.points /= rescale2
 
-# %% [markdown]
+###############################################################################
 # Plot the data
 # -------------
 # Let us have a look at the two shapes we want to align. Clearly, they are not
 # aligned and a rigid transformation is needed.
 
 plotter = pv.Plotter()
-plotter.add_mesh(shape1.to_pyvista())
-plotter.add_mesh(shape2.to_pyvista())
+plotter.add_mesh(shape1.to_pyvista(), color=color_1)
+plotter.add_mesh(shape2.to_pyvista(), color=color_2)
+
 plotter.show()
 
-# %% [markdown]
+###############################################################################
 # Apply the registration
 # ----------------------
 # We now apply the registration. The meshes points are not in correspondence
 # and we need to use a loss function that can handle this. We use the nearest
 # neighbors loss.
+# Using this loss leads to converge to a local minimum, where the shapesa are
+# aligned upside down.
 
-from skshapes.loss import NearestNeighborsLoss
-from skshapes.morphing import RigidMotion
-from skshapes.tasks import Registration
+loss = sks.NearestNeighborsLoss()
+model = sks.RigidMotion()
 
-loss = NearestNeighborsLoss()
-# The parameter n_steps is the number of steps for the motion. For a rigid
-# motion, it has no impact on the result as the motion is fully determined by
-# a rotation matrix and a translation vector. It is however useful for
-# creating a smooth animation of the registration.
-model = RigidMotion(n_steps=5)
-
-registration = Registration(
+registration = sks.Registration(
     model=model,
     loss=loss,
     n_iter=2,
     verbose=True,
-)
+) # default optimizer is torch.optim.LBFGS
 
 registration.fit(source=shape2, target=shape1)
+morph = registration.transform(source=shape2)
 
-# %% [markdown]
-# Plot an animation of the registration
-# -------------------------------------
-#
-# We can now plot an animation of the registration. We observe that the
-# registration is not perfect. This is due to the fact that the nearest
-# neighbors loss tries to match the points of the two shapes. However, the
-# shapes are not in correspondence and our model gather no information about
-# the correspondence. We can improve the registration by adding
-# a few landmarks.
-
-path = registration.path_
 plotter = pv.Plotter()
-plotter.add_mesh(shape1.to_pyvista())
-actor = plotter.add_mesh(shape2.to_pyvista())
-plotter.open_gif("rigid_registration.gif", fps=3)
-for shape in path:
-    plotter.remove_actor(actor)
-    actor = plotter.add_mesh(shape.to_pyvista())
-    plotter.write_frame()
-
+plotter.add_mesh(shape1.to_pyvista(), color=color_1)
+plotter.add_mesh(morph.to_pyvista(), color=color_2)
 plotter.show()
 
-# %% [markdown]
+###############################################################################
 # Add landmarks
 # -------------
 #
 # We now add landmarks to the two shapes. Three landmarks (head, left hand,
 # right hand) are enough to greatly improve the registration.
 
-landmarks1 = [5199, 2278, 10013]
-landmarks2 = [325, 786, 509]
+if not pv.BUILDING_GALLERY:
+    # If not in the gallery, we can use vedo to open the landmark setter
+    # Setting the default backend to vtk is necessary when running in a notebook
+    import vedo
+    vedo.settings.default_backend= 'vtk'
+    sks.LandmarkSetter([shape1, shape2]).start()
+else:
+    # Set the landmarks manually
+    landmarks1 = [4808, 147742, 1774]
+    landmarks2 = [325, 2116, 1927]
+
+    shape1.landmark_indices = landmarks1
+    shape2.landmark_indices = landmarks2
 
 colors = ["red", "green", "blue"]
 plotter = pv.Plotter()
-plotter.add_mesh(shape1.to_pyvista())
-for i in range(3):
+plotter.add_mesh(shape1.to_pyvista(), color=color_1)
+for i in range(len(shape1.landmark_indices)):
     plotter.add_points(
-        shape1.points[landmarks1[i]].numpy(),
-        color=colors[i],
+        shape1.landmark_points[i].numpy(),
+        color=colors[i % 3],
         render_points_as_spheres=True,
         point_size=25,
     )
-plotter.add_mesh(shape2.to_pyvista())
-for i in range(3):
+plotter.add_mesh(shape2.to_pyvista(), color=color_2)
+for i in range(len(shape2.landmark_indices)):
     plotter.add_points(
-        shape2.points[landmarks2[i]].numpy(),
-        color=colors[i],
+        shape2.landmark_points[i].numpy(),
+        color=colors[i % 3],
         render_points_as_spheres=True,
         point_size=25,
     )
 plotter.show()
 
-# %% [markdown]
-# Apply the registration with landmarks
-# -------------------------------------
+###############################################################################
+# Register again with a loss that includes landmarks
+# --------------------------------------------------
 #
-# We now apply the registration. We use the landmarks to define a landmark
-# loss. We use the nearest neighbors loss to match the rest of the points.
-# We use the same rigid motion model.
+# Now the loss is the sum of `NearestNeighborsLoss` and `LandmarkLoss`, the
+# mean L2 distance between the landmarks in the two shapes.
+# The registration now converges to a better solution.
 
-shape1.landmark_indices = landmarks1
-shape2.landmark_indices = landmarks2
+loss_landmarks = sks.NearestNeighborsLoss() + sks.LandmarkLoss()
 
-loss_landmarks = NearestNeighborsLoss() + sks.LandmarkLoss()
-
-registration = Registration(
+registration = sks.Registration(
     model=model,
     loss=loss_landmarks,
     n_iter=2,
@@ -155,20 +145,9 @@ registration = Registration(
 )
 
 registration.fit(source=shape2, target=shape1)
+morph = registration.transform(source=shape2)
 
-
-# %% [markdown]
-# Animation of the registration with landmarks
-# --------------------------------------------
-
-path = registration.path_
 plotter = pv.Plotter()
-plotter.add_mesh(shape1.to_pyvista())
-actor = plotter.add_mesh(shape2.to_pyvista())
-plotter.open_gif("rigid_registration.gif", fps=3)
-for shape in path:
-    plotter.remove_actor(actor)
-    actor = plotter.add_mesh(shape.to_pyvista())
-    plotter.write_frame()
-
+plotter.add_mesh(shape1.to_pyvista(), color=color_1)
+plotter.add_mesh(morph.to_pyvista(), color=color_2)
 plotter.show()

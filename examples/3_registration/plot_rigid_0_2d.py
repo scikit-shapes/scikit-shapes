@@ -3,7 +3,7 @@ Rigid alignment in 2D
 =====================
 
 
-This is an example of rigid motion registration, or alignment, in 2D.
+This is an example of rigid alignment in 2D for meshes with points in dense correspondence.
 """
 
 import pyvista as pv
@@ -12,27 +12,24 @@ from pyvista import examples
 
 import skshapes as sks
 
-# %%
-# ## Load data
-#
-# We load two toys datasets in 2D: wireframe meshes representing circles. To
+###############################################################################
+# We load two toy shapes in 2D: wireframe meshes representing circles. To
 # be able to see orientations, we remove one edge from each circle. The points
 # of both circles are in dense correspondence.
 
 source = sks.PolyData(examples.download_human())
 target = sks.PolyData(examples.download_doorman())
 
-# Load the circle
+# Load the circles
 source = sks.Circle()
 target = sks.Circle()
 
+# Remove one edge from each circle
 source.edges = source.edges[:-1]
 target.edges = target.edges[:-1]
 
 
-# %%
-# ## Apply a rigid motion to one of the circles
-#
+###############################################################################
 # Rigid motion are parametrized by a rotation and a translation. We apply a
 # rigid motion to one of the circles.
 
@@ -67,9 +64,9 @@ plotter.add_mesh(
 plotter.add_legend()
 plotter.show()
 
-# %%
-# ## Rigid registration
-#
+###############################################################################
+# Registration
+# ------------
 
 from skshapes.loss import L2Loss
 from skshapes.morphing import RigidMotion
@@ -88,9 +85,8 @@ registration = Registration(
 
 registration.fit(source=source, target=target)
 
-# %%
-# ## Animation of the registration
-#
+###############################################################################
+# Animation
 
 path = registration.path_
 plotter = pv.Plotter()

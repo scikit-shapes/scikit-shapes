@@ -1,4 +1,5 @@
-# from ..types import Optimizer
+"""Optimizers."""
+
 from typing import Union
 
 import torch.optim

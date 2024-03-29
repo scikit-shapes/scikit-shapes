@@ -1,6 +1,4 @@
-"""
-The :mod:`skshapes.morphing` module gathers deformation models.
-"""
+"""Deformation models."""
 
 from .basemodel import BaseModel
 from .extrinsic_deformation import ExtrinsicDeformation

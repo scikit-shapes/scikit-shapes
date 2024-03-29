@@ -1,8 +1,10 @@
 """
-LDDMM with normalized kernel - 1
-================================
+LDDMM with normalized kernel
+============================
+
 This notebook illustrates the interest of normalizing the cometric in the LDDMM
-model. We consider the registration of two spheres that differ by a translation.
+model. We consider the registration of two spheres that differ by a translation
+first, and then a more complex registration task with a translation and a deformation.
 
 Without normalization, the carpooling artifact occurs: the sphere
 is contracted, then translated and finally expanded. in this situation, event if
@@ -26,6 +28,8 @@ import pyvista as pv
 import torch
 
 import skshapes as sks
+
+# sphinx_gallery_thumbnail_number = 9
 
 ###############################################################################
 # Load data
@@ -241,3 +245,95 @@ for i in range(len(path)):
     plotter.camera_position = cpos
     plotter.write_frame()
 plotter.close()
+
+###############################################################################
+# Example with a more complex shape
+# ---------------------------------
+
+n_steps = 3
+
+plot_kwargs = {
+    "smooth_shading": True,
+    "pbr": True,
+    "metallic": 0.7,
+    "roughness": 0.6,
+
+}
+
+cpos = [(3.6401575998373183, -1.183408993703478, 1.0915912440258628),
+ (0.7463583722710609, 0.762569822371006, 0.48035204596817493),
+ (-0.1745415166347431, 0.04933887578777028, 0.9834129012306287)]
+
+# 5 - 8
+source = sks.PolyData("data/cactus/cactus3.ply")
+target = sks.PolyData("data/cactus/cactus11.ply")
+target.points += torch.Tensor([0.5, 0.5, 0])
+
+model = sks.ExtrinsicDeformation(
+    n_steps=n_steps,
+    kernel="gaussian",
+    scale=0.1,
+    normalization="both",
+)
+
+loss = sks.L2Loss()
+
+###############################################################################
+# Interpolation
+# -------------
+
+
+task = sks.Registration(
+    model=model,
+    loss=loss,
+    optimizer=sks.LBFGS(),
+    n_iter=1,
+    verbose=True,
+    regularization_weight=0.001
+)
+
+task.fit(source=source, target=target)
+
+path = task.path_
+
+plotter = pv.Plotter()
+for frame in path:
+    plotter.add_mesh(frame.to_pyvista(), color="tan", opacity=0.3, **plot_kwargs)
+plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.5, **plot_kwargs)
+plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.5, **plot_kwargs)
+plotter.camera_position = cpos
+plotter.show()
+
+###############################################################################
+# Extrapolation
+# -------------
+
+back = model.morph(
+    shape=source,
+    parameter=task.parameter_,
+    return_path=True,
+    return_regularization=True,
+    final_time=-1.0
+).path
+
+model.n_steps = 2 * n_steps
+
+forward = model.morph(
+    shape=source,
+    parameter=task.parameter_,
+    return_path=True,
+    return_regularization=True,
+    final_time=2.0
+).path
+
+path = back[::-1] + forward[1:]
+
+plotter = pv.Plotter()
+for frame in path:
+    plotter.add_mesh(frame.to_pyvista(), color="tan", opacity=0.3, **plot_kwargs)
+plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.5, **plot_kwargs)
+plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.5, **plot_kwargs)
+plotter.camera_position = cpos
+plotter.show()
+
+print(plotter.camera_position)
