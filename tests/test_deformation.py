@@ -4,54 +4,25 @@ import pytest
 import torch
 
 import skshapes as sks
-from skshapes.errors import DeviceError
 
 deformation_models = [
-    sks.IntrinsicDeformation,
-    sks.ExtrinsicDeformation,
-    sks.RigidMotion,
+    sks.IntrinsicDeformation(),
+    sks.ExtrinsicDeformation(),
+    sks.RigidMotion(),
 ]
 
-mesh_1 = sks.Sphere().decimate(target_reduction=0.99)
-mesh_2 = mesh_1.copy()
-mesh_2.points += 0.2
+sphere = sks.Sphere().decimate(target_reduction=0.99)
+circle = sks.Circle()
 
 
-def test_deformation():
-    """Compatibility of deformations modules wrt autograd."""
-    for deformation_model in deformation_models:
-        _test(deformation_model)
+@pytest.mark.parametrize("model", deformation_models)
+def test_deformation_polydata(model):
+    """Test for deformation models with polydata shapes (2D and 3D)."""
+    sks.validate_polydata_morphing_model(model, sphere)
+    sks.validate_polydata_morphing_model(model, circle)
 
 
-def _test(deformation_model):
-    # Define a pair of shapes and a loss function
-    shape = mesh_1
-    target = mesh_2
-    loss = sks.L2Loss()
-
-    # Initialize the deformation model
-    model = deformation_model()
-    # Get an initial parameter
-    p = model.inital_parameter(shape=shape)
-
-    p.requires_grad_(True)
-
-    morphed_shape = model.morph(shape=shape, parameter=p).morphed_shape
-    L = loss(morphed_shape, target)
-
-    L.backward()
-    assert p.grad is not None
-
-    if torch.cuda.is_available():
-        p = p.cuda()
-        with pytest.raises(DeviceError):
-            model.morph(shape=shape, parameter=p).morphed_shape  # noqa: B018
-
-
-circle = sks.Circle(n_points=5)
-
-
-@pytest.mark.parametrize("shape", [mesh_1, circle])
+@pytest.mark.parametrize("shape", [sphere, circle])
 def test_rigid_motion_multiple_steps(shape):
     """Test for rigid motion with multiple steps (2D and 3D).
 

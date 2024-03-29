@@ -1,6 +1,4 @@
-"""
-The :mod:`skshapes.loss` module gathers loss functions for shape processing.
-"""
+"""Loss functions for shape analysis."""
 
 from typing import Union
 

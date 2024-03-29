@@ -552,6 +552,7 @@ def test_landmarks_creation():
     mesh1.landmarks = landmarks
     mesh2.landmark_indices = landmarks_indices
 
+    assert torch.allclose(mesh1.landmark_points, mesh2.landmark_points_3D)
     assert torch.allclose(mesh1.landmark_points, mesh2.landmark_points)
     assert torch.allclose(
         mesh1.landmark_indices, torch.tensor(landmarks_indices)
@@ -570,6 +571,16 @@ def test_landmarks_creation():
     mesh1 = sks.PolyData(mesh1.to_pyvista())
 
     assert torch.allclose(mesh1.landmark_points, mesh2.landmark_points)
+
+    # Test the landmarks with a 2D mesh: landmark_points and landmark_points_3D
+    points_2d = torch.tensor([[0, 0], [0, 1], [1, 0]], dtype=sks.float_dtype)
+    triangles_2d = torch.tensor([[0, 1, 2]], dtype=sks.int_dtype)
+    mesh = sks.PolyData(points=points_2d, triangles=triangles_2d)
+    mesh.add_landmarks([1])
+    expected_2D = points_2d[1]
+    expected_3D = torch.cat([points_2d[1], torch.tensor([0])])
+    assert torch.allclose(mesh.landmark_points, expected_2D)
+    assert torch.allclose(mesh.landmark_points_3D, expected_3D)
 
 
 def test_landmarks_conservation():
@@ -777,3 +788,36 @@ def test_control_points_device():
     mesh.device = "cuda"
     assert mesh.points.device.type == "cuda"
     assert mesh.control_points.device.type == "cuda"
+
+
+def test_weighted_points():
+
+    # Test with a point cloud (3 points)
+    points_val = torch.tensor([[0, 0], [0, 1], [1, 0]], dtype=sks.float_dtype)
+    pc = sks.PolyData(points=points_val)
+    points, weight = pc.to_weighted_points()
+    assert torch.allclose(points, points_val)
+    assert torch.allclose(weight, torch.ones(3, dtype=sks.float_dtype) / 3)
+
+    # Test with triangle
+    triangles = torch.tensor([[0, 1, 2]], dtype=sks.int_dtype)
+    triangle = sks.PolyData(points=points_val, triangles=triangles)
+    points, weight = triangle.to_weighted_points()
+    assert torch.allclose(
+        points, torch.tensor([[1 / 3, 1 / 3]], dtype=sks.float_dtype)
+    )
+    assert torch.allclose(weight, torch.tensor([1], dtype=sks.float_dtype))
+
+    # Test with a wireframe  : x--x----x
+    points_val = torch.tensor(
+        [[0, 0, 0], [0, 0, 1], [0, 0, 3]], dtype=sks.float_dtype
+    )
+    edges = torch.tensor([[0, 1], [1, 2]], dtype=sks.int_dtype)
+    wireframe = sks.PolyData(points=points_val, edges=edges)
+    points, weight = wireframe.to_weighted_points()
+    assert torch.allclose(
+        points, torch.tensor([[0, 0, 0.5], [0, 0, 2]], dtype=sks.float_dtype)
+    )
+    assert torch.allclose(
+        weight, torch.tensor([1 / 3, 2 / 3], dtype=sks.float_dtype)
+    )

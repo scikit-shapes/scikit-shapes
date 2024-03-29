@@ -1,4 +1,4 @@
-"""Module with data types."""
+"""Data classes: PolyData, Images."""
 
 from math import pi
 from typing import Union

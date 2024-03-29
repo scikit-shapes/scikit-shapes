@@ -1,4 +1,0 @@
-Applications
-------------
-
-Examples demonstrating applications.

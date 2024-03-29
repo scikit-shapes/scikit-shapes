@@ -823,22 +823,6 @@ class PolyData(polydata_type):
             raise ShapeError(error_message)
         return data_attr
 
-    ######## getitem : TODO remove it !! ########
-
-    # @typecheck
-    # def __getitem__(self, key: Any) -> NumericalTensor:
-    #     """Return the point data corresponding to the key."""
-    #     if key not in self._point_data:
-    #         msg = f"Point data {key} is not defined."
-    #         raise KeyError(msg)
-    #     return self._point_data[key]
-
-    # @convert_inputs
-    # @typecheck
-    # def __setitem__(self, key: Any, value: NumericalTensor) -> None:
-    #     """Set the point data corresponding to the key."""
-    #     self._point_data[key] = value
-
     #################################
     #### Landmarks getter/setter ####
     #################################
@@ -888,6 +872,27 @@ class PolyData(polydata_type):
             return None
         else:
             return self.landmarks @ self.points
+
+    @property
+    def landmark_points_3D(self) -> Points | None:
+        """Landmarks in 3D coordinates.
+
+        If self.dim == 3, it is equivalent to landmark_points. Otherwise, if
+        self.dim == 2, it returns the landmarks with a third coordinate set to 0.
+
+        Returns
+        -------
+        Points
+            The landmarks in 3D coordinates.
+        """
+        if self.dim == 3:
+            return self.landmark_points
+        else:
+            landmark_points = torch.zeros(
+                (self.n_landmarks, 3), dtype=float_dtype, device=self.device
+            )
+            landmark_points[:, : self.dim] = self.landmark_points
+            return landmark_points
 
     @property
     @typecheck
@@ -1257,3 +1262,37 @@ class PolyData(polydata_type):
                 + f" and {self.device} for the PolyData."
             )
         self._control_points = control_points
+
+    ###########################
+    #### Weighted point cloud #
+    ###########################
+
+    @typecheck
+    def to_weighted_points(self) -> tuple[Points, Float1dTensor]:
+        """Convert the shape to a weighted point cloud.
+
+        Returns
+        -------
+        points
+            The points of the weighted point cloud.
+        weights
+            The weights of the weighted point cloud.
+        """
+        if self.triangles is not None:
+            points = self.triangle_centers
+            weights = self.triangle_areas / self.triangle_areas.sum()
+
+        elif self.edges is not None:
+            points = self.edge_centers
+            weights = self.edge_lengths / self.edge_lengths.sum()
+
+        else:
+            points = self.points
+            weights = (
+                torch.ones(
+                    self.n_points, dtype=float_dtype, device=self.device
+                )
+                / self.n_points
+            )
+
+        return points, weights

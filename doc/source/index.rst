@@ -6,6 +6,12 @@
 Scikit-Shapes: Shape analysis in Python
 =======================================
 
+Welcome to the Scikit-Shapes documentation (still under construction).
+
+Scikit-shapes provides tools for shape analysis in Python. The source code is available on `GitHub <https://github.com/scikit-shapes/scikit-shapes>`_.
+
+To get started, check out the installation instructions and have a look at the examples.
+
 Content
 -------
 
@@ -13,7 +19,6 @@ Content
     :maxdepth: 1
 
     installation
-    user_guide/index
     auto_examples/index
     api
     contributing

@@ -61,7 +61,6 @@ ignore = [
 # See: https://learn.scientific-python.org/development/guides/style/#PC190
 [tool.ruff]
 src = ["src"]
-exclude = ["src/skshapes/documentation_example.py"]
 
 [tool.ruff.lint]
 extend-select = [
@@ -99,6 +98,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # For _init__.py files:
 "**_init__.py**" = ["F401", "F403", "F405"]
+"examples/**" = ["T201"]
 # F401: imported but unused
 # F403: unable to detect undefined names (import *)
 # F405: may be undefined, or defined from star imports

@@ -1,38 +1,36 @@
 """
-Multiscaling
-============
+Multiscaling (triangle mesh)
+============================
 
-Learn how to create a multiscale representation of a triangle mesh using
-quadric decimation and how to propagate a signal on the multiscale
-representation.
+The Multiscale class is used to create a multiscale representation of a
+triangle mesh using quadric decimation. Quadric decimation reduces the number
+of points of a mesh by iteratively collapsing the edge with the smallest
+quadric error.
+
+For reference on quadric decimation, see: `Garland and Heckbert 1997 <https://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf>`_.
+
+We use the implementation proposed by `fast-simplification <https://github.com/pyvista/fast-simplification>`_.
 """
 
-# %% [markdown]
-# The Multiscale class is used to create a multiscale representation of a
-# triangle mesh using quadric decimation. Quadric decimation reduces the number
-# of points of a mesh by iteratively collapsing the edge with the smallest
-# quadric error.
-#
-# For reference on quadric decimation, see: [Garland and Heckbert 1997](https://www.cs.cmu.edu/~./garland/Papers/quadrics.pdf)
-#
-# We use the implementation proposed by [fast-simplification](https://github.com/pyvista/fast-simplification)
+###############################################################################
+# Load a mesh
 
-# %%
+import pyvista as pv
 import pyvista.examples
 
 import skshapes as sks
 
 bunny = sks.PolyData(pyvista.examples.download_bunny())
+
+###############################################################################
+# Create the multiscale representation with different ratios of the original
+# number of points
+
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
 
 
-# %% [markdown]
+###############################################################################
 # Visualize the multiscale representation
-# ---------------------------------------
-#
-
-# %%
-import pyvista as pv
 
 plotter = pv.Plotter(shape=(1, 4))
 plotter.subplot(0, 0)

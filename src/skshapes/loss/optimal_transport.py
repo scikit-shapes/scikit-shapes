@@ -59,13 +59,9 @@ class OptimalTransportLoss(BaseLoss):
             the loss
         """
         super().__call__(source=source, target=target)
-        target_points = target.points
-        target_weights = target.point_weights
-        target_weights = target_weights / target_weights.sum()
 
-        source_points = source.points
-        source_weights = source.point_weights
-        source_weights = source_weights / source_weights.sum()
+        source_points, source_weights = source.to_weighted_points()
+        target_points, target_weights = target.to_weighted_points()
 
         Loss = SamplesLoss(loss=self.loss, **self.kwargs)
         return Loss(
