@@ -91,7 +91,12 @@ plotter.show()
 # -------------
 #
 # We now add landmarks to the two shapes. Three landmarks (head, left hand,
-# right hand) are enough to greatly improve the registration.
+# right hand) are enough to greatly improve the registration. If you are running this script locally,
+# you can use the landmark setter application to select the landmarks interactively.
+# If you are seeing this in the gallery, here is a recording of the landmark setter
+# application being used to select the landmarks:
+#
+# .. image:: ../../images/demolandmarks.gif
 
 if not pv.BUILDING_GALLERY:
     # If not in the gallery, we can use vedo to open the landmark setter

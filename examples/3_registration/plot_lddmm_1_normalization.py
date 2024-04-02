@@ -24,6 +24,8 @@ Further explanation can be found in the p177 and onwards of https://www.jeanfeyd
 
 """
 
+from time import time
+
 import pyvista as pv
 import torch
 
@@ -48,6 +50,10 @@ cpos = [(1.6256104086078755, -9.701422233882411, 1.3012755902068773),
 
 source = sks.Sphere()
 target = sks.Sphere()
+
+decimation = sks.Decimation(n_points = 200)
+source = decimation.fit_transform(source)
+target = decimation.transform(target)
 
 target.points = target.points + torch.tensor([2, 0.0, 0.0])
 
@@ -79,7 +85,9 @@ task = sks.Registration(
     verbose=True,
 )
 
+start = time()
 task.fit(source=source, target=target)
+print("Elapsed time: ", time() - start)
 path = task.path_
 
 plotter = pv.Plotter()
@@ -137,12 +145,14 @@ task_norm = sks.Registration(
     model=model_norm,
     loss=loss,
     optimizer=sks.LBFGS(),
-    n_iter=3,
+    n_iter=1,
     regularization_weight=0.0,
     verbose=True,
 )
 
+start = time()
 task_norm.fit(source=source, target=target)
+print("Elapsed time: ", time() - start)
 path = task_norm.path_
 
 plotter = pv.Plotter()
@@ -199,12 +209,14 @@ task_norm = sks.Registration(
     model=model_norm,
     loss=loss,
     optimizer=sks.LBFGS(),
-    n_iter=3,
+    n_iter=1,
     regularization_weight=0.0,
     verbose=True,
 )
 
+start = time()
 task_norm.fit(source=source, target=target)
+elapsed_time = time() - start
 path = task_norm.path_
 
 plotter = pv.Plotter()
@@ -265,9 +277,14 @@ cpos = [(3.6401575998373183, -1.183408993703478, 1.0915912440258628),
  (-0.1745415166347431, 0.04933887578777028, 0.9834129012306287)]
 
 # 5 - 8
-source = sks.PolyData("data/cactus/cactus3.ply")
-target = sks.PolyData("data/cactus/cactus11.ply")
+source = sks.PolyData("../data/cactus/cactus3.ply")
+target = sks.PolyData("../data/cactus/cactus11.ply")
 target.points += torch.Tensor([0.5, 0.5, 0])
+
+decimation = sks.Decimation(n_points = 500)
+source = decimation.fit_transform(source)
+target = decimation.transform(target)
+
 
 model = sks.ExtrinsicDeformation(
     n_steps=n_steps,
@@ -282,7 +299,6 @@ loss = sks.L2Loss()
 # Interpolation
 # -------------
 
-
 task = sks.Registration(
     model=model,
     loss=loss,
@@ -292,7 +308,9 @@ task = sks.Registration(
     regularization_weight=0.001
 )
 
+start = time()
 task.fit(source=source, target=target)
+print("Elapsed time: ", time() - start)
 
 path = task.path_
 
