@@ -79,7 +79,7 @@ class LandmarkSetterSingleMesh(vedo.Plotter):
 
         # If the shape is a triangle mesh, we plot it with edges
         # Otherwise, we plot it with points (easier to select landmarks)
-        if shape.triangle is not None:
+        if shape.triangles is not None:
             self.actor = self.shape.to_vedo().linewidth(1)
             self.actor.pickable(True)
         else:
