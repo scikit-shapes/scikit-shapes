@@ -12,7 +12,6 @@ myst_parser >=0.13
 sphinx >=4.0
 sphinx-autodoc-typehints
 sphinx-copybutton
-sphinx-copybutton
 sphinx-design
 sphinx-gallery
 sphinx-math-dollar
