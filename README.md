@@ -53,6 +53,8 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 
 # Installation
 
+At the moment, scikit-shapes is available on linux and macOS only.
+
 For now, the recommended way to install scikit-shapes is directly from the main branch
 ```bash
 pip install 'skshapes @ git+https://github.com/scikit-shapes/scikit-shapes@main'
