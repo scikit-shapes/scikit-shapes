@@ -58,6 +58,8 @@ class Registration:
     gpu:
         do intensive numerical computations on a nvidia gpu with a cuda
         backend if available.
+    debug:
+        if True, information will be stored during the optimization process
 
     Examples
     --------
@@ -95,6 +97,7 @@ class Registration:
         n_iter: int = 10,
         verbose: int = 0,
         gpu: bool = True,
+        debug=False,
     ) -> None:
         if optimizer is None:
             optimizer = LBFGS()
@@ -105,6 +108,7 @@ class Registration:
         self.verbose = verbose
         self.n_iter = n_iter
         self.regularization_weight = regularization_weight
+        self.debug = debug
 
         if gpu:
             if torch.cuda.is_available():
@@ -218,6 +222,9 @@ class Registration:
             optimizer.zero_grad()
             loss_value = loss_fn(parameter)
             loss_value.backward()
+            if self.debug:
+                parameters_list[-1].append(parameter.clone().detach())
+                gradients_list[-1].append(parameter.grad.clone().detach())
             return loss_value
 
         loss_value = loss_fn(parameter)
@@ -245,9 +252,17 @@ class Registration:
 
         fidelity_history.append(self.current_loss)
         path_length_history.append(self.current_path_length)
+
+        if self.debug:
+            parameters_list = [[]]
+            gradients_list = [[]]
+
         # Run the optimization
         for _i in range(self.n_iter):
             loss_value = optimizer.step(closure)
+            if self.debug:
+                parameters_list.append([])
+                gradients_list.append([])
             fidelity_history.append(self.current_loss)
             path_length_history.append(self.current_path_length)
             if self.verbose > 0:
@@ -276,6 +291,10 @@ class Registration:
 
         # Move the parameter to the output device
         self.parameter_ = parameter.clone().detach().to(self.output_device)
+
+        if self.debug:
+            self.parameters_list_ = parameters_list
+            self.gradients_list_ = gradients_list
 
         morphing = self.model.morph(
             shape=source,
