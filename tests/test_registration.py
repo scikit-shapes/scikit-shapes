@@ -228,3 +228,76 @@ def test_extrinsic_control_points(
         )
     else:
         assert registration.parameter_.shape == mesh1.points.shape
+
+
+def test_intrinsic_deformation_fixed_endpoints():
+    """Test to run intrinsic deformation with fixed endpoints."""
+    mesh = mesh_3d
+
+    # Define the endpoints by adding a small offset to the points
+    endpoints = mesh.points.clone() + 0.1
+
+    # Define the model with fixed endpoints
+    model = sks.IntrinsicDeformation(
+        n_steps=2, endpoints=endpoints, metric="as_isometric_as_possible"
+    )
+
+    registration = sks.Registration(
+        model=model,
+        loss=sks.L2Loss(),
+        optimizer=sks.LBFGS(),
+        n_iter=1,
+        regularization_weight=10,
+    )
+
+    # Fit the registration (same mesh as source and target)
+    registration.fit(source=mesh, target=mesh)
+
+    # Check that the endpoints are fixed
+    assert torch.allclose(
+        registration.transform(source=mesh).points, endpoints
+    )
+
+
+def test_debug():
+    """Test the debug mode for registration."""
+
+    # Define the source and target shapes
+    source = mesh_3d
+    target = mesh_3d
+    target.points += 0.1
+
+    # Define the model
+    model = sks.RigidMotion()
+
+    n_iter = 5  # Number of iterations
+
+    # Define and fit the registration with debug=True
+    registration = sks.Registration(
+        model=model,
+        loss=sks.L2Loss(),
+        optimizer=sks.SGD(),
+        n_iter=n_iter,
+        regularization_weight=0,
+        debug=True,
+    )
+    registration.fit(source=source, target=target)
+
+    # Extract the gradients and parameters history
+    gradients_list = registration.gradients_list_
+    parameters_list = registration.parameters_list_
+
+    expected_shape = model.parameter_shape(shape=source)
+
+    # gradient_list and parameters_list should have the same length as n_iter
+    assert len(gradients_list) == n_iter
+    assert len(parameters_list) == n_iter
+
+    for i in range(n_iter):
+        # With SGD optimizer, there is only one call to the closure per iteration
+        assert len(gradients_list[i]) == 1
+        assert len(parameters_list[i]) == 1
+
+        # Check the shape of the gradients and parameters
+        assert gradients_list[i][0].shape == expected_shape
+        assert parameters_list[i][0].shape == expected_shape

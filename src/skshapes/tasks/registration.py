@@ -260,7 +260,7 @@ class Registration:
         # Run the optimization
         for _i in range(self.n_iter):
             loss_value = optimizer.step(closure)
-            if self.debug:
+            if self.debug and _i < self.n_iter - 1:
                 parameters_list.append([])
                 gradients_list.append([])
             fidelity_history.append(self.current_loss)
