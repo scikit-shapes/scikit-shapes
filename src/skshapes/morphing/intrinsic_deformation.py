@@ -18,6 +18,7 @@ from ..types import (
     FloatScalar,
     MorphingOutput,
     Number,
+    Points,
     Triangles,
     polydata_type,
 )
@@ -33,6 +34,12 @@ class IntrinsicDeformation(BaseModel):
         Number of integration steps.
     metric
         Riemannian metric used to regularize the morphing.
+    endpoints
+        The endpoints of the morphing. If None, the endpoints are not fixed and
+        the morphed shape is free to move. If not None, the morphed shape is
+        constrained to be at the endpoints and the only free steps are the
+        intermediate steps. Providing endpoints is useful to minimize the
+        energy of the morphing while keeping the endpoints fixed.
     **kwargs
         Additional keyword arguments.
     """
@@ -44,6 +51,7 @@ class IntrinsicDeformation(BaseModel):
         metric: Literal[
             "as_isometric_as_possible", "shell_energy"
         ] = "as_isometric_as_possible",
+        endpoints: None | Points = None,
         **kwargs,
     ) -> None:
 
@@ -58,6 +66,12 @@ class IntrinsicDeformation(BaseModel):
                 "bending_weight": kwargs.get("bending_weight", 0.001)
             }
             self.metric = shell_energy_metric
+
+        if endpoints is not None:
+            self.fixed_endpoints = True
+            self.endpoints = endpoints
+        else:
+            self.fixed_endpoints = False
 
     @convert_inputs
     @typecheck
@@ -92,6 +106,13 @@ class IntrinsicDeformation(BaseModel):
             msg = "The shape and the parameter must be on the same device."
             raise DeviceError(msg)
 
+        if self.fixed_endpoints and self.endpoints.device != shape.device:
+            self.endpoints = self.endpoints.detach().to(shape.device)
+
+        if self.fixed_endpoints and shape.points.shape != self.endpoints.shape:
+            msg = "The endpoints must have the same dimension as the shape to morph."
+            raise ValueError(msg)
+
         assert parameter.shape == self.parameter_shape(shape)
 
         ##### First, we compute the sequence of morphed points #####
@@ -99,7 +120,7 @@ class IntrinsicDeformation(BaseModel):
         n_points, d = shape.points.shape
         # Compute the cumulative sum of the velocity sequence
 
-        cumvelocities = torch.concatenate(
+        cumulative_velocities = torch.concatenate(
             (
                 torch.zeros(size=(n_points, 1, d), device=shape.device),
                 torch.cumsum(parameter.to(shape.device), dim=1),
@@ -109,10 +130,23 @@ class IntrinsicDeformation(BaseModel):
         # Compute the sequence of points by adding the cumulative sum of the
         # velocity sequence to the initial shape
         newpoints = (
-            shape.points.repeat(self.n_steps + 1, 1)
-            .reshape(self.n_steps + 1, n_points, d)
+            shape.points.repeat(self.n_free_steps + 1, 1)
+            .reshape(self.n_free_steps + 1, n_points, d)
             .permute(1, 0, 2)
-            + cumvelocities
+            + cumulative_velocities
+        )
+
+        # If we have fixed endpoints, we add the endpoints to the sequence
+        if self.fixed_endpoints:
+            last_velocity = self.endpoints - newpoints[:, -1, :]
+            newpoints = torch.cat(
+                (newpoints, self.endpoints.unsqueeze(1)), dim=1
+            )
+
+        velocities = (
+            parameter
+            if not self.fixed_endpoints
+            else torch.cat((parameter, last_velocity.unsqueeze(1)), dim=1)
         )
 
         # Then, we compute the morphed shape + regularization/path if needed
@@ -126,7 +160,7 @@ class IntrinsicDeformation(BaseModel):
         if return_regularization:
             regularization = self.metric(
                 points_sequence=newpoints[:, :-1, :],
-                velocities_sequence=parameter,
+                velocities_sequence=velocities,
                 edges=shape.edges,
                 triangles=shape.triangles,
                 **self.metric_kwargs,
@@ -164,7 +198,15 @@ class IntrinsicDeformation(BaseModel):
         """
         n_points = shape.points.shape[0]
         dim = shape.dim
-        return (n_points, self.n_steps, dim)
+        return (n_points, self.n_free_steps, dim)
+
+    @typecheck
+    @property
+    def n_free_steps(self) -> int:
+        """Number of integration steps."""
+        if self.fixed_endpoints:
+            return self.n_steps - 1
+        return self.n_steps
 
 
 def as_isometric_as_possible(
@@ -209,6 +251,8 @@ def as_isometric_as_possible(
         msg = "This metric requires edges to be defined"
         raise AttributeError(msg)
 
+    next_points_sequence = points_sequence + velocities_sequence
+
     n_steps = points_sequence.shape[1]
     e0, e1 = edges[:, 0], edges[:, 1]
     a1 = (
@@ -216,9 +260,20 @@ def as_isometric_as_possible(
         * (points_sequence[e0] - points_sequence[e1])
     ).sum(dim=2)
 
+    a2 = (
+        (velocities_sequence[e0] - velocities_sequence[e1])
+        * (next_points_sequence[e0] - next_points_sequence[e1])
+    ).sum(dim=2)
+
     scale = (points_sequence[e0] - points_sequence[e1]).norm(dim=2).mean()
 
-    return torch.sum(a1**2) / (2 * n_steps * (scale**4))
+    L2 = (
+        ((velocities_sequence[e0] - velocities_sequence[e1]) ** 2)
+        .sum(dim=2)
+        .mean()
+    )
+
+    return torch.sum(a1**2 + a2**2 + 0.001 * L2) / (2 * n_steps * (scale**4))
 
 
 def shell_energy_metric(
