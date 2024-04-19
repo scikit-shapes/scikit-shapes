@@ -1,4 +1,4 @@
-:construction_worker: scikit-shapes development is in pre-alpha stage, the [documentation](https://scikit-shapes.github.io/scikit-shapes/) may be incomplete, and the interface could be subject to important changes in a near future.
+To know more about scikit-shapes, check out the [documentation](https://scikit-shapes.github.io/scikit-shapes/) and the [gallery of examples](https://scikit-shapes.github.io/scikit-shapes/auto_examples/index.html)
 
 # Scikit-Shapes
 ![](https://github.com/scikit-shapes/scikit-shapes/actions/workflows/documentation.yml/badge.svg?branch=main) ![](https://github.com/scikit-shapes/scikit-shapes/actions/workflows/tests.yml/badge.svg?branch=main) [![codecov](https://codecov.io/gh/scikit-shapes/scikit-shapes/graph/badge.svg?token=RLM6HOH2QI)](https://codecov.io/gh/scikit-shapes/scikit-shapes)
@@ -53,12 +53,16 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 
 # Installation
 
-At the moment, scikit-shapes is available on linux and macOS only.
+At the moment, scikit-shapes is available on linux and macOS only
 
-For now, the recommended way to install scikit-shapes is directly from the main branch
+## From pip
+
+Scikit-shapes version can be installed direclty from pip with 
 ```bash
-pip install 'skshapes @ git+https://github.com/scikit-shapes/scikit-shapes@main'
+pip install skshapes
 ```
+
+## From source
 
 If you consider contrinuting to the codebase, you can also install scikit-shapes locally from a clone of the repository. On a terminal, navigate to the scikit-shapes directory and run :
 
