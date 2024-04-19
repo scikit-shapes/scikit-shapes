@@ -1,4 +1,4 @@
-beartype==0.17.2
+beartype<=0.17.2
 fast-edges-extraction
 fast-simplification
 geomloss

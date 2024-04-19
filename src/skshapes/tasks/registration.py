@@ -190,7 +190,9 @@ class Registration:
             )
 
             self.current_loss = loss.clone().detach()
-            self.current_path_length = morphing.regularization.clone().detach()
+            self.current_regularization = (
+                morphing.regularization.clone().detach()
+            )
 
             return total_loss
 
@@ -235,7 +237,7 @@ class Registration:
             if self.regularization_weight != 0:
                 print(  # noqa: T201
                     f" + {self.regularization_weight} * "
-                    f"{self.current_path_length:.2e}",
+                    f"{self.current_regularization:.2e}",
                     end="",
                 )
             else:
@@ -248,10 +250,10 @@ class Registration:
             )
 
         fidelity_history = []
-        path_length_history = []
+        regularization_history = []
 
         fidelity_history.append(self.current_loss)
-        path_length_history.append(self.current_path_length)
+        regularization_history.append(self.current_regularization)
 
         if self.debug:
             parameters_list = [[]]
@@ -264,7 +266,7 @@ class Registration:
                 parameters_list.append([])
                 gradients_list.append([])
             fidelity_history.append(self.current_loss)
-            path_length_history.append(self.current_path_length)
+            regularization_history.append(self.current_regularization)
             if self.verbose > 0:
                 loss_value = loss_fn(parameter)
                 print(  # noqa: T201
@@ -274,7 +276,7 @@ class Registration:
                 if self.regularization_weight != 0:
                     print(  # noqa: T201
                         f" + {self.regularization_weight} * "
-                        f"{self.current_path_length:.2e}",
+                        f"{self.current_regularization:.2e}",
                         end="",
                     )
                 else:
@@ -334,12 +336,13 @@ class Registration:
         self.fidelity_history_ = torch.stack(fidelity_history).to(
             self.output_device
         )
-        self.path_length_history_ = torch.stack(path_length_history).to(
+        self.fidelity_ = self.fidelity_history_[-1]
+
+        self.regularization_history_ = torch.stack(regularization_history).to(
             self.output_device
         )
+        self.regularization_ = self.regularization_history_[-1]
 
-        self.fidelity_ = self.fidelity_history_[-1]
-        self.regularization_ = self.path_length_history_[-1]
         return self
 
     @typecheck

@@ -1,17 +1,16 @@
-# This wokflow builds and publishes the package to TestPyPI
-# Trigger on: release published, manually, scheduled
-# Publish only when release
-# See: https://learn.scientific-python.org/development/guides/gha-wheels/
+# This wokflow builds and publishes the package to PyPI (only on release)
+# See: https://learn.scientific-python.org/development/guides/gha-pure/
 name: Wheels
 
 on:
   workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
   release:
     types:
       - published
-  schedule:
-    - cron: '0 0 * * *' # Every day at midnight https://pubs.opengroup.org/onlinepubs/9699919799/utilities/crontab.html#tag_20_25_07
-
 
 jobs:
   dist:
@@ -25,13 +24,12 @@ jobs:
 
   publish:
     needs: [dist]
-    environment:
-      name: TestPyPI
-      url: https://test.pypi.org/p/skshapes
+    environment: pypi
     permissions:
       id-token: write
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
+
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -39,5 +37,3 @@ jobs:
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
