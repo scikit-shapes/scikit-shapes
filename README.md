@@ -57,7 +57,7 @@ At the moment, scikit-shapes is available on linux and macOS only
 
 ## From pip
 
-Scikit-shapes version can be installed direclty from pip with 
+Scikit-shapes version can be installed direclty from pip with
 ```bash
 pip install skshapes
 ```
