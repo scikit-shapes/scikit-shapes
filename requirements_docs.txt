@@ -9,7 +9,7 @@ myst_parser >=0.13
 
 
 # Sphinx + theme/plugins
-sphinx >=4.0
+sphinx >=4.0, <= 7.2.6
 sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-design
