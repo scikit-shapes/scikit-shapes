@@ -145,11 +145,12 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
     'filename_pattern': '/plot_', # execute only files that start with `plot_`
     "ignore_pattern": "/utils_",
-    "doc_module": "pyvista",
     "image_scrapers": (DynamicScraper(), "matplotlib"),
     "first_notebook_cell": "%matplotlib inline",
-    "reset_modules": (reset_pyvista,),
-    "reset_modules_order": "both",
+    # Reset module did not work with sphinx-gallery 0.16.0
+    # we assume that documentation settings are not modified in examples
+    # "reset_modules": (reset_pyvista,),
+    # "reset_modules_order": "both",
 }
 
 always_document_param_types = False
