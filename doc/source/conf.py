@@ -118,6 +118,8 @@ nitpick_ignore = [
     ("py:class", "_io.BytesIO"),
 ]
 
+suppress_warnings = ["config.cache"]
+
 class ResetPyVista:
     """Reset pyvista module to default settings."""
 
@@ -126,6 +128,7 @@ class ResetPyVista:
 
         If default documentation settings are modified in any example, reset here.
         """
+        import pyvista
 
         pyvista._wrappers['vtkPolyData'] = pyvista.PolyData
         pyvista.set_plot_theme('document')
