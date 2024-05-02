@@ -7,13 +7,12 @@ jupyterlab
 myst_parser >=0.13
 
 
-
 # Sphinx + theme/plugins
 sphinx >=4.0, <= 7.2.6
 sphinx-autodoc-typehints
 sphinx-copybutton
 sphinx-design
-sphinx-gallery
+sphinx-gallery <= 0.15.0
 sphinx-math-dollar
 
 # To generate interactive scenes

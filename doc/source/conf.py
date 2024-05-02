@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.metadata
+import locale
 import os
 import warnings
 from pathlib import Path
@@ -14,6 +15,9 @@ from pyvista.core.utilities.docs import (  # noqa: F401
     pv_html_page_context,
 )
 from pyvista.plotting.utilities.sphinx_gallery import DynamicScraper
+
+# Otherwise VTK reader issues on some systems, causing sphinx to crash. See also #226.
+locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -122,7 +126,6 @@ class ResetPyVista:
 
         If default documentation settings are modified in any example, reset here.
         """
-        import pyvista
 
         pyvista._wrappers['vtkPolyData'] = pyvista.PolyData
         pyvista.set_plot_theme('document')
