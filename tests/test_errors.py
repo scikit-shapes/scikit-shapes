@@ -258,7 +258,7 @@ def test_error_loss():
     with pytest.raises(NotImplementedError):
         sks.loss.baseloss.BaseLoss()
 
-    with pytest.raises(ValueError, match="p must be positive"):
+    with pytest.raises(ValueError, match="p must be nonnegative"):
         sks.LpLoss(p=-1)
 
 

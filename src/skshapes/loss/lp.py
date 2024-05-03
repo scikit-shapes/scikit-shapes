@@ -11,8 +11,8 @@ class LpLoss(BaseLoss):
     """Lp loss for PolyData.
 
     This class defines the L2 loss for PolyData. If X = (x_i) and Y = (y_i) are
-    the points of two PolyData objects, the L2 loss is defined as:
-    Lp(X, Y) = sum_i ||x_i - y_i||_p
+    the points of two PolyData objects, the Lp loss is defined as:
+    Lp(X, Y) = sum_i ||x_i - y_i|| ^ p where ||.|| is the Euclidean norm.
 
     X and Y must have the same number of points. What is more, the points must
     be in correspondence, i.e. x_i and y_i must correspond to the same point.
@@ -27,8 +27,8 @@ class LpLoss(BaseLoss):
 
     @typecheck
     def __init__(self, p: Number = 2) -> None:
-        if p <= 0:
-            msg = "p must be positive"
+        if p < 0:
+            msg = "p must be nonnegative"
             raise ValueError(msg)
 
         self.p = p
@@ -52,7 +52,14 @@ class LpLoss(BaseLoss):
             the loss
         """
         super().__call__(source=source, target=target)
-        return torch.norm(source.points - target.points, p=self.p)
+        sqdists = ((source.points - target.points) ** 2).sum(dim=-1)
+        if self.p == 2:
+            distsp = sqdists
+        elif self.p == 1:
+            distsp = sqdists.sqrt()
+        else:
+            distsp = sqdists ** (self.p / 2)
+        return distsp.sum()
 
 
 class L2Loss(BaseLoss):
