@@ -18,8 +18,6 @@ from pyvista.core.utilities.docs import (  # noqa: F401
     linkcode_resolve,
     pv_html_page_context,
 )
-from pyvista.plotting.utilities.sphinx_gallery import DynamicScraper
-from reset_pyvista import ResetPyVista
 
 # Otherwise VTK reader issues on some systems, causing sphinx to crash. See also #226.
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
@@ -125,23 +123,20 @@ nitpick_ignore = [
 ]
 
 
-reset_pyvista = ResetPyVista()
-dynamic_scraper = DynamicScraper()
-
 
 sphinx_gallery_conf = {
     'examples_dirs': '../../examples',   # path to your example scripts
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
     'filename_pattern': '/plot_', # execute only files that start with `plot_`
     "ignore_pattern": "/utils_",
-    "image_scrapers": (dynamic_scraper, "matplotlib"),
+    "image_scrapers": ("conf_module.dynamic_scraper", "matplotlib"), # dynamic_scraper is defined in conf_module.py
     "first_notebook_cell": "%matplotlib inline",
     "backreferences_dir": None,
     # Reset module did not work with sphinx-gallery 0.16.0
     # we assume that documentation settings are not modified in examples
-    "reset_modules": (reset_pyvista,),
+    "reset_modules": ('conf_module.reset_pyvista',), # reset_pyvista is defined in conf_module.py
     "reset_modules_order": "both",
 }
 
-suppress_warnings = ["config.cache"]
+
 always_document_param_types = False
