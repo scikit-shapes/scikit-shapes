@@ -3,8 +3,12 @@ from __future__ import annotations
 import importlib.metadata
 import locale
 import os
+import sys
 import warnings
 from pathlib import Path
+
+# Allow to import local modules
+sys.path.insert(0, str(Path().resolve()))
 
 # pyvista configuration
 # See: https://github.com/pyvista/pyvista/blob/main/doc/source/conf.py
@@ -15,9 +19,11 @@ from pyvista.core.utilities.docs import (  # noqa: F401
     pv_html_page_context,
 )
 from pyvista.plotting.utilities.sphinx_gallery import DynamicScraper
+from reset_pyvista import ResetPyVista
 
 # Otherwise VTK reader issues on some systems, causing sphinx to crash. See also #226.
 locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -118,26 +124,9 @@ nitpick_ignore = [
     ("py:class", "_io.BytesIO"),
 ]
 
-suppress_warnings = ["config.cache"]
-
-class ResetPyVista:
-    """Reset pyvista module to default settings."""
-
-    def __call__(self, gallery_conf, fname): # noqa: ARG002
-        """Reset pyvista module to default settings
-
-        If default documentation settings are modified in any example, reset here.
-        """
-        import pyvista
-
-        pyvista._wrappers['vtkPolyData'] = pyvista.PolyData
-        pyvista.set_plot_theme('document')
-
-    def __repr__(self):
-        return 'ResetPyVista'
-
 
 reset_pyvista = ResetPyVista()
+dynamic_scraper = DynamicScraper()
 
 
 sphinx_gallery_conf = {
@@ -145,12 +134,14 @@ sphinx_gallery_conf = {
     'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
     'filename_pattern': '/plot_', # execute only files that start with `plot_`
     "ignore_pattern": "/utils_",
-    "image_scrapers": (DynamicScraper(), "matplotlib"),
+    "image_scrapers": (dynamic_scraper, "matplotlib"),
     "first_notebook_cell": "%matplotlib inline",
+    "backreferences_dir": None,
     # Reset module did not work with sphinx-gallery 0.16.0
     # we assume that documentation settings are not modified in examples
-    # "reset_modules": (reset_pyvista,),
-    # "reset_modules_order": "both",
+    "reset_modules": (reset_pyvista,),
+    "reset_modules_order": "both",
 }
 
+suppress_warnings = ["config.cache"]
 always_document_param_types = False
