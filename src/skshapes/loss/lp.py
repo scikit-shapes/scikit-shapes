@@ -12,7 +12,10 @@ class LpLoss(BaseLoss):
 
     This class defines the L2 loss for PolyData. If X = (x_i) and Y = (y_i) are
     the points of two PolyData objects, the Lp loss is defined as:
-    Lp(X, Y) = sum_i ||x_i - y_i|| ^ p where ||.|| is the Euclidean norm.
+
+    $$Lp(X, Y) = \\sum_i \\Vert x_i - y_i \\Vert^{(p/2)}$$
+
+    where $||.||$ is the Euclidean norm.
 
     X and Y must have the same number of points. What is more, the points must
     be in correspondence, i.e. x_i and y_i must correspond to the same point.
@@ -81,7 +84,7 @@ class LandmarkLoss(BaseLoss):
     If $X = (x_i)$ and $Y = (y_i)$ are the landmarks of two PolyData objects, the
     Lp loss is defined as:
 
-    $$Lp(X, Y) = \sum_i \Vert x_i - y_i \Vert_p$$
+    $$Lp(X, Y) = \\sum_i \\Vert x_i - y_i \\Vert^{(p/2)}$$
 
     X and Y must have the same number of landmarks. What is more, the landmarks
     must be in correspondence, i.e. $x_i$ and $y_i$ must correspond to the same
