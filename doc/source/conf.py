@@ -9,6 +9,9 @@ from pathlib import Path
 
 # Allow to import local modules
 sys.path.insert(0, str(Path().resolve()))
+# conf_module is where we define dynamic_scraper and reset_pyvista
+# for sphinx-gallery configuration
+import conf_module  # noqa: F401
 
 # pyvista configuration
 # See: https://github.com/pyvista/pyvista/blob/main/doc/source/conf.py
