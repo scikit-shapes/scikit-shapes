@@ -251,29 +251,52 @@ def as_isometric_as_possible(
         msg = "This metric requires edges to be defined"
         raise AttributeError(msg)
 
+    n_points, n_steps, dim = points_sequence.shape
+    assert velocities_sequence.shape == (n_points, n_steps, dim)
+
     next_points_sequence = points_sequence + velocities_sequence
 
-    n_steps = points_sequence.shape[1]
+    # e0 and e1 are (n_edges,)
+    n_edges = edges.shape[0]
+    assert edges.shape == (n_edges, 2)
     e0, e1 = edges[:, 0], edges[:, 1]
+
+    # Implement Eqs. (4-6) in Kilian et al. 2007:
+    # - velocities_sequence[i] is X_i
+    # - points_sequence[i] is P_k[i]
+    # - next_points_sequence[i] is P_(k+1)[i]
+
+    # Compute the left-most term in Eq. (6), << X_i, X_i >>_{P_i}
     a1 = (
-        (velocities_sequence[e0] - velocities_sequence[e1])
-        * (points_sequence[e0] - points_sequence[e1])
-    ).sum(dim=2)
+        (velocities_sequence[e0] - velocities_sequence[e1])  # X_p - X_q
+        * (points_sequence[e0] - points_sequence[e1])  # p - q
+    ).sum(
+        dim=2
+    ) ** 2  # Compute the dot product, and don't forget to square it
+    assert a1.shape == (n_edges, n_steps)
 
+    # Compute the right-most term in Eq. (6), << X_i, X_i >>_{P_(i+1)}
     a2 = (
-        (velocities_sequence[e0] - velocities_sequence[e1])
-        * (next_points_sequence[e0] - next_points_sequence[e1])
-    ).sum(dim=2)
+        (velocities_sequence[e0] - velocities_sequence[e1])  # X_p - X_q
+        * (
+            next_points_sequence[e0] - next_points_sequence[e1]
+        )  # p - q at the next step
+    ).sum(
+        dim=2
+    ) ** 2  # Compute the dot product, and don't forget to square it
+    assert a2.shape == (n_edges, n_steps)
 
-    scale = (points_sequence[e0] - points_sequence[e1]).norm(dim=2).mean()
+    scale = 1  # (points_sequence[e0] - points_sequence[e1]).norm(dim=2).mean()
 
-    L2 = (
-        ((velocities_sequence[e0] - velocities_sequence[e1]) ** 2)
-        .sum(dim=2)
-        .mean()
+    # Compute Eq. (5)
+    L2 = (velocities_sequence**2).sum(dim=2)
+    assert L2.shape == (n_points, n_steps)
+    # Currently, for L2, we use simple weights that sum up to 1 instead of the proper A_p
+    # TODO: fix it
+
+    return ((a1 + a2).sum() + 0.001 * L2.sum() / n_points) / (
+        2 * n_steps * (scale**4)
     )
-
-    return torch.sum(a1**2 + a2**2 + 0.001 * L2) / (2 * n_steps * (scale**4))
 
 
 def shell_energy_metric(
