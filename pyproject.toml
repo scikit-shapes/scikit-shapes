@@ -42,7 +42,10 @@ addopts = [
     "--cov-report=html"
     ]
 xfail_strict = true
-filterwarnings = ["error"]
+filterwarnings = [
+  "error",
+  'ignore:.*getdefaultlocale.*:DeprecationWarning',
+]
 log_cli_level = "info"
 testpaths = [
   "tests",

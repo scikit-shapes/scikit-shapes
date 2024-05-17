@@ -60,9 +60,8 @@ mesh_pv2.plot(scalars="signal", cpos="xy")
 # Back to scikit-shapes, the signal is preserved
 mesh_sks_back = sks.PolyData(mesh_pv2)
 assert torch.allclose(
-    mesh_sks_back.point_data["signal"],
-    mesh_sks.point_data["signal"]
-    )
+    mesh_sks_back.point_data["signal"], mesh_sks.point_data["signal"]
+)
 
 
 # Set some landmarks

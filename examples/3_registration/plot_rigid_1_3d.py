@@ -18,8 +18,8 @@ sys.path.append(pykeops.get_build_folder())
 
 import skshapes as sks
 
-color_1 = 'tan'
-color_2 = 'brown'
+color_1 = "tan"
+color_2 = "brown"
 
 ###############################################################################
 # Load data
@@ -34,8 +34,13 @@ shape2 = sks.PolyData(examples.download_doorman())
 shape1.point_data.clear()
 shape2.point_data.clear()
 
+
 def bounds(shape):
-    return torch.max(shape.points, dim=0).values - torch.min(shape.points, dim=0).values
+    return (
+        torch.max(shape.points, dim=0).values
+        - torch.min(shape.points, dim=0).values
+    )
+
 
 lims1 = bounds(shape1)
 lims2 = bounds(shape2)
@@ -76,7 +81,7 @@ registration = sks.Registration(
     loss=loss,
     n_iter=2,
     verbose=True,
-) # default optimizer is torch.optim.LBFGS
+)  # default optimizer is torch.optim.LBFGS
 
 registration.fit(source=shape2, target=shape1)
 morph = registration.transform(source=shape2)
@@ -99,13 +104,14 @@ plotter.show()
 # .. image:: ../../images/demolandmarks.gif
 
 if not pv.BUILDING_GALLERY:
-    # If not in the gallery, we can use vedo to open the landmark setter
-    # Setting the default backend to vtk is necessary when running in a notebook
+    # If not in the gallery, we can use vedo to open the landmark setter
+    # Setting the default backend to vtk is necessary when running in a notebook
     import vedo
-    vedo.settings.default_backend= 'vtk'
+
+    vedo.settings.default_backend = "vtk"
     sks.LandmarkSetter([shape1, shape2]).start()
 else:
-    # Set the landmarks manually
+    # Set the landmarks manually
     landmarks1 = [4808, 147742, 1774]
     landmarks2 = [325, 2116, 1927]
 

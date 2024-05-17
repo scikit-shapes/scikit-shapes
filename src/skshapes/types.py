@@ -1,13 +1,14 @@
 """Types aliases and utility functions for scikit-shapes."""
 
 import os
-from typing import Literal, NamedTuple
+from typing import Any, Literal, NamedTuple
 from warnings import warn
 
 import numpy as np
 import torch
 from beartype import beartype
 from beartype.typing import Annotated
+from beartype.typing import Callable as CallableBeartype
 from beartype.vale import Is
 from jaxtyping import Float, Float32, Float64, Int, Int32, Int64
 
@@ -55,6 +56,7 @@ FloatTensor = JaxFloat[
     torch.Tensor, "..."
 ]  # Only Float32 tensors are FloatTensors
 IntTensor = JaxInt[torch.Tensor, "..."]  # Only Int64 tensors are IntTensors
+Int32Tensor = Int32[torch.Tensor, "..."]
 NumericalTensor = FloatTensor | IntTensor
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]
 IntTensorArray = JaxInt[torch.Tensor, "_"]
@@ -116,6 +118,10 @@ class image_type:
 
 
 shape_type = polydata_type | image_type
+
+
+Particle = Any
+Callable = CallableBeartype
 
 
 @beartype

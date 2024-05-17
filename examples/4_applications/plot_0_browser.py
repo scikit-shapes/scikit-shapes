@@ -29,11 +29,11 @@ registration = sks.Registration(
 registration.fit(source=source, target=target)
 
 ###############################################################################
-# Browser
+# Browser
 #
 # if you are running this script locally, the vedo window containing the
-# browser will be displayed. The, you can navigate through the sequence of
-# shapes using the slider and adjust the camera position.
+# browser will be displayed. The, you can navigate through the sequence of
+# shapes using the slider and adjust the camera position.
 #
 # .. image:: ../../images/demo_browser.gif
 

@@ -14,21 +14,23 @@ from pyvista.plotting.utilities.sphinx_gallery import DynamicScraper
 
 dynamic_scraper = DynamicScraper()
 
+
 # Define reset_pyvista (reset pyvista module to default settings between examples)
 class ResetPyVista:
     """Reset pyvista module to default settings."""
 
-    def __call__(self, gallery_conf, fname): # noqa: ARG002
+    def __call__(self, gallery_conf, fname):  # noqa: ARG002
         """Reset pyvista module to default settings
 
         If default documentation settings are modified in any example, reset here.
         """
         import pyvista
 
-        pyvista._wrappers['vtkPolyData'] = pyvista.PolyData
-        pyvista.set_plot_theme('document')
+        pyvista._wrappers["vtkPolyData"] = pyvista.PolyData
+        pyvista.set_plot_theme("document")
 
     def __repr__(self):
-        return 'ResetPyVista'
+        return "ResetPyVista"
+
 
 reset_pyvista = ResetPyVista()
