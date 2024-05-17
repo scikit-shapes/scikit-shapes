@@ -33,13 +33,11 @@ def Circle(n_points: int = 20) -> polydata_type:
     Returns:
         polydata_type: the circle
     """
-    linspace = torch.linspace(0, 1, n_points)
+    linspace = torch.linspace(0, 1, n_points + 1)
 
-    circle_xs = 0.5 + 0.5 * torch.cos(2 * pi * linspace)
-    circle_ys = 0.5 + 0.5 * torch.sin(2 * pi * linspace)
+    circle_xs = 0.5 + 0.5 * torch.cos(2 * pi * linspace[:n_points])
+    circle_ys = 0.5 + 0.5 * torch.sin(2 * pi * linspace[:n_points])
     circle_points = torch.stack([circle_xs, circle_ys], dim=1)
 
-    edges = torch.tensor(
-        [[i, (i + 1) % n_points] for i in range(n_points - 1)]
-    )
+    edges = torch.tensor([[i, (i + 1) % n_points] for i in range(n_points)])
     return PolyData(points=circle_points, edges=edges)
