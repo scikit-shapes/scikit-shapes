@@ -134,6 +134,7 @@ sphinx_gallery_conf = {
         dynamic_scraper,
         "matplotlib",
     ),  # dynamic_scraper is defined in conf_module.py
+    "matplotlib_animations": True,
     "first_notebook_cell": "%matplotlib inline",
     "backreferences_dir": None,
     # Reset module did not work with sphinx-gallery 0.16.0

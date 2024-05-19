@@ -96,6 +96,9 @@ ignore = [
   "ISC001",   # Conflicts with formatter
   "PYI041",   # Use `float` instead of `int | float
   "RET505",   # Unnecessary `elif`/`else` after `return` statement
+  "F821",     # Ruff doesn't like Literal["mystring"]
+  "F722",     # Ruff doesn't like Literal["mystring"]
+  "T201",     # Ruff doesn't like prints
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -116,3 +119,6 @@ build = ["cp310-manylinux*", "cp311-manylinux*"]
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64"]
+
+[tool.codespell]
+ignore-words-list = "ot"
