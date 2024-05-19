@@ -1,16 +1,11 @@
 """Tests for the ParticleSystem class."""
 
-import taichi as ti
+
 import pytest
+import taichi as ti
 import torch
-from hypothesis import given, settings
+from hypothesis import given
 from hypothesis import strategies as st
-
-import numpy as np
-from matplotlib import pyplot as plt
-import matplotlib.animation as animation
-
-from typing import Optional
 
 import skshapes as sks
 
@@ -30,7 +25,7 @@ def test_dual_loss_grad_hessian(
     n_x: int,
     n_y: int,
     n_z: int,
-    barrier: Optional[float],
+    barrier: float | None,
 ):
     ti.init(arch=ti.cpu)
 
