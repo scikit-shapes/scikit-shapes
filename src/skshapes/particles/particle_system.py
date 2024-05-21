@@ -1,3 +1,5 @@
+import collections
+
 import matplotlib as mpl
 import numpy as np
 import taichi as ti
@@ -15,6 +17,8 @@ from ..types import (
 )
 
 ti_float = ti.f32
+AMBIENT_SPACE_LABEL = -1
+MASK_LABEL = -2
 
 
 @ti.data_oriented
@@ -23,13 +27,11 @@ class ParticleSystem:
 
     Parameters
     ----------
-    n_particles : int
-        The number of particles in the system.
-    particle_type : taichi type
-        The type of the particles in the system.
+    particles : list[Particle]
+        A list of particles that will be used to define the cells.
     domain : torch tensor
         A binary mask that defines the domain of the particles.
-    blocksize : int, optional
+    block_size : int, optional
         The size of the blocks in the pixel grids.
     integral_dimension : int, optional
         Dimension of the volume elements that we use to compute cell volumes.
@@ -49,19 +51,15 @@ class ParticleSystem:
     def __init__(
         self,
         *,
-        n_particles: int,
-        particle_type: Particle,
+        particles: list[Particle],
         domain: IntTensor,
-        blocksize: int | None = None,
-        integral_dimension: Literal[0, 1] = 0,
+        block_size: int | None = None,
+        integral_dimension: Literal[0, 1] = 1,
     ) -> None:
 
-        # We let users directly edit cell attributes by overloading
-        # self.__getattr__, self.__setattr__, and checking if the attributes
-        # correspond to a property of self.particle_type.
-        # As a consequence, and before doing anything, we must initialize
-        # self.particle_type with the low-level "self.__dict__" API.
-        self.__dict__["particle_type"] = particle_type
+        self.__dict__["device"] = domain.device
+
+        self._load_particles(particles)
 
         self.integral_dimension = integral_dimension
 
@@ -75,7 +73,6 @@ class ParticleSystem:
         self.pixel_volume = 1
 
         self.shape = self.domain.shape
-        self.device = self.domain.device
 
         # Make sure that our code is compatible with 1D, 2D and 3D domains by
         # defining the appropriate index types and segment connectivities.
@@ -115,15 +112,6 @@ class ParticleSystem:
         else:
             self.bitwise_modulo = None
 
-        # Create the collection of particles, with an additional particle
-        # for the ambient space.
-        self.cells = particle_type.field(shape=(1 + n_particles,))
-
-        # By default, all particles have zero dual potential:
-        self.cell_potential = ti.field(ti_float, shape=(1 + n_particles,))
-        # self.cell_potential.from_torch(torch.zeros(1 + n_particles, device=self.device))
-        self.seed_potential = torch.zeros(n_particles, device=self.device)
-
         # Create the grid of pixels, and the intermediate buffer
         # that will be used in the Jump Flooding Algorithm.
         # We use these grids to store the index of the cell that is associated
@@ -131,33 +119,89 @@ class ParticleSystem:
         self.pixels = ti.field(ti.i32)
         self.pixels_buffer = ti.field(ti.i32)
 
-        if blocksize is None:
+        if block_size is None:
             # By default, the pixel grids are just vanilla C-contiguous arrays.
             ti.root.dense(ind, self.shape).place(self.pixels)
             ti.root.dense(ind, self.shape).place(self.pixels_buffer)
         else:
             # But Taichi also lets us encode them as collections of square patches.
             # This can be useful for performance, especially on GPUs.
-            coarse = tuple(s // blocksize for s in self.shape)
-            block = tuple(blocksize for _ in self.shape)
+            coarse = tuple(s // block_size for s in self.shape)
+            block = tuple(block_size for _ in self.shape)
             # The lines below mean that the pixel grids are now stored as
-            # a collection of square patches of size (blocksize, blocksize).
+            # a collection of square patches of size (block_size, block_size).
             ti.root.dense(ind, coarse).dense(ind, block).place(self.pixels)
             ti.root.dense(ind, coarse).dense(ind, block).place(
                 self.pixels_buffer
             )
 
-    @property
-    @typecheck
-    def n_cells(self) -> int:
-        """Returns the number of cells in the system, including the ambient space.
+    def _load_particles(self, particles: list[Particle]):
+        """Loads the particles from a list of dictionaries."""
 
-        Returns
-        -------
-        int
-            The number of cells in the system.
-        """
-        return self.cells.shape[0]
+        if len(particles) == 0:
+            msg = "The list of particles must not be empty."
+            raise ValueError(msg)
+
+        n_particles = len(particles)
+
+        particle_type = particles[0]._taichi_class
+        # We let users directly edit cell attributes by overloading
+        # self.__getattr__, self.__setattr__, and checking if the attributes
+        # correspond to a property of self.particle_type.
+        # As a consequence, and before doing anything, we must initialize
+        # self.particle_type with the low-level "self.__dict__" API.
+        self.__dict__["particle_type"] = particle_type
+
+        if any(p._taichi_class != self.particle_type for p in particles):
+            msg = "Currently, all particles must have the same type."
+            raise NotImplementedError(msg)
+
+        # Create the collection of cells, one for each particle:
+        self.cells = self.particle_type.field(shape=(n_particles,))
+
+        # Turn the list of dictionaries into a dictionary of lists
+        # (one list per attribute of the particle type)
+        attributes = collections.defaultdict(list)
+        # {k: [] for k in self.particle_type.__dict__["members"]}
+        for p in particles:
+            for k, v in p.__dict__.items():
+                if k != "_taichi_class":
+                    attributes[k].append(v)
+
+        # Load the attributes into the Taichi field
+        for k, v in attributes.items():
+            if type(v[0]) in (int, float):
+                v_tensor = torch.tensor(v, device=self.device)
+            else:
+                v_tensor = torch.stack(v).to(device=self.device)
+
+            try:
+                getattr(self.cells, k).from_torch(v_tensor)
+            except AttributeError:
+                # k should be an attribute of self instead of self.cells
+                self.__dict__[k] = v_tensor
+
+        # By default, all particles have zero dual potential:
+        self.taichi_seed_potential = ti.field(ti_float, shape=(n_particles,))
+        # self.cell_potential.from_torch(torch.zeros(1 + n_particles, device=self.device))
+
+        if False:
+            self.seed_potential = torch.zeros(n_particles, device=self.device)
+        else:
+            self.seed_potential = self.volume.clone()
+            assert self.seed_potential.shape == (n_particles,)
+            assert self.seed_potential.device == self.device
+            assert self.seed_potential.dtype == torch.float32
+
+        # Init the relevant attributes for the taichi loops.
+        # Our convention is that:
+        # - the mask has index -2,
+        # - the ambient space has index -1,
+        # - the seeds have indices 0, 1, 2, ..., n_particles-1
+
+        self.cell_indices = ti.ndrange(n_particles)
+
+        return particle_type
 
     @property
     @typecheck
@@ -169,7 +213,7 @@ class ParticleSystem:
         int
             The number of particles in the system.
         """
-        return self.n_cells - 1
+        return self.cells.shape[0]
 
     @property
     @typecheck
@@ -184,13 +228,12 @@ class ParticleSystem:
         return float(self.domain.sum().item() * self.pixel_volume)
 
     def __getattr__(self, attr):
-        """Give direct access to the attributes of self.cells, minus the ambient space."""
+        """Give direct access to the attributes of self.cells."""
         if attr in self.__dict__["particle_type"].__dict__["members"]:
             # Case 1: the attribute is a property of the particle type
             out = getattr(self.cells, attr)  # out is a Taichi field
             # This is the Taichi way to convert to a torch tensor
-            out = out.to_torch()
-            return out[1:]
+            return out.to_torch()
         else:
             # Case 2: the attribute belongs to the ParticleSystem itself
             try:
@@ -199,11 +242,9 @@ class ParticleSystem:
                 raise AttributeError from e
 
     def __setattr__(self, attr, value):
-        """Give direct access to the attributes of self.cells, minus the ambient space."""
+        """Give direct access to the attributes of self.cells."""
         if attr in self.particle_type.__dict__["members"]:
-            # N.B.: All the attributes of the ambient space are set to zero.
-            val = torch.cat([torch.zeros_like(value[:1]), value])
-            getattr(self.cells, attr).from_torch(val)
+            getattr(self.cells, attr).from_torch(value)
         else:
             self.__dict__[attr] = value
 
@@ -231,7 +272,7 @@ class ParticleSystem:
             return ti.cast(tm.mod(pos, self.shape), ti.i32)
 
     @ti.func
-    def cost_raw(self, i, pixel):
+    def _cost_raw(self, i, pixel):
         """Computes the cost of cell i at pixel.
 
         Parameters
@@ -246,14 +287,18 @@ class ParticleSystem:
         float
             The cost of the cell at the pixel.
         """
+        # By convention, cell i=0 is associated to a constant, zero cost
+        # We want to return 0, but do not want to use if-else statements
+        # as they would slow down GPU code. Instead, for cell i=0, we compute
+        # another cost function and "select away" its value.
+        index = ti.select(i == AMBIENT_SPACE_LABEL, 0, i)
         # N.B.: the cell cost function takes as input a float32 vector
         #       with pixel coordinates
-        c_i = self.cells[i].cost(ti.cast(pixel, dtype=ti_float))
-        # By convention, cell i=0 is associated to a constant, zero cost
-        return ti.select(i == 0, 0.0, c_i)
+        c_i = self.cells[index].cost(ti.cast(pixel, dtype=ti_float))
+        return ti.select(i == AMBIENT_SPACE_LABEL, 0.0, c_i)
 
     @ti.func
-    def cost_offset(self, i, pixel):
+    def _cost_offset(self, i, pixel):
         """Computes the cost of cell i at pixel, offset by the dual potential.
 
         Parameters
@@ -269,21 +314,30 @@ class ParticleSystem:
             The cost of the cell at the pixel, offset by the dual potential.
         """
         # Offset the cost by the dual potential of the cell
-        return self.cost_raw(i, pixel) - self.cell_potential[i]
+        index = ti.select(i == AMBIENT_SPACE_LABEL, 0, i)
+        offset = ti.select(
+            i == AMBIENT_SPACE_LABEL, 0.0, self.taichi_seed_potential[index]
+        )
+        return self._cost_raw(i, pixel) - offset
+
+    @ti.func
+    def _cell_init_position(self, i):
+        """Returns the initial position of cell i."""
+        return self.cells[i].position
 
     @ti.kernel
-    def compute_labels_bruteforce(self):
+    def _compute_labels_bruteforce(self):
         """For each pixel, computes the index of the cell with the lowest cost.
         This is a brute-force method that is suitable for a small number of cells.
         For very large systems, the Jump Flooding Algorithm is more efficient.
         """
 
         for X in ti.grouped(self.pixels):
-            best_cost = ti_float(1e10)
-            best_index = 0  # Ambient space by default
+            best_cost = ti_float(0.0)
+            best_index = AMBIENT_SPACE_LABEL
 
-            for i in ti.ndrange(self.cells.shape[0]):
-                cost = self.cost_offset(i, X)
+            for i in ti.ndrange(self.n_particles):
+                cost = self._cost_offset(i, X)
 
                 if cost < best_cost:
                     best_cost = cost
@@ -292,27 +346,28 @@ class ParticleSystem:
             self.pixels[X] = best_index
 
     @ti.kernel
-    def init_sites(self):
+    def _init_sites(self):
         """Puts one pixel per seed in the pixel grid to init the Jump Flood Algorithm."""
         # Clear the pixels grid:
         for ind in ti.grouped(self.pixels):
-            self.pixels[ind] = 0  # Ambient space by default
+            self.pixels[ind] = AMBIENT_SPACE_LABEL  # Ambient space by default
 
         # Place one pixel per seed.
         # Note that we must be careful here to have at least one pixel per cell:
         # otherwise, the JFA algorithm will not work as expected.
         # For this reason, we should not run the seeding in parallel:
         # ti.loop_config(serialize=True)
-        for i in self.cells:
-            if i > 0:  # Skip the ambient space
+        for i in ti.ndrange(self.n_particles):
+            if i != AMBIENT_SPACE_LABEL:  # Skip the ambient space
                 # Cast the position to integers, using floor instead of round
-                pos = tm.floor(self.cells[i].position, dtype=ti.i32)
+                pos = tm.floor(self._cell_init_position(i), dtype=ti.i32)
                 # Wrap the indices to have periodic boundary conditions
                 # This is also useful if the user provided cells that lay outside
                 # the domain
                 pos = self.wrap_indices(pos)
 
-                if self.pixels[pos] == 0:  # If the pixel is not already taken
+                if self.pixels[pos] == AMBIENT_SPACE_LABEL:
+                    # If the pixel is not already taken
                     self.pixels[pos] = i  # Assign the seed index to the pixel
                 else:  # Collision!
                     # As a quick fix, we look for the nearest free pixel in
@@ -324,7 +379,7 @@ class ParticleSystem:
                         ):
                             pos2 = pos + ti.cast(dpos, dtype=ti.i32)
                             pos2 = self.wrap_indices(pos2)
-                            if self.pixels[pos2] == 0:
+                            if self.pixels[pos2] == AMBIENT_SPACE_LABEL:
                                 self.pixels[pos2] = i
                                 break
                         if self.pixels[pos2] == i:
@@ -338,7 +393,7 @@ class ParticleSystem:
     def _clear_buffer(self):
         """Sets all pixels in the buffer to the ambient space."""
         for ind in ti.grouped(self.pixels_buffer):
-            self.pixels_buffer[ind] = 0  # Set all pixels to ambient space
+            self.pixels_buffer[ind] = AMBIENT_SPACE_LABEL
 
     @ti.func
     def _copy_buffer(self):
@@ -347,7 +402,7 @@ class ParticleSystem:
             self.pixels[ind] = self.pixels_buffer[ind]
 
     @ti.kernel
-    def jfa_step(self, step: ti.i32):
+    def _jfa_step(self, step: ti.i32):
         """Implements one step of the Jump Flooding Algorithm.
 
         Parameters
@@ -361,8 +416,8 @@ class ParticleSystem:
         for X in ti.grouped(self.pixels):
             # Loop over 9 neighbors at distance step
             # and find the closest seed to the current pixel [i,j]
-            best_cost = ti_float(1e10)
-            best_index = 0  # Ambient space by default
+            best_cost = ti_float(0.0)
+            best_index = AMBIENT_SPACE_LABEL  # Ambient space by default
 
             ti.loop_config(serialize=True)  # Unroll the loop of size 3^dim
 
@@ -376,7 +431,7 @@ class ParticleSystem:
                 # Check if the cost function that is associated to X2 is a better
                 # fit for the current pixel than the previous best candidate:
                 i2 = self.pixels[X2]
-                cost = self.cost_offset(i2, X)
+                cost = self._cost_offset(i2, X)
 
                 if cost < best_cost:
                     best_cost = cost
@@ -400,14 +455,15 @@ class ParticleSystem:
 
         Parameters
         ----------
-        centers : (n_cells, dim) ti ndarray
+        centers : (n_particles, dim) ti ndarray
             The sum of pixel coordinates in each cell.
-        volumes : (n_cells,) ti ndarray
+        volumes : (n_particles,) ti ndarray
             The volumes of the cells.
         """
         for X in ti.grouped(self.pixels):
             i = self.pixels[X]
-            if i >= 0:  # Ignore the mask, i == -1
+            # Ignore the mask and the ambient space, just keep the "seed" indices
+            if i != MASK_LABEL and i != AMBIENT_SPACE_LABEL:
                 for d in ti.static(range(self.dim)):
                     centers[i, d] += X[d]
                 volumes[i] += 1
@@ -419,10 +475,10 @@ class ParticleSystem:
         # it would run into problems when cells have more than 16,777,217 pixels.
         # (this is the first integer that cannot be represented exactly as a float32)
         centers = torch.zeros(
-            (self.n_cells, self.dim), device=self.device, dtype=torch.int64
+            (self.n_particles, self.dim), device=self.device, dtype=torch.int64
         )
         volumes = torch.zeros(
-            self.n_cells, device=self.device, dtype=torch.int64
+            self.n_particles, device=self.device, dtype=torch.int64
         )
         self._cell_centers_volumes_kernel(centers, volumes)
         centers = centers.to(torch.float32)
@@ -444,9 +500,9 @@ class ParticleSystem:
 
         Parameters
         ----------
-        volume_corrections : (n_cells,) ti ndarray
+        volume_corrections : (n_particles,) ti ndarray
             The volume corrections for the cells.
-        ot_hessian : (n_cells, n_cells) ti ndarray
+        ot_hessian : (n_particles, n_particles) ti ndarray
             The Hessian of the dual semi-discrete optimal transport problem.
             Since the dual problem is concave, the Hessian is negative.
 
@@ -466,29 +522,38 @@ class ParticleSystem:
 
                 # Are we on the boundary between two cells?
                 # Exclude the mask, and disable a ruff tip that doesn't fit with taichi
-                if i != j and j != -1 and i != -1:  # noqa: PLR1714
+                if i != j and j != MASK_LABEL and i != MASK_LABEL:
                     # Compute the costs of the two cells at the two pixels
                     # By definition of i, Mx >= mx
-                    Mx = self.cost_offset(j, X)
-                    mx = self.cost_offset(i, X)
+                    Mx = self._cost_offset(j, X)
+                    mx = self._cost_offset(i, X)
                     hx = Mx - mx  # >= 0
 
                     # By definition of j, My >= my
-                    My = self.cost_offset(i, Y)
-                    my = self.cost_offset(j, Y)
+                    My = self._cost_offset(i, Y)
+                    my = self._cost_offset(j, Y)
                     hy = My - my  # >= 0
 
                     if hx > 0 or hy > 0:  # avoid divisions by 0
                         H = 1 / (hx + hy)
                         out += 0.5 * H * hx * hy
-                        volume_corrections[i] += 0.5 * H * (hx - hy)
-                        volume_corrections[j] += 0.5 * H * (hy - hx)
+
+                        if i != AMBIENT_SPACE_LABEL:
+                            volume_corrections[i] += 0.5 * H * (hx - hy)
+                        if j != AMBIENT_SPACE_LABEL:
+                            volume_corrections[j] += 0.5 * H * (hy - hx)
 
                         # TODO: use a sparse Hessian matrix instead of a dense one
-                        ot_hessian[i, i] -= H
-                        ot_hessian[j, j] -= H
-                        ot_hessian[i, j] += H
-                        ot_hessian[j, i] += H
+                        if i != AMBIENT_SPACE_LABEL:
+                            ot_hessian[i, i] -= H
+                        if j != AMBIENT_SPACE_LABEL:
+                            ot_hessian[j, j] -= H
+                        if (
+                            i != AMBIENT_SPACE_LABEL
+                            and j != AMBIENT_SPACE_LABEL
+                        ):
+                            ot_hessian[i, j] += H
+                            ot_hessian[j, i] += H
 
         return out
 
@@ -497,9 +562,9 @@ class ParticleSystem:
         self,
         mask: ti.types.ndarray(dtype=ti.i32, element_dim=0),
     ):
-        """Sets to -1 the pixel labels where the mask is zero."""
+        """Sets to MASK_LABEL the pixel labels where the mask is zero."""
         for X in ti.grouped(self.pixels):
-            self.pixels[X] = ti.select(mask[X], self.pixels[X], -1)
+            self.pixels[X] = ti.select(mask[X], self.pixels[X], MASK_LABEL)
 
     def compute_labels(
         self,
@@ -510,6 +575,7 @@ class ParticleSystem:
         """Computes the Laguerre cells associated to the particles.
 
         This function updates the following attributes:
+
         - the pixel grid with the index of the best cell at each pixel,
         - the cell centers and volumes,
         - the integral of the min-cost function over the domain,
@@ -533,15 +599,12 @@ class ParticleSystem:
         print("X", end="")
 
         # Load the cell potentials from the torch tensor to the Taichi field
-        cell_potential = torch.cat(
-            [torch.zeros_like(self.seed_potential[:1]), self.seed_potential]
-        )
-        self.cell_potential.from_torch(cell_potential)
+        self.taichi_seed_potential.from_torch(self.seed_potential)
 
         # We expect that the exact bruteforce method will be faster
         # when the number of cells is small (< 1000 ?)
         if method == "bruteforce":
-            self.compute_labels_bruteforce()
+            self._compute_labels_bruteforce()
 
         # The Jump Flooding Algorithm is more efficient for a large number of cells,
         # especially if we use a power-of-two domain and a small-ish init_step like
@@ -563,11 +626,11 @@ class ParticleSystem:
                 steps = steps[:n_steps]
 
             # Initialize the pixel grid with the seed positions
-            self.init_sites()
+            self._init_sites()
 
             # Run the Jump Flooding Algorithm
             for step in steps:
-                self.jfa_step(step)
+                self._jfa_step(step)
         else:
             msg = f"Unknown method {method}."
             raise ValueError(msg)
@@ -586,12 +649,12 @@ class ParticleSystem:
 
         # TODO: use a sparse Hessian matrix instead of a dense ones
         ot_hessian = torch.zeros(
-            (1 + self.n_particles, 1 + self.n_particles),
+            (self.n_particles, self.n_particles),
             device=self.device,
         )
 
         if self.integral_dimension == 0:
-            self.ot_hessian = ot_hessian[1:, 1:]
+            self.ot_hessian = ot_hessian
 
         elif self.integral_dimension == 1:
             # If dimension == 1, we use 1D elements that correspond to the segments
@@ -609,11 +672,9 @@ class ParticleSystem:
                 volume_corrections, ot_hessian
             )
 
-            assert volume_corrections.shape == (1 + self.n_particles,)
+            assert volume_corrections.shape == (self.n_particles,)
             assert self.seed_potential.shape == (self.n_particles,)
-            cost_correction += (
-                volume_corrections[1:] * self.seed_potential
-            ).sum()
+            cost_correction += (volume_corrections * self.seed_potential).sum()
 
             # N.B.: self._corrective_terms_1D makes self.dim passes over the pixels,
             # so don't forget to divide by self.dim to get the correct formulas.
@@ -621,7 +682,7 @@ class ParticleSystem:
             self.integral_cost_raw += cost_correction / self.dim
             # The potential for the ambient space is fixed to zero,
             # so we remove the first row and column of the Hessian of the dual OT cost.
-            self.ot_hessian = ot_hessian[1:, 1:] / self.dim
+            self.ot_hessian = ot_hessian / self.dim
 
         # The code above assumed that pixels had a volume of 1:
         # don't forget to multiply by the pixel volume to get the correct formulas.
@@ -632,7 +693,7 @@ class ParticleSystem:
     @property
     def volume_error(self):
         """Returns the errors between the cell volumes and the target volumes."""
-        return self.cell_volume[1:] - self.volume
+        return self.cell_volume - self.volume
 
     @property
     def relative_volume_error(self):
@@ -645,6 +706,7 @@ class ParticleSystem:
 
         This function computes the concave dual objective of the semi-discrete optimal
         transport problem. It populates the following attributes:
+
         - dual_loss: the value of the dual objective
         - dual_grad: the gradient of the dual objective
         - dual_hessian: the Hessian of the dual objective
@@ -658,12 +720,12 @@ class ParticleSystem:
         assert self.seed_potential.shape == (self.n_particles,)
 
         # Compute the Laguerre cells, i.e. assign a label i(x) to each pixel x
-        # N.B.: this also updates self.cell_potential
+        # N.B.: this also updates self.taichi_seed_potential
         self.compute_labels()
 
         # The gradient of the loss function is the difference between the current
         # cell volumes and the target volumes.
-        concave_grad = self.volume - self.cell_volume[1:]
+        concave_grad = self.volume - self.cell_volume
         assert concave_grad.shape == (self.n_particles,)
 
         # Compute the concave, dual objective of the semi-discrete optimal transport
@@ -716,13 +778,6 @@ class ParticleSystem:
         self.dual_loss = concave_loss
         self.dual_grad = concave_grad
         self.dual_hessian = concave_hessian
-
-    @property
-    @typecheck
-    def barycenter(self) -> FloatTensor:
-        """Returns the barycenters of the particles."""
-        # Cell 0 is the ambient space, so we exclude it
-        return self.cell_center[1:]
 
     @typecheck
     def fit_cells(
@@ -799,7 +854,7 @@ class ParticleSystem:
             # (assuming that different seeds correspond to distinct cost functions).
 
         if self.volume is None:
-            msg = "The volume of the cells must be set."
+            msg = "The '.volume' attribute must be set to specify target volumes."
             raise ValueError(msg)
 
         # Check that the problem is feasible
@@ -994,6 +1049,8 @@ class ParticleSystem:
         background_color: np.ndarray | None = None,
         mask_color: np.ndarray | None = None,
         blur_radius: int | float = 0,
+        cmin=-100,
+        cmax=100,
     ) -> np.ndarray:
         """Returns a canvas with the colors of the cells at each pixel.
 
@@ -1016,7 +1073,7 @@ class ParticleSystem:
             )
             self._scalarmappable = mpl.cm.ScalarMappable(
                 cmap=cmap,
-                norm=mpl.colors.Normalize(vmin=-100, vmax=100),
+                norm=mpl.colors.Normalize(vmin=cmin, vmax=cmax),
             )
             # Colors are RGBA values in [0, 1]
             particle_colors = np.array(particle_colors, dtype=np.float64)
@@ -1042,14 +1099,14 @@ class ParticleSystem:
                 mask_color = np.array([0.0, 0.0, 0.0, 1.0])
 
         # Our convention is that self.pixel_labels:
-        # - is -1 for the mask
-        # - is 0 for the background
-        # - is in [1, n_particles] for the particles
+        # - is -2 for the mask
+        # - is -1 for the ambient space
+        # - is in [0, n_particles-1] for the particles
         cell_colors = np.concatenate(
             [
-                mpl.colors.to_rgba_array(background_color),
                 particle_colors,
                 mpl.colors.to_rgba_array(mask_color),
+                mpl.colors.to_rgba_array(background_color),
             ],
             axis=0,
         )
@@ -1089,8 +1146,8 @@ class ParticleSystem:
     ):
         for ind in ti.grouped(canvas):
             label = self.pixels[ind]
-            if label >= 0:
-                canvas[ind] = self.cost_raw(label, ind)
+            if label != MASK_LABEL:
+                canvas[ind] = self._cost_raw(label, ind)
             else:
                 canvas[ind] = 0.0
 
@@ -1128,11 +1185,25 @@ class ParticleSystem:
                 X2 = X + ti.cast(DX, ti.i32)
                 X2 = tm.clamp(X2, 0, self.shape - self.i32vector(1, 1))
                 # The pixel that gets contoured is the one with the smallest index,
-                # typically the ambient space (index 0) but we exclude the mask (index -1)
-                if self.pixels[X2] > ref and ref >= 0:
+                # typically the ambient space (index -1) but we exclude the mask (index -2)
+                if self.pixels[X2] > ref and ref != MASK_LABEL:
                     canvas[X] = 1
 
-    def contours(self, linewidth=1):
+    @typecheck
+    def contours(self, linewidth=1) -> Int32Tensor:
+        """Returns a binary mask that highlights the contours of the cells.
+
+        Parameters
+        ----------
+        linewidth : int, optional
+            The width of the contours.
+
+        Returns
+        -------
+        torch int32 tensor
+            A canvas with the contours of the cells.
+        """
+
         canvas = torch.zeros(self.shape, dtype=torch.int32)
         self._contours(canvas, linewidth=linewidth)
         return canvas
@@ -1149,13 +1220,27 @@ class ParticleSystem:
                 interpolation="spline36",
             )
         )
-        if hasattr(self, "barycenter"):
+
+        if hasattr(self, "position"):
             artists.append(
                 ax.scatter(
-                    self.barycenter[:, 0],
-                    self.barycenter[:, 1],
-                    c="g",
+                    self.position[:, 0],
+                    self.position[:, 1],
+                    c="r",
                     s=9,
                 )
             )
+
+            if hasattr(self, "cell_center"):
+                # Display segments between the positions and the cell centers
+                # Create a list of segments to display
+                segments = []
+                for i in range(self.n_particles):
+                    segments.append([self.position[i], self.cell_center[i]])
+                # Create a line collection
+                lc = mpl.collections.LineCollection(
+                    segments, color="r", linewidth=1
+                )
+                artists.append(ax.add_collection(lc))
+
         return artists

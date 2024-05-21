@@ -99,6 +99,7 @@ ignore = [
   "F821",     # Ruff doesn't like Literal["mystring"]
   "F722",     # Ruff doesn't like Literal["mystring"]
   "T201",     # Ruff doesn't like prints
+  "PLR1714"   # Taichi does not let us merge "and"
 ]
 
 [tool.ruff.lint.per-file-ignores]

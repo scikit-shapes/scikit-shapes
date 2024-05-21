@@ -10,15 +10,16 @@ Modules
 
 .. autosummary::
 
-    types
+    convolutions
     data
+    decimation
+    features
     loss
     morphing
-    tasks
-    features
-    decimation
     multiscaling
-    convolutions
+    particles
+    types
+    tasks
 
 .. toctree::
     :hidden:

@@ -19,14 +19,16 @@ from matplotlib import pyplot as plt
 
 import skshapes as sks
 
-Nx, n_particles = 100, 10
+Nx, n_particles = 100, 9
 domain = torch.ones(Nx)
 
 particle_index = 0
 power = 2
-positions = Nx * torch.linspace(0.1, 0.9, n_particles).view(-1, 1)
-potential_values = torch.linspace(-0.002 * Nx**power, 0.005 * Nx**power, 10001)
+positions = Nx * torch.linspace(0.103, 0.9, n_particles).view(-1, 1)
 target_volumes = 0.6 * torch.ones(n_particles) * Nx / n_particles
+
+good_potential = target_volumes[0]
+potential_values = torch.linspace(-0.2 * good_potential, 2 * good_potential, 10001)
 
 print(f"Positions: {positions}")
 print(f"Target volumes: {target_volumes}")
@@ -46,15 +48,16 @@ for integral_dimension in [0, 1]:
     # Create a population of cells
     particles = sks.ParticleSystem(
         domain=domain,
-        n_particles=n_particles,
-        particle_type=sks.PowerCell1D,
         integral_dimension=integral_dimension,
+        particles=[
+            sks.PowerCell(
+                position=positions[k],
+                volume=target_volumes[k],
+                power=power,
+            )
+            for k in range(n_particles)
+        ]
     )
-
-    # Load the particles with our desired attributes:
-    particles.position = positions
-    particles.power = power * torch.ones(n_particles)
-    particles.volume = target_volumes
 
     for i, potential in enumerate(potential_values):
         particles.seed_potential[particle_index] = potential
@@ -66,9 +69,7 @@ for integral_dimension in [0, 1]:
         record["hessian"][integral_dimension][i] = particles.dual_hessian[
             particle_index, particle_index
         ]
-        record["volume"][integral_dimension][i] = particles.cell_volume[
-            particle_index + 1
-        ]
+        record["volume"][integral_dimension][i] = particles.cell_volume[particle_index]
 
     particles.seed_potential[:] = 0
     particles.fit_cells(

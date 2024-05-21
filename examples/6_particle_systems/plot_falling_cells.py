@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 
 import skshapes as sks
 
-Nx, Ny, n_particles = 600, 400, 50
+Nx, Ny, n_particles = 300, 200, 50
 X, Y = torch.meshgrid(
     torch.linspace(0, 1, Nx),
     torch.linspace(0, 1, Ny),
@@ -36,40 +36,38 @@ print(f"Total volume of the domain: {domain_volume:,} pixels")
 ###############################################################################
 # Create a population of cells
 #
-particles = sks.ParticleSystem(
-    domain=domain,
-    n_particles=n_particles,
-    particle_type=sks.AnisotropicPowerCell2D,
-)
 
 
 # Define two populations of particles:
-labels = (torch.arange(n_particles) > (n_particles // 2)).int()
-
-# Define the properties of both types of cells:
-powers = torch.tensor([2.0, 2.0])
+cell_type = (torch.arange(n_particles) > (n_particles // 2)).int()
+print(cell_type)
 
 # By default, the volume of each pixel is 1:
 volumes = torch.tensor([0.3, 0.5]) * domain_volume / n_particles
-precisions = torch.stack(
+precisions = torch.tensor(
     [
-        torch.tensor([[2.0, 0.0], [0.0, 1.0]]),
-        torch.tensor([[1.0, 0.0], [0.0, 2.0]]),
+        [[1.0, 0.0], [0.0, 1.0]],
+        [[1.0, 0.0], [0.0, 1.0]],
     ]
 )
 
+particles = sks.ParticleSystem(
+    domain=domain,
+    particles=[
+        sks.PowerCell(
+            position = torch.rand(2) * torch.tensor([Nx, Ny / 2]) + torch.tensor([0, Ny / 2]),
+            precision_matrix = precisions[label],
+            volume = volumes[label],
+            power = 2.0,
+        )
+        for label in cell_type
+    ],
+)
 
-# Load the particles with our desired attributes:
-particles.position = torch.rand((n_particles, 2)) * torch.tensor(
-    [Nx, Ny / 2]
-) + torch.tensor([0, Ny / 2])
-particles.precision_matrix = precisions[labels]
-particles.power = powers[labels]
-particles.volume = volumes[labels]
 
 for _ in range(5):
     particles.fit_cells()
-    particles.position = particles.barycenter
+    particles.position = particles.cell_center
 
 ###############################################################################
 # Simulate the cells falling under gravity
@@ -80,7 +78,8 @@ cell_volumes = []
 
 
 t = 0
-dt = 0.1
+dt = 0.2
+stiffness = 10
 gravity_force = torch.tensor([0, -10])
 velocities = 5 * torch.randn(n_particles, 2)
 
@@ -88,23 +87,33 @@ fig, ax = plt.subplots(figsize=(12, 6))
 frames = []
 
 
-for it in range(11):
+for it in range(101):
     t += dt
     print(f"Time t={t:.2f} ", end="")
-    recall = particles.barycenter - particles.position
+    recall = stiffness * (particles.cell_center - particles.position)
     velocities += (recall + gravity_force) * dt
-    particles.position = particles.position + velocities * dt
+    particles.position = particles.cell_center + velocities * dt
 
     particles.fit_cells()
-    cell_volumes.append(particles.cell_volume.cpu().numpy())
 
+    if False:
+        colors = cell_type
+        cmin = -1
+        cmax = 2
+    else:
+        colors = particles.relative_volume_error.cpu().numpy() * 100
+        cmin = -100
+        cmax = 100
+
+    cell_volumes.append(particles.cell_volume.cpu().numpy())
     frames.append(
         particles.display(
             ax=ax,
-            particle_colors=1000
-            * particles.relative_volume_error.cpu().numpy(),
+            particle_colors=colors,
             title=f"t = {it * dt:.2f}, CPU time {time.time() - start:.2f}s",
             line_width=1,
+            cmin=cmin,
+            cmax=cmax,
         )
     )
 
