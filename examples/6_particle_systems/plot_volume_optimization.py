@@ -14,7 +14,6 @@ import taichi as ti
 
 ti.init(arch=ti.cpu)
 
-import numpy as np
 import torch
 from matplotlib import pyplot as plt
 
