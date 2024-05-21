@@ -530,6 +530,7 @@ class ParticleSystem:
             The method to use to compute the cells. Possible values are "bruteforce"
             and "JFA" (Jump Flooding Algorithm).
         """
+        print("X", end="")
 
         # Load the cell potentials from the torch tensor to the Taichi field
         cell_potential = torch.cat(
@@ -731,10 +732,10 @@ class ParticleSystem:
         warm_start=True,
         stopping_criterion: Literal[
             "average error", "max error"
-        ] = "average error",
+        ] = "max error",
         rtol=1e-2,
         atol=0,
-        method: Literal["L-BFGS-B", "Newton"] = "L-BFGS-B",
+        method: Literal["L-BFGS-B", "Newton"] = "Newton",
         verbose=False,
     ):
         """Solves the semi-discrete optimal transport problem with volume constraints.

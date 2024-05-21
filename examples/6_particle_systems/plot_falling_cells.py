@@ -40,7 +40,6 @@ particles = sks.ParticleSystem(
     domain=domain,
     n_particles=n_particles,
     particle_type=sks.AnisotropicPowerCell2D,
-    integral_dimension=1,
 )
 
 
@@ -69,7 +68,7 @@ particles.power = powers[labels]
 particles.volume = volumes[labels]
 
 for _ in range(5):
-    particles.fit_cells(rtol=0.05)
+    particles.fit_cells()
     particles.position = particles.barycenter
 
 ###############################################################################
@@ -86,24 +85,17 @@ gravity_force = torch.tensor([0, -10])
 velocities = 5 * torch.randn(n_particles, 2)
 
 fig, ax = plt.subplots(figsize=(12, 6))
-fig2, ax2 = plt.subplots(figsize=(12, 6))
 frames = []
-frames2 = []
 
 
 for it in range(11):
     t += dt
+    print(f"Time t={t:.2f} ", end="")
     recall = particles.barycenter - particles.position
     velocities += (recall + gravity_force) * dt
     particles.position = particles.position + velocities * dt
 
-    particles.fit_cells(
-        stopping_criterion="max error",
-        rtol=0.05,
-        verbose=True,
-        max_iter=10,
-        method="Newton",
-    )
+    particles.fit_cells()
     cell_volumes.append(particles.cell_volume.cpu().numpy())
 
     frames.append(
@@ -116,22 +108,8 @@ for it in range(11):
         )
     )
 
-    step = -particles.domain_volume * particles.descent_direction
-    step = step / step.abs().max()
-    frames2.append(
-        particles.display(
-            ax=ax2,
-            particle_colors=100 * step.cpu().numpy(),
-            title=f"t = {it * dt:.2f}, CPU time {time.time() - start:.2f}s",
-            line_width=1,
-        )
-    )
-
 fig.colorbar(particles._scalarmappable, ax=ax)
 ani = animation.ArtistAnimation(fig, frames, interval=50)
-
-fig2.colorbar(particles._scalarmappable, ax=ax2)
-ani2 = animation.ArtistAnimation(fig2, frames2, interval=50)
 
 ###############################################################################
 # Convergence study:
