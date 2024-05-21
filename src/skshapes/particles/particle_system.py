@@ -119,13 +119,10 @@ class ParticleSystem:
         # for the ambient space.
         self.cells = particle_type.field(shape=(1 + n_particles,))
 
-        # By default, all particles have zero offset and unit scaling.
-        # Most users won't touch the scaling, but the offset is used by the semi-discrete
-        # optimal transport solver to enforce volume constraints on the Laguerre cells.
-        # N.B.: The two lines below actually use the __setattr__ method,
-        #       which target the attributes of self.cells[1:].
-        self.offset = torch.zeros(n_particles, device=self.device)
-        self.scaling = torch.ones(n_particles, device=self.device)
+        # By default, all particles have zero dual potential:
+        self.cell_potential = ti.field(ti_float, shape=(1 + n_particles,))
+        # self.cell_potential.from_torch(torch.zeros(1 + n_particles, device=self.device))
+        self.seed_potential = torch.zeros(n_particles, device=self.device)
 
         # Create the grid of pixels, and the intermediate buffer
         # that will be used in the Jump Flooding Algorithm.
@@ -233,8 +230,49 @@ class ParticleSystem:
         else:
             return ti.cast(tm.mod(pos, self.shape), ti.i32)
 
+    @ti.func
+    def cost_raw(self, i, pixel):
+        """Computes the cost of cell i at pixel.
+
+        Parameters
+        ----------
+        i : int
+            The index of the cell.
+        pixel : ti int64 vector
+            The pixel coordinates.
+
+        Returns
+        -------
+        float
+            The cost of the cell at the pixel.
+        """
+        # N.B.: the cell cost function takes as input a float32 vector
+        #       with pixel coordinates
+        c_i = self.cells[i].cost(ti.cast(pixel, dtype=ti_float))
+        # By convention, cell i=0 is associated to a constant, zero cost
+        return ti.select(i == 0, 0.0, c_i)
+
+    @ti.func
+    def cost_offset(self, i, pixel):
+        """Computes the cost of cell i at pixel, offset by the dual potential.
+
+        Parameters
+        ----------
+        i : int
+            The index of the cell.
+        pixel : ti int64 vector
+            The pixel coordinates.
+
+        Returns
+        -------
+        float
+            The cost of the cell at the pixel, offset by the dual potential.
+        """
+        # Offset the cost by the dual potential of the cell
+        return self.cost_raw(i, pixel) - self.cell_potential[i]
+
     @ti.kernel
-    def compute_cells_bruteforce(self):
+    def compute_labels_bruteforce(self):
         """For each pixel, computes the index of the cell with the lowest cost.
         This is a brute-force method that is suitable for a small number of cells.
         For very large systems, the Jump Flooding Algorithm is more efficient.
@@ -245,9 +283,8 @@ class ParticleSystem:
             best_index = 0  # Ambient space by default
 
             for i in ti.ndrange(self.cells.shape[0]):
-                # N.B.: the cell cost function takes as input a float32 vector
-                #       with pixel coordinates
-                cost = self.cells[i].cost(ti.cast(X, dtype=ti_float))
+                cost = self.cost_offset(i, X)
+
                 if cost < best_cost:
                     best_cost = cost
                     best_index = i
@@ -339,9 +376,8 @@ class ParticleSystem:
                 # Check if the cost function that is associated to X2 is a better
                 # fit for the current pixel than the previous best candidate:
                 i2 = self.pixels[X2]
-                # N.B.: the cell cost function takes as input a float32 vector
-                #       with integer coordinates
-                cost = self.cells[i2].cost(ti.cast(X, dtype=ti_float))
+                cost = self.cost_offset(i2, X)
+
                 if cost < best_cost:
                     best_cost = cost
                     best_index = i2
@@ -353,17 +389,19 @@ class ParticleSystem:
         self._copy_buffer()
 
     @ti.kernel
-    def _cell_centers_volumes(
+    def _cell_centers_volumes_kernel(
         self,
-        centers: ti.types.ndarray(dtype=ti_float, element_dim=0),
-        volumes: ti.types.ndarray(dtype=ti_float, element_dim=0),
+        centers: ti.types.ndarray(dtype=ti.int64, element_dim=0),
+        volumes: ti.types.ndarray(dtype=ti.int64, element_dim=0),
     ):
-        """Computes in place the barycenter and volume of each cell.
+        """Computes in place the non-normalized barycenter and volume of each cell.
+        We use int64 instead of float32 to avoid overflows: when calling this function,
+        do not forget to convert to float32 and normalize the barycenters afterwards.
 
         Parameters
         ----------
         centers : (n_cells, dim) ti ndarray
-            The barycenters of the cells.
+            The sum of pixel coordinates in each cell.
         volumes : (n_cells,) ti ndarray
             The volumes of the cells.
         """
@@ -371,16 +409,30 @@ class ParticleSystem:
             i = self.pixels[X]
             if i >= 0:  # Ignore the mask, i == -1
                 for d in ti.static(range(self.dim)):
-                    centers[i, d] += ti.cast(X[d], ti_float)
-                volumes[i] += 1.0
+                    centers[i, d] += X[d]
+                volumes[i] += 1
 
-        # Normalize the sum of the pixel coordinates to get the barycenter
-        for i in ti.ndrange(self.n_cells):
-            for d in ti.static(range(self.dim)):
-                if volumes[i] > 0:
-                    centers[i, d] /= volumes[i]
-                else:
-                    centers[i, d] = 0.0
+    def _cell_centers_volumes(self):
+        """Computes the barycenter and volume of each cell."""
+        # We use int64 instead of float32 to avoid overflows during the summation.
+        # Otherwise, since self._cell_centers_volumes just adds "+1" for every pixel,
+        # it would run into problems when cells have more than 16,777,217 pixels.
+        # (this is the first integer that cannot be represented exactly as a float32)
+        centers = torch.zeros(
+            (self.n_cells, self.dim), device=self.device, dtype=torch.int64
+        )
+        volumes = torch.zeros(
+            self.n_cells, device=self.device, dtype=torch.int64
+        )
+        self._cell_centers_volumes_kernel(centers, volumes)
+        centers = centers.to(torch.float32)
+        volumes = volumes.to(torch.float32)
+
+        centers = centers / volumes[:, None]
+        centers[volumes == 0.0, :] = 0.0  # Avoid division by zero
+
+        self.cell_center = centers
+        self.cell_volume = volumes
 
     @ti.kernel
     def _corrective_terms_1D(
@@ -413,29 +465,30 @@ class ParticleSystem:
                 j = self.pixels[Y]  # Index of the best cell at pixel Y
 
                 # Are we on the boundary between two cells?
-                if i != j and (-1 not in {i, j}):  # Exclude the mask
+                # Exclude the mask, and disable a ruff tip that doesn't fit with taichi
+                if i != j and j != -1 and i != -1:  # noqa: PLR1714
                     # Compute the costs of the two cells at the two pixels
                     # By definition of i, Mx >= mx
-                    Mx = self.cells[j].cost(ti.cast(X, dtype=ti_float))
-                    mx = self.cells[i].cost(ti.cast(X, dtype=ti_float))
+                    Mx = self.cost_offset(j, X)
+                    mx = self.cost_offset(i, X)
                     hx = Mx - mx  # >= 0
 
                     # By definition of j, My >= my
-                    My = self.cells[i].cost(ti.cast(Y, dtype=ti_float))
-                    my = self.cells[j].cost(ti.cast(Y, dtype=ti_float))
+                    My = self.cost_offset(i, Y)
+                    my = self.cost_offset(j, Y)
                     hy = My - my  # >= 0
 
-                    if hx > 0 and hy > 0:
-                        f = 1 / (hx + hy)
-                        out += 0.5 * f * hx * hy
-                        volume_corrections[i] += 0.5 * f * (hx - hy)
-                        volume_corrections[j] += 0.5 * f * (hy - hx)
+                    if hx > 0 or hy > 0:  # avoid divisions by 0
+                        H = 1 / (hx + hy)
+                        out += 0.5 * H * hx * hy
+                        volume_corrections[i] += 0.5 * H * (hx - hy)
+                        volume_corrections[j] += 0.5 * H * (hy - hx)
 
                         # TODO: use a sparse Hessian matrix instead of a dense one
-                        ot_hessian[i, i] -= f
-                        ot_hessian[j, j] -= f
-                        ot_hessian[i, j] += f
-                        ot_hessian[j, i] += f
+                        ot_hessian[i, i] -= H
+                        ot_hessian[j, j] -= H
+                        ot_hessian[i, j] += H
+                        ot_hessian[j, i] += H
 
         return out
 
@@ -448,7 +501,7 @@ class ParticleSystem:
         for X in ti.grouped(self.pixels):
             self.pixels[X] = ti.select(mask[X], self.pixels[X], -1)
 
-    def compute_cells(
+    def compute_labels(
         self,
         init_step=None,
         n_steps=None,
@@ -477,10 +530,17 @@ class ParticleSystem:
             The method to use to compute the cells. Possible values are "bruteforce"
             and "JFA" (Jump Flooding Algorithm).
         """
+
+        # Load the cell potentials from the torch tensor to the Taichi field
+        cell_potential = torch.cat(
+            [torch.zeros_like(self.seed_potential[:1]), self.seed_potential]
+        )
+        self.cell_potential.from_torch(cell_potential)
+
         # We expect that the exact bruteforce method will be faster
         # when the number of cells is small (< 1000 ?)
         if method == "bruteforce":
-            self.compute_cells_bruteforce()
+            self.compute_labels_bruteforce()
 
         # The Jump Flooding Algorithm is more efficient for a large number of cells,
         # especially if we use a power-of-two domain and a small-ish init_step like
@@ -514,18 +574,14 @@ class ParticleSystem:
         # Set pixel labels to -1 wherever domain == 0
         self._apply_mask(self.domain)
 
-        # Compute basic information (centers and volumes) about the cells
-        self.cell_centers = torch.zeros(
-            (self.n_cells, self.dim), device=self.device
-        )
-        self.cell_volume = torch.zeros(self.n_cells, device=self.device)
-        self._cell_centers_volumes(self.cell_centers, self.cell_volume)
+        # Recompute self.cell_center and self.cell_volume
+        self._cell_centers_volumes()
 
-        # Estimation of the integral of the min-cost function over the domain
+        # Estimation of the integral of the best cost function over the domain
         # and volumes if the uniform measure on the domain is approximated
         # by a sum of Dirac masses at the pixel centers,
         # i.e. elements of dimension 0.
-        self.cost_integral = (self.pixel_costs * self.domain).sum()
+        self.integral_cost_raw = (self.pixel_cost_raw * self.domain).sum()
 
         # TODO: use a sparse Hessian matrix instead of a dense ones
         ot_hessian = torch.zeros(
@@ -541,7 +597,7 @@ class ParticleSystem:
             # between adjacent pixels, along the axes of the 1D, 2D or 3D domain.
             # Assuming a piecewise linear model for the cost function,
             # direct computations show that we must add corrective terms to the
-            # cost_integral along the boundaries of the cell,
+            # cost integral along the boundaries of the cell,
             # and correct the cell volumes as well.
             volume_corrections = torch.zeros_like(self.cell_volume)
 
@@ -552,17 +608,23 @@ class ParticleSystem:
                 volume_corrections, ot_hessian
             )
 
+            assert volume_corrections.shape == (1 + self.n_particles,)
+            assert self.seed_potential.shape == (self.n_particles,)
+            cost_correction += (
+                volume_corrections[1:] * self.seed_potential
+            ).sum()
+
             # N.B.: self._corrective_terms_1D makes self.dim passes over the pixels,
             # so don't forget to divide by self.dim to get the correct formulas.
             self.cell_volume += volume_corrections / self.dim
-            self.cost_integral += cost_correction / self.dim
+            self.integral_cost_raw += cost_correction / self.dim
             # The potential for the ambient space is fixed to zero,
             # so we remove the first row and column of the Hessian of the dual OT cost.
             self.ot_hessian = ot_hessian[1:, 1:] / self.dim
 
         # The code above assumed that pixels had a volume of 1:
         # don't forget to multiply by the pixel volume to get the correct formulas.
-        self.cost_integral *= self.pixel_volume
+        self.integral_cost_raw *= self.pixel_volume
         self.cell_volume *= self.pixel_volume
         self.ot_hessian *= self.pixel_volume
 
@@ -592,37 +654,45 @@ class ParticleSystem:
             Optional barrier parameter that promotes positivity for the dual potentials.
         """
 
-        particle_potentials = -self.offset
+        assert self.seed_potential.shape == (self.n_particles,)
 
-        # Compute the Laguerre cells, i.e. assign a color to each pixel
-        self.compute_cells()
+        # Compute the Laguerre cells, i.e. assign a label i(x) to each pixel x
+        # N.B.: this also updates self.cell_potential
+        self.compute_labels()
+
+        # The gradient of the loss function is the difference between the current
+        # cell volumes and the target volumes.
+        concave_grad = self.volume - self.cell_volume[1:]
+        assert concave_grad.shape == (self.n_particles,)
 
         # Compute the concave, dual objective of the semi-discrete optimal transport
         # problem (which is actually discrete-discrete here, since we use pixels
         # instead of proper Voronoi-Laguerre cells)
-        # First term: \sum_i v_i * f_i
-        # (without the volume of the ambient space, that is associated to
-        # a potential of zero)
-        concave_loss = (self.volume * particle_potentials).sum()
-        # Second term: integral of the min-cost function over the domain.
-        # Recall that domain is a binary mask, and
-        # self.pixel_costs[x] = min_i ( c_i(x) - seed_potentials[i] )
-        concave_loss = concave_loss + self.cost_integral
+        if False:
+            # First term: \sum_i v_i * f_i
+            # (without the volume of the ambient space, that is associated to
+            # a potential of zero)
+            concave_loss = (self.volume * particle_potentials).sum()
+            # Second term: integral of the min-cost function over the domain.
+            # Recall that domain is a binary mask, and
+            # self.pixel_costs[x] = min_i ( c_i(x) - seed_potentials[i] )
+            concave_loss = concave_loss + self.cost_integral
+        else:
+            # For the sake of numerical stability, we use the following equivalent
+            # formula that decomposes the cost function into two terms:
+            # First, sum_i f_i * (v_i - # of pixels in cell i)
+            concave_loss = (concave_grad * self.seed_potential).sum()
+            # Second, sum_x c_{i(x)}(x)
+            concave_loss = concave_loss + self.integral_cost_raw
+
+        concave_hessian = self.ot_hessian
+        assert concave_hessian.shape == (self.n_particles, self.n_particles)
 
         # By convention, we divide the dual cost by the volume of the domain
         # to get a meaningful value that is independent of the domain shape.
         concave_loss = concave_loss / self.domain_volume
-
-        # The gradient of the loss function is the difference between the current
-        # cell volumes and the target volumes. We normalize by the number of pixels
-        # to get meaningful values and gradients in the optimization.
-        # (Keeping things of order 1 is probably a good idea for numerical stability
-        # and compatibility with default optimizer settings.)
-        concave_grad = (
-            self.volume - self.cell_volume[1:]
-        ) / self.domain_volume
-
-        concave_hessian = self.ot_hessian / self.domain_volume
+        concave_grad = concave_grad / self.domain_volume
+        concave_hessian = concave_hessian / self.domain_volume
 
         if barrier is not None:
             # Add a barrier to prevent the potentials from becoming negative,
@@ -631,15 +701,15 @@ class ParticleSystem:
             # We use a simple quadratic barrier, but other choices are possible.
             # The barrier is only active when the potentials are negative.
             # We use a small value to avoid numerical issues.
-            barrier_loss = 0.5 * (particle_potentials.clamp(max=0) ** 2).sum()
+            barrier_loss = 0.5 * (self.seed_potential.clamp(max=0) ** 2).sum()
             concave_loss -= barrier * barrier_loss
 
-            barrier_gradient = particle_potentials.clamp(max=0)
+            barrier_gradient = self.seed_potential.clamp(max=0)
             concave_grad -= barrier * barrier_gradient
 
             # TODO: use a sparse Hessian matrix instead of a dense one
             concave_hessian -= torch.diag(
-                barrier * (particle_potentials < 0).float()
+                barrier * (self.seed_potential < 0).float()
             )
 
         self.dual_loss = concave_loss
@@ -651,10 +721,10 @@ class ParticleSystem:
     def barycenter(self) -> FloatTensor:
         """Returns the barycenters of the particles."""
         # Cell 0 is the ambient space, so we exclude it
-        return self.cell_centers[1:]
+        return self.cell_center[1:]
 
     @typecheck
-    def volume_fit(
+    def fit_cells(
         self,
         max_iter=10,
         barrier=None,
@@ -664,7 +734,7 @@ class ParticleSystem:
         ] = "average error",
         rtol=1e-2,
         atol=0,
-        method: Literal["L-BFGS-B", "Newton"] = "Newton",
+        method: Literal["L-BFGS-B", "Newton"] = "L-BFGS-B",
         verbose=False,
     ):
         """Solves the semi-discrete optimal transport problem with volume constraints.
@@ -718,12 +788,11 @@ class ParticleSystem:
         # These dual potentials (denoted by "f_i" in our papers)
         # act on the cost functions as negative offsets, i.e.
         # they turn c_i(x) into c_i(x) - f_i.
-        if warm_start:
-            # Reuse the current potentials (= -1 * offset_i) as a starting point
-            seed_potentials = -self.offset
-        else:
-            # Just start from zero potentials
-            seed_potentials = torch.zeros(self.n_particles, device=self.device)
+        if not warm_start:
+            # Reset to start from zero potentials
+            self.seed_potential = torch.zeros(
+                self.n_particles, device=self.device
+            )
             # The dual OT problem is concave, so the starting point
             # should not have a significant impact on the final result
             # (assuming that different seeds correspond to distinct cost functions).
@@ -758,7 +827,7 @@ class ParticleSystem:
                 # Small hack: use the LBFGS optimizer with max_iter = 1
                 # to get access to a good line search algorithm.
                 optimizer = torch.optim.LBFGS(
-                    [seed_potentials],
+                    [self.seed_potential],
                     lr=1,
                     line_search_fn="strong_wolfe",
                     tolerance_grad=(atol + rtol * self.volume.min())
@@ -768,8 +837,6 @@ class ParticleSystem:
                 )
 
             def step(closure, current_value):
-                nonlocal seed_potentials
-
                 # grad of the convex minimization problem
                 grad = -self.dual_grad
                 hessian = -self.dual_hessian  # hessian is >= 0
@@ -780,22 +847,37 @@ class ParticleSystem:
                 # We solve the linear system Hessian * delta = -grad
                 # TODO: using a sparse Hessian matrix and an algebraic multigrid solver
                 direction = torch.linalg.solve(hessian, -grad)
+
+                """
+                direction_error = hessian @ direction + grad
+                print("")
+                print("Volume error:", self.volume_error)
+                print("-Gradient:", -grad)
+                print("Direction:", direction)
+                print("Newton error:", direction_error.abs().max())
+                """
                 self.descent_direction = direction
 
-                if False:
+                if True:
                     # Implement line search by hand
                     t = 1
-                    old_potentials = seed_potentials.clone()
+                    old_potential = self.seed_potential.clone()
+                    current_error = self.volume_error.abs().max()
                     while True:
-                        seed_potentials = old_potentials + t * direction
+                        self.seed_potential = old_potential + t * direction
                         new_value = closure()
-                        if new_value < current_value:
+
+                        if False:
+                            if new_value < current_value:
+                                break
+                        elif self.volume_error.abs().max() < current_error:
+                            print("Breaking at t=", t)
                             break
                         t /= 2
                         if t < 1e-8:
                             break
                 else:
-                    seed_potentials.grad = -direction
+                    self.seed_potential.grad = -direction
                     optimizer.step(closure=closure)
                     new_value = closure()
 
@@ -812,37 +894,36 @@ class ParticleSystem:
             # This threshold is applied to the maximum of the absolute values of the gradient
             # coordinates: we choose a value that corresponds to a conservative relative error
             optimizer = torch.optim.LBFGS(
-                [seed_potentials],
+                [self.seed_potential],
                 lr=1,
                 line_search_fn="strong_wolfe",
                 tolerance_grad=(atol + rtol * self.volume.min())
-                / self.domain_volume,
+                / (10 * self.domain_volume),
                 tolerance_change=1e-20,
                 max_iter=max_iter,
             )
 
             def step(closure, _):
                 optimizer.step(closure=closure)
-                return closure()
+                cl = closure()
+                self.descent_direction = -self.seed_potential.grad
+                return cl
 
-            n_outer_iterations = 3
+            n_outer_iterations = 10
 
         def closure():
             # Zero the gradients on the dual seed_potentials
             optimizer.zero_grad()
             # If NaN, throw an error
-            if torch.isnan(seed_potentials).any():
+            if torch.isnan(self.seed_potential).any():
                 msg = "NaN detected in seed potentials."
                 raise ValueError(msg)
 
-            # Replace the cost function c_i(x) (e.g. = |x-x_i|^2)
-            # with a biased version c_i(x) - seed_potentials[i]
-            self.offset = -seed_potentials
             # Compute the dual OT loss, gradient and Hessian
             self.compute_dual_loss(barrier=barrier)
             # Since the dual problem is concave, we minimize -dual_loss
             convex_loss = -self.dual_loss
-            seed_potentials.grad = -self.dual_grad
+            self.seed_potential.grad = -self.dual_grad
 
             if verbose:
                 print(".", end="", flush=True)
@@ -887,9 +968,8 @@ class ParticleSystem:
             # Throw a warning if the optimization did not converge
             print("Warning: optimization did not converge.")
 
-        # To be sure, we recompute the cells with the final seed potentials
-        self.offsets = -seed_potentials
-        self.compute_cells()
+        # To be sure, we recompute the cells and loss with the final seed potentials
+        self.compute_dual_loss(barrier=barrier)
         return converged
 
     @property
@@ -1003,23 +1083,30 @@ class ParticleSystem:
         return canvas
 
     @ti.kernel
-    def _pixel_costs(
+    def _pixel_cost_raw(
         self, canvas: ti.types.ndarray(dtype=ti_float, element_dim=0)
     ):
         for ind in ti.grouped(canvas):
-            index = self.pixels[ind]
-            if index >= 0:
-                canvas[ind] = self.cells[index].cost(
-                    ti.cast(I, dtype=ti_float)
-                )
+            label = self.pixels[ind]
+            if label >= 0:
+                canvas[ind] = self.cost_raw(label, ind)
             else:
                 canvas[ind] = 0.0
 
     @property
     @typecheck
-    def pixel_costs(self) -> FloatTensor:
+    def pixel_cost_raw(self) -> FloatTensor:
+        """Returns a canvas with the cost of the cells at each pixel.
+
+        At each pixel x, we evaluate the cost function c_i(x) of the best cell i(x).
+
+        Returns
+        -------
+        torch tensor
+            A canvas with the cost of the cells at each pixel.
+        """
         canvas = torch.zeros(self.shape, device=self.device)
-        self._pixel_costs(canvas)
+        self._pixel_cost_raw(canvas)
         return canvas
 
     @ti.kernel

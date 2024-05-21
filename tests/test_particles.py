@@ -1,6 +1,5 @@
 """Tests for the ParticleSystem class."""
 
-
 import pytest
 import taichi as ti
 import torch
@@ -38,6 +37,8 @@ def test_dual_loss_grad_hessian(
     domain = domain | (Y > 0.5) | (X > 0.8)
     domain = X > -1
     domain_volume = domain.int().sum().item()
+
+    assert n_z > 0
 
     particles = sks.ParticleSystem(
         domain=domain,

@@ -19,7 +19,7 @@ from matplotlib import pyplot as plt
 
 import skshapes as sks
 
-Nx, Ny, n_particles = 300, 200, 50
+Nx, Ny, n_particles = 600, 400, 50
 X, Y = torch.meshgrid(
     torch.linspace(0, 1, Nx),
     torch.linspace(0, 1, Ny),
@@ -42,6 +42,7 @@ particles = sks.ParticleSystem(
     particle_type=sks.AnisotropicPowerCell2D,
     integral_dimension=1,
 )
+
 
 # Define two populations of particles:
 labels = (torch.arange(n_particles) > (n_particles // 2)).int()
@@ -68,7 +69,7 @@ particles.power = powers[labels]
 particles.volume = volumes[labels]
 
 for _ in range(5):
-    particles.volume_fit(rtol=0.05)
+    particles.fit_cells(rtol=0.05)
     particles.position = particles.barycenter
 
 ###############################################################################
@@ -78,13 +79,16 @@ for _ in range(5):
 start = time.time()
 cell_volumes = []
 
+
 t = 0
 dt = 0.1
 gravity_force = torch.tensor([0, -10])
 velocities = 5 * torch.randn(n_particles, 2)
 
 fig, ax = plt.subplots(figsize=(12, 6))
+fig2, ax2 = plt.subplots(figsize=(12, 6))
 frames = []
+frames2 = []
 
 
 for it in range(11):
@@ -93,8 +97,12 @@ for it in range(11):
     velocities += (recall + gravity_force) * dt
     particles.position = particles.position + velocities * dt
 
-    particles.volume_fit(
-        stopping_criterion="max error", rtol=0.05, verbose=True
+    particles.fit_cells(
+        stopping_criterion="max error",
+        rtol=0.05,
+        verbose=True,
+        max_iter=10,
+        method="Newton",
     )
     cell_volumes.append(particles.cell_volume.cpu().numpy())
 
@@ -107,10 +115,13 @@ for it in range(11):
             line_width=1,
         )
     )
-    frames.append(
+
+    step = -particles.domain_volume * particles.descent_direction
+    step = step / step.abs().max()
+    frames2.append(
         particles.display(
-            ax=ax,
-            particle_colors=-2 * particles.descent_direction.cpu().numpy(),
+            ax=ax2,
+            particle_colors=100 * step.cpu().numpy(),
             title=f"t = {it * dt:.2f}, CPU time {time.time() - start:.2f}s",
             line_width=1,
         )
@@ -119,6 +130,8 @@ for it in range(11):
 fig.colorbar(particles._scalarmappable, ax=ax)
 ani = animation.ArtistAnimation(fig, frames, interval=50)
 
+fig2.colorbar(particles._scalarmappable, ax=ax2)
+ani2 = animation.ArtistAnimation(fig2, frames2, interval=50)
 
 ###############################################################################
 # Convergence study:
