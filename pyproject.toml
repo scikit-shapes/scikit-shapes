@@ -58,7 +58,10 @@ filterwarnings = [
 
 
 log_cli_level = "info"
-testpaths = ["tests"]
+testpaths = [
+  "tests",
+  "optional_tests"
+  ]
 
 [tool.repo-review]
 ignore = [

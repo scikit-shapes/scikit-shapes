@@ -30,23 +30,28 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
-      - name: Install package (with dependencies for linting, testing and building doc and optional dependencies)
+      - name: Install package (with dependencies for tests)
         run: |
           pip install --upgrade pip
           pip install -r requirements_dev.txt
-          pip install .[all]
+          pip install .
 
-      - name: Test with pytest
+      - name: Test (minimal dependencies)
         run: |
           export SKSHAPES_FLOAT_DTYPE=float32
           pytest --cov-report xml:coverage.xml --durations=0
+
+      - name: Test (with all optional dependencies)
+        run: |
+          pip install .[all]
+          pytest optional_tests/ --cov-append --cov-report xml:coverage_opt.xml --durations=0
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: false
-          files: ./coverage.xml,
+          files: ./coverage.xml, ./coverage_opt.xml
           flags: unittests
           name: codecov-umbrella
           token: ${{ secrets.CODECOV_TOKEN }}
