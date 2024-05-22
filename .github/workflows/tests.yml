@@ -30,11 +30,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
-      - name: Install package (with dependencies for linting, testing and building doc)
+      - name: Install package (with dependencies for linting, testing and building doc and optional dependencies)
         run: |
           pip install --upgrade pip
           pip install -r requirements_dev.txt
-          pip install .
+          pip install .[all]
 
       - name: Test with pytest
         run: |
@@ -45,12 +45,9 @@ jobs:
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
         uses: codecov/codecov-action@v4
         with:
-          directory: ./
-          env_vars: OS,PYTHON
           fail_ci_if_error: false
           files: ./coverage.xml,
           flags: unittests
           name: codecov-umbrella
+          token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
