@@ -57,14 +57,14 @@ At the moment, scikit-shapes is available on linux and macOS only
 
 ## From pip
 
-Scikit-shapes version can be installed directly from pip with
+The last stable version of scikit-shapes version can be installed directly from pip with
 ```bash
 pip install skshapes
 ```
 
 ## From source
 
-If you consider contrinuting to the codebase, you can also install scikit-shapes locally from a clone of the repository. On a terminal, navigate to the scikit-shapes directory and run :
+If you want the development version or consider contributing to the codebase, you can also install scikit-shapes locally from a clone of the repository. On a terminal, navigate to the scikit-shapes directory and run :
 
 ```bash
 pip install -e .
@@ -87,7 +87,10 @@ pytest
 - build the documentation (and serve it locally)
 ```bash
 pip install -r requirement_docs.txt
-mkdocs serve
+sphinx-apidoc -o doc/source/api/ --module-first --force src/skshapes
+sphinx-build -b html doc/source/ doc/_build/html
+cd doc/_build/html
+python -m http.server
 ```
 
 # Contributing
