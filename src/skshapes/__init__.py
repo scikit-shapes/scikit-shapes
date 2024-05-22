@@ -5,6 +5,11 @@ from .convolutions import *
 from .data import *
 from .decimation import *
 from .features import *
+from .globals import (
+    float_dtype,
+    int_dtype,
+    taichi_installed,
+)
 from .input_validation import *
 from .loss import *
 from .morphing import *
