@@ -16,7 +16,15 @@ from ..types import (
     Particle,
 )
 
+# To enable fast computations on all GPUs, we prefer to use 32-bit floats
+# instead of 64-bit floats. Convergence (especially line search) becomes
+# more tricky to handle, but the portability is worth it.
 ti_float = ti.f32
+
+# Our convention is that:
+# - the mask has index -2,
+# - the ambient space has index -1,
+# - the seeds have indices 0, 1, 2, ..., n_particles-1
 AMBIENT_SPACE_LABEL = -1
 MASK_LABEL = -2
 
@@ -37,7 +45,8 @@ class ParticleSystem:
         Dimension of the volume elements that we use to compute cell volumes.
         A value of 0 corresponds to a simple summation over a discrete pixel grid.
         A value of 1 corresponds to a piecewise linear model along a cartesian wireframe.
-
+    barrier : float, optional
+        Optional barrier parameter that promotes positivity for the dual potentials.
 
     Examples
     --------
@@ -55,6 +64,7 @@ class ParticleSystem:
         domain: IntTensor,
         block_size: int | None = None,
         integral_dimension: Literal[0, 1] = 1,
+        barrier: float | None = 0.1,
     ) -> None:
 
         self.__dict__["device"] = domain.device
@@ -62,6 +72,7 @@ class ParticleSystem:
         self._load_particles(particles)
 
         self.integral_dimension = integral_dimension
+        self.barrier = barrier
 
         self.domain = domain.type(torch.int32)
         # Check that the domain is binary
@@ -185,23 +196,25 @@ class ParticleSystem:
         self.taichi_seed_potential = ti.field(ti_float, shape=(n_particles,))
         # self.cell_potential.from_torch(torch.zeros(1 + n_particles, device=self.device))
 
+        self.init_dual_potentials()
+
+        return particle_type
+
+    def init_dual_potentials(self):
+        """Sets a good initial guess for the dual potentials.
+
+        This function is written in a way that is compatible with our normalization
+        convention for e.g. PowerCells: it results in immediate convergence for
+        particles that are isolated in the ambient space.
+        """
+
         if False:
             self.seed_potential = torch.zeros(n_particles, device=self.device)
         else:
             self.seed_potential = self.volume.clone()
-            assert self.seed_potential.shape == (n_particles,)
+            assert self.seed_potential.shape == (self.n_particles,)
             assert self.seed_potential.device == self.device
             assert self.seed_potential.dtype == torch.float32
-
-        # Init the relevant attributes for the taichi loops.
-        # Our convention is that:
-        # - the mask has index -2,
-        # - the ambient space has index -1,
-        # - the seeds have indices 0, 1, 2, ..., n_particles-1
-
-        self.cell_indices = ti.ndrange(n_particles)
-
-        return particle_type
 
     @property
     @typecheck
@@ -596,8 +609,6 @@ class ParticleSystem:
             The method to use to compute the cells. Possible values are "bruteforce"
             and "JFA" (Jump Flooding Algorithm).
         """
-        print("X", end="")
-
         # Load the cell potentials from the torch tensor to the Taichi field
         self.taichi_seed_potential.from_torch(self.seed_potential)
 
@@ -701,7 +712,7 @@ class ParticleSystem:
         return self.volume_error / self.volume
 
     @typecheck
-    def compute_dual_loss(self, barrier=None):
+    def compute_dual_loss(self):
         """Updates the dual loss, gradient and Hessian of the semi-discrete OT problem.
 
         This function computes the concave dual objective of the semi-discrete optimal
@@ -710,14 +721,14 @@ class ParticleSystem:
         - dual_loss: the value of the dual objective
         - dual_grad: the gradient of the dual objective
         - dual_hessian: the Hessian of the dual objective
-
-        Parameters
-        ----------
-        barrier : float, optional
-            Optional barrier parameter that promotes positivity for the dual potentials.
         """
 
         assert self.seed_potential.shape == (self.n_particles,)
+
+        # If NaN, throw an error
+        if torch.isnan(self.seed_potential).any():
+            msg = "NaN detected in seed potentials."
+            raise ValueError(msg)
 
         # Compute the Laguerre cells, i.e. assign a label i(x) to each pixel x
         # N.B.: this also updates self.taichi_seed_potential
@@ -757,7 +768,7 @@ class ParticleSystem:
         concave_grad = concave_grad / self.domain_volume
         concave_hessian = concave_hessian / self.domain_volume
 
-        if barrier is not None:
+        if self.barrier is not None:
             # Add a barrier to prevent the potentials from becoming negative,
             # which would correspond to a negative volume.
             # This prevents L-BFGS from going too far in the wrong direction.
@@ -765,14 +776,14 @@ class ParticleSystem:
             # The barrier is only active when the potentials are negative.
             # We use a small value to avoid numerical issues.
             barrier_loss = 0.5 * (self.seed_potential.clamp(max=0) ** 2).sum()
-            concave_loss -= barrier * barrier_loss
+            concave_loss -= self.barrier * barrier_loss
 
             barrier_gradient = self.seed_potential.clamp(max=0)
-            concave_grad -= barrier * barrier_gradient
+            concave_grad -= self.barrier * barrier_gradient
 
             # TODO: use a sparse Hessian matrix instead of a dense one
             concave_hessian -= torch.diag(
-                barrier * (self.seed_potential < 0).float()
+                self.barrier * (self.seed_potential <= 0).float()
             )
 
         self.dual_loss = concave_loss
@@ -783,7 +794,6 @@ class ParticleSystem:
     def fit_cells(
         self,
         max_iter=10,
-        barrier=None,
         warm_start=True,
         stopping_criterion: Literal[
             "average error", "max error"
@@ -816,9 +826,6 @@ class ParticleSystem:
         ----------
         max_iter : int, optional
             The maximum number of iterations.
-        barrier : float, optional
-            Optional barrier parameter for the Newton method,
-            which promotes positivity for the dual potentials.
         warm_start : bool, optional
             If True, uses the current potentials as a starting point.
             Otherwise, starts from zero potentials.
@@ -839,8 +846,7 @@ class ParticleSystem:
             If True, we print information to monitor convergence.
         """
 
-        # Initial the dual potentials for each seed, i.e. each cell except
-        # cell 0 that corresponds to the ambient space.
+        # Initialize the dual potentials for each particle.
         # These dual potentials (denoted by "f_i" in our papers)
         # act on the cost functions as negative offsets, i.e.
         # they turn c_i(x) into c_i(x) - f_i.
@@ -877,71 +883,111 @@ class ParticleSystem:
                 msg = "Newton's method is only available when self.integral_dimension == 1."
                 raise ValueError(msg)
 
-            if False:
-                optimizer = torch.optim.SGD([seed_potentials], lr=1)
-            else:
-                # Small hack: use the LBFGS optimizer with max_iter = 1
-                # to get access to a good line search algorithm.
-                optimizer = torch.optim.LBFGS(
-                    [self.seed_potential],
-                    lr=1,
-                    line_search_fn="strong_wolfe",
-                    tolerance_grad=(atol + rtol * self.volume.min())
-                    / self.domain_volume,
-                    tolerance_change=1e-20,
-                    max_iter=1,
-                )
+            # We need to "launch" the descent with a first computation.
+            self.compute_dual_loss()
 
-            def step(closure, current_value):
-                # grad of the convex minimization problem
-                grad = -self.dual_grad
-                hessian = -self.dual_hessian  # hessian is >= 0
+            def step():
+                # hessian is >= 0. Basically, -1 * Laplacian
+                hessian = -self.dual_hessian
                 # Make it > 0 to avoid numerical issues
-                hessian = hessian + 1e-6 * torch.eye(
+                diagonal = 1e-6 * torch.eye(
                     self.n_particles, device=self.device
                 )
-                # We solve the linear system Hessian * delta = -grad
-                # TODO: using a sparse Hessian matrix and an algebraic multigrid solver
-                direction = torch.linalg.solve(hessian, -grad)
+                # We solve the linear system Hessian * delta = grad
+                # TODO: use a sparse Hessian matrix and an algebraic multigrid solver
+                direction = torch.linalg.solve(
+                    hessian + diagonal, self.dual_grad
+                )
 
-                """
-                direction_error = hessian @ direction + grad
-                print("")
-                print("Volume error:", self.volume_error)
-                print("-Gradient:", -grad)
-                print("Direction:", direction)
-                print("Newton error:", direction_error.abs().max())
-                """
+                if False:
+                    solver_error = hessian @ direction - grad
+                    print("")
+                    print("Volume error:", self.volume_error)
+                    print("Gradient    :", grad)
+                    print("Direction   :", direction)
+                    print("Solver error:", solver_error.abs().max())
+
                 self.descent_direction = direction
 
-                if True:
-                    # Implement line search by hand
-                    t = 1
-                    old_potential = self.seed_potential.clone()
-                    current_error = self.volume_error.abs().max()
-                    while True:
-                        self.seed_potential = old_potential + t * direction
-                        new_value = closure()
+                # Implement line search by hand
+                old_potential = self.seed_potential.clone()
 
-                        if False:
-                            if new_value < current_value:
-                                break
-                        elif self.volume_error.abs().max() < current_error:
-                            print("Breaking at t=", t)
-                            break
-                        t /= 2
-                        if t < 1e-8:
-                            break
-                else:
-                    self.seed_potential.grad = -direction
-                    optimizer.step(closure=closure)
-                    new_value = closure()
+                line_search_criterion = "max error"
+
+                if line_search_criterion == "dual loss":
+                    current_value = self.dual_loss
+                    directional_derivative = self.dual_grad @ direction
+
+                elif line_search_criterion == "max error":
+                    current_value = self.volume_error.abs().max()
+
+                elif line_search_criterion == "gradient norm":
+                    # self.dual_grad(f + t * direction) ~ self.dual_grad(f) + t * H_dir
+                    H_dir = self.dual_hessian @ direction
+                    # H_dir should be close to -grad, but not exactly due to
+                    # the extra coefficients on the diagonal
+
+                    # We monitor convergence via the squared norm of the gradient.
+                    # This is (much) more numerically stable than using the dual loss itself.
+                    # By construction,
+                    # Error(f + t * direction)
+                    # = SqNorm(grad(f + t * direction))
+                    # ~ SqNorm(grad(f) + t * H_dir)
+                    # ~ Error(f) + 2 * t * grad @ H_dir + t^2 * H_dir @ H_dir
+                    current_value = (self.dual_grad**2).sum()
+                    grad = self.dual_grad.clone()
+                    grad_grad = (grad @ grad).item()
+                    grad_H_dir = (self.dual_grad @ H_dir).item()
+                    H_dir_H_dir = (H_dir @ H_dir).item()
+                    print(
+                        f"{grad_grad:.2e} _ {grad_H_dir:.2e} _ {H_dir_H_dir:.2e}, ",
+                        end="",
+                    )
 
                 if verbose:
-                    print(":", end="", flush=True)
-                return new_value
+                    print(
+                        f"Starting line search with criterion {line_search_criterion}"
+                    )
+                    print(f"        Start => {current_value:.8e}", end="")
 
-            n_outer_iterations = max_iter
+                for k in range(20):
+                    t = 2 ** (-k)
+                    self.seed_potential = old_potential + t * direction
+                    self.compute_dual_loss()
+
+                    if line_search_criterion == "dual loss":
+                        armijio = (
+                            current_value + 0.5 * t * directional_derivative
+                        )
+                        if verbose:
+                            print(
+                                f"\n        2**-{k} => {self.dual_loss:.8e} >=? {armijio:.8e}, ",
+                                end="",
+                            )
+                        if self.dual_loss >= armijio:
+                            break
+                    elif line_search_criterion == "max error":
+                        if verbose:
+                            print(
+                                f"\n        2**-{k} => {self.volume_error.abs().max():.2e} <=? {current_value:.2e}, ",
+                                end="",
+                            )
+                        if self.volume_error.abs().max() <= current_value:
+                            break
+                    elif line_search_criterion == "gradient norm":
+                        grad2 = (self.dual_grad**2).sum()
+                        # expected_error = ((1 - t) ** 2) * current_error
+                        expected_grad2 = (
+                            grad_grad + 2 * t * grad_H_dir + t**2 * H_dir_H_dir
+                        )
+                        expected_grad2b = ((grad + t * H_dir) ** 2).sum()
+                        if verbose:
+                            print(
+                                f"\n        2**-{k} => {grad2:.2e} vs {expected_grad2:.2e} vs {expected_grad2b:.2e}, ",
+                                end="",
+                            )
+                        if grad2 <= 1.1 * current_value:
+                            break
 
         elif method == "L-BFGS-B":
             # We use LBFGS here as it is both simple and versatile.
@@ -956,51 +1002,31 @@ class ParticleSystem:
                 tolerance_grad=(atol + rtol * self.volume.min())
                 / (10 * self.domain_volume),
                 tolerance_change=1e-20,
-                max_iter=max_iter,
+                max_iter=20,
             )
 
-            def step(closure, _):
+            def closure():
+                # Zero the gradients on the dual seed_potentials
+                optimizer.zero_grad()
+                # Compute the dual OT loss, gradient and Hessian
+                self.compute_dual_loss()
+                # Since the dual problem is concave, we minimize -dual_loss
+                convex_loss = -self.dual_loss
+                self.seed_potential.grad = -self.dual_grad
+                if verbose:
+                    print(".", end="", flush=True)
+
+                return convex_loss
+
+            def step():
                 optimizer.step(closure=closure)
-                cl = closure()
                 self.descent_direction = -self.seed_potential.grad
-                return cl
-
-            n_outer_iterations = 10
-
-        def closure():
-            # Zero the gradients on the dual seed_potentials
-            optimizer.zero_grad()
-            # If NaN, throw an error
-            if torch.isnan(self.seed_potential).any():
-                msg = "NaN detected in seed potentials."
-                raise ValueError(msg)
-
-            # Compute the dual OT loss, gradient and Hessian
-            self.compute_dual_loss(barrier=barrier)
-            # Since the dual problem is concave, we minimize -dual_loss
-            convex_loss = -self.dual_loss
-            self.seed_potential.grad = -self.dual_grad
-
-            if verbose:
-                print(".", end="", flush=True)
-
-            return convex_loss
-
-        current_value = closure()
-
-        # Actual optimization loop
-        if verbose:
-            print(
-                f"Dual cost: {-current_value.item():.15e} ", end="", flush=True
-            )
 
         converged = False
-        for outer_it in range(n_outer_iterations):
-            current_value = step(closure, current_value)
+        for outer_it in range(max_iter):
 
-            if verbose:
-                lo = current_value.item()
-                print(f"it{outer_it}={-lo:.15e}", end="", flush=True)
+            print(f"    it={outer_it} : ", end="")
+            step()
 
             error = self.volume_error.abs()
             threshold = atol + rtol * self.volume.abs()
@@ -1023,9 +1049,6 @@ class ParticleSystem:
         if not stop:
             # Throw a warning if the optimization did not converge
             print("Warning: optimization did not converge.")
-
-        # To be sure, we recompute the cells and loss with the final seed potentials
-        self.compute_dual_loss(barrier=barrier)
         return converged
 
     @property

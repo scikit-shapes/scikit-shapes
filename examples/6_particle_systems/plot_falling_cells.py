@@ -37,7 +37,6 @@ print(f"Total volume of the domain: {domain_volume:,} pixels")
 # Create a population of cells
 #
 
-
 # Define two populations of particles:
 cell_type = (torch.arange(n_particles) > (n_particles // 2)).int()
 print(cell_type)
@@ -51,6 +50,7 @@ precisions = torch.tensor(
     ]
 )
 
+
 particles = sks.ParticleSystem(
     domain=domain,
     particles=[
@@ -58,7 +58,7 @@ particles = sks.ParticleSystem(
             position = torch.rand(2) * torch.tensor([Nx, Ny / 2]) + torch.tensor([0, Ny / 2]),
             precision_matrix = precisions[label],
             volume = volumes[label],
-            power = 2.0,
+            power = .5,
         )
         for label in cell_type
     ],
@@ -66,7 +66,7 @@ particles = sks.ParticleSystem(
 
 
 for _ in range(5):
-    particles.fit_cells()
+    particles.fit_cells(verbose=True)
     particles.position = particles.cell_center
 
 ###############################################################################
@@ -75,7 +75,6 @@ for _ in range(5):
 
 start = time.time()
 cell_volumes = []
-
 
 t = 0
 dt = 0.2
@@ -89,12 +88,12 @@ frames = []
 
 for it in range(101):
     t += dt
-    print(f"Time t={t:.2f} ", end="")
+    print(f"Time t={t:.2f}")
     recall = stiffness * (particles.cell_center - particles.position)
     velocities += (recall + gravity_force) * dt
     particles.position = particles.cell_center + velocities * dt
 
-    particles.fit_cells()
+    particles.fit_cells(verbose=True)
 
     if False:
         colors = cell_type
