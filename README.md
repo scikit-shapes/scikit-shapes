@@ -64,7 +64,7 @@ pip install skshapes
 
 ## From source
 
-If you want the development verion or consider contributing to the codebase, you can also install scikit-shapes locally from a clone of the repository. On a terminal, navigate to the scikit-shapes directory and run :
+If you want the development version or consider contributing to the codebase, you can also install scikit-shapes locally from a clone of the repository. On a terminal, navigate to the scikit-shapes directory and run :
 
 ```bash
 pip install .
