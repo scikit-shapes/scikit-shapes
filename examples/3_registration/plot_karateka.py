@@ -2,7 +2,7 @@
 Intrinsic vs Extrinsic deformation
 ==================================
 
-Intrisic and extrinsic deformations are two different approaches to non-rigid
+Intrinsic and extrinsic deformations are two different approaches to non-rigid
 deformation.
 
 This example shows how both approaches differ on a simple 2D example.
