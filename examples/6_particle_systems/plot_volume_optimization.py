@@ -27,6 +27,7 @@ import skshapes as sks
 # one of the dual potentials:
 #
 
+
 def display_optimization_graphs(
         particles: sks.ParticleSystem,
         particle_index: int = 0,
@@ -39,7 +40,7 @@ def display_optimization_graphs(
         lambda: collections.defaultdict(lambda: torch.zeros(len(potential_values)))
     )
 
-    for integral_dimension in [1]: #[0, 1]:
+    for integral_dimension in [0, 1]:
 
         # Set the smoothness of the dual cost:
         particles.integral_dimension = integral_dimension
@@ -66,7 +67,6 @@ def display_optimization_graphs(
             max_iter=10,
         )
         print(particles.seed_potential[particle_index], particles.cell_volume)
-
 
     # Plot the results on 4 different figures, one for each key in the record
     for k in record:

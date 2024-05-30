@@ -128,12 +128,12 @@ class ParticleSystem:
         # We use these grids to store the index of the cell that is associated
         # to each pixel.
         self.pixels = ti.field(ti.i32)
-        self.pixels_buffer = ti.field(ti.i32)
+        self.pixels_2 = ti.field(ti.i32)
 
         if block_size is None:
             # By default, the pixel grids are just vanilla C-contiguous arrays.
             ti.root.dense(ind, self.shape).place(self.pixels)
-            ti.root.dense(ind, self.shape).place(self.pixels_buffer)
+            ti.root.dense(ind, self.shape).place(self.pixels_2)
         else:
             # But Taichi also lets us encode them as collections of square patches.
             # This can be useful for performance, especially on GPUs.
@@ -142,9 +142,7 @@ class ParticleSystem:
             # The lines below mean that the pixel grids are now stored as
             # a collection of square patches of size (block_size, block_size).
             ti.root.dense(ind, coarse).dense(ind, block).place(self.pixels)
-            ti.root.dense(ind, coarse).dense(ind, block).place(
-                self.pixels_buffer
-            )
+            ti.root.dense(ind, coarse).dense(ind, block).place(self.pixels_2)
 
     def _load_particles(self, particles: list[Particle]):
         """Loads the particles from a list of dictionaries."""
@@ -359,6 +357,42 @@ class ParticleSystem:
             self.pixels[X] = best_index
 
     @ti.kernel
+    def _compute_best_2_labels_bruteforce(self):
+        """For each pixel, computes the index of the two cells with the lowest cost.
+        This is a brute-force method that is suitable for a small number of cells.
+        """
+
+        for X in ti.grouped(self.pixels):
+            best_cost = ti_float(0.0)
+            best_index = AMBIENT_SPACE_LABEL
+
+            best_cost_2 = ti_float(1e30)
+            best_index_2 = AMBIENT_SPACE_LABEL
+
+            # We should have best_cost <= best_cost_2
+            # In case of ties, best_index <= best_index_2
+
+            for i in ti.ndrange(self.n_particles):
+                cost = self._cost_offset(i, X)
+
+                if cost < best_cost:
+                    # 2nd <- 1st
+                    best_cost_2 = best_cost
+                    best_index_2 = best_index
+
+                    # 1st <- new
+                    best_cost = cost
+                    best_index = i
+
+                elif cost < best_cost_2:
+                    # 2nd <- new
+                    best_cost_2 = cost
+                    best_index_2 = i
+
+            self.pixels[X] = best_index
+            self.pixels_2[X] = best_index_2
+
+    @ti.kernel
     def _init_sites(self):
         """Puts one pixel per seed in the pixel grid to init the Jump Flood Algorithm."""
         # Clear the pixels grid:
@@ -405,14 +439,14 @@ class ParticleSystem:
     @ti.func
     def _clear_buffer(self):
         """Sets all pixels in the buffer to the ambient space."""
-        for ind in ti.grouped(self.pixels_buffer):
-            self.pixels_buffer[ind] = AMBIENT_SPACE_LABEL
+        for ind in ti.grouped(self.pixels_2):
+            self.pixels_2[ind] = AMBIENT_SPACE_LABEL
 
     @ti.func
     def _copy_buffer(self):
         """Copies the pixel buffer to the main pixel grid."""
         for ind in ti.grouped(self.pixels):
-            self.pixels[ind] = self.pixels_buffer[ind]
+            self.pixels[ind] = self.pixels_2[ind]
 
     @ti.kernel
     def _jfa_step(self, step: ti.i32):
@@ -452,7 +486,7 @@ class ParticleSystem:
 
             # We must use an intermediate buffer to avoid overwriting the pixels
             # while the main loop is still running
-            self.pixels_buffer[X] = best_index
+            self.pixels_2[X] = best_index
 
         self._copy_buffer()
 
@@ -513,9 +547,9 @@ class ParticleSystem:
 
         Parameters
         ----------
-        volume_corrections : (n_particles,) ti ndarray
+        volume_corrections : (1 + n_particles,) ti ndarray
             The volume corrections for the cells.
-        ot_hessian : (n_particles, n_particles) ti ndarray
+        ot_hessian : (1 + n_particles, 1 + n_particles) ti ndarray
             The Hessian of the dual semi-discrete optimal transport problem.
             Since the dual problem is concave, the Hessian is negative.
 
@@ -525,48 +559,134 @@ class ParticleSystem:
             The corrective term for the integral of the min-cost function.
         """
         out = ti_float(0.0)
-        for X in ti.grouped(self.pixels):
+        for x in ti.grouped(self.pixels):
             for dpos in ti.static(self.segment_connectivity):
-                Y = X + ti.cast(dpos, dtype=ti.i32)
-                Y = self.wrap_indices(Y)
+                y = x + ti.cast(dpos, dtype=ti.i32)
+                y = self.wrap_indices(y)
 
-                i = self.pixels[X]  # Index of the best cell at pixel X
-                j = self.pixels[Y]  # Index of the best cell at pixel Y
+                i = self.pixels[x]  # Index of the best cell at pixel x
+                j = self.pixels[y]  # Index of the best cell at pixel y
 
                 # Are we on the boundary between two cells?
-                # Exclude the mask, and disable a ruff tip that doesn't fit with taichi
                 if i != j and j != MASK_LABEL and i != MASK_LABEL:
-                    # Compute the costs of the two cells at the two pixels
+                    # Get the indices of the 2nd best cells at pixels x and y
+                    i2 = self.pixels_2[x]  # = j, most often
+                    j2 = self.pixels_2[y]  # = i, most often
+
+                    # Compute the delta between the two best cells at the two pixels
                     # By definition of i, Mx >= mx
-                    Mx = self._cost_offset(j, X)
-                    mx = self._cost_offset(i, X)
-                    hx = Mx - mx  # >= 0
+                    Mx = self._cost_offset(i2, x)
+                    mx = self._cost_offset(i, x)
+                    X = Mx - mx  # >= 0
 
                     # By definition of j, My >= my
-                    My = self._cost_offset(i, Y)
-                    my = self._cost_offset(j, Y)
-                    hy = My - my  # >= 0
+                    My = self._cost_offset(j2, y)
+                    my = self._cost_offset(j, y)
+                    Y = My - my  # >= 0
 
-                    if hx > 0 or hy > 0:  # avoid divisions by 0
-                        H = 1 / (hx + hy)
-                        out += 0.5 * H * hx * hy
+                    # Since AMBIENT_SPACE_LABEL == -1,
+                    # we need to offset everything prior to filling
+                    # volume_corrections and the hessian
+                    i += 1
+                    j += 1
+                    i2 += 1
+                    j2 += 1
 
-                        if i != AMBIENT_SPACE_LABEL:
-                            volume_corrections[i] += 0.5 * H * (hx - hy)
-                        if j != AMBIENT_SPACE_LABEL:
-                            volume_corrections[j] += 0.5 * H * (hy - hx)
+                    if X > 0 or Y > 0:  # avoid divisions by 0
+                        invXpY = 1 / (X + Y)
+                        out += 0.5 * invXpY * X * Y
 
-                        # TODO: use a sparse Hessian matrix instead of a dense one
-                        if i != AMBIENT_SPACE_LABEL:
-                            ot_hessian[i, i] -= H
-                        if j != AMBIENT_SPACE_LABEL:
-                            ot_hessian[j, j] -= H
-                        if (
-                            i != AMBIENT_SPACE_LABEL
-                            and j != AMBIENT_SPACE_LABEL
-                        ):
-                            ot_hessian[i, j] += H
-                            ot_hessian[j, i] += H
+                        dX = 0.5 * (Y * invXpY) ** 2
+                        dY = 0.5 * (X * invXpY) ** 2
+
+                        if i != j2:
+                            volume_corrections[i] -= dX
+                            volume_corrections[j2] += dY
+                        else:
+                            # volume_corrections[i] += dY - dX
+                            # but numerically stable, since
+                            # dY - dX = .5 * (X**2 - Y**2) / (X + Y)**2
+                            #         = .5 * (X - Y) / (X + Y)
+                            volume_corrections[i] += 0.5 * invXpY * (X - Y)
+
+                        if j != i2:
+                            volume_corrections[j] -= dY
+                            volume_corrections[i2] += dX
+                        else:
+                            # volume_corrections[j] += dX - dY
+                            # but numerically stable, since
+                            # dX - dY = .5 * (Y**2 - X**2) / (X + Y)**2
+                            #         = .5 * (Y - X) / (X + Y)
+                            volume_corrections[j] += 0.5 * invXpY * (Y - X)
+
+                        if i == j2 and j == i2:
+                            # Most common case: only two cells are "active"
+                            # on the segment [x, y]
+
+                            # TODO: use a sparse Hessian matrix instead of a dense one
+                            ot_hessian[i, i] -= invXpY
+                            ot_hessian[j, j] -= invXpY
+                            ot_hessian[i, j] += invXpY
+                            ot_hessian[j, i] += invXpY
+
+                        else:
+                            A = -(Y**2) / (X + Y) ** 3  # = dXX
+                            B = (X * Y) / (X + Y) ** 3  # = dXY
+                            C = -(X**2) / (X + Y) ** 3  # = dYY
+                            D = -invXpY  # = A - 2*B + C
+                            E = Y / (X + Y) ** 2  # = B - A
+                            F = X / (X + Y) ** 2  # = B - C
+
+                            if i == j2 and j != i2:
+                                ot_hessian[i, i] += D
+                                ot_hessian[i2, i2] += A
+                                ot_hessian[j, j] += C
+
+                                ot_hessian[i, i2] += E
+                                ot_hessian[i2, i] += E
+
+                                ot_hessian[i, j] += F
+                                ot_hessian[j, i] += F
+
+                                ot_hessian[i2, j] -= B
+                                ot_hessian[j, i2] -= B
+
+                            elif i != j2 and j == i2:
+                                ot_hessian[i, i] += A
+                                ot_hessian[j, j] += D
+                                ot_hessian[j2, j2] += C
+
+                                ot_hessian[i, j] += E
+                                ot_hessian[j, i] += E
+
+                                ot_hessian[i, j2] -= B
+                                ot_hessian[j2, i] -= B
+
+                                ot_hessian[j, j2] += F
+                                ot_hessian[j2, j] += F
+
+                            else:
+                                # Very rare case, i != j2 and j != i2,
+                                # four different cells are involved on [x, y]
+                                ot_hessian[i, i] += A
+                                ot_hessian[i2, i2] += A
+                                ot_hessian[i, i2] -= A
+                                ot_hessian[i2, i] -= A
+
+                                ot_hessian[j, j] += C
+                                ot_hessian[j2, j2] += C
+                                ot_hessian[j, j2] -= C
+                                ot_hessian[j2, j] -= C
+
+                                ot_hessian[i, j] += B
+                                ot_hessian[j, i] += B
+                                ot_hessian[i2, j2] += B
+                                ot_hessian[j2, i2] += B
+
+                                ot_hessian[i2, j] -= B
+                                ot_hessian[j, i2] -= B
+                                ot_hessian[i, j2] -= B
+                                ot_hessian[j2, i] -= B
 
         return out
 
@@ -615,12 +735,23 @@ class ParticleSystem:
         # We expect that the exact bruteforce method will be faster
         # when the number of cells is small (< 1000 ?)
         if method == "bruteforce":
-            self._compute_labels_bruteforce()
+            if self.integral_dimension == 0:
+                self._compute_labels_bruteforce()
+            elif self.integral_dimension == 1:
+                self._compute_best_2_labels_bruteforce()
+            else:
+                msg = "self.integral_dimension should be in {0, 1}."
+                raise ValueError(msg)
 
         # The Jump Flooding Algorithm is more efficient for a large number of cells,
         # especially if we use a power-of-two domain and a small-ish init_step like
         # 16 or 32.
         elif method == "JFA":
+
+            if self.integral_dimension == 1:
+                msg = "We should add support for 2nd best pixel in the JFA algorithm."
+                raise NotImplementedError(msg)
+
             # Create a list of steps that looks like
             # [1, N/2, N/4, N/8, ... 1]
             steps = [1]  # Start with a step of 1, aka. "1+JFA"
@@ -660,12 +791,12 @@ class ParticleSystem:
 
         # TODO: use a sparse Hessian matrix instead of a dense ones
         ot_hessian = torch.zeros(
-            (self.n_particles, self.n_particles),
+            (1 + self.n_particles, 1 + self.n_particles),
             device=self.device,
         )
 
         if self.integral_dimension == 0:
-            self.ot_hessian = ot_hessian
+            self.ot_hessian = ot_hessian[1:, 1:].contiguous()
 
         elif self.integral_dimension == 1:
             # If dimension == 1, we use 1D elements that correspond to the segments
@@ -674,7 +805,9 @@ class ParticleSystem:
             # direct computations show that we must add corrective terms to the
             # cost integral along the boundaries of the cell,
             # and correct the cell volumes as well.
-            volume_corrections = torch.zeros_like(self.cell_volume)
+            volume_corrections = torch.zeros(
+                (1 + self.n_particles,), device=self.device
+            )
 
             # Compute the extra terms for the cost integral and the cell volumes
             # that correspond to a switch from a piecewise constant model on
@@ -682,6 +815,9 @@ class ParticleSystem:
             cost_correction = self._corrective_terms_1D(
                 volume_corrections, ot_hessian
             )
+
+            volume_corrections = volume_corrections[1:].contiguous()
+            ot_hessian = ot_hessian[1:, 1:].contiguous()
 
             assert volume_corrections.shape == (self.n_particles,)
             assert self.seed_potential.shape == (self.n_particles,)
@@ -733,6 +869,16 @@ class ParticleSystem:
         # Compute the Laguerre cells, i.e. assign a label i(x) to each pixel x
         # N.B.: this also updates self.taichi_seed_potential
         self.compute_labels()
+
+        # TODO: remove this
+        # assert (self.pixel_labels != self.pixel_labels_2).all()
+
+        if (self.integral_dimension == 1) and (
+            self.pixel_labels == self.pixel_labels_2
+        ).any():
+            print((self.pixel_labels == self.pixel_labels_2).sum())
+            m = self.pixel_labels == self.pixel_labels_2
+            print(self.pixel_labels[m])
 
         # The gradient of the loss function is the difference between the current
         # cell volumes and the target volumes.
@@ -912,7 +1058,7 @@ class ParticleSystem:
                 # Implement line search by hand
                 old_potential = self.seed_potential.clone()
 
-                line_search_criterion = "max error"
+                line_search_criterion = "dual loss"
 
                 if line_search_criterion == "dual loss":
                     current_value = self.dual_loss
@@ -957,7 +1103,8 @@ class ParticleSystem:
 
                     if line_search_criterion == "dual loss":
                         armijio = (
-                            current_value + 0.5 * t * directional_derivative
+                            0.99 * current_value
+                            + 0.5 * t * directional_derivative
                         )
                         if verbose:
                             print(
@@ -1056,6 +1203,16 @@ class ParticleSystem:
     def pixel_labels(self) -> Int32Tensor:
         """Returns a canvas (same shape as domain) with the index of the cell at each pixel."""
         labels = self.pixels.to_torch()
+        assert labels.shape == self.shape
+        assert labels.dtype == torch.int32
+        assert labels.device == self.device
+        return labels
+
+    @property
+    @typecheck
+    def pixel_labels_2(self) -> Int32Tensor:
+        """Returns a canvas (same shape as domain) with the index of the 2nd best cell at each pixel."""
+        labels = self.pixels_2.to_torch()
         assert labels.shape == self.shape
         assert labels.dtype == torch.int32
         assert labels.device == self.device
