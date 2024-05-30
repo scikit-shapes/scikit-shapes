@@ -130,7 +130,7 @@ def test_errors_dataset_attributes():
     # add two attributes
     attributes.append(torch.rand(50, 3))
     attributes.append(torch.rand(50, 3))
-    print(attributes)  # noqa: T201
+    print(attributes)
 
     with pytest.raises(ValueError, match="should not be empty"):
         sks.data.utils.DataAttributes.from_dict({})

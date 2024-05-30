@@ -9,7 +9,6 @@ The rules for signal propagation are defined by the `FineToCoarsePolicy <../../a
 `CoarseToFinePolicy <../../api/skshapes.html#skshapes.types.FineToCoarsePolicy>`_ classes.
 """
 
-
 import pyvista as pv
 import pyvista.examples
 
@@ -47,7 +46,9 @@ multiscale_bunny.propagate(
 
 signal_low = multiscale_bunny.at(ratio=0.005).points[:, 1]
 multiscale_bunny.at(ratio=0.005).point_data["height_low_constant"] = signal_low
-multiscale_bunny.at(ratio=0.005).point_data["height_low_smoothing"] = signal_low
+multiscale_bunny.at(ratio=0.005).point_data["height_low_smoothing"] = (
+    signal_low
+)
 
 # define a coarse_to_fine propagation scheme
 coarse_to_fine_policy = sks.CoarseToFinePolicy(
@@ -73,7 +74,7 @@ multiscale_bunny.propagate(
 
 
 ###############################################################################
-# Visualize the multiscale representation
+# Visualize the multiscale representation
 
 plotter = pv.Plotter(shape=(3, 4))
 row = 0

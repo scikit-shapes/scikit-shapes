@@ -232,22 +232,20 @@ class Registration:
         loss_value = loss_fn(parameter)
         if self.verbose > 0:
             loss_value = loss_fn(parameter)
-            print(f"Initial loss : {loss_fn(parameter):.2e}")  # noqa: T201
-            print(f"  = {self.current_loss:.2e}", end="")  # noqa: T201
+            print(f"Initial loss : {loss_fn(parameter):.2e}")
+            print(f"  = {self.current_loss:.2e}", end="")
             if self.regularization_weight != 0:
-                print(  # noqa: T201
+                print(
                     f" + {self.regularization_weight} * "
                     f"{self.current_regularization:.2e}",
                     end="",
                 )
             else:
-                print(  # noqa: T201
+                print(
                     " + 0",
                     end="",
                 )
-            print(  # noqa: T201
-                " (fidelity + regularization_weight * regularization)"
-            )
+            print(" (fidelity + regularization_weight * regularization)")
 
         fidelity_history = []
         regularization_history = []
@@ -269,24 +267,20 @@ class Registration:
             regularization_history.append(self.current_regularization)
             if self.verbose > 0:
                 loss_value = loss_fn(parameter)
-                print(  # noqa: T201
-                    f"Loss after {_i + 1} iteration(s) : {loss_value:.2e}"
-                )
-                print(f"  = {self.current_loss:.2e}", end="")  # noqa: T201
+                print(f"Loss after {_i + 1} iteration(s) : {loss_value:.2e}")
+                print(f"  = {self.current_loss:.2e}", end="")
                 if self.regularization_weight != 0:
-                    print(  # noqa: T201
+                    print(
                         f" + {self.regularization_weight} * "
                         f"{self.current_regularization:.2e}",
                         end="",
                     )
                 else:
-                    print(  # noqa: T201
+                    print(
                         " + 0",
                         end="",
                     )
-                print(  # noqa: T201
-                    " (fidelity + regularization_weight * regularization)"
-                )
+                print(" (fidelity + regularization_weight * regularization)")
 
         # Store the device type of the parameter (useful for testing purposes)
         self.internal_parameter_device_type = parameter.device.type

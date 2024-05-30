@@ -13,7 +13,7 @@ We use the implementation proposed by `fast-simplification <https://github.com/p
 """
 
 ###############################################################################
-# Load a mesh
+# Load a mesh
 
 import pyvista as pv
 import pyvista.examples
@@ -23,8 +23,8 @@ import skshapes as sks
 bunny = sks.PolyData(pyvista.examples.download_bunny())
 
 ###############################################################################
-# Create the multiscale representation with different ratios of the original
-# number of points
+# Create the multiscale representation with different ratios of the original
+# number of points
 
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.005])
 

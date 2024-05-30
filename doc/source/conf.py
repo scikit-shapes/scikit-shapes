@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import importlib.metadata
 import locale
 import os
@@ -21,8 +22,8 @@ from pyvista.core.utilities.docs import (  # noqa: F401
 )
 
 # Otherwise VTK reader issues on some systems, causing sphinx to crash. See also #226.
-locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
-
+with contextlib.suppress(locale.Error):
+    locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -43,7 +44,7 @@ if not Path.exists(pyvista.FIGURE_PATH):
 
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True
-os.environ['PYVISTA_BUILDING_GALLERY'] = 'true'
+os.environ["PYVISTA_BUILDING_GALLERY"] = "true"
 
 warnings.filterwarnings(
     "ignore",
@@ -75,11 +76,11 @@ extensions = [
     "sphinx_math_dollar",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
-    'sphinx_gallery.gen_gallery',
+    "sphinx_gallery.gen_gallery",
 ]
 
 
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 myst_enable_extensions = [
     "amsmath",
@@ -124,18 +125,23 @@ nitpick_ignore = [
 ]
 
 
-
 sphinx_gallery_conf = {
-    'examples_dirs': '../../examples',   # path to your example scripts
-    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-    'filename_pattern': '/plot_', # execute only files that start with `plot_`
+    "examples_dirs": "../../examples",  # path to your example scripts
+    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+    "filename_pattern": "/plot_",  # execute only files that start with `plot_`
     "ignore_pattern": "/utils_",
-    "image_scrapers": (dynamic_scraper, "matplotlib"), # dynamic_scraper is defined in conf_module.py
+    "image_scrapers": (
+        dynamic_scraper,
+        "matplotlib",
+    ),  # dynamic_scraper is defined in conf_module.py
+    "matplotlib_animations": True,
     "first_notebook_cell": "%matplotlib inline",
     "backreferences_dir": None,
     # Reset module did not work with sphinx-gallery 0.16.0
     # we assume that documentation settings are not modified in examples
-    "reset_modules": (reset_pyvista,), # reset_pyvista is defined in conf_module.py
+    "reset_modules": (
+        reset_pyvista,
+    ),  # reset_pyvista is defined in conf_module.py
     "reset_modules_order": "both",
 }
 

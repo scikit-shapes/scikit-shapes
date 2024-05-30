@@ -36,18 +36,27 @@ def tests(session: nox.Session) -> None:
     session.install(".")
     session.run("pytest", *session.posargs)
 
+
 @nox.session(python=["3.11"])
 def precommit(session: nox.Session) -> None:
     """Run the pre-commit hooks."""
     session.install("-r", "requirements_dev.txt")
-    session.run("pre-commit",  "run",  "--all-files")
+    session.run("pre-commit", "run", "--all-files")
+
 
 @nox.session(python=["3.11"])
 def documentation(session: nox.Session) -> None:
     """Run the pre-commit hooks."""
     install_cpu_torch(session)
-    session.install("-r", "requirements_doc.txt")
+    session.install("-r", "requirements_docs.txt")
     session.install(".")
 
-    session.run("sphinx-apidoc",  "-o",  "doc/source/api/", "--module-first", "--force", "src/skshapes")
+    session.run(
+        "sphinx-apidoc",
+        "-o",
+        "doc/source/api/",
+        "--module-first",
+        "--force",
+        "src/skshapes",
+    )
     session.run("sphinx-build", "-b", "html", "doc/source/", "doc/_build/html")
