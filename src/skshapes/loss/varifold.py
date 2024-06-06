@@ -115,8 +115,8 @@ class VarifoldLoss(BaseLoss):
         """
         super().__call__(source=source, target=target)
 
-        a = varifold_scalar(source, target, sigma=self.sigma)
-        b = varifold_scalar(source, target, sigma=self.sigma)
+        a = varifold_scalar(source, source, sigma=self.sigma)
+        b = varifold_scalar(target, target, sigma=self.sigma)
         c = varifold_scalar(source, target, sigma=self.sigma)
 
         return a + b - 2 * c

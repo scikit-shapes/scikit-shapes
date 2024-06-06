@@ -14,3 +14,4 @@ from .geometry import (
     triangle_centers,
     triangle_normals,
 )
+from .H2_energy import H2_energy

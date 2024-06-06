@@ -49,7 +49,7 @@ class IntrinsicDeformation(BaseModel):
         self,
         n_steps: int = 1,
         metric: Literal[
-            "as_isometric_as_possible", "shell_energy"
+            "as_isometric_as_possible", "shell_energy", "H2"
         ] = "as_isometric_as_possible",
         endpoints: None | Points = None,
         **kwargs,
@@ -66,6 +66,10 @@ class IntrinsicDeformation(BaseModel):
                 "bending_weight": kwargs.get("bending_weight", 0.001)
             }
             self.metric = shell_energy_metric
+
+        elif metric == "H2":
+            self.metric_kwargs = {}
+            self.metric = H2_energy_metric
 
         if endpoints is not None:
             self.fixed_endpoints = True
@@ -333,3 +337,22 @@ def shell_energy_metric(
         triangles=triangles,
         weight=bending_weight,
     ).mean()
+
+
+def H2_energy_metric(
+    points_sequence: Float3dTensor,
+    velocities_sequence: Float3dTensor,  # noqa: ARG001
+    edges: Edges | None = None,  # noqa: ARG001
+    triangles: Triangles | None = None,
+) -> FloatScalar:
+
+    if triangles is None:
+        msg = "This metric requires triangles to be defined"
+        raise AttributeError(msg)
+
+    from ..triangle_mesh import H2_energy
+
+    return H2_energy(
+        points_sequence=points_sequence,
+        triangles=triangles,
+    )
