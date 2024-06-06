@@ -47,3 +47,22 @@ def test_lp_loss(p):
     assert torch.isclose(
         loss(shape_X, shape_Y), torch.tensor(1 + 5 ** (p / 2))
     )
+
+
+def test_varifold_loss():
+
+    loss = sks.VarifoldLoss(
+        radial_kernel="Gaussian",
+        radial_bandwidth=0.1,
+        zonal_kernel="Cauchy-Binet",
+    )
+
+    sphere = sks.Sphere()
+    assert torch.isclose(loss(source=sphere, target=sphere), torch.tensor(0.0))
+
+    translated_sphere = sphere.copy()
+    translated_sphere.points += torch.tensor([0.1, 0.1, 0.1])
+
+    assert not torch.isclose(
+        loss(source=sphere, target=translated_sphere), torch.tensor(0.0)
+    )
