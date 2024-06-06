@@ -69,15 +69,6 @@ def varifold_scalar(
     return (gaussian_kernel * cb_kernel * vol_product).sum(dim=1).sum()
 
 
-def varifold_loss(shape1, shape2, sigma=0.1):
-
-    a = varifold_scalar(shape1, shape1, sigma=sigma)
-    b = varifold_scalar(shape2, shape2, sigma=sigma)
-    c = varifold_scalar(shape1, shape2, sigma=sigma)
-
-    return a + b - 2 * c
-
-
 class VarifoldLoss(BaseLoss):
     """Varifold Loss.
 
@@ -115,8 +106,8 @@ class VarifoldLoss(BaseLoss):
         """
         super().__call__(source=source, target=target)
 
-        a = varifold_scalar(source, target, sigma=self.sigma)
-        b = varifold_scalar(source, target, sigma=self.sigma)
+        a = varifold_scalar(source, source, sigma=self.sigma)
+        b = varifold_scalar(target, target, sigma=self.sigma)
         c = varifold_scalar(source, target, sigma=self.sigma)
 
         return a + b - 2 * c
