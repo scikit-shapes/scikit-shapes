@@ -29,7 +29,7 @@ int_dtype = torch.int64
 try:
     import taichi  # noqa: F401
 
-    taichi_installed = True
+    taichi_available = True
 
 except ImportError:
-    taichi_installed = False
+    taichi_available = False

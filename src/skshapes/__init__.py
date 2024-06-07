@@ -8,7 +8,7 @@ from .features import *
 from .globals import (
     float_dtype,
     int_dtype,
-    taichi_installed,
+    taichi_available,
 )
 from .input_validation import *
 from .loss import *

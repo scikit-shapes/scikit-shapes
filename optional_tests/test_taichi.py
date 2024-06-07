@@ -5,7 +5,7 @@ import pytest
 import skshapes as sks
 
 
-@pytest.mark.skipif(not sks.taichi_installed, reason="Taichi is not installed")
+@pytest.mark.skipif(not sks.taichi_available, reason="Taichi is not installed")
 def test_taichi():
     """This test imports taichi.
 
