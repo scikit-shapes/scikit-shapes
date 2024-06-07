@@ -40,6 +40,10 @@ class IntrinsicDeformation(BaseModel):
         constrained to be at the endpoints and the only free steps are the
         intermediate steps. Providing endpoints is useful to minimize the
         energy of the morphing while keeping the endpoints fixed.
+    use_stiff_edges
+        If the source PolyData has a `stiff_edges` property and this argument
+        is `True`, the `stiff_edges` are passed to the metric. If the source
+        PolyData has no `stiff_edges`, `edges are passed by default.`
     **kwargs
         Additional keyword arguments.
     """
@@ -52,6 +56,7 @@ class IntrinsicDeformation(BaseModel):
             "as_isometric_as_possible", "shell_energy"
         ] = "as_isometric_as_possible",
         endpoints: None | Points = None,
+        use_stiff_edges: bool = True,
         **kwargs,
     ) -> None:
 
@@ -72,6 +77,8 @@ class IntrinsicDeformation(BaseModel):
             self.endpoints = endpoints
         else:
             self.fixed_endpoints = False
+
+        self.use_stiff_edges = use_stiff_edges
 
     @convert_inputs
     @typecheck
@@ -114,6 +121,13 @@ class IntrinsicDeformation(BaseModel):
             raise ValueError(msg)
 
         assert parameter.shape == self.parameter_shape(shape)
+
+        # Choose edges regarding the use_stiff_edges argument
+        if self.use_stiff_edges and shape.stiff_edges is not None:
+            edges = shape.stiff_edges
+
+        else:
+            edges = shape.edges
 
         ##### First, we compute the sequence of morphed points #####
 
@@ -161,7 +175,7 @@ class IntrinsicDeformation(BaseModel):
             regularization = self.metric(
                 points_sequence=newpoints[:, :-1, :],
                 velocities_sequence=velocities,
-                edges=shape.edges,
+                edges=edges,
                 triangles=shape.triangles,
                 **self.metric_kwargs,
             )

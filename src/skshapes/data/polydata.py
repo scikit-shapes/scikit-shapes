@@ -85,6 +85,8 @@ class PolyData(polydata_type):
         The landmarks of the shape.
     control_points
         The control points of the shape.
+    stiff_edges
+        The stiff edges structure of the shape, useful for as_isometric_as_possible
     point_data
         The point data of the shape.
     edge_data
@@ -114,6 +116,7 @@ class PolyData(polydata_type):
         device: str | torch.device | None = None,
         landmarks: Landmarks | IntSequence | None = None,
         control_points: polydata_type | None = None,
+        stiff_edges: Edges | None = None,
         point_data: DataAttributes | None = None,
         edge_data: DataAttributes | None = None,
         triangle_data: DataAttributes | None = None,
@@ -285,10 +288,13 @@ class PolyData(polydata_type):
 
         self.device = device
 
-        # Initialize
+        # Initialize data
         self.point_data = point_data
         self.edge_data = edge_data
         self.triangle_data = triangle_data
+
+        # Initialize stiff_edges
+        self._stiff_edges = stiff_edges
 
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
@@ -417,6 +423,8 @@ class PolyData(polydata_type):
             kwargs["triangle_data"] = self._triangle_data.clone()
         if self._control_points is not None:
             kwargs["control_points"] = self.control_points.copy()
+        if self._stiff_edges is not None:
+            kwargs["stiff_edges"] = self.stiff_edges.clone()
 
         return PolyData(**kwargs, device=self.device)
 
@@ -602,6 +610,115 @@ class PolyData(polydata_type):
         self.edge_data = None
         self.triangle_data = None
         self.cache_clear()
+
+    ###################################
+    #### Stiff Edges getter/setter ####
+    ###################################
+    @property
+    @typecheck
+    def stiff_edges(self) -> Edges | None:
+        """Stiff edges getter"""
+
+        if not hasattr(self, "_stiff_edges"):
+            return None
+
+        return self._stiff_edges
+
+    @stiff_edges.setter
+    @typecheck
+    def stiff_edges(self, stiff_edges: Edges | None) -> None:
+        """Set the stiff edges of the PolyData
+
+        Stiff edges are additional edges that can used as edge structure for
+        some some intrinsic metrics such as as_isometric_as_possible
+
+        Parameters
+        ----------
+        stiff_edges
+            The stiff edges
+
+        Raises
+        ------
+        IndexError
+            If the maximum index in stiff_edges exceeds the number of points
+        """
+
+        if stiff_edges is None:
+            self._stiff_edges = None
+
+        else:
+            if stiff_edges.max() >= self.n_points:
+                raise IndexError(
+                    "The maximum vertex index in edges array is larger than the"
+                    + " number of points."
+                )
+
+            self._stiff_edges = stiff_edges.clone().to(self.device)
+
+    @typecheck
+    def compute_stiff_edges(self, k: int = 2, verbose: bool = False) -> Edges:
+        """Compute the k-neighbors edges graph of edges
+
+        Parameters
+        ----------
+        k, optional
+            the size of the neighborhood, by default 2
+        verbose, optional
+            whether or not display information about the remaining number of steps
+
+        Returns
+        -------
+            The k-neighbors edges graph
+        """
+        if not k > 0:
+            msg = "The number of neighbors k must be positive"
+            raise ValueError(msg)
+
+        edges = self.edges
+
+        if verbose:
+            print(f"Computing k-neighbors graph with k = {k}")  # noqa: T201
+            print(f"Step 1/{k}")  # noqa: T201
+
+        # Compute the adjacency matrix
+        adjacency_matrix = torch.zeros(
+            size=(self.n_points, self.n_points),
+            dtype=torch.int64,
+            device=self.device,
+        )
+        for i in range(self.n_edges):
+            i0, i1 = self.edges[i]
+            adjacency_matrix[i0, i1] = 1
+            adjacency_matrix[i1, i0] = 1
+
+        M = adjacency_matrix
+        stiff_edges = edges.clone()
+        stiff_edges = torch.sort(stiff_edges, dim=1).values
+
+        for i in range(k - 1):
+
+            if verbose:
+                print(f"Step {i+2}/{k}")  # noqa: T201
+
+            # Iterate the adjacency matrix
+            M = M @ adjacency_matrix
+
+            # Get the connectivity (at least one path between the two vertices)
+            a, b = torch.where(M > 0)
+
+            last_edges = torch.stack((a, b), dim=1)
+
+            # Remove the diagonal and the duplicates with the convention
+            # edges[i, 0] < edges[i, 1]
+            last_edges = last_edges[
+                torch.where(last_edges[:, 0] - last_edges[:, 1] < 0)
+            ]
+
+            # Concatenate the new edges and remove the duplicates
+            stiff_edges = torch.cat((stiff_edges, last_edges), dim=0)
+            stiff_edges = torch.unique(stiff_edges, dim=0)
+
+        return stiff_edges
 
     #################################
     #### Triangles getter/setter ####
