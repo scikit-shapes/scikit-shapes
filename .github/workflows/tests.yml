@@ -36,11 +36,15 @@ jobs:
           pip install -r requirements_dev.txt
           pip install .
 
+
+      # Tests are run first with minimal dependencies, to ensure that the core functionality is working
       - name: Test (minimal dependencies)
         run: |
           export SKSHAPES_FLOAT_DTYPE=float32
           pytest --cov-report xml:coverage.xml --durations=0
 
+      # Tests are run with all optional dependencies, to ensure that the optional functionality is working
+      # we only run the tests on the optional_tests folder to avoid running the tests twice
       - name: Test (with all optional dependencies)
         run: |
           pip install .[all]
