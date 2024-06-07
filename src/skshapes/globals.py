@@ -27,8 +27,9 @@ int_dtype = torch.int64
 #
 
 try:
-    import taichi  # noqa: F401
+    import taichi
 
+    taichi.init(arch=taichi.gpu)
     taichi_available = True
 
 except ImportError:
