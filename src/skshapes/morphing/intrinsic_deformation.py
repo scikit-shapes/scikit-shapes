@@ -217,7 +217,12 @@ class IntrinsicDeformation(BaseModel):
     @typecheck
     @property
     def n_free_steps(self) -> int:
-        """Number of integration steps."""
+        """Number of integration steps.
+
+        If the endpoints are fixed, the number of free steps is n_steps - 1 as
+        the last step is fixed by the endpoints. Otherwise, the number of free
+        steps is n_steps.
+        """
         if self.fixed_endpoints:
             return self.n_steps - 1
         return self.n_steps
