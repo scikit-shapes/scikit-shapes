@@ -6,6 +6,7 @@ to obtain the sequence of points of the morphed shape. The morphing is
 regularized by a Riemannian metric on the shape space.
 """
 
+from collections.abc import Callable
 from typing import Literal
 
 import torch
@@ -52,9 +53,9 @@ class IntrinsicDeformation(BaseModel):
     def __init__(
         self,
         n_steps: int = 1,
-        metric: Literal[
-            "as_isometric_as_possible", "shell_energy"
-        ] = "as_isometric_as_possible",
+        metric: (
+            Literal["as_isometric_as_possible", "shell_energy"] | Callable
+        ) = "as_isometric_as_possible",
         endpoints: None | Points = None,
         use_stiff_edges: bool = True,
         **kwargs,
@@ -72,6 +73,10 @@ class IntrinsicDeformation(BaseModel):
             }
             self.metric = shell_energy_metric
 
+        elif callable(metric):
+            metric_validation(metric)
+            self.metric = metric
+
         if endpoints is not None:
             self.fixed_endpoints = True
             self.endpoints = endpoints
@@ -79,6 +84,13 @@ class IntrinsicDeformation(BaseModel):
             self.fixed_endpoints = False
 
         self.use_stiff_edges = use_stiff_edges
+
+        self.copy_features = [
+            "n_steps",
+            "metric",
+            "endpoints",
+            "use_stiff_edges",
+        ]
 
     @convert_inputs
     @typecheck
@@ -226,6 +238,85 @@ class IntrinsicDeformation(BaseModel):
         if self.fixed_endpoints:
             return self.n_steps - 1
         return self.n_steps
+
+
+@typecheck
+def metric_validation(metric: Callable) -> None:
+    """Test the validity of a callable metric.
+
+    Parameters
+    ----------
+    metric
+        The metric to test.
+
+    Raises
+    -------
+    ValueError
+        If the metric has one of the following issues:
+        - The metric does not have the expected arguments (points_sequence,
+        velocities_sequence, edges, triangles).
+        - The metric does not return a `torch.Tensor`.
+        - The metric does not return a scalar.
+        - The metric is not differentiable wrt the velocities.
+    """
+    from inspect import signature
+
+    # test the arguments names
+    fct_signature = signature(metric)
+
+    expected_args = [
+        "points_sequence",
+        "velocities_sequence",
+        "edges",
+        "triangles",
+    ]
+
+    for arg in expected_args:
+        if arg not in fct_signature.parameters:
+
+            msg = (
+                f"The metric must have the following arguments: "
+                f"{', '.join(expected_args)}. The argument {arg} is missing."
+            )
+            raise ValueError(msg)
+
+    # Create a set of random points, triangles, edges and velocities
+    n_steps = 3
+    n_points = 10
+    dim = 3
+    n_triangles = 12
+    n_edges = 15
+    points_sequence = torch.rand(n_points, n_steps, dim)
+    triangles = torch.randint(0, n_points, (n_triangles, 3))
+    edges = torch.randint(0, n_points, (n_edges, 2))
+    velocities_sequence = torch.rand(n_points, n_steps, dim)
+    velocities_sequence.requires_grad = (
+        True  # We need to compute the gradient wrt the velocities
+    )
+
+    # Compute the metric
+    a = metric(
+        points_sequence=points_sequence,
+        velocities_sequence=velocities_sequence,
+        edges=edges,
+        triangles=triangles,
+    )
+
+    # Assert that a is a scalar
+    if not torch.is_tensor(a):
+        msg = "The metric must return a tensor."
+        raise ValueError(msg)
+
+    if a.shape != ():
+        msg = "The metric must return a scalar."
+        raise ValueError(msg)
+
+    # Try to compute the gradient wrt the velocities, it must not raise an error
+    try:
+        torch.autograd.grad(a, velocities_sequence)
+    except RuntimeError as err:
+        msg = "The metric must be differentiable wrt the velocities."
+        raise ValueError(msg) from err
 
 
 def as_isometric_as_possible(
