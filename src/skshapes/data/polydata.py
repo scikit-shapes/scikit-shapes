@@ -630,7 +630,10 @@ class PolyData(polydata_type):
         """Set the stiff edges of the PolyData
 
         Stiff edges are additional edges that can used as edge structure for
-        some some intrinsic metrics such as as_isometric_as_possible
+        some some intrinsic metrics such as as_isometric_as_possible.
+
+        Built-in methods such as `k_ring_graph` or `knn_graph` can be used
+        to compute the stiff edges.
 
         Parameters
         ----------
@@ -656,8 +659,11 @@ class PolyData(polydata_type):
             self._stiff_edges = stiff_edges.clone().to(self.device)
 
     @typecheck
-    def compute_stiff_edges(self, k: int = 2, verbose: bool = False) -> Edges:
-        """Compute the k-neighbors edges graph of edges
+    def k_ring_graph(self, k: int = 2, verbose: bool = False) -> Edges:
+        """Compute the k-ring graph of the shape.
+
+        The k-ring graph is the graph where each vertex is connected to its
+        k-neighbors, where the neighborhoods are defined by the edges.
 
         Parameters
         ----------
@@ -668,7 +674,7 @@ class PolyData(polydata_type):
 
         Returns
         -------
-            The k-neighbors edges graph
+            The k-ring neighbors edges.
         """
         if not k > 0:
             msg = "The number of neighbors k must be positive"
@@ -683,7 +689,7 @@ class PolyData(polydata_type):
         # Compute the adjacency matrix
         adjacency_matrix = torch.zeros(
             size=(self.n_points, self.n_points),
-            dtype=torch.int64,
+            dtype=int_dtype,
             device=self.device,
         )
         for i in range(self.n_edges):
@@ -692,8 +698,8 @@ class PolyData(polydata_type):
             adjacency_matrix[i1, i0] = 1
 
         M = adjacency_matrix
-        stiff_edges = edges.clone()
-        stiff_edges = torch.sort(stiff_edges, dim=1).values
+        k_ring_edges = edges.clone()
+        k_ring_edges = torch.sort(k_ring_edges, dim=1).values
 
         for i in range(k - 1):
 
@@ -715,10 +721,58 @@ class PolyData(polydata_type):
             ]
 
             # Concatenate the new edges and remove the duplicates
-            stiff_edges = torch.cat((stiff_edges, last_edges), dim=0)
-            stiff_edges = torch.unique(stiff_edges, dim=0)
+            k_ring_edges = torch.cat((k_ring_edges, last_edges), dim=0)
+            k_ring_edges = torch.unique(k_ring_edges, dim=0)
 
-        return stiff_edges
+        return k_ring_edges
+
+    @typecheck
+    def knn_graph(self, k: int = 2, include_edges: bool = False) -> Edges:
+        """Return the k-nearest neighbors edges of a shape.
+
+        Parameters
+        ----------
+        shape
+            The shape to process.
+        k
+            The number of neighbors.
+        include_edges
+            If True, the edges of the shape are concatenated with the k-nearest
+            neighbors edges.
+
+        Returns
+        -------
+        Edges
+            The k-nearest neighbors edges.
+        """
+
+        from pykeops.torch import LazyTensor
+
+        points = self.points
+
+        points_i = LazyTensor(points[:, None, :])  # (N, 1, 3)
+        points_j = LazyTensor(points[None, :, :])  # (1, N, 3)
+
+        D_ij = ((points_i - points_j) ** 2).sum(-1)
+
+        out = D_ij.argKmin(K=k + 1, dim=1)
+
+        out = out[:, 1:]
+
+        knn_edges = torch.zeros(
+            (k * self.n_points, 2), dtype=int_dtype, device=self.device
+        )
+        knn_edges[:, 0] = torch.repeat_interleave(
+            torch.arange(self.n_points), k
+        )
+        knn_edges[:, 1] = out.flatten()
+
+        if include_edges and self.edges is not None:
+            knn_edges = torch.cat([self.edges, knn_edges], dim=0)
+
+        knn_edges, _ = torch.sort(knn_edges, dim=1)
+
+        return torch.unique(knn_edges, dim=0)
 
     #################################
     #### Triangles getter/setter ####
