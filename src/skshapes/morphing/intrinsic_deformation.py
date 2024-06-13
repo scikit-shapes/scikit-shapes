@@ -74,6 +74,7 @@ class IntrinsicDeformation(BaseModel):
             self.metric = shell_energy_metric
 
         elif callable(metric):
+            self.metric_kwargs = {}
             metric_validation(metric)
             self.metric = metric
 
@@ -82,6 +83,7 @@ class IntrinsicDeformation(BaseModel):
             self.endpoints = endpoints
         else:
             self.fixed_endpoints = False
+            self.endpoints = None
 
         self.use_stiff_edges = use_stiff_edges
 
@@ -90,6 +92,7 @@ class IntrinsicDeformation(BaseModel):
             "metric",
             "endpoints",
             "use_stiff_edges",
+            "metric_kwargs",
         ]
 
     @convert_inputs

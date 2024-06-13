@@ -2,7 +2,7 @@
 
 from typing import Union
 
-from .baseloss import EmptyLoss, ProductLoss, SumLoss
+from .baseloss import BaseLoss, EmptyLoss, ProductLoss, SumLoss
 from .lp import L2Loss, LandmarkLoss, LpLoss
 from .nearest_neighbors import NearestNeighborsLoss
 from .optimal_transport import OptimalTransportLoss
