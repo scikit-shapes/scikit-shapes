@@ -23,6 +23,12 @@ dependencies = [
     "fast-edges-extraction",
 ]
 
+# Optional dependencies: see https://github.com/scikit-shapes/scikit-shapes/pull/55
+[project.optional-dependencies]
+taichi = ["taichi"]
+all = ["skshapes[taichi]"] # https://stackoverflow.com/questions/75490231/pip-pyproject-toml-can-optional-dependency-groups-require-other-optional-depend
+
+
 [project.urls]
 Documentation = "https://scikit-shapes.github.io/scikit-shapes/"
 Repository = "https://github.com/scikit-shapes/scikit-shapes"
@@ -42,11 +48,21 @@ addopts = [
     "--cov-report=html"
     ]
 xfail_strict = true
-filterwarnings = ["error"]
+
+# Importing taichi leads to a locale.getdefaultlocale deprecation warning, we ignore it
+# See https://stackoverflow.com/questions/58399870/pytest-suppress-deprecationwarning-from-specific-3rd-party-modules/69622325#69622325
+# for dtails about filterwarnings configuration
+filterwarnings = [
+  "error",
+  "ignore:'locale.getdefaultlocale' is deprecated*:DeprecationWarning"
+]
+
+
 log_cli_level = "info"
 testpaths = [
   "tests",
-]
+  "optional_tests"
+  ]
 
 [tool.repo-review]
 ignore = [
