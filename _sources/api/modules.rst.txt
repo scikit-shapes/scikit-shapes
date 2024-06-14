@@ -1,0 +1,7 @@
+skshapes
+========
+
+.. toctree::
+   :maxdepth: 4
+
+   skshapes

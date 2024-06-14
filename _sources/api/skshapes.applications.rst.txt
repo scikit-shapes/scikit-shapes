@@ -1,0 +1,42 @@
+skshapes.applications package
+=============================
+
+.. automodule:: skshapes.applications
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.applications.barycentric\_landmark\_setter module
+----------------------------------------------------------
+
+.. automodule:: skshapes.applications.barycentric_landmark_setter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.applications.browser module
+------------------------------------
+
+.. automodule:: skshapes.applications.browser
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.applications.vertices\_landmark\_setter module
+-------------------------------------------------------
+
+.. automodule:: skshapes.applications.vertices_landmark_setter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.applications.window\_generator module
+----------------------------------------------
+
+.. automodule:: skshapes.applications.window_generator
+   :members:
+   :undoc-members:
+   :show-inheritance:

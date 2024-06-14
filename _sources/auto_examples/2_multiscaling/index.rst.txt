@@ -1,0 +1,79 @@
+
+
+.. _sphx_glr_auto_examples_2_multiscaling:
+
+Multiscaling
+------------
+
+Representing data at various scale is a core feature of scikit-shapes: in addition to data compression, we provide tools for preserving features across scales.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The Multiscale class is used to create a multiscale representation of a triangle mesh using qua...">
+
+.. only:: html
+
+  .. image:: /auto_examples/2_multiscaling/images/thumb/sphx_glr_plot_multiscaling_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_2_multiscaling_plot_multiscaling.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling (triangle mesh)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Landmarks are preserved in the multiscale representation.">
+
+.. only:: html
+
+  .. image:: /auto_examples/2_multiscaling/images/thumb/sphx_glr_plot_multiscaling_landmarks_thumb.gif
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_2_multiscaling_plot_multiscaling_landmarks.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling and landmarks</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how a signal a signal can be propagated across scales on a multiscale repres...">
+
+.. only:: html
+
+  .. image:: /auto_examples/2_multiscaling/images/thumb/sphx_glr_plot_signal_multiscale_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_2_multiscaling_plot_signal_multiscale.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling and signal propagation</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/2_multiscaling/plot_multiscaling
+   /auto_examples/2_multiscaling/plot_multiscaling_landmarks
+   /auto_examples/2_multiscaling/plot_signal_multiscale
+

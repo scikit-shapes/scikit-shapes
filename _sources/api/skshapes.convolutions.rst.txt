@@ -1,0 +1,50 @@
+skshapes.convolutions package
+=============================
+
+.. automodule:: skshapes.convolutions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.convolutions.constant\_kernel module
+---------------------------------------------
+
+.. automodule:: skshapes.convolutions.constant_kernel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.convolutions.linear\_operator module
+---------------------------------------------
+
+.. automodule:: skshapes.convolutions.linear_operator
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.convolutions.mesh\_convolution module
+----------------------------------------------
+
+.. automodule:: skshapes.convolutions.mesh_convolution
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.convolutions.point\_convolution module
+-----------------------------------------------
+
+.. automodule:: skshapes.convolutions.point_convolution
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.convolutions.squared\_distances module
+-----------------------------------------------
+
+.. automodule:: skshapes.convolutions.squared_distances
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,34 @@
+skshapes.input\_validation package
+==================================
+
+.. automodule:: skshapes.input_validation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.input\_validation.converters module
+--------------------------------------------
+
+.. automodule:: skshapes.input_validation.converters
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.input\_validation.notnone\_rules module
+------------------------------------------------
+
+.. automodule:: skshapes.input_validation.notnone_rules
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+skshapes.input\_validation.typechecking module
+----------------------------------------------
+
+.. automodule:: skshapes.input_validation.typechecking
+   :members:
+   :undoc-members:
+   :show-inheritance:

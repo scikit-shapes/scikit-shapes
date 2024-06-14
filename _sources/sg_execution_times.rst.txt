@@ -1,0 +1,76 @@
+
+:orphan:
+
+.. _sphx_glr_sg_execution_times:
+
+
+Computation times
+=================
+**07:08.664** total execution time for 14 files **from all galleries**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_3_registration_plot_lddmm_1_normalization.py` (``../../examples/3_registration/plot_lddmm_1_normalization.py``)
+     - 03:18.875
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_3_registration_plot_karateka.py` (``../../examples/3_registration/plot_karateka.py``)
+     - 01:14.398
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_3_registration_plot_rigid_1_3d.py` (``../../examples/3_registration/plot_rigid_1_3d.py``)
+     - 01:12.836
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_3_registration_plot_multiscale_elastic.py` (``../../examples/3_registration/plot_multiscale_elastic.py``)
+     - 01:04.560
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_3_registration_plot_lddmm_0_skulls.py` (``../../examples/3_registration/plot_lddmm_0_skulls.py``)
+     - 00:05.018
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_2_multiscaling_plot_multiscaling_landmarks.py` (``../../examples/2_multiscaling/plot_multiscaling_landmarks.py``)
+     - 00:03.917
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_2_multiscaling_plot_multiscaling.py` (``../../examples/2_multiscaling/plot_multiscaling.py``)
+     - 00:02.066
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_1_data_plot_polydata.py` (``../../examples/1_data/plot_polydata.py``)
+     - 00:01.569
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_1_data_plot_pyvista.py` (``../../examples/1_data/plot_pyvista.py``)
+     - 00:01.553
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_2_multiscaling_plot_signal_multiscale.py` (``../../examples/2_multiscaling/plot_signal_multiscale.py``)
+     - 00:01.546
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_3_registration_plot_rigid_0_2d.py` (``../../examples/3_registration/plot_rigid_0_2d.py``)
+     - 00:01.356
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_4_applications_plot_1_landmarksetter.py` (``../../examples/4_applications/plot_1_landmarksetter.py``)
+     - 00:00.419
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_5_customization_plot_custom_model_polydata.py` (``../../examples/5_customization/plot_custom_model_polydata.py``)
+     - 00:00.357
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_4_applications_plot_0_browser.py` (``../../examples/4_applications/plot_0_browser.py``)
+     - 00:00.192
+     - 0.0

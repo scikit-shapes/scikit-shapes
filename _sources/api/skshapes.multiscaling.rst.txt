@@ -1,0 +1,18 @@
+skshapes.multiscaling package
+=============================
+
+.. automodule:: skshapes.multiscaling
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.multiscaling.multiscale module
+---------------------------------------
+
+.. automodule:: skshapes.multiscaling.multiscale
+   :members:
+   :undoc-members:
+   :show-inheritance:

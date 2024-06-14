@@ -1,0 +1,18 @@
+skshapes.tasks package
+======================
+
+.. automodule:: skshapes.tasks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+skshapes.tasks.registration module
+----------------------------------
+
+.. automodule:: skshapes.tasks.registration
+   :members:
+   :undoc-members:
+   :show-inheritance:

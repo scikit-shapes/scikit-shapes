@@ -1,0 +1,369 @@
+:orphan:
+
+.. _examples_gallery:
+
+Gallery of examples
+===================
+
+The examples below shows functionalities of scikit-shapes.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    </div>
+
+Data
+----
+
+The data classes are designed to store geometric data and associated features for shape analysis.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="PyVista is a Python library for 3D visualization and mesh manipulation. It is a python wrapper ...">
+
+.. only:: html
+
+  .. image:: /auto_examples/1_data/images/thumb/sphx_glr_plot_pyvista_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_1_data_plot_pyvista.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">PolyData conversion from and to PyVista or Vedo</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This notebook describes the PolyData class, the common class for point clouds, wireframe and tr...">
+
+.. only:: html
+
+  .. image:: /auto_examples/1_data/images/thumb/sphx_glr_plot_polydata_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_1_data_plot_polydata.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">The PolyData class: point cloud, wireframe and triangle meshes</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+Multiscaling
+------------
+
+Representing data at various scale is a core feature of scikit-shapes: in addition to data compression, we provide tools for preserving features across scales.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The Multiscale class is used to create a multiscale representation of a triangle mesh using qua...">
+
+.. only:: html
+
+  .. image:: /auto_examples/2_multiscaling/images/thumb/sphx_glr_plot_multiscaling_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_2_multiscaling_plot_multiscaling.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling (triangle mesh)</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Landmarks are preserved in the multiscale representation.">
+
+.. only:: html
+
+  .. image:: /auto_examples/2_multiscaling/images/thumb/sphx_glr_plot_multiscaling_landmarks_thumb.gif
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_2_multiscaling_plot_multiscaling_landmarks.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling and landmarks</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how a signal a signal can be propagated across scales on a multiscale repres...">
+
+.. only:: html
+
+  .. image:: /auto_examples/2_multiscaling/images/thumb/sphx_glr_plot_signal_multiscale_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_2_multiscaling_plot_signal_multiscale.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling and signal propagation</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+Registration
+------------
+
+The registration class allows to express various registration algorithm within the same framework.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Intrinsic and extrinsic deformations are two different approaches to non-rigid deformation.">
+
+.. only:: html
+
+  .. image:: /auto_examples/3_registration/images/thumb/sphx_glr_plot_karateka_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_3_registration_plot_karateka.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Intrinsic vs Extrinsic deformation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip=" This is an example of rigid alignment in 2D for meshes with points in dense correspondence.">
+
+.. only:: html
+
+  .. image:: /auto_examples/3_registration/images/thumb/sphx_glr_plot_rigid_0_2d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_3_registration_plot_rigid_0_2d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Rigid alignment in 2D</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we demonstrate how to perform rigid registration (also known alignment) of two...">
+
+.. only:: html
+
+  .. image:: /auto_examples/3_registration/images/thumb/sphx_glr_plot_rigid_1_3d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_3_registration_plot_rigid_1_3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Rigid alignment in 3D with landmarks</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="LDDMM is a deformation method based on geodesic shooting in the space of diffeomorphisms. In sc...">
+
+.. only:: html
+
+  .. image:: /auto_examples/3_registration/images/thumb/sphx_glr_plot_lddmm_0_skulls_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_3_registration_plot_lddmm_0_skulls.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Registration with LDDMM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This notebook illustrates the interest of normalizing the cometric in the LDDMM model. We consi...">
+
+.. only:: html
+
+  .. image:: /auto_examples/3_registration/images/thumb/sphx_glr_plot_lddmm_1_normalization_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_3_registration_plot_lddmm_1_normalization.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">LDDMM with normalized kernel</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip=" This examples is an implementation of the paper &quot;Geometric Modeling in Shape Space&quot; by Kilian,...">
+
+.. only:: html
+
+  .. image:: /auto_examples/3_registration/images/thumb/sphx_glr_plot_multiscale_elastic_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_3_registration_plot_multiscale_elastic.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Elastic metric and multiscale strategy</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+Applications
+------------
+
+The application module contains small applications, written with `Vedo <https://vedo.embl.es/>`_ that can be helpful for geometric data processing.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A Browser can be used to visualize a sequence of shapes. The user can navigate through the sequ...">
+
+.. only:: html
+
+  .. image:: /auto_examples/4_applications/images/thumb/sphx_glr_plot_0_browser_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_4_applications_plot_0_browser.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Browse a sequence of shapes</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Landmarks can be set manually or using the landmark setter.">
+
+.. only:: html
+
+  .. image:: /auto_examples/4_applications/images/thumb/sphx_glr_plot_1_landmarksetter_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_4_applications_plot_1_landmarksetter.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Set landmarks</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+Custom model or loss function
+-----------------------------
+
+In addition to the built-in models and loss functions, you can write custom ones.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This notebooks shows how to write a class to define a deformation model.">
+
+.. only:: html
+
+  .. image:: /auto_examples/5_customization/images/thumb/sphx_glr_plot_custom_model_polydata_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_5_customization_plot_custom_model_polydata.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Write a custom deformation model for PolyData.</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+   :includehidden:
+
+
+   /auto_examples/1_data/index.rst
+   /auto_examples/2_multiscaling/index.rst
+   /auto_examples/3_registration/index.rst
+   /auto_examples/4_applications/index.rst
+   /auto_examples/5_customization/index.rst
+
+
+.. only:: html
+
+  .. container:: sphx-glr-footer sphx-glr-footer-gallery
+
+    .. container:: sphx-glr-download sphx-glr-download-python
+
+      :download:`Download all examples in Python source code: auto_examples_python.zip </auto_examples/auto_examples_python.zip>`
+
+    .. container:: sphx-glr-download sphx-glr-download-jupyter
+
+      :download:`Download all examples in Jupyter notebooks: auto_examples_jupyter.zip </auto_examples/auto_examples_jupyter.zip>`
+
+
+.. only:: html
+
+ .. rst-class:: sphx-glr-signature
+
+    `Gallery generated by Sphinx-Gallery <https://sphinx-gallery.github.io>`_

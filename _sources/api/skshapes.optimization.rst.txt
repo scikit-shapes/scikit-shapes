@@ -1,0 +1,7 @@
+skshapes.optimization package
+=============================
+
+.. automodule:: skshapes.optimization
+   :members:
+   :undoc-members:
+   :show-inheritance:
