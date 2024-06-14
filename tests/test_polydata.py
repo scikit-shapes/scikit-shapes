@@ -821,3 +821,56 @@ def test_weighted_points():
     assert torch.allclose(
         weight, torch.tensor([1 / 3, 2 / 3], dtype=sks.float_dtype)
     )
+
+
+def test_stiff_edges_construction():
+    """Test knn and k ring graph construction.
+
+
+    The mesh is a 2D line with a break:
+    0-1-2-3-4 5-6-7-8-9
+
+    The k-ring graph with k=4 take the break into account whereas the knn
+    graph does not.
+
+    We also test the copy method with respect to the stiff_edges attribute, first
+    by testing that the stiff_edges are correctly copied, then by changing the
+    stiff_edges of the copy and checking that the original mesh is not modified.
+    """
+
+    points = torch.tensor([[i, 0] for i in range(10)], dtype=sks.float_dtype)
+    edges = torch.tensor([[i, i + 1] for i in range(4)], dtype=sks.int_dtype)
+    edges = torch.cat([edges, torch.tensor([[5, 6], [6, 7], [7, 8], [8, 9]])])
+
+    polydata = sks.PolyData(points=points, edges=edges)
+
+    k = 4
+
+    with pytest.raises(ValueError, match="k must be positive"):
+        polydata.k_ring_graph(k=-1)
+
+    with pytest.raises(ValueError, match="k must be positive"):
+        polydata.knn_graph(k=-1)
+
+    k_ring = polydata.k_ring_graph(k=k, verbose=True)
+    k_nn = polydata.knn_graph(k=k)
+
+    def neighbors(graph, i):
+        """Return the neighbors of the vertex i in the graph."""
+
+        # Compute row and column indices where the vertex i is present
+        i_edges, indices = torch.where(graph == i)
+        # Get the neighbors of the vertex i
+        return torch.sort(graph[i_edges, 1 - indices]).values
+
+    assert torch.allclose(neighbors(k_ring, 4), torch.tensor([0, 1, 2, 3]))
+
+    assert torch.allclose(neighbors(k_nn, 4), torch.tensor([0, 1, 2, 3, 5, 6]))
+
+    polydata.stiff_edges = k_ring
+    polydata_copy = polydata.copy()
+
+    assert torch.allclose(polydata.stiff_edges, polydata_copy.stiff_edges)
+
+    polydata_copy.stiff_edges = k_nn
+    assert polydata.stiff_edges.shape[0] != polydata_copy.stiff_edges.shape[0]

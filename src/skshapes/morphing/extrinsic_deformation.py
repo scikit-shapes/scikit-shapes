@@ -74,6 +74,15 @@ class ExtrinsicDeformation(BaseModel):
 
         self.ode_module = ODEModule(self.ode_func)
 
+        self.copy_features = [
+            "n_steps",
+            "control_points",
+            "solver",
+            "kernel",
+            "scale",
+            "normalization",
+        ]
+
     @typecheck
     def morph(
         self,

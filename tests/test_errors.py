@@ -261,6 +261,30 @@ def test_error_loss():
     with pytest.raises(ValueError, match="p must be nonnegative"):
         sks.LpLoss(p=-1)
 
+    circle = sks.Circle()
+    sphere = sks.Sphere()
+
+    edges = sphere.edges
+    wireframe_sphere = sks.PolyData(points=sphere.points, edges=edges)
+
+    # Assert that varifold loss cannot be called with 2D PolyData or without triangles
+    varifold_loss = sks.VarifoldLoss()
+
+    dim_error_msg = "Dimension of source and target must be 3 to compute varifold loss. Found 2 for source, 3 for target"
+
+    with pytest.raises(ValueError, match=dim_error_msg):
+        varifold_loss(source=circle, target=sphere)
+
+    triangles_error_msg = (
+        "Source and target must have triangles to compute varifold loss."
+    )
+
+    assert sphere.dim == 3
+    assert wireframe_sphere.dim == 3
+
+    with pytest.raises(ValueError, match=triangles_error_msg):
+        varifold_loss(source=sphere, target=wireframe_sphere)
+
 
 def test_error_custom_model():
     class DummyModel1:

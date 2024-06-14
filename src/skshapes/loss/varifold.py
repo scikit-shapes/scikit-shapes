@@ -1,5 +1,7 @@
 """Nearest Neighbors loss for PolyData."""
 
+from typing import Literal
+
 from pykeops.torch import LazyTensor
 
 from ..input_validation import typecheck
@@ -22,7 +24,9 @@ def extract_geom(shape: polydata_type) -> tuple[Points, Points, Float1dTensor]:
 def varifold_scalar(
     shape1: polydata_type,
     shape2: polydata_type,
-    sigma: float = 0.1,
+    radial_kernel,
+    sigma,
+    zonal_kernel,
 ) -> FloatScalar:
     """Compute the varifold loss between two shapes.
 
@@ -57,25 +61,24 @@ def varifold_scalar(
     V_y = LazyTensor(target_volumes[None, :])
 
     # Gaussian kernel
-    D_xy = ((x_i - y_j) ** 2).sum(-1)
-    gaussian_kernel = (-D_xy / (sigma**2)).exp()
+    if radial_kernel == "Gaussian":
+        D_xy = ((x_i - y_j) ** 2).sum(-1)
+        K_radial = (-D_xy / (sigma**2)).exp()
+    else:
+        msg = "Only Gaussian radial kernel is implemented do far"
+        raise NotImplementedError(msg)
 
     # Cauchy-Binet kernel
-    cb_kernel = (nx_i * ny_j).sum(-1) ** 2
+    if zonal_kernel == "Cauchy-Binet":
+        K_zonal = (nx_i * ny_j).sum(-1) ** 2
+    else:
+        msg = "Only Cauchy-Binet zonal kernel is implemented do far"
+        raise NotImplementedError(msg)
 
     # product of volumes
     vol_product = V_x * V_y
 
-    return (gaussian_kernel * cb_kernel * vol_product).sum(dim=1).sum()
-
-
-def varifold_loss(shape1, shape2, sigma=0.1):
-
-    a = varifold_scalar(shape1, shape1, sigma=sigma)
-    b = varifold_scalar(shape2, shape2, sigma=sigma)
-    c = varifold_scalar(shape1, shape2, sigma=sigma)
-
-    return a + b - 2 * c
+    return (K_radial * K_zonal * vol_product).sum(dim=1).sum()
 
 
 class VarifoldLoss(BaseLoss):
@@ -87,13 +90,25 @@ class VarifoldLoss(BaseLoss):
 
     Parameters
     ----------
-    sigma
-        the bandwidth of the Gaussian kernel
+    radial_kernel
+        The radial kernel (between point positions)
+    zonal_kernel
+        The zonal kernel (between triangles normals)
+    radial_bandwidth
+        The bandwidth for the radial kernel
     """
 
     @typecheck
-    def __init__(self, sigma=0.1) -> None:
-        self.sigma = sigma
+    def __init__(
+        self,
+        radial_kernel: Literal["Gaussian", "uniform"] = "Gaussian",
+        zonal_kernel: Literal["Cauchy-Binet"] = "Cauchy-Binet",
+        radial_bandwidth: float = 0.1,
+    ) -> None:
+
+        self.radial_kernel = radial_kernel
+        self.zonal_kernel = zonal_kernel
+        self.sigma = radial_bandwidth
 
     @typecheck
     def __call__(
@@ -115,8 +130,22 @@ class VarifoldLoss(BaseLoss):
         """
         super().__call__(source=source, target=target)
 
-        a = varifold_scalar(source, target, sigma=self.sigma)
-        b = varifold_scalar(source, target, sigma=self.sigma)
-        c = varifold_scalar(source, target, sigma=self.sigma)
+        if source.dim != 3 or target.dim != 3:
+            msg = f"Dimension of source and target must be 3 to compute varifold loss. Found {source.dim} for source, {target.dim} for target"
+            raise ValueError(msg)
+
+        if (source.triangles is None) or (target.triangles is None):
+            msg = "Source and target must have triangles to compute varifold loss."
+            raise ValueError(msg)
+
+        kwargs = {
+            "sigma": self.sigma,
+            "radial_kernel": self.radial_kernel,
+            "zonal_kernel": self.zonal_kernel,
+        }
+
+        a = varifold_scalar(source, source, **kwargs)
+        b = varifold_scalar(target, target, **kwargs)
+        c = varifold_scalar(source, target, **kwargs)
 
         return a + b - 2 * c

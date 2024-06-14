@@ -5,10 +5,16 @@
 ### Added
 
 * Add taichi as an optional dependency and set up the framework for future optional dependencies (https://github.com/scikit-shapes/scikit-shapes/pull/55)
+* Varifold Loss for triangle meshes (https://github.com/scikit-shapes/scikit-shapes/pull/53)
+* `stiff_edges` attribute to `PolyData` with `knn_graph` and `k_ring_graph` methods (https://github.com/scikit-shapes/scikit-shapes/pull/53)
+* `cotan_weights` for triangle meshes (https://github.com/scikit-shapes/scikit-shapes/pull/53)
+* multiscale registration example (https://github.com/scikit-shapes/scikit-shapes/pull/53)
+
 
 ### Changed
 
 * Fix Lp loss formula
+* Fix as_isometric_as_possible metric formula (https://github.com/scikit-shapes/scikit-shapes/pull/53)
 
 ### removed
 

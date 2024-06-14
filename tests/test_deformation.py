@@ -42,3 +42,16 @@ def test_rigid_motion_multiple_steps(shape):
     ).path[-1]
 
     assert torch.allclose(out.points, out2.points, rtol=1e-3)
+
+
+@pytest.mark.parametrize("model", deformation_models)
+def test_copy_model(model):
+
+    # Copy the model
+    model_copy = model.copy()
+    # Assert that the number of steps is the same
+    assert model_copy.n_steps == model.n_steps
+    # Change the number of steps of the copy
+    model_copy.n_steps = 2 * model.n_steps
+    # Assert that the number of steps is different
+    assert model_copy.n_steps != model.n_steps
