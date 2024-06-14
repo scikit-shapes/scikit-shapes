@@ -2,6 +2,7 @@
 
 from .edge_topology import EdgeTopology
 from .geometry import (
+    cotan_weights,
     dihedral_angles,
     edge_centers,
     edge_lengths,
