@@ -4,6 +4,16 @@
 
 ### Added
 
+### Changed
+
+### removed
+
+## 0.2
+
+Released on June 14, 2024.
+
+### Added
+
 * Add taichi as an optional dependency and set up the framework for future optional dependencies (https://github.com/scikit-shapes/scikit-shapes/pull/55)
 * Varifold Loss for triangle meshes (https://github.com/scikit-shapes/scikit-shapes/pull/53)
 * `stiff_edges` attribute to `PolyData` with `knn_graph` and `k_ring_graph` methods (https://github.com/scikit-shapes/scikit-shapes/pull/53)
