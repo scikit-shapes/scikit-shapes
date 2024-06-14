@@ -151,9 +151,10 @@ def time_refinement(
 #
 # Each fine mesh can be projected to a coarse mesh,resulting in a system of
 # coordinates. The coordinates consist of (for each point of the fine mesh):
-# - the id of the closer triangle in the coarse mesh
-# - the barycentric coordinates of the point in the triangle (2 coordinates)
-# - the orthogonal coordinate of the point with respect to the triangle normal
+#
+# * the id of the closer triangle in the coarse mesh
+# * the barycentric coordinates of the point in the triangle (2 coordinates)
+# * the orthogonal coordinate of the point with respect to the triangle normal
 #
 # With this system of coordinate, a coarse mesh with the same triangles as the
 # one used to define the coordinates can be refined to a finer mesh. It is done
@@ -161,10 +162,10 @@ def time_refinement(
 # coordinate to the position.
 #
 # The space refinement process consists in:
-# - projecting the fine source and target on the coarse source and target
-# - refining the coarse sequence of poses to a fine sequence of poses
-# for both systems of coordinates
-# - defining the fine seuqence as a linear combination of the two refined sequences
+#
+# * projecting the fine source and target on the coarse source and target
+# * refining the coarse sequence of poses to a fine sequence of poses for both systems of coordinates
+# * defining the fine sequence as a linear combination of the two refined sequences
 #
 # This step lead to a fine sequence of poses in at the fine resolution. The
 # registration model can then be refitted to minimize the energy.
@@ -425,8 +426,8 @@ def space_refinement(
 # Multiscale representation
 # -------------------------
 #
-# Back to our example, we will first decimate the source and target shapes to
-# a coarse resolution. The decimation os done in parallel for both shapes to
+# Back to our example, we first decimate the source and target shapes to
+# a coarseer resolution. The decimation is done in parallel for both shapes to
 # keep the correspondence between the points.
 
 n_points_coarse = 650
@@ -467,7 +468,7 @@ plotter.show()
 # shapes. The linear blending can be directly computed from the difference between
 # the source and target points. Here we use a registration with `IntrinsicDeformation`
 # model and `L2Loss` loss with a regularization weight of 0.0. In this context, the
-# optimimal parameter is the linear blending between the source and target shapes.
+# optimal parameter is the linear blending between the source and target shapes.
 #
 # As illustrated by the animation below, the linear blending is not satisfactory
 # as the trunk of the elephant is shrunk in the middle of the path.
@@ -507,7 +508,7 @@ plotter.close()
 # ----------------------------------------------------------
 #
 # Following the remark at the end of section 2, we add additional edges to the source
-# shape to make it stiffer. The choice of stiffener herer is a k-ring graph with k=8.
+# shape to make it stiffer. The choice of stiffener here is a k-ring graph with k=8.
 # A k-ring graph is a graph where each vertex is connected to its k-nearest neighbors
 # in the graph.
 #
@@ -553,9 +554,9 @@ plotter.close()
 # Although better than the linear blending, the registration is not perfect. The
 # movement of the trunk is still not realistic. To improve the registration, we
 # apply a time refinement. Doubling the number of time steps increases flexibility
-# at the price of a higher computational cost. However, the metric evaluation are typically
-# cost. However, the metric evaluation are typically not linear with the number of
-# steps as we use pyTorch parallel computation as much as possible.
+# at the price of a higher computational cost. However, the metric evaluation
+# are typically not linear with the number of steps as we use pyTorch parallel
+# computation as much as possible.
 #
 # After the time refinement, the deformation is much more realistic. The trunk
 # is not shrunk anymore and the deformation is more natural. We can now move
@@ -624,19 +625,18 @@ plotter.close()
 # -------
 #
 # This example illustrates the multiscale strategy proposed by Kilian, Mitra and
-# Pottmann. In the paper, the authors suggests strategies with more than two
+# Pottmann. In the paper, the authors suggest strategies with more than two
 # scales. The code written here can be easily adapted to deal with more intricate
 # multiscale strategies.
 #
 # As a take-home message:
-# - Register directly the shapes in full resolution is usually not a good idea
-# - Coarse representation can be used to find a good initialization for the registration
-# by adding stiffness to the shapes (e.g. with a k-ring graph)
-# - Time refinement can be used to add flexibility to the deformation
-# - When the coarse deformation is satisfactory, space refinement can be used to
-# obtain a deformation in full resolution.
 #
-# As future work, this strategy can be applied to more intricate problems such as
+# * Register directly the shapes in full resolution is usually not a good idea
+# * Coarse representation can be used to find a good initialization for the registration by adding stiffness to the shapes (e.g. with a k-ring graph)
+# * Time refinement can be used to add flexibility to the deformation
+# * When the coarse deformation is satisfactory, space refinement can be used to obtain a deformation in full resolution.
+#
+# For future work, this strategy can be applied to more intricate problems such as
 # the registration of 3D shapes with different topologies (with varifold loss for
 # instance) or other metrics. The projection step in the space refinement can also
 # be improved by using a intrinsic metric to compute the coordinates of the fine
