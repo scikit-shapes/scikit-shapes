@@ -846,7 +846,13 @@ def test_stiff_edges_construction():
 
     k = 4
 
-    k_ring = polydata.k_ring_graph(k=k)
+    with pytest.raises(ValueError, match="k must be positive"):
+        polydata.k_ring_graph(k=-1)
+
+    with pytest.raises(ValueError, match="k must be positive"):
+        polydata.knn_graph(k=-1)
+
+    k_ring = polydata.k_ring_graph(k=k, verbose=True)
     k_nn = polydata.knn_graph(k=k)
 
     def neighbors(graph, i):

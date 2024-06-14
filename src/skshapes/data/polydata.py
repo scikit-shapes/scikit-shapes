@@ -745,6 +745,9 @@ class PolyData(polydata_type):
         Edges
             The k-nearest neighbors edges.
         """
+        if not k > 0:
+            msg = "The number of neighbors k must be positive"
+            raise ValueError(msg)
 
         from pykeops.torch import LazyTensor
 
