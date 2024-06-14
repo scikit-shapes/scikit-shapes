@@ -19,3 +19,7 @@ sphinx-math-dollar
 trame
 trame_vtk
 trame_vuetify
+
+# For multiscale registration example, could be nice to have another implementation of
+# projection on surface mesh in the future
+trimesh
