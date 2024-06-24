@@ -21,7 +21,7 @@ from pyvista.core.utilities.docs import (  # noqa: F401
 )
 
 # Otherwise VTK reader issues on some systems, causing sphinx to crash. See also #226.
-locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+#locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 
 # Manage errors
