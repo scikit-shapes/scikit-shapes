@@ -8,13 +8,13 @@ meshes at the same time, if they have the same topology. This is useful when
 we need to compute the same property along a sequence of deformation of a
 triangle mesh.
 
-All the function on this module are implemented in PyTorch. They take the
+All the function in this module are implemented in PyTorch. They take the
 points and triangles of the mesh as input and return a tensor with the
 computed property.
 
-Arguments points can be either a tensor of shape:
-- (d_points, dim) for a single mesh
-- (n_meshes, n_poses, dim) for a sequence of poses of the same mesh
+Arguments `points` can be either a tensor of shape:
+- (n_points, dim) for a single mesh
+- (n_points, n_poses, dim) for a sequence of poses of the same mesh
 """
 
 import torch
@@ -183,7 +183,7 @@ def edge_centers(
 
 
 @typecheck
-def _get_geometry(
+def _get_geometry_manifold(
     points: Points | PointsSequence,
     triangles: Triangles,
     edge_topology: EdgeTopology | None = None,
@@ -191,14 +191,11 @@ def _get_geometry(
     tuple[Float2dTensor, Float2dTensor, Float2dTensor, Float2dTensor]
     | tuple[Float3dTensor, Float3dTensor, Float3dTensor, Float3dTensor]
 ):
-    """Get the geometry of the edges of a triangular mesh.
+    """Get the geometry of the manifold edges of a triangular mesh.
 
     The geometry of an edge is defined by the four points Pi, Pj, Pk, Pl
     where Pi and Pj are the two extremities of the edge, Pk and Pl are
     the two points of the two adjacent triangles that are not Pi and Pj.
-
-    Boundary edges are not considered.
-    Edges with more than two adjacent triangles are not considered.
 
     Parameters
     ----------
@@ -240,6 +237,56 @@ def _get_geometry(
 
 
 @typecheck
+def _get_geometry_boundary(
+    points: Points | PointsSequence,
+    triangles: Triangles,
+    edge_topology: EdgeTopology | None = None,
+) -> (
+    tuple[Float2dTensor, Float2dTensor, Float2dTensor]
+    | tuple[Float3dTensor, Float3dTensor, Float3dTensor]
+):
+    """Get the geometry of the boundary edges of a triangular mesh.
+
+    The geometry of a boundary edge is defined by the three points Pi, Pj, Pk
+    where Pi and Pj are the two extremities of the edge, Pk is the point of the
+    adjacent triangle.
+
+    Parameters
+    ----------
+    points
+        Points of the mesh.
+    triangles
+        Triangles of the mesh.
+    edge_topology
+        Edge topology of the mesh.
+
+    Returns
+    -------
+    Pi
+        First extremity of the edges.
+    Pj
+        Second extremity of the edges.
+    Pk
+        Adjacent point of the edge.
+    """
+    if edge_topology is None:
+        edge_topology = EdgeTopology(triangles)
+
+    e = edge_topology.boundary_edges
+    ef = edge_topology.boundary_adjacent_triangles
+    ei = edge_topology.boundary_adjacent_points
+
+    pi, pj = e[:, 0], e[:, 1]
+    pk = triangles[ef, ei]
+
+    Pi = points[pi, :]
+    Pj = points[pj, :]
+    Pk = points[pk, :]
+
+    return Pi, Pj, Pk
+
+
+@typecheck
 def dihedral_angles(
     *,
     points: Points | PointsSequence,
@@ -247,6 +294,12 @@ def dihedral_angles(
     edge_topology: EdgeTopology | None = None,
 ) -> Float1dTensor | Float2dTensor:
     """Dihedral angles of the edges of a triangular mesh.
+
+    The dihedral angle of an edge is a discrete version of the second fundamental
+    form, it is a function of the angle between the normals of adjacent triangles
+    to an edge. More explanation can be found in the paper "Linear Surface
+    Reconstruction from Discrete Fundamental Forms on Triangle Meshes"
+    (https://www.cse.msu.edu/~ytong/DiscreteFundamentalForms.pdf)
 
     Parameters
     ----------
@@ -266,7 +319,7 @@ def dihedral_angles(
     if edge_topology is None:
         edge_topology = EdgeTopology(triangles)
 
-    Pi, Pj, Pk, Pl = _get_geometry(
+    Pi, Pj, Pk, Pl = _get_geometry_manifold(
         points=points,
         triangles=triangles,
         edge_topology=edge_topology,
@@ -286,3 +339,111 @@ def dihedral_angles(
     tmp = (cross_prod * edge_dir).sum(dim=-1)
 
     return torch.atan2(tmp, aux)
+
+
+def cotan_weights(
+    *,
+    points: Points | PointsSequence,
+    triangles: Triangles,
+    edge_topology: EdgeTopology | None = None,
+) -> Float1dTensor | Float2dTensor:
+    """Cotan weights of a triangular mesh
+
+    The cotan weights of an edge are a discrete version of the Laplace-Beltrami
+    operator. They depend on the angles between the edge and the adjacent triangles.
+    An illustration ca be found in figure 4 of https://arxiv.org/pdf/2204.04238
+
+    Parameters
+    ----------
+    points
+        Points or sequence of points with shape (n_points, n_poses, dim).
+    triangles
+        Triangles of the mesh.
+    edge_topology
+        Edge topology of the mesh. If not provided, it will be computed from
+        the triangles.
+
+    Returns
+    -------
+        The cotan weights of the edges with shape (n_edges,) for a single
+        mesh or (n_edges, n_poses) for a sequence of meshes.
+
+    """
+
+    if edge_topology is None:
+        edge_topology = EdgeTopology(triangles)
+
+    # Make sure that all edges are manifold or boundary (no singularities)
+
+    if not torch.all(edge_topology.is_manifold | edge_topology.is_boundary):
+        msg = "The mesh should not have singularities (valence different from 2 or 1)"
+        raise ValueError(msg)
+
+    cotan_weights = torch.zeros(
+        edge_topology.edges.shape[0],
+        dtype=points.dtype,
+        device=points.device,
+    )
+
+    def _compute_angle(
+        a: PointsSequence, b: PointsSequence
+    ) -> Float1dTensor | Float2dTensor:
+        """Compute the angle between two vectors a and b
+
+        Parameters
+        ----------
+        a
+            First vector with shape (n_edges, dim) or (n_edges, n_poses, dim).
+        b
+            Second vector with shape (n_edges, dim) or (n_edges, n_poses, dim).
+
+        Returns
+        -------
+
+        """
+        dot = (a * b).sum(dim=-1)
+        a_norm = torch.norm(a, dim=-1)
+        b_norm = torch.norm(b, dim=-1)
+        return torch.acos(dot / (a_norm * b_norm))
+
+    if torch.any(edge_topology.is_manifold):
+
+        Pi, Pj, Pk, Pl = _get_geometry_manifold(
+            points=points,
+            triangles=triangles,
+            edge_topology=edge_topology,
+        )
+
+        # Compute the angle alpha (at Pk) and beta (at Pl) between the edge and the adjacent triangles
+
+        alpha = _compute_angle(Pi - Pk, Pj - Pk)
+        beta = _compute_angle(Pj - Pl, Pi - Pl)
+
+        # Compute the cotan weights
+        cot_alpha = 1 / torch.tan(alpha)
+        cot_beta = 1 / torch.tan(beta)
+
+        # The cotan weight of a manifold edge is the average of the cotan of the angles
+        # between the edge and the adjacent triangles
+        cotan_weights[edge_topology.is_manifold] = (cot_alpha + cot_beta) / 2
+
+    if torch.any(edge_topology.is_boundary):
+
+        Pi, Pj, Pk = _get_geometry_boundary(
+            points=points,
+            triangles=triangles,
+            edge_topology=edge_topology,
+        )
+
+        # Compute the angle alpha (at Pk) between the edge and the adjacent triangle
+
+        alpha = _compute_angle(Pi - Pk, Pj - Pk)
+
+        # Compute the cotan weights
+        cot_alpha = 1 / torch.tan(alpha)
+
+        # The cotan weight of a boundary edge is the cotan of the angle between
+        # the edge and the adjacent triangle
+        cotan_weights[edge_topology.is_boundary] = cot_alpha
+
+    return cotan_weights

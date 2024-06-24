@@ -15,7 +15,7 @@ from skshapes.triangle_mesh import (
     triangle_centers,
     triangle_normals,
 )
-from skshapes.triangle_mesh.geometry import _get_geometry
+from skshapes.triangle_mesh.geometry import _get_geometry_manifold
 
 
 def test_edge_topology():
@@ -161,7 +161,7 @@ def test_functional_geometry():
         expected_triangles_centers,
     )
 
-    Pi, Pj, Pk, Pl = _get_geometry(points, triangles)
+    Pi, Pj, Pk, Pl = _get_geometry_manifold(points, triangles)
     assert torch.allclose(Pi[0], points[1])
     assert torch.allclose(Pj[0], points[2])
     assert torch.allclose(Pk[0], points[0])
@@ -252,3 +252,89 @@ def test_energy():
             )
 
             assert torch.allclose(energy, energy_frames[i])
+
+
+def test_cotan_weigths():
+    """Test the cotan weights on a toy example
+
+
+        2 = (0, 1)
+        |
+      l2|    l1
+    1---|--------------0
+        |
+        |
+        3 = (0, -1)
+
+    distance(2, 3) = 1
+    intersection( (2,3), (0,1) ) = (0,0)
+
+    + triangles [0, 2, 3], [1, 2, 3]
+
+
+    angle(2,0,3) = 2 * atan(1 / l1)
+    angle(2,1,3) = 2 * atan(1 / l2)
+    angle(0,2,3) = (pi - angle(2,0,3)) / 2
+    angle(2,3,0) = angle(0,2,3)
+    angle(1,2,3) = (pi - angle(2,1,3)) / 2
+    angle(2,3,1) = angle(1,2,3)
+
+
+    """
+
+    # Generate random lengths l1 and l2
+    l1 = 5 * torch.rand(1) + 5
+    l2 = 5 * torch.rand(1) + 5
+
+    # Generate the points, the triangles and create the polydata
+    a0 = torch.tensor([l1, 0])
+    a1 = torch.tensor([-l2, 0])
+    a2 = torch.tensor([0, 1])
+    a3 = torch.tensor([0, -1])
+
+    triangles = torch.tensor(
+        [
+            [0, 2, 3],
+            [1, 2, 3],
+        ]
+    )
+
+    polydata = sks.PolyData(
+        points=torch.stack([a0, a1, a2, a3], dim=0), triangles=triangles
+    )
+
+    # Compute the expected cotan weights
+    angle_right = 2 * torch.atan(1 / l1)  # angle(2,0,3)
+    angle_left = 2 * torch.atan(1 / l2)  # angle(2,1,3)
+    angle_up_right = (
+        torch.pi - angle_right
+    ) / 2  # angle(0,2,3) = angle(2,3,0)
+    angle_up_left = (torch.pi - angle_left) / 2  # angle(1,2,3) = angle(2,3,1)
+
+    expected_cotan_weights = {
+        (0, 2): 1 / torch.tan(angle_up_right),  # boundary
+        (0, 3): 1 / torch.tan(angle_up_right),  # boundary
+        (1, 2): 1 / torch.tan(angle_up_left),  # boundary
+        (1, 3): 1 / torch.tan(angle_up_left),  # boundary
+        (2, 3): (1 / torch.tan(angle_right) + 1 / torch.tan(angle_left))
+        / 2,  # manifold
+    }
+
+    # Compute cotan weights with the skshapes function
+    cotan_weights = {
+        (edge[0].item(), edge[1].item()): weight
+        for edge, weight in zip(
+            polydata.edges,
+            sks.cotan_weights(
+                points=polydata.points, triangles=polydata.triangles
+            ),
+            strict=False,
+        )
+    }
+
+    # Check the cotan weights
+    for key in expected_cotan_weights:
+        assert torch.isclose(cotan_weights[key], expected_cotan_weights[key])
+
+
+test_cotan_weigths()

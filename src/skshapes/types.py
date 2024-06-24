@@ -1,8 +1,6 @@
 """Types aliases and utility functions for scikit-shapes."""
 
-import os
 from typing import Literal, NamedTuple
-from warnings import warn
 
 import numpy as np
 import torch
@@ -11,22 +9,7 @@ from beartype.typing import Annotated
 from beartype.vale import Is
 from jaxtyping import Float, Float32, Float64, Int, Int32, Int64
 
-admissile_float_dtypes = ["float32", "float64"]
-float_dtype = os.environ.get("SKSHAPES_FLOAT_DTYPE", "float32")
-
-if float_dtype in admissile_float_dtypes:
-    float_dtype = getattr(torch, float_dtype)
-
-else:
-    warn(
-        f"Unknown float dtype {float_dtype}. Possible values are"
-        + "{admissile_float_dtypes}. Using float32 as default.",
-        stacklevel=1,
-    )
-    float_dtype = torch.float32
-
-int_dtype = torch.int64
-
+from .globals import float_dtype, int_dtype
 
 # Type aliases
 Number = int | float

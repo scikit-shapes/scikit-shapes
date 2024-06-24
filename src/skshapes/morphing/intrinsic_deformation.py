@@ -6,6 +6,7 @@ to obtain the sequence of points of the morphed shape. The morphing is
 regularized by a Riemannian metric on the shape space.
 """
 
+from collections.abc import Callable
 from typing import Literal
 
 import torch
@@ -40,6 +41,10 @@ class IntrinsicDeformation(BaseModel):
         constrained to be at the endpoints and the only free steps are the
         intermediate steps. Providing endpoints is useful to minimize the
         energy of the morphing while keeping the endpoints fixed.
+    use_stiff_edges
+        If the source PolyData has a `stiff_edges` property and this argument
+        is `True`, the `stiff_edges` are passed to the metric. If the source
+        PolyData has no `stiff_edges`, `edges are passed by default.`
     **kwargs
         Additional keyword arguments.
     """
@@ -48,10 +53,11 @@ class IntrinsicDeformation(BaseModel):
     def __init__(
         self,
         n_steps: int = 1,
-        metric: Literal[
-            "as_isometric_as_possible", "shell_energy"
-        ] = "as_isometric_as_possible",
+        metric: (
+            Literal["as_isometric_as_possible", "shell_energy"] | Callable
+        ) = "as_isometric_as_possible",
         endpoints: None | Points = None,
+        use_stiff_edges: bool = True,
         **kwargs,
     ) -> None:
 
@@ -67,11 +73,27 @@ class IntrinsicDeformation(BaseModel):
             }
             self.metric = shell_energy_metric
 
+        elif callable(metric):
+            self.metric_kwargs = {}
+            metric_validation(metric)
+            self.metric = metric
+
         if endpoints is not None:
             self.fixed_endpoints = True
             self.endpoints = endpoints
         else:
             self.fixed_endpoints = False
+            self.endpoints = None
+
+        self.use_stiff_edges = use_stiff_edges
+
+        self.copy_features = [
+            "n_steps",
+            "metric",
+            "endpoints",
+            "use_stiff_edges",
+            "metric_kwargs",
+        ]
 
     @convert_inputs
     @typecheck
@@ -114,6 +136,13 @@ class IntrinsicDeformation(BaseModel):
             raise ValueError(msg)
 
         assert parameter.shape == self.parameter_shape(shape)
+
+        # Choose edges regarding the use_stiff_edges argument
+        if self.use_stiff_edges and shape.stiff_edges is not None:
+            edges = shape.stiff_edges
+
+        else:
+            edges = shape.edges
 
         ##### First, we compute the sequence of morphed points #####
 
@@ -161,7 +190,7 @@ class IntrinsicDeformation(BaseModel):
             regularization = self.metric(
                 points_sequence=newpoints[:, :-1, :],
                 velocities_sequence=velocities,
-                edges=shape.edges,
+                edges=edges,
                 triangles=shape.triangles,
                 **self.metric_kwargs,
             )
@@ -203,10 +232,94 @@ class IntrinsicDeformation(BaseModel):
     @typecheck
     @property
     def n_free_steps(self) -> int:
-        """Number of integration steps."""
+        """Number of integration steps.
+
+        If the endpoints are fixed, the number of free steps is n_steps - 1 as
+        the last step is fixed by the endpoints. Otherwise, the number of free
+        steps is n_steps.
+        """
         if self.fixed_endpoints:
             return self.n_steps - 1
         return self.n_steps
+
+
+@typecheck
+def metric_validation(metric: Callable) -> None:
+    """Test the validity of a callable metric.
+
+    Parameters
+    ----------
+    metric
+        The metric to test.
+
+    Raises
+    -------
+    ValueError
+        If the metric has one of the following issues:
+        - The metric does not have the expected arguments (points_sequence,
+        velocities_sequence, edges, triangles).
+        - The metric does not return a `torch.Tensor`.
+        - The metric does not return a scalar.
+        - The metric is not differentiable wrt the velocities.
+    """
+    from inspect import signature
+
+    # test the arguments names
+    fct_signature = signature(metric)
+
+    expected_args = [
+        "points_sequence",
+        "velocities_sequence",
+        "edges",
+        "triangles",
+    ]
+
+    for arg in expected_args:
+        if arg not in fct_signature.parameters:
+
+            msg = (
+                f"The metric must have the following arguments: "
+                f"{', '.join(expected_args)}. The argument {arg} is missing."
+            )
+            raise ValueError(msg)
+
+    # Create a set of random points, triangles, edges and velocities
+    n_steps = 3
+    n_points = 10
+    dim = 3
+    n_triangles = 12
+    n_edges = 15
+    points_sequence = torch.rand(n_points, n_steps, dim)
+    triangles = torch.randint(0, n_points, (n_triangles, 3))
+    edges = torch.randint(0, n_points, (n_edges, 2))
+    velocities_sequence = torch.rand(n_points, n_steps, dim)
+    velocities_sequence.requires_grad = (
+        True  # We need to compute the gradient wrt the velocities
+    )
+
+    # Compute the metric
+    a = metric(
+        points_sequence=points_sequence,
+        velocities_sequence=velocities_sequence,
+        edges=edges,
+        triangles=triangles,
+    )
+
+    # Assert that a is a scalar
+    if not torch.is_tensor(a):
+        msg = "The metric must return a tensor."
+        raise ValueError(msg)
+
+    if a.shape != ():
+        msg = "The metric must return a scalar."
+        raise ValueError(msg)
+
+    # Try to compute the gradient wrt the velocities, it must not raise an error
+    try:
+        torch.autograd.grad(a, velocities_sequence)
+    except RuntimeError as err:
+        msg = "The metric must be differentiable wrt the velocities."
+        raise ValueError(msg) from err
 
 
 def as_isometric_as_possible(
@@ -251,29 +364,52 @@ def as_isometric_as_possible(
         msg = "This metric requires edges to be defined"
         raise AttributeError(msg)
 
+    n_points, n_steps, dim = points_sequence.shape
+    assert velocities_sequence.shape == (n_points, n_steps, dim)
+
     next_points_sequence = points_sequence + velocities_sequence
 
-    n_steps = points_sequence.shape[1]
+    # e0 and e1 are (n_edges,)
+    n_edges = edges.shape[0]
+    assert edges.shape == (n_edges, 2)
     e0, e1 = edges[:, 0], edges[:, 1]
+
+    # Implement Eqs. (4-6) in Kilian et al. 2007:
+    # - velocities_sequence[i] is X_i
+    # - points_sequence[i] is P_k[i]
+    # - next_points_sequence[i] is P_(k+1)[i]
+
+    # Compute the left-most term in Eq. (6), << X_i, X_i >>_{P_i}
     a1 = (
-        (velocities_sequence[e0] - velocities_sequence[e1])
-        * (points_sequence[e0] - points_sequence[e1])
-    ).sum(dim=2)
+        (velocities_sequence[e0] - velocities_sequence[e1])  # X_p - X_q
+        * (points_sequence[e0] - points_sequence[e1])  # p - q
+    ).sum(
+        dim=2
+    ) ** 2  # Compute the dot product, and don't forget to square it
+    assert a1.shape == (n_edges, n_steps)
 
+    # Compute the right-most term in Eq. (6), << X_i, X_i >>_{P_(i+1)}
     a2 = (
-        (velocities_sequence[e0] - velocities_sequence[e1])
-        * (next_points_sequence[e0] - next_points_sequence[e1])
-    ).sum(dim=2)
+        (velocities_sequence[e0] - velocities_sequence[e1])  # X_p - X_q
+        * (
+            next_points_sequence[e0] - next_points_sequence[e1]
+        )  # p - q at the next step
+    ).sum(
+        dim=2
+    ) ** 2  # Compute the dot product, and don't forget to square it
+    assert a2.shape == (n_edges, n_steps)
 
-    scale = (points_sequence[e0] - points_sequence[e1]).norm(dim=2).mean()
+    scale = 1  # (points_sequence[e0] - points_sequence[e1]).norm(dim=2).mean()
 
-    L2 = (
-        ((velocities_sequence[e0] - velocities_sequence[e1]) ** 2)
-        .sum(dim=2)
-        .mean()
+    # Compute Eq. (5)
+    L2 = (velocities_sequence**2).sum(dim=2)
+    assert L2.shape == (n_points, n_steps)
+    # Currently, for L2, we use simple weights that sum up to 1 instead of the proper A_p
+    # TODO: fix it
+
+    return ((a1 + a2).sum() + 0.001 * L2.sum() / n_points) / (
+        2 * n_steps * (scale**4)
     )
-
-    return torch.sum(a1**2 + a2**2 + 0.001 * L2) / (2 * n_steps * (scale**4))
 
 
 def shell_energy_metric(

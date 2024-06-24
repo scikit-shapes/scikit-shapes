@@ -67,21 +67,21 @@ pip install skshapes
 If you want the development version or consider contributing to the codebase, you can also install scikit-shapes locally from a clone of the repository. On a terminal, navigate to the scikit-shapes directory and run :
 
 ```bash
-pip install .
+pip install -e .
 ```
 
 Then you can :
 
 -  run the pre-commit hooks:
 ```bash
-pip install -e requirements_dev.txt
+pip install -r requirements_dev.txt
 pre-commit install
 pre-commit run --all-files
 ```
 
 - run the tests:
 ```bash
-pip install -e requirements_dev.txt
+pip install -r requirements_dev.txt
 pytest
 ```
 - build the documentation (and serve it locally)

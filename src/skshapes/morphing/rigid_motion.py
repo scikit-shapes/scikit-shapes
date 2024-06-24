@@ -31,6 +31,8 @@ class RigidMotion(BaseModel):
     def __init__(self, n_steps: int = 1) -> None:
         self.n_steps = n_steps
 
+        self.copy_features = ["n_steps"]
+
     @convert_inputs
     @typecheck
     def morph(
