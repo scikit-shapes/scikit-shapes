@@ -42,7 +42,7 @@ repos:
         verbose: true
 
   - repo: https://github.com/adamchainz/blacken-docs
-    rev: "1.16.0"  # replace with latest tag on GitHub
+    rev: "1.18.0"  # replace with latest tag on GitHub
     hooks:
       - id: blacken-docs
         additional_dependencies:
@@ -60,7 +60,7 @@ repos:
   #     - id: numpydoc-validation
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.4.8"
+    rev: "v0.5.0"
     hooks:
       - id: ruff
         args: ["--fix", "--show-fixes"]
