@@ -1,7 +1,13 @@
-# Scikit-Shapes
-Shape processing in Python.
+To know more about scikit-shapes, check out the [documentation](https://scikit-shapes.github.io/scikit-shapes/) and the [gallery of examples](https://scikit-shapes.github.io/scikit-shapes/auto_examples/index.html)
 
-![](docs/animation.gif)
+# Scikit-Shapes
+![](https://github.com/scikit-shapes/scikit-shapes/actions/workflows/documentation.yml/badge.svg?branch=main) ![](https://github.com/scikit-shapes/scikit-shapes/actions/workflows/tests.yml/badge.svg?branch=main) [![codecov](https://codecov.io/gh/scikit-shapes/scikit-shapes/graph/badge.svg?token=RLM6HOH2QI)](https://codecov.io/gh/scikit-shapes/scikit-shapes)
+
+
+
+Shape processing in Python
+
+![](doc/animation.gif)
 
 ## Presentation
 
@@ -16,7 +22,7 @@ Scikit-shapes is a python package for the analysis of 2D and 3D shape data. It g
 
 Scikit-shapes is thinked to be intuitive and user-friendly, our am is to provide a library that is
 - **Task-oriented**: basic objects are high-level tasks, such as `Registration` or `Multiscaling`. The mathematical details as loss function, deformation model, are defined as hyperparameters.
-- **Modular**: workflows can be designed following a plug-and-play approach, allowing comparison accross different methods for the same task. In addition, it is possible to implement new modules such as deformation model or loss function and integrate them in existing pipelines.
+- **Modular**: workflows can be designed following a plug-and-play approach, allowing comparison across different methods for the same task. In addition, it is possible to implement new modules such as deformation model or loss function and integrate them in existing pipelines.
 - **Efficient**: skshapes relies mostly on pyTorch and pyKeOps for computations. It allows to speed-up numerical intensive part of the analysis with parallelization on CPU or GPU.
 
 Here is a code snippet illustrating how a registration model is build by combining a loss function and a deformation model:
@@ -28,15 +34,13 @@ shape1 = sks.read("data/shape1.vtk")
 shape2 = sks.read("data/shape2.vtk")
 
 registration = sks.Registration(
-
-    model = sks.ExtrinsicDeformation(n_steps=5, kernel="gaussian", blur=0.5),
-    loss = sks.NearestNeighborLoss(),
-    gpu = True,
+    model=sks.ExtrinsicDeformation(n_steps=5, kernel="gaussian", blur=0.5),
+    loss=sks.NearestNeighborLoss(),
+    gpu=True,
 )
 
 registration.fit(source=shape1, target=shape2)
 transformed_shape = registration.transform(source=shape1)
-
 ```
 
 
@@ -49,33 +53,50 @@ Scikit-shapes relies on other open-source software, our main dependencies are :
 
 # Installation
 
+At the moment, scikit-shapes is available on linux and macOS only
 
-## From source (library only)
+## From pip
 
-To install scikit-shapes directly from the source code, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
-
+The last stable version of scikit-shapes version can be installed directly from pip with
 ```bash
-pip install .
-```
-## From source (for developers)
-
-To install scikit-shapes as well as developpers dependencies, first clone the repository. Then on a terminal, navigate to the scikit-shapes directory and run :
-```bash
-pip install -e .[dev]
-```
-Then, you will have the possibility to interactively edit the code, run the linting tool and syntax checker, run the tests and build the documentation. From scikit-shapes directory, use the following commands :
-```bash
-# Lint
-black .
-# Check syntax 
-flake8 skshapes
-# Run tests and show code coverage
-pytest --cov-config=.coveragerc --cov=skshapes --cov-report=html test/
-firefox htmlcov/index.html
-# Build documentation
-mkdocs serve
+pip install skshapes
 ```
 
-## Contributing
+## From source
 
-TBA
+If you want the development version or consider contributing to the codebase, you can also install scikit-shapes locally from a clone of the repository. On a terminal, navigate to the scikit-shapes directory and run :
+
+```bash
+pip install -e .
+```
+
+Then you can :
+
+-  run the pre-commit hooks:
+```bash
+pip install -r requirements_dev.txt
+pre-commit install
+pre-commit run --all-files
+```
+
+- run the tests:
+```bash
+pip install -r requirements_dev.txt
+pytest
+```
+- build the documentation (and serve it locally)
+```bash
+pip install -r requirement_docs.txt
+sphinx-apidoc -o doc/source/api/ --module-first --force src/skshapes
+sphinx-build -b html doc/source/ doc/_build/html
+cd doc/_build/html
+python -m http.server
+```
+
+# Contributing
+
+We warmly welcome all contribution, if you found a bug, a typo or want to contribute with a new feature, please open an [issue](https://github.com/scikit-shapes/scikit-shapes/issues).
+
+You can also open a [discussion](https://github.com/scikit-shapes/scikit-shapes/discussions) if you have any question regarding the project.
+
+For more information about contributing with new code, see the [dedicated section](https://scikit-shapes.github.io/scikit-shapes/contributing/) of the documentation.

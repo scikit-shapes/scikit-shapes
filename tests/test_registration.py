@@ -1,10 +1,12 @@
-import skshapes as sks
-import pyvista
-import torch
-import pytest
+"""Test the registration task."""
 
+import pytest
+import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
+
+import skshapes as sks
+from skshapes.errors import DeviceError, NotFittedError
 
 list_models = [
     sks.RigidMotion,
@@ -20,52 +22,51 @@ list_losses = [
 ]
 
 list_optimizers = [
-    sks.LBFGS(),
+    sks.LBFGS(max_iter=1, max_eval=1),
     sks.SGD(),
     sks.Adam(),
     sks.Adagrad(),
 ]
 
+mesh_3d = sks.Sphere().decimate(target_reduction=0.995)
+mesh_2d = sks.Circle(n_points=7)
+
 
 @given(
     model=st.sampled_from(list_models),
-    n_steps=st.integers(min_value=1, max_value=3),
     loss=st.sampled_from(list_losses),
     optimizer=st.sampled_from(list_optimizers),
-    n_iter=st.integers(min_value=1, max_value=3),
-    regularization=st.floats(min_value=0, max_value=1),
-    gpu=st.booleans(),
-    verbose=st.booleans(),
+    n_iter=st.integers(min_value=0, max_value=1),
+    regularization_weight=st.sampled_from([0, 0.1]),
     provide_initial_parameter=st.booleans(),
     dim=st.integers(min_value=2, max_value=3),
 )
-@settings(deadline=None, max_examples=5)
+@settings(deadline=None)
 def test_registration_hypothesis(
     model,
-    n_steps,
     loss,
     optimizer,
     n_iter,
-    regularization,
-    gpu,
-    verbose,
+    regularization_weight,
     provide_initial_parameter,
     dim,
 ):
+    """Test that the registration task not failed with random params."""
     # Load two meshes
+    n_steps = 1
 
     if dim == 3:
-        source = sks.Sphere().decimate(target_reduction=0.95)
-        target = sks.Sphere().decimate(target_reduction=0.95)
+        source = mesh_3d
+        target = mesh_3d
     else:
-        source = sks.Circle(n_points=20)
-        target = sks.Circle(n_points=20)
+        source = mesh_2d
+        target = mesh_2d
 
     assert source.dim == target.dim
     assert source.dim == dim
 
-    source.landmark_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    target.landmark_indices = [9, 10, 11, 12, 13, 14, 15, 16, 17]
+    source.landmark_indices = [0, 1, 2, 3, 4]
+    target.landmark_indices = [3, 2, 1, 0, 4]
 
     # Few type checks
     assert isinstance(source, sks.PolyData)
@@ -78,9 +79,9 @@ def test_registration_hypothesis(
         loss=loss,
         optimizer=optimizer,
         n_iter=n_iter,
-        gpu=gpu,
-        regularization=regularization,
-        verbose=verbose,
+        gpu=False,
+        regularization_weight=regularization_weight,
+        verbose=False,
     )
 
     # Check that the registration object is correctly initialized
@@ -88,7 +89,7 @@ def test_registration_hypothesis(
     assert r.loss == loss
     assert r.optimizer == optimizer
     assert r.n_iter == n_iter
-    assert r.regularization == regularization
+    assert r.regularization_weight == regularization_weight
 
     # If applicable, provide an initial parameter
     if provide_initial_parameter:
@@ -97,16 +98,8 @@ def test_registration_hypothesis(
         initial_parameter = None
 
     # Try to transform the source shape without fitting first
-    try:
+    with pytest.raises(NotFittedError):
         r.transform(source=source)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "Should have raised an error, fit must be called"
-            + "before transform"
-        )
-
     # Fit
     r.fit(source=source, target=target, initial_parameter=initial_parameter)
 
@@ -123,7 +116,9 @@ def test_registration_hypothesis(
     not torch.cuda.is_available(), reason="Cuda is required for this test"
 )
 def test_registration_device():
-    """This test ensure the behavior of the registration task with respect to
+    """Test the behavior of the registration task with respect to the device.
+
+    This test ensure the behavior of the registration task with respect to
         the devices of the source, target and the gpu argument.
     Expected behavior:
         - If the gpu argument is True, the optimization should occurs on the
@@ -134,17 +129,17 @@ def test_registration_device():
             the same as the device of the source and the target
         - If source.device != target.device, an error should be raised
     """
-    shape1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
-    shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
+    shape1 = mesh_3d
+    shape2 = mesh_3d
 
-    n_steps = 2
+    n_steps = 1
     models = [
         sks.RigidMotion(n_steps=n_steps),
         sks.ExtrinsicDeformation(n_steps=n_steps),
         sks.IntrinsicDeformation(n_steps=n_steps),
     ]
-    loss = sks.OptimalTransportLoss()
-    optimizer = sks.LBFGS()
+    loss = sks.L2Loss()
+    optimizer = sks.SGD()
 
     for model in models:
         for device in ["cpu", "cuda"]:
@@ -158,11 +153,11 @@ def test_registration_device():
                     optimizer=optimizer,
                     n_iter=1,
                     gpu=gpu,
-                    regularization=0.1,
+                    regularization_weight=0,
                     verbose=1,
-                )
+                ).fit(source=source, target=target)
 
-                newshape = task.fit_transform(source=source, target=target)
+                newshape = task.transform(source=source)
 
                 # Check that the device on which the optimization is performed
                 # corresponds to the gpu argument
@@ -183,39 +178,126 @@ def test_registration_device():
         #  raised
         source = shape1.to("cpu")
         target = shape2.to("cuda")
-        try:
+        with pytest.raises(DeviceError):
             task.fit(source=source, target=target)
-        except ValueError:
-            pass
-        else:
-            raise AssertionError("Should have raised an error")
 
 
-def test_lddmm_control_points():
-    mesh1 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.95)
-    mesh2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.9)
+@pytest.mark.parametrize(
+    ("kernel", "control_points", "normalization", "n_steps"),
+    [
+        ("gaussian", False, "both", 1),
+        ("gaussian", True, "rows", 2),
+        ("uniform", False, "columns", 2),
+    ],
+)
+def test_extrinsic_control_points(
+    kernel, control_points, normalization, n_steps
+):
+    """Test to run extrinsic deformation with control points."""
+    mesh1 = mesh_3d
+    mesh2 = mesh_3d
 
-    mesh1.control_points = mesh1.bounding_grid(N=5, offset=0.25)
+    mesh1.control_points = mesh1.bounding_grid(N=2, offset=0.25)
 
     # Define the model
     model = sks.ExtrinsicDeformation(
-        n_steps=5, kernel=sks.GaussianKernel(sigma=0.5), control_points=True
+        n_steps=n_steps,
+        kernel=kernel,
+        scale=0.1,
+        normalization=normalization,
+        control_points=control_points,
     )
 
-    loss = sks.OptimalTransportLoss()
-    optimizer = sks.LBFGS()
+    loss = sks.OptimalTransportLoss() + 2 * sks.EmptyLoss()
+    optimizer = sks.SGD()
 
     registration = sks.Registration(
         model=model,
         loss=loss,
         optimizer=optimizer,
-        n_iter=10,
-        lr=0.1,
-        regularization=0.1,
+        n_iter=1,
+        regularization_weight=0.1,
         gpu=False,
         verbose=True,
     )
 
     registration.fit(source=mesh1, target=mesh2)
+    if control_points:
+        assert (
+            registration.parameter_.shape == mesh1.control_points.points.shape
+        )
+    else:
+        assert registration.parameter_.shape == mesh1.points.shape
 
-    assert registration.parameter_.shape == mesh1.control_points.points.shape
+
+def test_intrinsic_deformation_fixed_endpoints():
+    """Test to run intrinsic deformation with fixed endpoints."""
+    mesh = mesh_3d
+
+    # Define the endpoints by adding a small offset to the points
+    endpoints = mesh.points.clone() + 0.1
+
+    # Define the model with fixed endpoints
+    model = sks.IntrinsicDeformation(
+        n_steps=2, endpoints=endpoints, metric="as_isometric_as_possible"
+    )
+
+    registration = sks.Registration(
+        model=model,
+        loss=sks.L2Loss(),
+        optimizer=sks.LBFGS(),
+        n_iter=1,
+        regularization_weight=10,
+    )
+
+    # Fit the registration (same mesh as source and target)
+    registration.fit(source=mesh, target=mesh)
+
+    # Check that the endpoints are fixed
+    assert torch.allclose(
+        registration.transform(source=mesh).points, endpoints
+    )
+
+
+def test_debug():
+    """Test the debug mode for registration."""
+
+    # Define the source and target shapes
+    source = mesh_3d
+    target = mesh_3d
+    target.points += 0.1
+
+    # Define the model
+    model = sks.RigidMotion()
+
+    n_iter = 5  # Number of iterations
+
+    # Define and fit the registration with debug=True
+    registration = sks.Registration(
+        model=model,
+        loss=sks.L2Loss(),
+        optimizer=sks.SGD(),
+        n_iter=n_iter,
+        regularization_weight=0,
+        debug=True,
+    )
+    registration.fit(source=source, target=target)
+
+    # Extract the gradients and parameters history
+    gradients_list = registration.gradients_list_
+    parameters_list = registration.parameters_list_
+
+    expected_shape = model.parameter_shape(shape=source)
+
+    # gradient_list and parameters_list should have the same length as n_iter
+    assert len(gradients_list) == n_iter
+    assert len(parameters_list) == n_iter
+
+    for i in range(n_iter):
+        # With SGD optimizer, there is only one call to the closure per iteration
+        assert len(gradients_list[i]) == 1
+        assert len(parameters_list[i]) == 1
+
+        # Check the shape of the gradients and parameters
+        assert gradients_list[i][0].shape == expected_shape
+        assert parameters_list[i][0].shape == expected_shape

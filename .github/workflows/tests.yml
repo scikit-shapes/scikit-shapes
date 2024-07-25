@@ -1,0 +1,62 @@
+# Install scikit-shapes from source, run the tests and upload the coverage to Codecov
+# this workflow is triggered on pull request  and push to main branch
+name: Tests
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  install_and_run_tests:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.10", "3.11"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }} on ${{ matrix.os }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install package (with dependencies for tests)
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements_dev.txt
+          pip install .
+
+
+      # Tests are run first with minimal dependencies, to ensure that the core functionality is working
+      - name: Test (minimal dependencies)
+        run: |
+          export SKSHAPES_FLOAT_DTYPE=float32
+          pytest --cov-report xml:coverage.xml --durations=0
+
+      # Tests are run with all optional dependencies, to ensure that the optional functionality is working
+      # we only run the tests on the optional_tests folder to avoid running the tests twice
+      - name: Test (with all optional dependencies)
+        run: |
+          pip install .[all]
+          pytest optional_tests/ --cov-append --cov-report xml:coverage_opt.xml --durations=0
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
+        uses: codecov/codecov-action@v4
+        with:
+          fail_ci_if_error: false
+          files: ./coverage.xml, ./coverage_opt.xml
+          flags: unittests
+          name: codecov-umbrella
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true

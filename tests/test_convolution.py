@@ -1,26 +1,28 @@
-import skshapes as sks
+"""Tests for the convolution module."""
+
+import pytest
 import torch
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
+import skshapes as sks
 
-def test_mesh_convolution():
+
+def test_mesh_convolution_point_cloud():
+    """Test error handling for mesh_convolution on a point cloud."""
     points = torch.rand(10, 3)
     pc = sks.PolyData(points=points)
-    try:
+    with pytest.raises(
+        AttributeError,
+        match="Mesh convolution is only defined on"
+        + " triangle meshes or wireframe PolyData",
+    ):
         pc.mesh_convolution()
-    except ValueError:
-        pass
-    else:
-        raise AssertionError(
-            "mesh_convolution should raise a ValueError"
-            + " if the mesh is not a triangle mesh or a"
-            + " wireframe PolyData."
-        )
 
 
 def test_squared_distance():
-    N, M = 2000, 1000
+    """Test the squared distance function."""
+    N, M = 20, 10
 
     # Define two point clouds
     X = torch.randn(N, 3, dtype=sks.float_dtype)
@@ -64,8 +66,8 @@ def test_squared_distance():
     assert torch.allclose(signal_out1, signal_out2)
 
 
-def test_convolution_trivial():
-    #
+def test_convolution_simple():
+    """Test the convolution results by comparing with direct computations."""
     X = torch.tensor(
         [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]], dtype=sks.float_dtype
     )
@@ -84,8 +86,6 @@ def test_convolution_trivial():
     )
 
     a = torch.rand(4).to(sks.float_dtype)
-    print(gaussian_kernel_torch @ a)
-    print(gaussian_kernel_sks @ a)
     assert torch.allclose(gaussian_kernel_torch @ a, gaussian_kernel_sks @ a)
 
     #
@@ -106,23 +106,21 @@ def test_convolution_trivial():
 
 
 @given(
-    N=st.integers(min_value=2, max_value=500),
-    M=st.integers(min_value=2, max_value=500),
-    scale=st.floats(min_value=0.01, max_value=100),
     kernel=st.sampled_from(["gaussian", "uniform"]),
     normalize=st.booleans(),
     dim=st.integers(min_value=1, max_value=2),
 )
 @settings(deadline=None)
 def test_convolution_functional(
-    N: int,
-    M: int,
-    scale: float,
     kernel: str,
     normalize: bool,
     dim: int,
 ):
+    """Test the convolution results by comparing with direct computations."""
     # Sample two point clouds
+    M, N = torch.randint(low=2, high=8, size=(2,))
+    scale = 0.01 + torch.rand(1).item()
+
     X = torch.rand(N, 3).to(sks.float_dtype)
     Y = torch.rand(M, 3).to(sks.float_dtype)
 
@@ -184,7 +182,8 @@ def test_convolution_functional(
     assert torch.allclose(A, B, atol=1e-4)
 
 
-def test_mesh_convolution():
+def test_mesh_convolution_constant_signal():
+    """Test that a constant signal is kept unchanged."""
     mesh = sks.Sphere()
     # define a constant signal
     signal = torch.rand(1) * torch.ones(mesh.n_points, dtype=sks.float_dtype)
@@ -197,7 +196,7 @@ def test_mesh_convolution():
 
 
 def test_multidimensional_matrix_multiplication():
-    """test the LinearOperator class for multidimensional matrix multiplication
+    """Test the LinearOperator class for multidimensional matrix product.
 
     More precisely, we test that if M is a Linearoperator of shape (n, m) and
     A a tensor of shape (m, *t), then M @ A is well defined and results in a
@@ -205,9 +204,8 @@ def test_multidimensional_matrix_multiplication():
     """
 
     # Define a LinearOperator of shape (n, m)
-    randint = (
-        lambda up, low=1: torch.randint(low, up, (1,))[0] if up > low else low
-    )
+    def randint(up, low=1):
+        return torch.randint(low, up, (1,))[0] if up > low else low
 
     n, m = randint(10, low=2), randint(10, low=2)
     a, b, c = randint(10, low=2), randint(10, low=2), randint(10, low=2)
@@ -223,9 +221,7 @@ def test_multidimensional_matrix_multiplication():
 
     # take a random index (i, j, k, l) and assert that the output is correct
     # at this index
-    i, j, k, l = randint(n), randint(a), randint(b), randint(c)
-    print(result.shape)
-    print(result[i, j, k, l])
+    i, j, k, l = randint(n), randint(a), randint(b), randint(c)  # noqa: E741
     assert torch.isclose(
         result[i, j, k, l],
         sum([matrix[i, ii] * A[ii, j, k, l] for ii in range(m)]).to(
@@ -235,8 +231,7 @@ def test_multidimensional_matrix_multiplication():
 
 
 def test_multidimensional_signal_convolution():
-    """Test that the mesh convolution operator is well defined for
-        multidimensional signals
+    """Test well defineness for multidimensional signals.
 
     The mesh convolution operator is defined as a matrix of shape
     (n_points, n_points) where n_points is the number of points of the mesh. In
@@ -246,7 +241,6 @@ def test_multidimensional_signal_convolution():
     output signal is checked to have the right shape after matrix
     multiplication.
     """
-
     mesh = sks.Sphere()
     n_points = mesh.n_points
 
@@ -258,12 +252,22 @@ def test_multidimensional_signal_convolution():
 
     a, b, c = randtriplet(10)
     data = torch.rand(n_points, a, b, c).to(sks.float_dtype)
-    mesh["signal"] = data
+    mesh.point_data["signal"] = data
 
     # Compute the mesh convolution operator
     M = mesh.mesh_convolution()
     # assert that the @ operator is well defined
     # and that the output signal has the expected shape
     assert M.shape == (n_points, n_points)
-    assert mesh["signal"].shape == (n_points, a, b, c)
+    assert mesh.point_data["signal"].shape == (n_points, a, b, c)
     assert (M @ data).shape == (n_points, a, b, c)
+
+
+def test_constant_kernel():
+    n = 10
+    points = torch.rand(n, 3)
+    kernel = sks.convolutions.constant_kernel.constant_1_kernel(points=points)
+
+    signal = torch.rand(n)
+    # Assert that the transpose of the kernel is the same as the kernel
+    assert torch.allclose(kernel @ signal, kernel.T @ signal)

@@ -1,0 +1,25 @@
+furo
+myst_parser >=0.13
+
+# To generate GIFs
+imageio
+
+# Sphinx + theme/plugins
+sphinx >=4.0
+sphinx-autodoc-typehints
+sphinx-copybutton
+sphinx-design
+sphinx-gallery <= 0.15.0
+sphinx-math-dollar
+
+# To generate interactive scenes
+ipython
+jupyterlab
+trame
+trame_vtk
+trame_vuetify
+
+# For multiscale registration example, could be nice to have another implementation of
+# projection on surface mesh in the future
+trimesh
+rtree

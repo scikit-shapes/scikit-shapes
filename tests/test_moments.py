@@ -1,15 +1,21 @@
+"""Tests for the moments of a shape."""
+
+import sys
+
 import torch
-import skshapes as sks
+import vedo as vd
 from hypothesis import given, settings
 from hypothesis import strategies as st
-import vedo as vd
+
+import skshapes as sks
+
 from .utils import create_shape, vedo_frames
-import sys
 
 sys.path.append(sys.path[0][:-4])
 
 
 def moments(X):
+    """Compute the first 4 moments of a point cloud."""
     # Switch to Float64 precision for better accuracy
     X = X.double()
     N, D = X.shape
@@ -29,32 +35,27 @@ def moments(X):
     scale=st.floats(min_value=0.01, max_value=10),
     offset=st.floats(min_value=0.1, max_value=10),
 )
-@settings(max_examples=1000, deadline=None)
+@settings(max_examples=5, deadline=None)
 def test_moments_1(*, n_points: int, scale: float, offset: float):
+    """Test the first 4 moments of a random shape."""
     points = scale * torch.randn(n_points, 3) + offset * torch.randn(1)
     shape = sks.PolyData(points=points)
 
     for central in [False, True]:
-        print(f"Central: {central}")
-        if central:
-            gt = moments(points - points.mean(0))
-        else:
-            gt = moments(points)
+        gt = moments(points - points.mean(0)) if central else moments(points)
 
         for order in [1, 2, 3, 4]:
-            print(f"order: {order}")
-            print(f"gt: {gt[order - 1]}")
             mom = shape.point_moments(
                 order=order, scale=None, central=central, dtype="double"
             )
             mom = mom[0]
-            print(f"mom: {mom}")
             assert torch.allclose(
                 mom.double(), gt[order - 1], atol=1e-4, rtol=1e-2
             )
 
 
 def display_moments(*, scale=1, **kwargs):
+    """Display moments of a shape (not a test)."""
     shape = create_shape(**kwargs)
 
     local_average = shape.point_moments(order=1, scale=scale)

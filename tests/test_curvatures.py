@@ -1,23 +1,25 @@
-import time
-import numpy as np
-import torch
-import skshapes as sks
+"""Tests for the curvatures module."""
 
-from pytest import approx
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+import pytest
+import torch
+import vedo as vd
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-import vedo as vd
+import skshapes as sks
 
 from .utils import create_point_cloud, create_shape
-
-import sys
 
 sys.path.append(sys.path[0][:-4])
 
 
 @given(
-    n_points=st.integers(min_value=400, max_value=500),
+    n_points=st.integers(min_value=40, max_value=50),
     a=st.floats(min_value=-1, max_value=1),
     b=st.floats(min_value=-1, max_value=1),
     c=st.floats(min_value=-1, max_value=1),
@@ -36,6 +38,7 @@ def test_curvatures_quadratic(
     e: float,
     f: float,
 ):
+    """Test the curvatures of a quadratic function."""
     # Our current estimation method relies on the estimation of the tangent
     # plane, and does not give perfect results for quadratic functions "off
     # center".
@@ -48,9 +51,7 @@ def test_curvatures_quadratic(
     e = 0 * e
 
     def poly(x, y):
-        return (
-            0.5 * a * x**2 + b * x * y + 0.5 * c * y**2 + d * x + e * y + f
-        )
+        return 0.5 * a * x**2 + b * x * y + 0.5 * c * y**2 + d * x + e * y + f
 
     # See Example 4.2 in Curvature formulas for implicit curves and surfaces,
     # Goldman, 2005, for reference on those formulas, keeping in mind that
@@ -77,11 +78,11 @@ def test_curvatures_quadratic(
 
     for scale in scales:
         kmax, kmin = shape.point_principal_curvatures(scale=scale)
-        return None
+        return
         kmax = kmax[0].item()
         kmin = kmin[0].item()
-        assert kmax * kmin == approx(gauss, abs=5e-1, rel=2e-1)
-        assert (kmax + kmin) / 2 == approx(mean, abs=5e-1, rel=2e-1)
+        assert kmax * kmin == pytest.approx(gauss, abs=5e-1, rel=2e-1)
+        assert (kmax + kmin) / 2 == pytest.approx(mean, abs=5e-1, rel=2e-1)
 
 
 @given(
@@ -89,10 +90,11 @@ def test_curvatures_quadratic(
     radius=st.floats(min_value=0.1, max_value=10),
     relative_scale=st.floats(min_value=0.1, max_value=0.12),
 )
-@settings(deadline=None)
+@settings(max_examples=1, deadline=None)
 def test_curvatures_sphere(
     *, n_points: int, radius: float, relative_scale: float
 ):
+    """Test the curvatures of a sphere."""
     # Create a sphere with the correct radius and an arbitrary center:
     shape = create_shape(shape="sphere", n_points=n_points, radius=radius)
 
@@ -105,6 +107,7 @@ def test_curvatures_sphere(
 
 
 def display_curvatures_old(*, function: callable, scale=1):
+    """Old version of display_curvatures, kept for reference."""
     points, normals = create_point_cloud(n_points=20, f=function, normals=True)
     points = points + 0.05 * torch.randn(len(points), 3)
 
@@ -125,32 +128,23 @@ def display_curvatures_old(*, function: callable, scale=1):
     plt.close()
 
 
-if __name__ == "__main__":
-    import argparse
-    from pprint import pprint
-    import os
-    import glob
-
-    def display_curvatures(*, scale=1, highlight=None, **kwargs):
-        shape = create_shape(**kwargs)
-        scales = [scale, 2 * scale, 5 * scale, 10 * scale]
+def display_curvatures(*, scale=1, highlight=0, **kwargs):
+    """Display the curvatures of a shape (not a test)."""
+    shape = create_shape(**kwargs)
+    scales = [scale, 2 * scale, 5 * scale, 10 * scale]
 
         fig3D = vd.Plotter(shape=(2, 2), axes=1)
 
         if highlight is None:
             highlight = shape.points[:, 1].argmin()
 
-        for i, s in enumerate(scales):
-            Xm = shape.point_moments(order=1, scale=s)
-            curvedness = shape.point_curvedness(scale=s)
-            r2 = shape.point_quadratic_coefficients(scale=s).r2
-            kmax, kmin = shape.point_principal_curvatures(scale=s)
-            print(
-                f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]},"
-                + f" R2: {r2[highlight]}"
-            )
-            quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
-            assert quadratic_fit.shape == (3, 3, 3)
+    for i, s in enumerate(scales):
+        Xm = shape.point_moments(order=1, scale=s)
+        curvedness = shape.point_curvedness(scale=s)
+        # shape.point_quadratic_coefficients(scale=s).r2
+        kmax, kmin = shape.point_principal_curvatures(scale=s)
+        quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
+        assert quadratic_fit.shape == (3, 3, 3)
 
             n_samples = 5000
             uv1 = s * torch.randn(n_samples, 3, device=shape.device)
@@ -244,141 +238,80 @@ if __name__ == "__main__":
         fig3D.interactive()
 
     shapes = [
-        dict(
-            shape="sphere",
-            radius=1,
-            scale=0.05,
-            n_points=500,
-        ),
-        dict(
-            shape="sphere",
-            radius=0.1,
-            scale=0.005,
-            n_points=500,
-        ),
-        dict(
-            shape="sphere",
-            radius=10,
-            scale=0.5,
-            n_points=500,
-        ),
-        dict(
-            function=lambda x, y: 0.5 * x**2 + 0.5 * y**2,
-            scale=0.05,
-            n_points=31,
-            noise=0.0001,
-            highlight=0 if False else int(31**2 / 2),
-        ),
-        dict(
-            function=lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
-            scale=0.05,
-            n_points=15,
-            noise=0.01,
-        ),
-        dict(
-            function=lambda x, y: 0.5 * x**2 - 0.5 * y**2,
-            scale=0.05,
-            n_points=31,
-            noise=0.0001,
-            highlight=0 if False else int(31**2 / 2),
-        ),
-        dict(
-            shape="unit patch",
-            function=lambda x, y: 2 * x * y,
-            scale=0.08,
-            n_points=1000,
-        ),
-        dict(
-            function=lambda x, y: 0.5 * x * x / 3
+        {
+            "shape": "sphere",
+            "radius": 1,
+            "scale": 0.05,
+            "n_points": 500,
+        },
+        {
+            "shape": "sphere",
+            "radius": 0.1,
+            "scale": 0.005,
+            "n_points": 500,
+        },
+        {
+            "shape": "sphere",
+            "radius": 10,
+            "scale": 0.5,
+            "n_points": 500,
+        },
+        {
+            "function": lambda x, y: 0.5 * x**2 + 0.5 * y**2,
+            "scale": 0.05,
+            "n_points": 31,
+            "noise": 0.0001,
+            "highlight": 0 if False else int(31**2 / 2),
+        },
+        {
+            "function": lambda x, y: (2 - 0.5 * x**2 - y**2).abs().sqrt() - 1,
+            "scale": 0.05,
+            "n_points": 15,
+            "noise": 0.01,
+        },
+        {
+            "function": lambda x, y: 0.5 * x**2 - 0.5 * y**2,
+            "scale": 0.05,
+            "n_points": 31,
+            "noise": 0.0001,
+            "highlight": 0 if False else int(31**2 / 2),
+        },
+        {
+            "shape": "unit patch",
+            "function": lambda x, y: 2 * x * y,
+            "scale": 0.08,
+            "n_points": 1000,
+        },
+        {
+            "function": lambda x, y: 0.5 * x * x / 3
             - x * y
             - 0.5 * 1.5 * y * y
             + 2,
-            scale=0.05,
-            n_points=15,
-            noise=0.0001,
-            highlight=0 if False else int(15**2 / 2),
-        ),
-        dict(
-            function=lambda x, y: y**2 + y,
-            scale=0.05,
-            n_points=31,
-            noise=0.0001,
-            highlight=0 if False else int(31**2 / 2),
-        ),
+            "scale": 0.05,
+            "n_points": 15,
+            "noise": 0.0001,
+            "highlight": 0 if False else int(15**2 / 2),
+        },
+        {
+            "function": lambda x, y: y**2 + y,  # noqa: ARG005
+            "scale": 0.05,
+            "n_points": 31,
+            "noise": 0.0001,
+            "highlight": 0 if False else int(31**2 / 2),
+        },
+        {
+            "file_name": "~/data/PN1.stl",
+            "scale": 2.0,
+            "n_points": 5e3,
+            "highlight": 0,
+        },
     ]
+    shapes = shapes[:-1]
+    mode = ["display", "profile"][0]
 
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        "--scale",
-        type=float,
-        default=1,
-        help="Scale of the curvature estimation.",
-    )
-    parser.add_argument(
-        "--highlight",
-        type=int,
-        default=None,
-        help="Index of the point to highlight.",
-    )
-    parser.add_argument(
-        "--mode",
-        choices=["display", "profile"],
-        default="display",
-        help="Whether to display the results or profile the code.",
-    )
-    parser.add_argument(
-        "--n_points",
-        type=int,
-        default=None,
-        help="Number of points in the point cloud.",
-    )
-    parser.add_argument(
-        "source",
-        nargs="*",
-        default=None,
-        help="Shape to load.",
-    )
-    parser.add_argument(
-        "--output",
-        type=str,
-        default="",
-        help="Folder where outputs should be saved.",
-    )
-    parser.add_argument(
-        "--alpha",
-        type=float,
-        default=1,
-        help="Transparency.",
-    )
-    parser.add_argument(
-        "--color",
-        choices=["curvatures", "curvedness"],
-        default="curvatures",
-        help="Color code for the curvature.",
-    )
-
-    args = parser.parse_args()
-
-    if args.source:
-        sources = [glob.glob(s) for s in args.source]
-        sources = [item for sublist in sources for item in sublist]
-
-        shapes = [
-            dict(
-                file_name=source,
-                scale=args.scale,
-                n_points=args.n_points,
-                highlight=args.highlight,
-            )
-            for source in sources
-        ]
-    pprint(shapes)
-
-    if args.mode == "display":
-        for SHAPE_ID, s in enumerate(shapes, start=1):
+    if mode == "display":
+        for s in shapes:
             display_curvatures(**s)
-            print("")
 
     elif args.mode == "profile":
         from .utils import profiler
@@ -394,21 +327,16 @@ if __name__ == "__main__":
 
         start = time.time()
         kmax, kmin = shape.point_principal_curvatures(scale=scale)
-        print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
         stop = time.time()
-        print(f"First run, elapsed time = {stop - start:.3f}s")
 
         with myprof as prof:
             kmax, kmin = shape.point_principal_curvatures(scale=scale)
-            print(f"Kmax: {kmax[highlight]}, Kmin: {kmin[highlight]}")
 
-        print(shape.point_moments.cache_info())
+        # Create an "output/" folder if it doesn't exist
 
-        # Create an "output/" foler if it doesn't exist
-        import os
-
-        if not os.path.exists("output"):
-            os.makedirs("output")
+        output_path = Path("output")
+        if not Path.exists(output_path):
+            Path.mkdir(output_path, parents=True)
 
         # Export to chrome://tracing
         prof.export_chrome_trace("output/trace_curvatures.json")

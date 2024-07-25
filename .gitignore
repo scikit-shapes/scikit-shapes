@@ -138,6 +138,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+# vscode settings
+**/.vscode/
+
 # mypy
 .mypy_cache/
 .dmypy.json
@@ -151,6 +154,9 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Ruff cache
+.ruff_cache/
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
