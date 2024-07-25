@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import importlib.metadata
-import locale
 import os
 import sys
 import warnings
