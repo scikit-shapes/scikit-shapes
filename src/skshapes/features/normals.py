@@ -6,7 +6,7 @@ from pykeops.torch import LazyTensor
 
 from ..input_validation import typecheck
 from ..types import FloatTensor, Number, Points, Triangles
-from ..utils import diagonal_ranges
+from ..utils import diagonal_ranges, scatter
 
 
 @typecheck
@@ -22,17 +22,19 @@ def _point_normals(
             raise ValueError(msg)
 
         tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
-        n = torch.zeros_like(self.points)
+
         # TODO: instead of distributing to the vertices equally, we should
         #       distribute according to the angles of the triangles.
-        for k in range(3):
-            # n[self.triangles[k, i]] += tri_n[i]
-            n.scatter_reduce_(
-                dim=0,
-                index=self.triangles[k].view(-1, 1),
+        n = sum(
+            scatter(
                 src=tri_n,
+                index=self.triangles[:, k],
                 reduce="sum",
+                min_length=self.n_points,
             )
+            for k in range(3)
+        )
+        assert n.shape == self.points.shape
 
     else:
         # Get a smooth field of normals via the Structure Tensor:
