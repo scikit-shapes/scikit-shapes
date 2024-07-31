@@ -16,6 +16,7 @@ from ..types import (
     Points,
     Triangles,
     float_dtype,
+    Literal,
 )
 from ..utils import diagonal_ranges
 from .normals import smooth_normals, tangent_vectors
@@ -463,6 +464,178 @@ def _point_quadratic_fits(
     return fit
 
 
+class MeanGaussCurvatures(NamedTuple):
+    """Class to store the mean and gauss curvatures."""
+
+    mean: Float1dTensor
+    gauss: Float1dTensor
+
+
+@typecheck
+def _point_mean_gauss_curvatures(
+    self,
+    *,
+    scale: Number | None = None,
+    method: Literal["varifold", "tangent_quadratic"] = "varifold",
+    mean_only: bool = True,
+    **kwargs,
+) -> MeanGaussCurvatures:
+    """Point-wise mean and gauss curvatures."""
+
+    if method == "varifold":
+        N = self.n_points
+
+        # Point positions
+        x = self.points
+        assert x.shape == (N, 3)
+
+        # Normalized coordinates, for the sake of numerical stability:
+        x = x - x.mean(0, keepdim=True)
+        x = x / scale
+        assert x.shape == (N, 3)
+
+        # Local normal + tangent vectors: these are arranged row-wise!
+        nuv = self.point_frames(scale=scale, **kwargs)
+        assert nuv.shape == (N, 3, 3)
+
+        n = nuv[:, 0, :].contiguous()  # (N, 3)
+        assert n.shape == (N, 3)
+
+        uv = nuv[:, 1:, :].contiguous()  # (N, 2, 3)
+        assert uv.shape == (N, 2, 3)
+
+        #u = nuv[:, 1, :].contiguous(),  # (N, 3)
+        #v = nuv[:, 2, :].contiguous(),  # (N, 3)
+        #assert u.shape == (N, 3)
+        #assert v.shape == (N, 3)
+
+        # Point weights, typically one:
+        m = self.point_weights
+        assert m.shape == (N,)
+
+        # Wrap as LazyTensors:
+        x_i = LazyTensor(x.view(N, 1, 3))
+        x_j = LazyTensor(x.view(1, N, 3))
+
+        n_i = LazyTensor(n.view(N, 1, 3))
+        n_j = LazyTensor(n.view(1, N, 3))
+
+        m_j = LazyTensor(m.view(1, N, 1))
+
+        # Squared distances:
+        d2_ij = ((x_j - x_i) ** 2).sum(-1)  # (N, N, 1) ~ squared distance
+
+        if mean_only:
+            window_ij = (1 - d2_ij).step()  # (N, N, 1) ~ dimensionless
+            d_ij = d2_ij.sqrt()  # (N, N, 1) ~ distance
+            u_ij = (x_i - x_j) / (1e-20 + d_ij)  # (N, N, 3) ~ dimensionless
+            proj_ij = u_ij - (u_ij | n_j) * n_j  # (N, N, 3)
+
+            Num_ij = m_j * window_ij * proj_ij  # (N, N, 3)
+            Den_ij = m_j * d_ij * window_ij  # (N, N, 1)
+
+            Num = Num_ij.sum(1)  # (N, 3)
+            Den = Den_ij.sum(1)  # (N, 1)
+
+            mean_vec = Num / Den
+            mean = (mean_vec ** 2).sum(-1).sqrt() / scale  # (N,) ~ distance
+
+            gauss = mean ** 2
+        else:
+            proj_nij = n_i - (n_i | n_j) * n_j  # (N, N, 3) ~ dimensionless
+            ni_pl = proj_nij | (x_j - x_i)  # (N, N, 1) ~ distance
+
+            # Gaussian window:
+            window_ij = (-d2_ij / 2).exp()  # (N, N, 1) ~ dimensionless
+
+            Num_ij = m_j * window_ij * ni_pl * n_j.tensorprod(n_j)  # (N, N, 9) ~ distance
+            Den_ij = m_j * d2_ij * window_ij  # (N, N, 1) ~ squared distance
+
+            # Reduction:
+            Num = Num_ij.sum(1).view(N, 3, 3)  # (N, 9)
+            Den = Den_ij.sum(1).view(N)  # (N, 1)
+            assert Num.shape == (N, 3, 3)
+            assert Den.shape == (N,)
+
+            Num = Num @ uv.transpose(1, 2)  # (N, 3, 2)
+            assert Num.shape == (N, 3, 2)
+
+            Num = uv @ Num  # (N, 2, 2)
+            assert Num.shape == (N, 2, 2)
+
+            SecondForm = - (1 / scale) * Num / (1e-20 + Den).view(N, 1, 1)  # (N, 2, 2)
+            assert SecondForm.shape == (N, 2, 2)
+
+            # Mean and Gauss curvatures:
+            mean = (SecondForm[:, 0, 0] + SecondForm[:, 1, 1]) / 2
+            gauss = SecondForm[:, 0, 0] * SecondForm[:, 1, 1] - SecondForm[:, 0, 1] ** 2
+
+
+    elif method == "tangent_quadratic":
+        N = self.n_points
+
+        # Local average:
+        Xm = self.point_moments(order=1, scale=scale, central=False, **kwargs)
+        assert Xm.shape == (N, 3)
+
+        # Local quadratic coefficients in tangent space:
+        coefs, nuv, r2 = self.point_quadratic_coefficients(scale=scale, **kwargs)
+        assert coefs.shape == (N, 6)
+        for key in ["n", "u", "v"]:
+            assert nuv[key].shape == (N, 3)
+
+        # Compute the coordinates of the current point in the local tangent frame,
+        # centered around the local average:
+        x = self.points - Xm
+        assert x.shape == (N, 3)
+        U = (nuv["u"] * x).sum(-1)
+        V = (nuv["v"] * x).sum(-1)
+        assert U.shape == (N,)
+        assert V.shape == (N,)
+
+
+        # We rely on the formulas detailed in Example 4.2 of
+        # Curvature formulas for implicit curves and surfaces, Goldman, 2005.
+        # In the local tangent frame centered on the local average Xm,
+        # our quadratic approximation reads:
+        # n = f(u, v) = .5 * (a * u**2 + 2 * b * u * v +  c * v**2) +  d * u
+        #                                                           +  e * v + f
+        #             =      c0 * u**2 +    c1 * u * v + c2 * v**2  + c3 * u
+        #                                                           + c4 * v + c5
+        a, b, c = 2 * coefs[:, 0], coefs[:, 1], 2 * coefs[:, 2]
+        d, e = coefs[:, 3], coefs[:, 4]
+
+        # The gradient of f is:
+        # Grad(f) = [a * u + b * v + d, b * u + c * v + e]
+        gu = a * U + b * V + d
+        gv = b * U + c * V + e
+        denom = 1 + gu**2 + gv**2  # 1 + ||Grad(f)||^2
+
+        # The Hessian of f is H(f) = [[a, b], [b, c]].
+        gauss = a * c - b * b  # det(H(f))
+        gauss = gauss / denom**2
+
+        # Term 1: Grad(f)^T . H(f) . Grad(f)
+        mean = gu * gu * a + 2 * gu * gv * b + gv * gv * c
+        # Term 2: - (1 + ||Grad(f)||^2) * trace(H(f))
+        mean = mean - denom * (a + c)
+        mean = 0.5 * mean / denom ** (1.5)
+
+        # Our convention is that mean = trace / 2
+        mean = mean / 2
+
+
+    # Go from mean+gauss to kmax+kmin:
+    if self.triangles is None:
+        # If we cannot orient the surface,
+        # our convention is that the mean curvature is positive:
+        mean = mean.abs()
+
+    assert mean.shape == (N,)
+    assert gauss.shape == (N,)
+    return MeanGaussCurvatures(mean=mean, gauss=gauss)
+
+
 class PrincipalCurvatures(NamedTuple):
     """Class to store the principal curvatures."""
 
@@ -473,71 +646,26 @@ class PrincipalCurvatures(NamedTuple):
 @typecheck
 def _point_principal_curvatures(
     self,
-    *,
-    scale: Number | None = None,
     **kwargs,
 ) -> PrincipalCurvatures:
-    """Point-wise principal curvatures.
+    """Point-wise principal curvatures."""
 
-    We rely on the formulas detailed in Example 4.2 of
-    Curvature formulas for implicit curves and surfaces, Goldman, 2005.
-    """
-    N = self.n_points
+    mean, gauss = self.point_mean_gauss_curvatures(**kwargs)
 
-    # Local average:
-    Xm = self.point_moments(order=1, scale=scale, central=False, **kwargs)
-    assert Xm.shape == (N, 3)
-
-    # Local quadratic coefficients in tangent space:
-    coefs, nuv, r2 = self.point_quadratic_coefficients(scale=scale, **kwargs)
-    assert coefs.shape == (N, 6)
-    for key in ["n", "u", "v"]:
-        assert nuv[key].shape == (N, 3)
-
-    # Compute the coordinates of the current point in the local tangent frame,
-    # centered around the local average:
-    x = self.points - Xm
-    assert x.shape == (N, 3)
-    U = (nuv["u"] * x).sum(-1)
-    V = (nuv["v"] * x).sum(-1)
-    assert U.shape == (N,)
-    assert V.shape == (N,)
-
-    # In the local tangent frame centered on the local average Xm,
-    # our quadratic approximation reads:
-    # n = f(u, v) = .5 * (a * u**2 + 2 * b * u * v +  c * v**2) +  d * u
-    #                                                           +  e * v + f
-    #             =      c0 * u**2 +    c1 * u * v + c2 * v**2  + c3 * u
-    #                                                           + c4 * v + c5
-    a, b, c = 2 * coefs[:, 0], coefs[:, 1], 2 * coefs[:, 2]
-    d, e = coefs[:, 3], coefs[:, 4]
-
-    # The gradient of f is:
-    # Grad(f) = [a * u + b * v + d, b * u + c * v + e]
-    gu = a * U + b * V + d
-    gv = b * U + c * V + e
-    denom = 1 + gu**2 + gv**2  # 1 + ||Grad(f)||^2
-
-    # The Hessian of f is H(f) = [[a, b], [b, c]].
-    gauss = a * c - b * b  # det(H(f))
-    gauss = gauss / denom**2
-
-    # Term 1: Grad(f)^T . H(f) . Grad(f)
-    mean = gu * gu * a + 2 * gu * gv * b + gv * gv * c
-    # Term 2: - (1 + ||Grad(f)||^2) * trace(H(f))
-    mean = mean - denom * (a + c)
-    mean = 0.5 * mean / denom ** (1.5)
-
-    if self.triangles is None:
-        # If we cannot orient the surface,
-        # our convention is that the mean curvature is positive:
-        mean = mean.abs()
-
-    # delta = (trace ** 2 - 4 * det).relu().sqrt()
+    # Find kmax and kmin such that:
+    # kmax + kmin = 2 * mean
+    # kmax * kmin = gauss
+    # kmax >= kmin
     delta = (mean**2 - gauss).relu().sqrt()
     kmax = mean + delta
     kmin = mean - delta
+    # (kmax + kmin) / 2 = mean
+    # kmax * kmin = (mean + delta) * (mean - delta)
+    #             = mean**2 - delta**2
+    #             = mean**2 - (mean**2 - gauss)
+    #             = gauss
 
+    N = self.n_points
     assert kmax.shape == (N,)
     assert kmin.shape == (N,)
     return PrincipalCurvatures(kmax=kmax, kmin=kmin)
@@ -575,16 +703,16 @@ def _point_curvedness(self, **kwargs) -> Float1dTensor:
 @typecheck
 def _point_curvature_colors(
     self,
-    scale: Number | None = None,
+    **kwargs,
 ):
-    r2 = self.point_quadratic_coefficients(scale=scale).r2
+    r2 = self.point_quadratic_coefficients(**kwargs).r2
 
-    s = self.point_curvedness(scale=scale)
+    s = self.point_curvedness(**kwargs)
     s = s / s.max()
     s = (1e-5 + s).log().abs()
     s = s / s.max()
     s = 1 - s
-    i = -self.point_shape_indices(scale=scale)  # .abs()
+    i = -self.point_shape_indices(**kwargs)  # .abs()
     i = (1 + i) / 4
 
     if False:

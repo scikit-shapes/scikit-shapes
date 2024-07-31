@@ -1,6 +1,7 @@
 from .curvatures import (
     _point_curvature_colors,
     _point_curvedness,
+    _point_mean_gauss_curvatures,
     _point_principal_curvatures,
     _point_quadratic_coefficients,
     _point_quadratic_fits,
