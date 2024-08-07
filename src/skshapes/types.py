@@ -65,6 +65,9 @@ Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 Points2d = JaxFloat[torch.Tensor, "_ 2"]
 Points3d = JaxFloat[torch.Tensor, "_ 3"]
 
+# name the dimension to ensure identical number of points
+Points3d_n = JaxFloat[torch.Tensor, "n 3"]
+
 Points = Points2d | Points3d  # 3D or 2D points
 
 # Points sequences for sequence of poses (i.e. sequence of shapes)

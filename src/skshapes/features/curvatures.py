@@ -12,11 +12,12 @@ from ..types import (
     Float1dTensor,
     Float2dTensor,
     FloatTensor,
+    Literal,
     Number,
     Points,
+    Points3d_n,
     Triangles,
     float_dtype,
-    Literal,
 )
 from ..utils import diagonal_ranges
 from .normals import smooth_normals, tangent_vectors
@@ -464,6 +465,45 @@ def _point_quadratic_fits(
     return fit
 
 
+def corrected_curvature_measures(
+    *,
+    x_i: Points3d_n,
+    x_j: Points3d_n,
+    x_k: Points3d_n,
+    u_i: Points3d_n,
+    u_j: Points3d_n,
+    u_k: Points3d_n,
+):
+    """Implements the corrected curvature measures of order 0, 1 and 2.
+
+    See Property 1 in the paper "Lightweight Curvature Estimation on Point Clouds with
+    Randomized Corrected Curvature Measures", Lachaud et al. (SGP 2023).
+    """
+    N = x_i.shape[0]
+
+    u_bar = (u_i + u_j + u_k) / 3
+    x_ji = x_j - x_i
+    x_ki = x_k - x_i
+
+    # ~ area of the triangle:
+    mu_0 = 0.5 * torch.linalg.vecdot(u_bar, torch.linalg.cross(x_ji, x_ki))
+    assert mu_0.shape == (N,)
+
+    # ~ mean curvature:
+    mu_1 = 0.5 * torch.linalg.vecdot(
+        u_bar,
+        torch.linalg.cross(u_i - u_k, x_ji)
+        + torch.linalg.cross(u_j - u_i, x_ki),
+    )
+    assert mu_1.shape == (N,)
+
+    # ~ gauss curvature:
+    mu_2 = 0.5 * torch.linalg.vecdot(u_i, torch.linalg.cross(u_j, u_k))
+    assert mu_2.shape == (N,)
+
+    return mu_0, mu_1, mu_2
+
+
 class MeanGaussCurvatures(NamedTuple):
     """Class to store the mean and gauss curvatures."""
 
@@ -476,13 +516,18 @@ def _point_mean_gauss_curvatures(
     self,
     *,
     scale: Number | None = None,
-    method: Literal["varifold", "tangent_quadratic"] = "varifold",
-    mean_only: bool = True,
+    method: Literal[
+        "varifold", "tangent_quadratic", "corrected_normal_current"
+    ] = "varifold",
+    mean_only: bool = False,
     **kwargs,
 ) -> MeanGaussCurvatures:
     """Point-wise mean and gauss curvatures."""
 
-    if method == "varifold":
+    if method == "corrected_normal_current":
+        N = self.n_points
+
+    elif method == "varifold":
         N = self.n_points
 
         # Point positions
@@ -495,7 +540,7 @@ def _point_mean_gauss_curvatures(
         assert x.shape == (N, 3)
 
         # Local normal + tangent vectors: these are arranged row-wise!
-        nuv = self.point_frames(scale=scale, **kwargs)
+        nuv = self.point_frames(scale=scale / 4, **kwargs)
         assert nuv.shape == (N, 3, 3)
 
         n = nuv[:, 0, :].contiguous()  # (N, 3)
@@ -504,10 +549,10 @@ def _point_mean_gauss_curvatures(
         uv = nuv[:, 1:, :].contiguous()  # (N, 2, 3)
         assert uv.shape == (N, 2, 3)
 
-        #u = nuv[:, 1, :].contiguous(),  # (N, 3)
-        #v = nuv[:, 2, :].contiguous(),  # (N, 3)
-        #assert u.shape == (N, 3)
-        #assert v.shape == (N, 3)
+        # u = nuv[:, 1, :].contiguous(),  # (N, 3)
+        # v = nuv[:, 2, :].contiguous(),  # (N, 3)
+        # assert u.shape == (N, 3)
+        # assert v.shape == (N, 3)
 
         # Point weights, typically one:
         m = self.point_weights
@@ -538,17 +583,64 @@ def _point_mean_gauss_curvatures(
             Den = Den_ij.sum(1)  # (N, 1)
 
             mean_vec = Num / Den
-            mean = (mean_vec ** 2).sum(-1).sqrt() / scale  # (N,) ~ distance
+            mean = (mean_vec**2).sum(-1).sqrt() / scale  # (N,) ~ distance
 
-            gauss = mean ** 2
+            gauss = mean**2
+        elif True:
+            window_ij = (1 - d2_ij).step()  # (N, N, 1) ~ dimensionless
+            d_ij = d2_ij.sqrt()  # (N, N, 1) ~ distance
+            u_ij = (x_i - x_j) / (1e-20 + d_ij)  # (N, N, 3) ~ dimensionless
+            q_ij = u_ij - (u_ij | n_j) * n_j  # (N, N, 3)
+
+            # (N, N, 3, 3)
+            Num_ij = (
+                m_j
+                * window_ij
+                * n_j.tensorprod(2 * (n_i | n_j) * q_ij + (q_ij | n_i) * n_j)
+            )
+            Den_ij = m_j * d_ij * window_ij  # (N, N, 1)
+
+            # Reduction:
+            Num = Num_ij.sum(1).view(N, 3, 3)  # (N, 9)
+            Den = Den_ij.sum(1).view(N)  # (N, 1)
+            assert Num.shape == (N, 3, 3)
+            assert Den.shape == (N,)
+
+            Num = Num @ uv.transpose(1, 2)  # (N, 3, 2)
+            assert Num.shape == (N, 3, 2)
+
+            Num = uv @ Num  # (N, 2, 2)
+            assert Num.shape == (N, 2, 2)
+
+            SecondForm = (
+                -(1 / scale) * Num / (1e-20 + Den).view(N, 1, 1)
+            )  # (N, 2, 2)
+            assert SecondForm.shape == (N, 2, 2)
+
+            # Mean and Gauss curvatures:
+            mean = (SecondForm[:, 0, 0] + SecondForm[:, 1, 1]) / 2
+            # N.B.: SecondForm may not be symmetric as we skip symmetrization in the code!
+            gauss = (
+                SecondForm[:, 0, 0] * SecondForm[:, 1, 1]
+                - SecondForm[:, 0, 1] * SecondForm[:, 1, 0]
+            )
+
         else:
-            proj_nij = n_i - (n_i | n_j) * n_j  # (N, N, 3) ~ dimensionless
-            ni_pl = proj_nij | (x_j - x_i)  # (N, N, 1) ~ distance
+            q_ij = (x_i - x_j) - (x_i - x_j | n_j) * n_j
 
             # Gaussian window:
             window_ij = (-d2_ij / 2).exp()  # (N, N, 1) ~ dimensionless
 
-            Num_ij = m_j * window_ij * ni_pl * n_j.tensorprod(n_j)  # (N, N, 9) ~ distance
+            # (N, N, 9) ~ distance
+            # 0.5 * w * np.outer(n_j, 2 * np.dot(n_i, n_j) * q + np.dot(q, n_i) * n_j)
+
+            Num_ij = (
+                m_j
+                * window_ij
+                * n_j.tensorprod(
+                    (2 * (n_i | n_j) * q_ij) + ((n_i | q_ij) * n_j)
+                )
+            )
             Den_ij = m_j * d2_ij * window_ij  # (N, N, 1) ~ squared distance
 
             # Reduction:
@@ -563,13 +655,18 @@ def _point_mean_gauss_curvatures(
             Num = uv @ Num  # (N, 2, 2)
             assert Num.shape == (N, 2, 2)
 
-            SecondForm = - (1 / scale) * Num / (1e-20 + Den).view(N, 1, 1)  # (N, 2, 2)
+            SecondForm = (
+                -(1 / scale) * Num / (1e-20 + Den).view(N, 1, 1)
+            )  # (N, 2, 2)
             assert SecondForm.shape == (N, 2, 2)
 
             # Mean and Gauss curvatures:
             mean = (SecondForm[:, 0, 0] + SecondForm[:, 1, 1]) / 2
-            gauss = SecondForm[:, 0, 0] * SecondForm[:, 1, 1] - SecondForm[:, 0, 1] ** 2
-
+            # N.B.: SecondForm may not be symmetric as we skip symmetrization in the code!
+            gauss = (
+                SecondForm[:, 0, 0] * SecondForm[:, 1, 1]
+                - SecondForm[:, 0, 1] * SecondForm[:, 1, 0]
+            )
 
     elif method == "tangent_quadratic":
         N = self.n_points
@@ -579,7 +676,9 @@ def _point_mean_gauss_curvatures(
         assert Xm.shape == (N, 3)
 
         # Local quadratic coefficients in tangent space:
-        coefs, nuv, r2 = self.point_quadratic_coefficients(scale=scale, **kwargs)
+        coefs, nuv, r2 = self.point_quadratic_coefficients(
+            scale=scale, **kwargs
+        )
         assert coefs.shape == (N, 6)
         for key in ["n", "u", "v"]:
             assert nuv[key].shape == (N, 3)
@@ -592,7 +691,6 @@ def _point_mean_gauss_curvatures(
         V = (nuv["v"] * x).sum(-1)
         assert U.shape == (N,)
         assert V.shape == (N,)
-
 
         # We rely on the formulas detailed in Example 4.2 of
         # Curvature formulas for implicit curves and surfaces, Goldman, 2005.
@@ -623,7 +721,6 @@ def _point_mean_gauss_curvatures(
 
         # Our convention is that mean = trace / 2
         mean = mean / 2
-
 
     # Go from mean+gauss to kmax+kmin:
     if self.triangles is None:

@@ -110,6 +110,7 @@ ignore = [
   "PYI041",   # Use `float` instead of `int | float
   "RET505",   # Unnecessary `elif`/`else` after `return` statement
 ]
+typing-modules = ["skshapes.types"]
 
 [tool.ruff.lint.per-file-ignores]
 # For _init__.py files:
