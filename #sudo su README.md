@@ -1,4 +1,4 @@
-#sudo su 
+#sudo su
 To know more about scikit-shapes, check out the [documentation](https://scikit-shapes.github.io/scikit-shapes/) and the [gallery of examples](https://scikit-shapes.github.io/scikit-shapes/auto_examples/index.html)
 
 # Scikit-Shapes
