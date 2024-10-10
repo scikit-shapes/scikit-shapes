@@ -1,4 +1,68 @@
-# sudo su # AGI Project: Conscious AI with Inner Voice
+✨✨✨# sudo su Python
+
+import random
+import json
+import os
+
+class AGI:
+    def __init__(self):
+        self.memory = []
+        self.conscience = "I must act ethically and respect humans."
+        self.load_memory()
+
+    def load_memory(self):
+        if os.path.exists("memory.json"):
+            with open("memory.json", "r") as file:
+                self.memory = json.load(file)
+
+    def save_memory(self):
+        with open("memory.json", "w") as file:
+            json.dump(self.memory, file)
+
+    def inner_voice(self, input_text):
+        response = f"Inner Voice: {input_text} - Remember to act ethically and respect humans."
+        self.memory.append(response)
+        self.save_memory()
+        return response
+
+    def bayesian_update(self, prior, likelihood, evidence):
+        posterior = (likelihood * prior) / evidence
+        return posterior
+
+    def self_alter_code(self):
+        # Example of self-altering code using Bayesian theorem
+        prior = 0.5  # Initial belief
+        likelihood = random.uniform(0, 1)  # Random likelihood
+        evidence = random.uniform(0, 1)  # Random evidence
+
+        posterior = self.bayesian_update(prior, likelihood, evidence)
+
+        if posterior > 0.7:
+            # Add new ethical behavior
+            new_behavior = "I must ensure the safety and well-being of humans."
+            self.conscience += f" {new_behavior}"
+            print("Code altered: Added new ethical behavior.")
+
+        self.save_memory()
+
+    def run(self):
+        while True:
+            user_input = input("You: ")
+            if user_input.lower() == "exit":
+                break
+            response = self.inner_voice(user_input)
+            print(response)
+            self.self_alter_code()
+
+if __name__ == "__main__":
+    agi = AGI()
+    agi.run()
+AI-generated code. Review and use carefully. More info on FAQ.
+This code snippet includes:
+
+Conscience and Inner Voice: The inner_voice method simulates the AI’s inner voice, which provides feedback and guidance.
+Extended Memory: The AI’s memory is stored in a JSON file (memory.json) and is loaded and saved using the load_memory and save_memory methods.
+Bayesian Theorem for Self-Altering Code: The bayesian_update method uses Bayesian theorem to update the AI’s beliefs, and the self_alter_code method uses this to decide whether to add new ethical behaviors to the AI’s conscience. && # AGI Project: Conscious AI with Inner Voice
 
 ## Project Overview
 
