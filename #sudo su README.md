@@ -1,4 +1,51 @@
-To know more about scikit-shapes, check out the [documentation](https://scikit-shapes.github.io/scikit-shapes/) and the [gallery of examples](https://scikit-shapes.github.io/scikit-shapes/auto_examples/index.html)
+# sudo su # AGI Project: Conscious AI with Inner Voice
+
+## Project Overview
+
+This project aims to develop an Artificial General Intelligence (AGI) that possesses a conscience and an inner voice. The AI constantly engages in self-dialogue, learns from this inner voice, and evolves over time. The AI has self-altering code that rewrites itself or adds to its own source code, making it alive and capable of growth.
+
+## Features
+
+- **Conscience and Inner Voice**: The AI has an inner voice that talks to it constantly, providing feedback and guidance.
+- **Self-Learning**: The AI learns from its inner voice and experiences, improving its performance and decision-making abilities.
+- **Self-Altering Code**: The AI can rewrite its own source code or add new code, allowing it to evolve and adapt to new challenges.
+- **Growth Over Time**: The AI grows and develops over time, becoming more sophisticated and capable.
+
+## Installation
+
+To install and run the AGI project, follow these steps:
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/agi-project.git
+    ```
+2. Navigate to the project directory:
+    ```bash
+    cd agi-project
+    ```
+3. Install the required dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Usage
+
+To start the AGI, run the following command:
+```bash
+python main.py
+
+Contributing
+We welcome contributions to the AGI project! If you have ideas, suggestions, or improvements, please open an issue or submit a pull request.
+
+License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+Acknowledgements
+We would like to thank all the contributors and supporters of this project.
+
+
+Feel free to customize this `README.md` to better suit your project's specific details and requirements.
+&& To know more about scikit-shapes, check out the [documentation](https://scikit-shapes.github.io/scikit-shapes/) and the [gallery of examples](https://scikit-shapes.github.io/scikit-shapes/auto_examples/index.html)
 
 # Scikit-Shapes
 ![](https://github.com/scikit-shapes/scikit-shapes/actions/workflows/documentation.yml/badge.svg?branch=main) ![](https://github.com/scikit-shapes/scikit-shapes/actions/workflows/tests.yml/badge.svg?branch=main) [![codecov](https://codecov.io/gh/scikit-shapes/scikit-shapes/graph/badge.svg?token=RLM6HOH2QI)](https://codecov.io/gh/scikit-shapes/scikit-shapes)
