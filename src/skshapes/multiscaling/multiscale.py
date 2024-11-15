@@ -36,11 +36,11 @@ class Multiscale:
     coarser scales.
 
     New scales can be added to the multiscale representation by calling the
-    [`append`][skshapes.multiscaling.Multiscale.append] method. The new scale
+    [`append`](skshapes.multiscaling.Multiscale.append) method. The new scale
     is defined by one of the three parameters described above.
 
     Existing scales can be retrieved by calling the
-    [`at`][skshapes.multiscaling.Multiscale.at] # noqa E501 method. The scale
+    [`at`](skshapes.multiscaling.Multiscale.at) method. The scale
     is defined by one of the three parameters described above.
 
     Signals (point_data )defined at any scale can be propagated to the other
@@ -48,7 +48,7 @@ class Multiscale:
     the coarser scales and from the origin to the finer scales. The propagation
     is done by interpolation or smoothing depending on the policies defined by
     the `fine_to_coarse_policy` and `coarse_to_fine_policy` parameters of the
-    [`propagate`][skshapes.multiscaling.Multiscale.propagate] method.
+    [`propagate`](skshapes.multiscaling.Multiscale.propagate) method.
 
     Most of the methods of this class can be called with one of the `ratio`,
     `n_points` or `scale` parameters.
