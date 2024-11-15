@@ -36,11 +36,12 @@ class Multiscale:
     coarser scales.
 
     New scales can be added to the multiscale representation by calling the
-    [`append`](skshapes.multiscaling.Multiscale.append) method. The new scale
+    :meth:`append<skshapes.multiscaling.multiscale.Multiscale.append>` method.
+    The new scale
     is defined by one of the three parameters described above.
 
     Existing scales can be retrieved by calling the
-    [`at`](skshapes.multiscaling.Multiscale.at) method. The scale
+    :meth:`at<skshapes.multiscaling.multiscale.Multiscale.at>` method. The scale
     is defined by one of the three parameters described above.
 
     Signals (point_data )defined at any scale can be propagated to the other
@@ -104,14 +105,6 @@ class Multiscale:
     ) -> None:
         self.shape = shape
 
-        if ratios is not None:
-            pass
-        elif n_points is not None:
-            ratios = [n / shape.n_points for n in n_points]
-        elif scales is not None:
-            msg = "Scales are not implemented yet"
-            raise NotImplementedError(msg)
-
         if decimation_module is not None:
             if not hasattr(decimation_module, "ref_mesh_"):
                 msg = "The decimation module has not been fitted."
@@ -134,8 +127,15 @@ class Multiscale:
         self.mappings_from_origin = {}
         self.shapes[1] = shape
 
-        for r in ratios:
-            self.append(ratio=float(r))
+        if ratios is not None:
+            for r in ratios:
+                self.append(ratio=float(r))
+        elif n_points is not None:
+            for n in n_points:
+                self.append(n_points=n)
+        elif scales is not None:
+            for s in scales:
+                self.append(scale=float(s))
 
     @one_and_only_one(parameters=["ratio", "n_points", "scale"])
     @typecheck
@@ -146,10 +146,10 @@ class Multiscale:
         n_points: int | None = None,
         scale: Number | None = None,
     ) -> None:
-        """Append a new shape.
+        """Appends a new shape to the list of sub-sampled representations of the base shape.
 
         This function can be called with one of the `ratio`, `n_points` or
-        `scale`.
+        `scale` parameters.
 
         Parameters
         ----------
@@ -171,9 +171,13 @@ class Multiscale:
             # ratio already exists, do nothing
             pass
         else:
+            if n_points is not None:
+                sampling = dict(n_points_strict=n_points)
+            else:
+                sampling = dict(ratio=ratio)
             new_shape, indice_mapping = self._decimation_module.transform(
                 self.shape,
-                ratio=ratio,
+                **sampling,
                 return_indice_mapping=True,
             )
 
@@ -198,7 +202,15 @@ class Multiscale:
 
         # find clostest n_points
         available_ratios = self.shapes.keys()
-        ratio = min(available_ratios, key=lambda x: abs(x - ratio))
+
+        # Clamp the ratio to 1, i.e. n_points to shape.n_points
+        # If the user asks for too many points, we simply return the raw shape.
+        ratio = min(1, ratio)
+        # Return the smallest ratio (= most compact shape)
+        # which is still larger (= at least as precise) as the required shape.
+        # Since ratio is <= 1 and 1 always belongs to available_ratios,
+        # this is a non-empty minimization.
+        ratio = min(r for r in available_ratios if r >= ratio)
 
         return self.shapes[ratio]
 

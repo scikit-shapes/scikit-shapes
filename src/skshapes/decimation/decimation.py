@@ -223,7 +223,11 @@ class Decimation:
             max_iter = 10
             i = 0
             while not done and i < max_iter:
-                coarse_mesh = self.transform(mesh=mesh, n_points=n_points)
+                coarse_mesh, indice_mapping = self.transform(
+                    mesh=mesh,
+                    n_points=n_points,
+                    return_indice_mapping=True,
+                )
                 if coarse_mesh.n_points == n_points_strict:
                     # We reached the target number of points
                     done = True
@@ -244,7 +248,10 @@ class Decimation:
                     + " iterations."
                 )
 
-            return coarse_mesh
+            if not return_indice_mapping:
+                return coarse_mesh
+            else:
+                return coarse_mesh, indice_mapping
 
         if target_reduction is None and n_points is None and ratio is None:
             # default, target_reduction is the same as in __init__

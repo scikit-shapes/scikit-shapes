@@ -28,6 +28,7 @@ multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.001])
 pl = pv.Plotter(shape=(2, 2))
 
 for i, ratio in enumerate([1, 0.1, 0.01, 0.001]):
+    # Use the '.at()' method to access the shape at different scales
     sampled_bunny = multiscale_bunny.at(ratio=ratio)
 
     pl.subplot(i // 2, i % 2)
@@ -40,8 +41,9 @@ for i, ratio in enumerate([1, 0.1, 0.01, 0.001]):
 
 pl.show()
 
+
 ###############################################################################
-# Please note that calling the :obj:`~skshapes.multiscaling.multiscale.Multiscale.at` method with an arbitrary ratio
+# Please note that calling the :meth:`~skshapes.multiscaling.multiscale.Multiscale.at` method with an arbitrary ratio
 # returns the most compact (i.e. the coarsest) representation stored
 # in the :class:`Multiscale<skshapes.multiscaling.multiscale.Multiscale>` object that is
 # at least as detailed as the specified ratio.
@@ -49,6 +51,7 @@ pl.show()
 pl = pv.Plotter(shape=(2, 2))
 
 for i, ratio in enumerate([0.5, 0.1, 0.05, 0.01]):
+    # Use the '.at()' method to access the shape at different scales
     sampled_bunny = multiscale_bunny.at(ratio=ratio)
 
     pl.subplot(i // 2, i % 2)
@@ -62,7 +65,7 @@ for i, ratio in enumerate([0.5, 0.1, 0.05, 0.01]):
 pl.show()
 
 ###############################################################################
-# Alternatively, we can use the `n_points` parameter to specify the desired
+# Alternatively, we can use the ``n_points`` parameter to specify the desired
 # number of points per resolution level.
 
 multiscale_bunny = sks.Multiscale(shape=bunny, n_points=[3000, 1000, 300, 100])
@@ -70,28 +73,7 @@ multiscale_bunny = sks.Multiscale(shape=bunny, n_points=[3000, 1000, 300, 100])
 pl = pv.Plotter(shape=(2, 2))
 
 for i, n_points in enumerate([3000, 1000, 300, 100]):
-    sampled_bunny = multiscale_bunny.at(n_points=n_points)
-
-    pl.subplot(i // 2, i % 2)
-    sks.doc.display(
-        plotter=pl,
-        shape=sampled_bunny,
-        show_edges=True,
-        title=f".at(n_points={n_points}), {sampled_bunny.n_points:,} points",
-        )
-
-pl.show()
-
-
-###############################################################################
-# We can also use the `scale` parameter to specify the desired
-# number of points per resolution level.
-
-multiscale_bunny = sks.Multiscale(shape=bunny, n_points=[3000, 1000, 300, 100])
-
-pl = pv.Plotter(shape=(2, 2))
-
-for i, n_points in enumerate([3000, 1000, 300, 100]):
+    # Use the '.at()' method with the n_points parameter instead of ratio
     sampled_bunny = multiscale_bunny.at(n_points=n_points)
 
     pl.subplot(i // 2, i % 2)
