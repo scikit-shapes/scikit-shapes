@@ -23,57 +23,47 @@ from ..utils import scatter
 class Multiscale:
     """Multiscale representation of a shape.
 
-    This class allows to represent a shape at different scales. The shape is
-    represented at the origin scale and at different coarser scales. The
-    coarser scales can be defined by three different parameters:
+    This class represents a shape using multiple levels of details,
+    from coarse to fine scales.
+    This is useful to speed-up computations such as multigrid simulations or level-of-detail rendering.
+    This class takes as input a high-resolution shape and accepts three types of parameters to define the coarser representations in the hierarchy:
 
-    - the ratio of the number of points between the origin scale and the
-        coarser scale,
-    - the number of points of the coarser scale,
-    - the scale of the coarser scale.
+    - The number of points ``n_points`` of each coarser scale.
+    - The typical ``scale`` or distance between two neighboring samples at each coarser scale.
+    - The ``ratio`` of the number of points between the origin scale and each coarser scale. A ratio of 1.0 corresponds to the original high-resolution shape, whereas a ratio of 0.2 corresponds to a coarse representation that only uses 20% of the original point count.
 
-    If landmarks are defined on the origin shape, they are propagated to the
-    coarser scales.
 
-    New scales can be added to the multiscale representation by calling the
+    Most of the methods of this class can be called with one of the ``n_points``, ``scale`` or ``ratio`` parameters.
+
+    We can retrieve existing coarse models at different scales using the
+    :meth:`at<skshapes.multiscaling.multiscale.Multiscale.at>` method and add models at new sampling resolutions using the
     :meth:`append<skshapes.multiscaling.multiscale.Multiscale.append>` method.
-    The new scale
-    is defined by one of the three parameters described above.
 
-    Existing scales can be retrieved by calling the
-    :meth:`at<skshapes.multiscaling.multiscale.Multiscale.at>` method. The scale
-    is defined by one of the three parameters described above.
+    Signals (:attr:`~skshapes.data.polydata.PolyData.point_data`) defined at one scale can be propagated to the other scales using the :meth:`~skshapes.multiscaling.multiscale.Multiscale.propagate` method.
+    This is illustrated in :ref:`this tutorial <multiscale_signal_propagation_example>`.
 
-    Signals (point_data )defined at any scale can be propagated to the other
-    scales. The propagation is performed in both directions from the origin to
-    the coarser scales and from the origin to the finer scales. The propagation
-    is done by interpolation or smoothing depending on the policies defined by
-    the `fine_to_coarse_policy` and `coarse_to_fine_policy` parameters of the
-    [`propagate`](skshapes.multiscaling.Multiscale.propagate) method.
+    Likewise, if landmarks are defined on the original shape, they are propagated to the coarser scales as illustrated in :ref:`this tutorial <multiscale_landmarks_example>`.
 
-    Most of the methods of this class can be called with one of the `ratio`,
-    `n_points` or `scale` parameters.
 
     Parameters
     ----------
     shape
-        The shape at the origin scale.
+        The shape at the original, finest scale.
     ratios
-        The ratios of the coarser scales.
+        The sampling ratios that describe the coarser scales.
     n_points
-        The number of points of the coarser scales.
+        The target numbers of points for each coarser scale.
     scales
-        The scales of the coarser scales.
+        The sampling scales that describe the coarser scales.
     decimation_module
-        The decimation module to use to compute the coarser scales. If not
-        provided, it is defined automatically.
+        The decimation module that should be used to compute the coarser representations of the shape. If not provided, it is defined automatically.
 
     Raises
     ------
     NotImplementedError
         If the shape is not a triangle mesh.
     ValueError
-        If none of the `ratios`, `n_points` or `scales` parameters are
+        If none of the ``ratios``, ``n_points`` or ``scales`` parameters are
         provided or if more than one of these parameters are provided.
 
     Examples
@@ -87,9 +77,18 @@ class Multiscale:
         shape = sks.Sphere()
         ratios = [0.5, 0.25, 0.125]
         multiscale = sks.Multiscale(shape=shape, ratios=ratios)
+        print("Hi")
 
-    See the [gallery](../../../generated/gallery/#multiscaling) for more
-    examples.
+    .. testcode::
+
+        1 + 1  # this will give no output!
+        print(2 + 2)  # this will give output
+
+    .. testoutput::
+
+        4
+
+    See the :ref:`gallery <multiscale_examples>` for more examples.
 
     """
 
@@ -132,7 +131,7 @@ class Multiscale:
                 self.append(ratio=float(r))
         elif n_points is not None:
             for n in n_points:
-                self.append(n_points=n)
+                self.append(n_points=int(n))
         elif scales is not None:
             for s in scales:
                 self.append(scale=float(s))
@@ -175,14 +174,29 @@ class Multiscale:
                 sampling = dict(n_points_strict=n_points)
             else:
                 sampling = dict(ratio=ratio)
-            new_shape, indice_mapping = self._decimation_module.transform(
+            new_shape, index_mapping = self._decimation_module.transform(
                 self.shape,
                 **sampling,
-                return_indice_mapping=True,
+                return_index_mapping=True,
             )
 
             self.shapes[ratio] = new_shape
-            self.mappings_from_origin[ratio] = indice_mapping
+            self.mappings_from_origin[ratio] = index_mapping
+
+    def best_key(self, *, ratio: Number) -> Number:
+        """Return the best key in the shapes dictionary for a given, arbitrary ratio.
+
+        This returns the smallest ratio (= most compact shape) which is still larger
+        (= at least as precise) as the required sampling ratio.
+        """
+        available_ratios = self.shapes.keys()
+
+        # Clamp the ratio to 1, i.e. n_points to shape.n_points
+        # If the user asks for too many points, we simply return the raw shape.
+        ratio = min(1, ratio)
+        # Since ratio is <= 1 and 1 always belongs to available_ratios,
+        # this is a non-empty minimization.
+        return min(r for r in available_ratios if r >= ratio)
 
     @one_and_only_one(parameters=["ratio", "n_points", "scale"])
     @typecheck
@@ -200,19 +214,7 @@ class Multiscale:
             msg = "Scales are not implemented yet"
             raise NotImplementedError(msg)
 
-        # find clostest n_points
-        available_ratios = self.shapes.keys()
-
-        # Clamp the ratio to 1, i.e. n_points to shape.n_points
-        # If the user asks for too many points, we simply return the raw shape.
-        ratio = min(1, ratio)
-        # Return the smallest ratio (= most compact shape)
-        # which is still larger (= at least as precise) as the required shape.
-        # Since ratio is <= 1 and 1 always belongs to available_ratios,
-        # this is a non-empty minimization.
-        ratio = min(r for r in available_ratios if r >= ratio)
-
-        return self.shapes[ratio]
+        return self.shapes[self.best_key(ratio=ratio)]
 
     @one_and_only_one(parameters=["from_ratio", "from_n_points", "from_scale"])
     @typecheck
@@ -327,7 +329,7 @@ class Multiscale:
             reduce = fine_to_coarse_policy.reduce
             return scatter(
                 src=source_signal,
-                index=self.indice_mapping(
+                index=self.index_mapping(
                     fine_ratio=source_ratio, coarse_ratio=target_ratio
                 ),
                 reduce=reduce,
@@ -341,7 +343,7 @@ class Multiscale:
             fine_ratio_signal = torch.index_select(
                 source_signal,
                 dim=0,
-                index=self.indice_mapping(
+                index=self.index_mapping(
                     fine_ratio=target_ratio, coarse_ratio=source_ratio
                 ),
             )
@@ -360,15 +362,16 @@ class Multiscale:
             return fine_ratio_signal
 
     @typecheck
-    def indice_mapping(
+    def index_mapping(
         self, fine_ratio: Number, coarse_ratio: Number
     ) -> Int1dTensor:
-        """Return the indice mapping from high to low resolution.
+        """Return the index mapping from a fine to a coarse resolution.
 
-        The indice mapping is a 1d tensor of integers of length equal to the
-        number of points at the high resolution ratio. Each element of the
-        tensor is the index of the corresponding point at the low resolution
-        ratio.
+        The index mapping is a 1d tensor of integers whose length is equal to the
+        number of points at the fine resolution ratio. Each element of the
+        tensor is the index of the corresponding point at the coarse resolution
+        ratio. This method is used internally to propagate signals from one
+        scale to another.
 
         Parameters
         ----------
@@ -380,7 +383,7 @@ class Multiscale:
         Returns
         -------
         Int1dTensor
-            The indice mapping from high to low resolution.
+            The index mapping from a fine to a coarse resolution.
         """
         assert (
             fine_ratio >= coarse_ratio
@@ -388,11 +391,8 @@ class Multiscale:
         assert 0 < coarse_ratio <= 1, "coarse_ratio must be between 0 and 1"
         assert 0 < fine_ratio <= 1, "fine_ratio must be between 0 and 1"
 
-        available_ratios = list(self.shapes.keys())
-        fine_ratio = min(available_ratios, key=lambda x: abs(x - fine_ratio))
-        coarse_ratio = min(
-            available_ratios, key=lambda x: abs(x - coarse_ratio)
-        )
+        fine_ratio = self.best_key(ratio=fine_ratio)
+        coarse_ratio = self.best_key(ratio=coarse_ratio)
 
         if fine_ratio == coarse_ratio:
             return torch.arange(self.shapes[fine_ratio].n_points)

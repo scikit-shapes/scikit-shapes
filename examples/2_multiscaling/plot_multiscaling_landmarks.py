@@ -1,4 +1,6 @@
 """
+.. _multiscale_landmarks_example:
+
 Multiscaling and landmarks
 ==========================
 
@@ -6,15 +8,14 @@ The :class:`skshapes.Multiscale<skshapes.multiscaling.multiscale.Multiscale>` cl
 preserves landmarks across scales.
 """
 
-import pyvista
-from pyvista import examples
+import pyvista as pv
 
 import skshapes as sks
 
 ###############################################################################
 # To demonstrate this, we first load a mesh with a collection of key points.
 
-mesh = sks.PolyData(examples.download_louis_louvre().clean())
+mesh = sks.PolyData(pv.examples.download_louis_louvre().clean())
 
 landmarks = [151807, 21294, 23344, 25789, 131262, 33852, 171465, 191680]
 landmarks += [172653, 130895, 9743, 19185, 143397, 200885]
@@ -32,7 +33,7 @@ multiscale = sks.Multiscale(shape=mesh, ratios=ratios)
 # The ``landmark_points`` and ``landmark_indices`` attributes of the shape
 # are transported consistently between the different scales.
 
-pl = pyvista.Plotter()
+pl = pv.Plotter()
 
 pl.open_gif("animation.gif", fps=1)
 for ratio in ratios:

@@ -1,4 +1,6 @@
 """
+.. _multiscale_signal_propagation_example:
+
 Multiscaling and signal propagation
 ===================================
 
@@ -12,11 +14,10 @@ and a :class:`CoarseToFinePolicy <skshapes.types.CoarseToFinePolicy>`.
 # First, we load the Stanford bunny as a triangle mesh and sub-sample it using 10%, 1% and 0.5% of the original point count.
 
 import pyvista as pv
-import pyvista.examples
 
 import skshapes as sks
 
-bunny = sks.PolyData(pyvista.examples.download_bunny())
+bunny = sks.PolyData(pv.examples.download_bunny())
 ratios = [1, 0.1, 0.01, 0.001]
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=ratios)
 

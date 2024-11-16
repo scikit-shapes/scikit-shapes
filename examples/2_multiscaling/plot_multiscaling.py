@@ -1,4 +1,6 @@
 """
+.. _multiscale_triangle_mesh_example:
+
 Multiscaling with triangle meshes
 ==================================
 
