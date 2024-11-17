@@ -34,7 +34,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements_dev.txt
-          pip install .
+          pip install -e .
 
 
       # Tests are run first with minimal dependencies, to ensure that the core functionality is working
@@ -47,7 +47,7 @@ jobs:
       # we only run the tests on the optional_tests folder to avoid running the tests twice
       - name: Test (with all optional dependencies)
         run: |
-          pip install .[all]
+          pip install -e .[all]
           pytest optional_tests/ --cov-append --cov-report xml:coverage_opt.xml --durations=0
 
       - name: Upload coverage to Codecov
