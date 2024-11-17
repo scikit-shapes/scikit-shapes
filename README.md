@@ -87,9 +87,10 @@ pytest
 - build the documentation (and serve it locally)
 ```bash
 pip install -r requirement_docs.txt
-sphinx-apidoc -o doc/source/api/ --module-first --force src/skshapes
-sphinx-build -b html doc/source/ doc/_build/html
-cd doc/_build/html
+cd doc/source/
+make clean
+make html
+cd ../_build/html
 python -m http.server
 ```
 

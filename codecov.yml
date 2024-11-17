@@ -1,3 +1,2 @@
 ignore:
   - "**/skshapes/applications/**/*"
-  - "**/skshapes/documenation_example.py"

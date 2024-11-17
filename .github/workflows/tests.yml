@@ -34,8 +34,13 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -r requirements_dev.txt
-          pip install .
+          pip install -e .
 
+      # https://github.com/pyvista/setup-headless-display-action
+      # This step is needed to run pyvista displays in tests,
+      # e.g. in the tests of skshapes.doc.display.
+      - name: Setup headless display
+        uses: pyvista/setup-headless-display-action@v2
 
       # Tests are run first with minimal dependencies, to ensure that the core functionality is working
       - name: Test (minimal dependencies)
@@ -47,7 +52,7 @@ jobs:
       # we only run the tests on the optional_tests folder to avoid running the tests twice
       - name: Test (with all optional dependencies)
         run: |
-          pip install .[all]
+          pip install -e .[all]
           pytest optional_tests/ --cov-append --cov-report xml:coverage_opt.xml --durations=0
 
       - name: Upload coverage to Codecov

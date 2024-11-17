@@ -49,7 +49,7 @@ def test_multiscale_api():
     # test that indice mapping from a ratio to the same ratio is the identity
     ratio = torch.rand(1).item()
     assert torch.allclose(
-        M1.indice_mapping(
+        M1.index_mapping(
             fine_ratio=ratio,
             coarse_ratio=ratio,
         ),
@@ -167,7 +167,7 @@ def test_multiscale(init_type):
     intermediate_ratio = float(intermediate_ratio)
 
     # Test indice mapping
-    im = M.indice_mapping(
+    im = M.index_mapping(
         fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio
     )
     # Check that the number of points is correct
@@ -176,11 +176,11 @@ def test_multiscale(init_type):
     assert (im.max() + 1) == M.at(ratio=coarse_ratio).n_points
 
     # Test composition of indice mapping
-    im_from_intermediate_ratio_to_coarse_ratio = M.indice_mapping(
+    im_from_intermediate_ratio_to_coarse_ratio = M.index_mapping(
         fine_ratio=1, coarse_ratio=coarse_ratio
     )
-    im1 = M.indice_mapping(fine_ratio=1, coarse_ratio=intermediate_ratio)
-    im2 = M.indice_mapping(
+    im1 = M.index_mapping(fine_ratio=1, coarse_ratio=intermediate_ratio)
+    im2 = M.index_mapping(
         fine_ratio=intermediate_ratio, coarse_ratio=coarse_ratio
     )
     assert torch.allclose(im_from_intermediate_ratio_to_coarse_ratio, im2[im1])

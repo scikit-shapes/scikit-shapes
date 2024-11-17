@@ -172,7 +172,7 @@ class Decimation:
         n_points: int | None = None,
         n_points_strict: int | None = None,
         ratio: float | None = None,
-        return_indice_mapping: bool = False,
+        return_index_mapping: bool = False,
     ) -> polydata_type | tuple[polydata_type, Int1dTensor]:
         """Transform a mesh using the decimation algorithm.
 
@@ -200,7 +200,7 @@ class Decimation:
         ratio
             The ratio of the number of points of the mesh to decimate over the
             number of points of the mesh used to fit the decimation object.
-        return_indice_mapping
+        return_index_mapping
             If True, the indice mapping is returned as well as the decimated
             mesh.
 
@@ -223,7 +223,11 @@ class Decimation:
             max_iter = 10
             i = 0
             while not done and i < max_iter:
-                coarse_mesh = self.transform(mesh=mesh, n_points=n_points)
+                coarse_mesh, index_mapping = self.transform(
+                    mesh=mesh,
+                    n_points=n_points,
+                    return_index_mapping=True,
+                )
                 if coarse_mesh.n_points == n_points_strict:
                     # We reached the target number of points
                     done = True
@@ -244,7 +248,10 @@ class Decimation:
                     + " iterations."
                 )
 
-            return coarse_mesh
+            if not return_index_mapping:
+                return coarse_mesh
+            else:
+                return coarse_mesh, index_mapping
 
         if target_reduction is None and n_points is None and ratio is None:
             # default, target_reduction is the same as in __init__
@@ -303,7 +310,7 @@ class Decimation:
         (
             points,
             triangles,
-            indice_mapping,
+            index_mapping,
         ) = fast_simplification.replay_simplification(
             points=points,
             triangles=triangles,
@@ -322,7 +329,7 @@ class Decimation:
             new_indices = l_indices.clone()
             # the second line of new_indices corresponds to the indices of the
             # points, we need to apply the mapping
-            new_indices[1] = torch.from_numpy(indice_mapping[new_indices[1]])
+            new_indices[1] = torch.from_numpy(index_mapping[new_indices[1]])
 
             # If there are landmarks in the decimated mesh, we create a sparse
             # tensor with the landmarks
@@ -334,8 +341,8 @@ class Decimation:
         else:
             landmarks = None
 
-        # Convert the indice_mapping numpy array to torch tensor
-        indice_mapping = torch.Tensor(indice_mapping).to(int_dtype)
+        # Convert the index_mapping numpy array to torch tensor
+        index_mapping = torch.Tensor(index_mapping).to(int_dtype)
 
         decimated_mesh = PolyData(
             torch.from_numpy(points).to(float_dtype),
@@ -344,10 +351,10 @@ class Decimation:
             device=device,
         )
 
-        if not return_indice_mapping:
+        if not return_index_mapping:
             return decimated_mesh
         else:
-            return decimated_mesh, indice_mapping
+            return decimated_mesh, index_mapping
 
     @no_more_than_one(
         parameters=["target_reduction", "n_points", "ratio", "n_points_strict"]
@@ -361,7 +368,7 @@ class Decimation:
         n_points: int | None = None,
         n_points_strict: int | None = None,
         ratio: float | None = None,
-        return_indice_mapping: bool = False,
+        return_index_mapping: bool = False,
     ) -> polydata_type | tuple[polydata_type, Int1dTensor]:
         """Decimate and return decimated mesh."""
         self.fit(mesh)
@@ -370,7 +377,7 @@ class Decimation:
             "n_points": n_points,
             "n_points_strict": n_points_strict,
             "ratio": ratio,
-            "return_indice_mapping": return_indice_mapping,
+            "return_index_mapping": return_index_mapping,
         }
         return self.transform(mesh, **kwargs)
 

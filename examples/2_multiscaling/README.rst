@@ -1,3 +1,5 @@
+.. _multiscale_examples:
+
 Multiscaling
 ------------
 

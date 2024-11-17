@@ -67,6 +67,7 @@ extensions = [
     "pyvista.ext.plot_directive",
     "pyvista.ext.viewer_directive",
     "sphinx.ext.autodoc",
+    "sphinx.ext.doctest",
     "sphinx.ext.autosummary",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
@@ -115,6 +116,10 @@ myst_enable_extensions = [
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+
 }
 
 nitpick_ignore = [
@@ -136,6 +141,10 @@ sphinx_gallery_conf = {
     # we assume that documentation settings are not modified in examples
     "reset_modules": (reset_pyvista,), # reset_pyvista is defined in conf_module.py
     "reset_modules_order": "both",
+    "reference_url": {
+         # The module you locally document uses None
+        "sphinx_gallery": None,
+    }
 }
 
 suppress_warnings = ["config.cache"]

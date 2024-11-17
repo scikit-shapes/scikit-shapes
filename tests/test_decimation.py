@@ -8,14 +8,14 @@ import skshapes as sks
 from skshapes.errors import InputStructureError
 
 
-def test_indice_mapping_interface():
+def test_index_mapping_interface():
     """Test the interface of the indice mapping class."""
     sphere = sks.Sphere()
     d1 = sks.Decimation(n_points=10).fit(mesh=sphere)
-    newsphere1, im1 = d1.transform(sphere, return_indice_mapping=True)
+    newsphere1, im1 = d1.transform(sphere, return_index_mapping=True)
 
     d2 = sks.Decimation(n_points=10)
-    newsphere2, im2 = d2.fit_transform(sphere, return_indice_mapping=True)
+    newsphere2, im2 = d2.fit_transform(sphere, return_index_mapping=True)
 
     assert torch.allclose(newsphere1.points, newsphere2.points)
     assert torch.allclose(im1, im2)

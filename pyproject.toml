@@ -44,8 +44,11 @@ addopts = [
     "--strict-markers",
     "--strict-config",
     "--cov=skshapes",
+    "--doctest-modules",
     "--cov-report=term-missing",
-    "--cov-report=html"
+    "--cov-report=html",
+    "./tests",
+    "./src",
     ]
 xfail_strict = true
 
@@ -109,6 +112,7 @@ ignore = [
   "ISC001",   # Conflicts with formatter
   "PYI041",   # Use `float` instead of `int | float
   "RET505",   # Unnecessary `elif`/`else` after `return` statement
+  "C408",     # Allow for dict(a=1) instead of {"a": 1}
 ]
 
 [tool.ruff.lint.per-file-ignores]

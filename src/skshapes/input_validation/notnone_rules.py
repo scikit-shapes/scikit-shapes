@@ -5,7 +5,10 @@ can be called by different arguments combinations. For example, a function can
 be called with one of the arguments `a`, `b` or `c` but not with more than one
 of them. This can be done with the `one_and_only_one` decorator:
 
-.. code-block:: python
+.. testcode::
+
+    from skshapes.input_validation import one_and_only_one
+
 
     @one_and_only_one(["a", "b", "c"])
     def foo(a=None, b=None, c=None):
@@ -16,6 +19,13 @@ of them. This can be done with the `one_and_only_one` decorator:
     foo(b=1)  # OK
     foo(c=1)  # OK
     foo(a=1, b=1)  # InputStructureError
+
+.. testoutput::
+
+    Traceback (most recent call last):
+        ...
+    skshapes.errors.InputStructureError: One and only one of the parameters ['a', 'b', 'c'] must be not None and they must be passed as keyword arguments.
+
 
 Decorators already implemented:
 
@@ -93,7 +103,7 @@ def rule_one_and_only_one(not_none: int, parameters: list[str]) -> None:
     if not_none != 1:
         raise InputStructureError(
             f"One and only one of the parameters {parameters} must be"
-            + " not None and they must be passed as keyword arguments"
+            + " not None and they must be passed as keyword arguments."
         )
 
 
@@ -101,8 +111,8 @@ def rule_no_more_than_one(not_none: int, parameters: list[str]) -> None:
     """Rule that checks that no more than one of the parameters is not None."""
     if not_none > 1:
         raise InputStructureError(
-            f"No more than one if the parameters {parameters} must be"
-            + " not None and they must be passed as keyword arguments"
+            f"No more than one of the parameters {parameters} must be"
+            + " not None and they must be passed as keyword arguments."
         )
 
 
@@ -126,13 +136,26 @@ def one_and_only_one(parameters: list[str]):
 
     Examples
     --------
-    >>> @one_and_only_one(["a", "b"])
-    >>> def func(a=None, b=None):
-    >>>     pass
-    >>> func(a=1)
-    >>> func(b=1)
-    >>> func(a=1, b=1)
-    InputStructureError: Only one of the parameters a, b must be not None
+
+    .. testcode::
+
+        from skshapes.input_validation import one_and_only_one
+
+
+        @one_and_only_one(["a", "b"])
+        def func(a=None, b=None):
+            pass
+
+
+        func(a=1)
+        func(b=1)
+        func(a=1, b=1)
+
+    .. testoutput::
+
+        Traceback (most recent call last):
+         ...
+        skshapes.errors.InputStructureError: One and only one of the parameters ['a', 'b'] must be not None and they must be passed as keyword arguments.
 
     """
     return generator_notnone_rule(rule_one_and_only_one)(parameters)
@@ -158,14 +181,27 @@ def no_more_than_one(parameters):
 
     Examples
     --------
-    >>> @no_more_than_one(["a", "b"])
-    >>> def func(a=None, b=None):
-    >>>     pass
-    >>> func()
-    >>> func(a=1)
-    >>> func(b=1)
-    >>> func(a=1, b=1)
-    InputStructureError: No more than one of the parameters a, b must be not None  # noqa E501
+
+    .. testcode::
+
+        from skshapes.input_validation import no_more_than_one
+
+
+        @no_more_than_one(["a", "b"])
+        def func(a=None, b=None):
+            pass
+
+
+        func()
+        func(a=1)
+        func(b=1)
+        func(a=1, b=1)
+
+    .. testoutput::
+
+        Traceback (most recent call last):
+         ...
+        skshapes.errors.InputStructureError: No more than one of the parameters ['a', 'b'] must be not None and they must be passed as keyword arguments.
 
     """
     return generator_notnone_rule(rule_no_more_than_one)(parameters)
