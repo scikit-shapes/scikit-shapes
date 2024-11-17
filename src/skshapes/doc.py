@@ -41,6 +41,7 @@ def display(
 
         pv.OFF_SCREEN = True
 
+
     .. testcode::
 
         shape = sks.Sphere()
@@ -103,7 +104,7 @@ def display(
             )
     elif style == "points":
         material = dict(
-            point_size=20,
+            point_size=60,
             render_points_as_spheres=True,
         )
 
@@ -181,6 +182,7 @@ def display(
     # https://gitlab.kitware.com/vtk/vtk/-/issues/18849
     if pl.shape == (1, 1):
         pl.enable_ssao(radius=1)
+        pl.enable_anti_aliasing("ssaa", multi_samples=32)
         # pl.enable_shadows()
 
     pl.camera_position = "xy"

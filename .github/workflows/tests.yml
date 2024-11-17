@@ -36,6 +36,11 @@ jobs:
           pip install -r requirements_dev.txt
           pip install -e .
 
+      # https://github.com/pyvista/setup-headless-display-action
+      # This step is needed to run pyvista displays in tests,
+      # e.g. in the tests of skshapes.doc.display.
+      - name: Setup headless display
+        uses: pyvista/setup-headless-display-action@v2
 
       # Tests are run first with minimal dependencies, to ensure that the core functionality is working
       - name: Test (minimal dependencies)
