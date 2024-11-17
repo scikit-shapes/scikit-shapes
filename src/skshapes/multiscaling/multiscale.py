@@ -69,26 +69,24 @@ class Multiscale:
     Examples
     --------
 
-    .. code-block:: python
+    .. testcode::
 
         import skshapes as sks
 
-        # load a shape
         shape = sks.Sphere()
-        ratios = [0.5, 0.25, 0.125]
-        multiscale = sks.Multiscale(shape=shape, ratios=ratios)
-
-    .. testcode::
-
-        1 + 1  # this will give no output!
-        print(2 + 2)  # this will give output
+        multiscale = sks.Multiscale(shape=shape, ratios=[0.5, 0.25])
+        # Note that the original shape is always included in the multiscale representation
+        # for a sampling ratio = 1.0
+        for ratio in multiscale.ratios:
+            print(f"at ratio={ratio}, {multiscale.at(ratio=ratio).n_points} points")
 
     .. testoutput::
 
-        4
+        at ratio=1.0, 842 points
+        at ratio=0.5, 421 points
+        at ratio=0.25, 210 points
 
     See the :ref:`gallery <multiscale_examples>` for more examples.
-
     """
 
     @one_and_only_one(parameters=["ratios", "n_points", "scales"])
@@ -123,7 +121,9 @@ class Multiscale:
 
         self.shapes = {}
         self.mappings_from_origin = {}
-        self.shapes[1] = shape
+
+        # Add the original shape at ratio = 1.0
+        self.shapes[1.0] = shape
 
         if ratios is not None:
             for r in ratios:
@@ -158,6 +158,28 @@ class Multiscale:
         scale
             The target scale.
 
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            multiscale = sks.Multiscale(shape=shape, ratios=[0.5])
+            multiscale.append(n_points=100)
+            # N.B.: the original shape is always included in the multiscale representation
+            #       for a sampling ratio = 1.0
+            for ratio in multiscale.ratios:
+                print(f"at ratio={ratio:.3f}, {multiscale.at(ratio=ratio).n_points} points")
+
+        .. testoutput::
+
+            at ratio=1.000, 842 points
+            at ratio=0.500, 421 points
+            at ratio=0.119, 100 points
+
         """
         if n_points is not None:
             ratio = n_points / self.shape.n_points
@@ -182,20 +204,64 @@ class Multiscale:
             self.shapes[ratio] = new_shape
             self.mappings_from_origin[ratio] = index_mapping
 
+    @property
+    @typecheck
+    def ratios(self) -> NumberSequence:
+        """Return the available ratios of the shapes in the multiscale representation.
+
+        The ratios are sorted in decreasing order.
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()  # The sphere has 842 points
+            multiscale = sks.Multiscale(shape=shape, n_points=[400, 100])
+            # N.B.: the original shape is always included in the multiscale representation
+            #       for a sampling ratio = 1.0
+            print(multiscale.ratios)
+
+        .. testoutput::
+
+            [1.0, 0.4750593824228028, 0.1187648456057007]
+
+        """
+        return sorted(self.shapes.keys(), reverse=True)
+
     def best_key(self, *, ratio: Number) -> Number:
         """Return the best key in the shapes dictionary for a given, arbitrary ratio.
 
         This returns the smallest ratio (= most compact shape) which is still larger
         (= at least as precise) as the required sampling ratio.
-        """
-        available_ratios = self.shapes.keys()
 
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            multiscale = sks.Multiscale(shape=shape, ratios=[0.5, 0.25])
+            print(multiscale.best_key(ratio=0.6))
+            print(multiscale.best_key(ratio=0.3))
+
+        .. testoutput::
+
+            1.0
+            0.5
+
+        """
         # Clamp the ratio to 1, i.e. n_points to shape.n_points
         # If the user asks for too many points, we simply return the raw shape.
         ratio = min(1, ratio)
-        # Since ratio is <= 1 and 1 always belongs to available_ratios,
+        # Since ratio is <= 1 and 1 always belongs to self.ratios,
         # this is a non-empty minimization.
-        return min(r for r in available_ratios if r >= ratio)
+        return min(r for r in self.ratios if r >= ratio)
 
     @one_and_only_one(parameters=["ratio", "n_points", "scale"])
     @typecheck
@@ -206,7 +272,27 @@ class Multiscale:
         n_points: int | None = None,
         scale: Number | None = None,
     ) -> shape_type:
-        """Get the shape at a given ratio, number of points or scale."""
+        """Returns the shape at a given ratio, number of points or scale.
+
+        If the shape at the given ratio, number of points or scale does not exist,
+        returns most compact (= coarsest) shape that is at least as precise.
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()  # The sphere has 842 points
+            multiscale = sks.Multiscale(shape=shape, n_points=[300, 100])
+            print(multiscale.at(n_points=200).n_points)
+
+        .. testoutput::
+
+            300
+
+        """
         if n_points is not None:
             ratio = n_points / self.shape.n_points
         elif scale is not None:
@@ -255,6 +341,11 @@ class Multiscale:
             The policy for the fine to coarse propagation.
         coarse_to_fine_policy
             The policy for the coarse to fine propagation.
+
+        Examples
+        --------
+
+        See the :ref:`multiscale_signal_propagation_example` tutorial for an example.
         """
         if fine_to_coarse_policy is None:
             fine_to_coarse_policy = FineToCoarsePolicy()
@@ -364,7 +455,7 @@ class Multiscale:
     def index_mapping(
         self, fine_ratio: Number, coarse_ratio: Number
     ) -> Int1dTensor:
-        """Return the index mapping from a fine to a coarse resolution.
+        """Returns the index mapping from a fine to a coarse resolution.
 
         The index mapping is a 1d tensor of integers whose length is equal to the
         number of points at the fine resolution ratio. Each element of the
@@ -383,6 +474,40 @@ class Multiscale:
         -------
         Int1dTensor
             The index mapping from a fine to a coarse resolution.
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            multiscale = sks.Multiscale(shape=shape, ratios=[0.5, 0.25])
+            im = multiscale.index_mapping(fine_ratio=0.5, coarse_ratio=0.25)
+
+            print(f"{multiscale.at(ratio=0.5).n_points} = {im.shape},", im.dtype)
+
+        .. testoutput::
+
+            421 = torch.Size([421]), torch.int64
+
+        .. testcode::
+
+            print(f"{multiscale.at(ratio=0.25).n_points} = {im.max()} + 1")
+
+        .. testoutput::
+
+            210 = 209 + 1
+
+        .. testcode::
+
+            print(im[:10])
+
+        .. testoutput::
+
+            tensor([53,  0,  0,  7,  1,  2,  2,  3,  4,  4])
+
         """
         assert (
             fine_ratio >= coarse_ratio
@@ -405,5 +530,25 @@ class Multiscale:
 
     @typecheck
     def __len__(self) -> int:
-        """Return the number of scales that are stored internally."""
+        """Returns the number of scales that are stored internally.
+
+        Note that the original shape is always included in the multiscale representation
+        for a sampling ratio = 1.0.
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            multiscale = sks.Multiscale(shape=shape, ratios=[0.5, 0.25])
+            print(multiscale.ratios, len(multiscale))
+
+        .. testoutput::
+
+            [1.0, 0.5, 0.25] 3
+
+        """
         return len(self.shapes)

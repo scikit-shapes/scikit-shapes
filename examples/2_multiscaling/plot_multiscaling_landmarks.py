@@ -30,7 +30,8 @@ ratios = [1, 0.1, 0.01, 0.001]
 multiscale = sks.Multiscale(shape=mesh, ratios=ratios)
 
 ###############################################################################
-# The ``landmark_points`` and ``landmark_indices`` attributes of the shape
+# The :attr:`~skshapes.data.polydata.PolyData.landmark_points` and
+# :attr:`~skshapes.data.polydata.PolyData.landmark_indices` attributes of the shape
 # are transported consistently between the different scales.
 
 pl = pv.Plotter()
@@ -38,7 +39,8 @@ pl = pv.Plotter()
 pl.open_gif("animation.gif", fps=1)
 for ratio in ratios:
     mesh_i = multiscale.at(ratio=ratio)
-    print(f"with {mesh_i.n_points:,d} points, landmarks = ", mesh_i.landmark_indices)
+    print(f"with {mesh_i.n_points:,d} points, landmarks = ")
+    print([int(i) for i in mesh_i.landmark_indices])
 
     pl.clear_actors()
     sks.doc.display(plotter=pl, shape=mesh_i)

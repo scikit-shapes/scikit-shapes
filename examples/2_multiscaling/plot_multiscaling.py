@@ -44,6 +44,7 @@ for i, ratio in enumerate([1, 0.1, 0.01, 0.001]):
 pl.show()
 
 
+
 ###############################################################################
 # Please note that calling the :meth:`~skshapes.multiscaling.multiscale.Multiscale.at` method with an arbitrary ratio
 # returns the most compact (i.e. the coarsest) representation stored

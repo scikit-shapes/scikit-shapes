@@ -19,11 +19,56 @@ def display(
     silhouette=True,
     style="surface",
 ):
-    if plotter is None:
-        plotter = pv.Plotter(window_size=[800, 800], lighting="none")
+    """Uses PyVista to display a 3D shape according to our style guide.
 
-    # Shortcut
-    pl = plotter
+    .. warning::
+
+        This function is used in the documentation and may change
+        without notice. It is not meant to be used in production code.
+        If you like the style, please feel free to copy the code of this utility
+        function and adapt it to your needs.
+
+
+    .. testcode::
+
+        import torch
+        import pyvista as pv
+        import skshapes as sks
+
+
+    .. testcode::
+        :hide:
+
+        pv.OFF_SCREEN = True
+
+    .. testcode::
+
+        shape = sks.Sphere()
+
+        # Display the shape as a raw, lowpoly mesh in a new window
+        sks.doc.display(shape, title="A sphere", show_edges=True)
+
+        # Display the shape as a smooth surface mesh in a subplot
+        pl = pv.Plotter(shape=(1, 2))
+        pl.subplot(0, 0)
+        shape.point_data["scalars"] = torch.arange(shape.n_points)
+        sks.doc.display(shape, plotter=pl, scalars="scalars", smooth=True)
+        pl.subplot(0, 1)
+        sks.doc.display(shape, plotter=pl, scalars="scalars", smooth=True, cmap="viridis")
+        pl.show()
+
+        # Display the shape as a red point cloud
+        sks.doc.display(shape.points, color="red")
+        print("Done!")
+
+    .. testoutput::
+
+        Done!
+
+
+    """
+
+    pl = pv.Plotter(window_size=[800, 800]) if plotter is None else plotter
 
     # If shape is a numpy array or a torch Tensor, convert it to PolyData
     if isinstance(shape, np.ndarray | torch.Tensor):
@@ -75,7 +120,7 @@ def display(
         **material,
     )
 
-    if True:
+    if style == "surface":
         silhouette_width = pl.shape[0] * 0.0025 * mesh.length
         mesh["silhouette_width"] = silhouette_width * np.ones(mesh.n_points)
         # Now use those normals to warp the surface
@@ -92,16 +137,23 @@ def display(
     # elev = 0, azim = 0 is the +x direction
     # elev = 0, azim = 90 is the +y direction
     # elev = 90, azim = 0 is the +z direction
-    if pl.shape != (1, 1):
+    if True:  # pl.shape != (1, 1):
         pl.remove_all_lights()
         light_intensity = 0.6
         light_elev = 40
         light_azim = 90
-        headlight_intensity = 0.6
+        headlight_intensity = 0.5
+
+        if "pbr" in material:
+            light_intensity = 3.0
+            headlight_intensity = 2.0
 
         n_lights = np.ceil(light_intensity).astype(int)
 
-        light = pv.Light(intensity=light_intensity / n_lights)
+        light = pv.Light(
+            light_type="camera light",
+            intensity=light_intensity / n_lights,
+        )
         light.set_direction_angle(light_elev, light_azim)
         for _ in range(n_lights):
             pl.add_light(light)
@@ -134,3 +186,6 @@ def display(
     pl.camera_position = "xy"
     pl.enable_parallel_projection()
     pl.camera.zoom(1.2)
+
+    if plotter is None:
+        pl.show()

@@ -4,6 +4,7 @@ from .applications import *
 from .convolutions import *
 from .data import *
 from .decimation import *
+from .doc import *
 from .features import *
 from .globals import (
     float_dtype,
