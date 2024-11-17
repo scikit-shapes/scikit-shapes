@@ -77,7 +77,6 @@ class Multiscale:
         shape = sks.Sphere()
         ratios = [0.5, 0.25, 0.125]
         multiscale = sks.Multiscale(shape=shape, ratios=ratios)
-        print("Hi")
 
     .. testcode::
 
@@ -406,5 +405,5 @@ class Multiscale:
 
     @typecheck
     def __len__(self) -> int:
-        """Return the number of scales."""
+        """Return the number of scales that are stored internally."""
         return len(self.shapes)
