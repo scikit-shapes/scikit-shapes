@@ -16,9 +16,7 @@ def _point_normals(
     scale: Number | None = None,
     **kwargs,
 ) -> Points:
-    """point_normals(self, scale=None, **kwargs) -> Points
-
-    Compute a smooth field of normals at the vertices of a mesh.
+    """Compute a smooth field of normals at the vertices of a mesh.
 
     Parameters
     ----------

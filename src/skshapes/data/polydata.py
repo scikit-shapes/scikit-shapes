@@ -31,10 +31,28 @@ from ..types import (
     int_dtype,
     polydata_type,
 )
-from ..utils import copy_doc
 from .utils import DataAttributes
 
 
+def add_cached_methods_to_sphinx(cls):
+    """Ensures that e.g. ``PolyData.point_normals`` is documented in Sphinx.
+
+    Cached methods are instance methods that are memoized with ``functools.lru_cache``.
+    This small decorator ensures that although ``PolyData.point_normals`` is a cached
+    front-end for the private method ``PolyData._point_normals`` that is instantiated
+    in the `__init__` method, the Sphinx documentation will look as though
+    it was a regular method.
+    """
+    for method_name in cls._cached_methods:
+        # As far as Sphinx is concerned,
+        # self.method_name = self._method_name
+        # Then, at the end of the __init__, we overwrite self.method_name
+        # with a memoized version of self._method_name.
+        setattr(cls, method_name, getattr(cls, "_" + method_name))
+    return cls
+
+
+@add_cached_methods_to_sphinx
 class PolyData(polydata_type):
     """A polygonal shape that is composed of points, edges and/or triangles.
 
@@ -331,6 +349,7 @@ class PolyData(polydata_type):
                 ),
             )
 
+    # N.B.: _cached_methods is also used in the decorator add_cached_methods_to_sphinx.
     _cached_methods = (
         "point_convolution",
         "point_normals",
@@ -358,13 +377,6 @@ class PolyData(polydata_type):
         _point_shape_indices,
     )
     from .utils import cache_clear
-
-    # for method_name in _cached_methods:
-    #    setattr(__name__, method_name, copy_doc(getattr(__name__, "_" + method_name)))
-
-    @copy_doc(_point_normals)
-    def point_normals(self):
-        pass
 
     # ----------------------------------------------------------------------------
     # End of the Python magic. Thanks StackOverflow and AnthonyExplains!
