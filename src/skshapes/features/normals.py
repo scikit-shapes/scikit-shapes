@@ -16,6 +16,21 @@ def _point_normals(
     scale: Number | None = None,
     **kwargs,
 ) -> Points:
+    """point_normals(self, scale=None, **kwargs) -> Points
+
+    Compute a smooth field of normals at the vertices of a mesh.
+
+    Parameters
+    ----------
+    scale : Number, optional
+        The scale of the Gaussian smoothing window. If None, the normals are
+        computed directly from the triangles. The default is None.
+
+    Returns
+    -------
+    Points
+        A ``(n_points, 3)`` tensor of normal vectors at the vertices of the mesh.
+    """
     if scale is None:
         if self.triangles is None:
             msg = "If no triangles are provided, you must specify a scale."

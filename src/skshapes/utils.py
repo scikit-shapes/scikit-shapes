@@ -1,8 +1,10 @@
 """Utility functions for the skshapes package."""
 
-from typing import Literal
+from collections.abc import Callable
+from typing import Any, Literal, TypeAlias, TypeVar
 
 import torch
+from typing_extensions import ParamSpec
 
 from .errors import DeviceError
 from .input_validation import convert_inputs, typecheck
@@ -120,3 +122,19 @@ def scatter(
     return output.scatter_reduce(
         index=index, src=src, dim=0, reduce=reduce, include_self=False
     )
+
+
+T = TypeVar("T")
+P = ParamSpec("P")
+WrappedFuncDeco: TypeAlias = Callable[[Callable[P, T]], Callable[P, T]]
+
+
+def copy_doc(copy_func: Callable[..., Any]) -> WrappedFuncDeco[P, T]:
+    """Copies the doc string of the given function to another.
+    This function is intended to be used as a decorator."""
+
+    def wrapped(func: Callable[P, T]) -> Callable[P, T]:
+        func.__doc__ = copy_func.__doc__
+        return func
+
+    return wrapped

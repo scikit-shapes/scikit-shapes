@@ -31,56 +31,72 @@ from ..types import (
     int_dtype,
     polydata_type,
 )
+from ..utils import copy_doc
 from .utils import DataAttributes
 
 
 class PolyData(polydata_type):
-    """A polygonal data object. It is composed of points, edges and triangles.
+    """A polygonal shape that is composed of points, edges and/or triangles.
 
-    Three types of objects can be provided to initialize a PolyData object:
+    A :class:`PolyData` object can be created from:
 
-    - a vedo mesh
-    - a pyvista mesh
-    - a path to a mesh
-    - points, edges and triangles as torch tensors
+    - Points, edges and triangles as `torch.Tensors <https://pytorch.org/docs/stable/tensors.html#torch.Tensor>`_.
+    - A path to a file containing a mesh, in a format that is accepted by
+      `pyvista.read <https://docs.pyvista.org/api/utilities/_autosummary/pyvista.read>`_.
+    - A `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
+    - A `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
 
-    PolyData object has support for data attributes: point_data,
-    edge_data and triangle_data. These are dictionaries of torch tensors that
-    can be used to store any kind of data associated with the points, edges or
-    triangles of the shape.
 
-    Landmarks can be defined on the shape. The easiest way to define landmarks
-    is to provide a list of indices.
+    Main features:
 
-    Landmarks can also be defined as a sparse
-    tensor of shape (n_landmarks, n_points) where each line is a landmark in
-    barycentric coordinates. It allows to define landmarks in a continuous
-    space (on a triangle or an edge) and not only on the vertices of the shape.
+    - Custom scalar- or vector-valued **signals** on a :class:`PolyData` can
+      be stored in the three attributes :attr:`point_data`,
+      :attr:`edge_data` and :attr:`triangle_data` that behave as dictionaries of torch Tensors.
 
-    Control Points can be defined on the shape. Control Points is another
-    PolyData that is used to control the deformation of the shape. It is used
-    in the context of the [`ExtrinsicDeformation`](../../morphing/extrinsic_deformation)
-    model.
+    - **Landmarks** or "keypoints" can also be defined on the shape,
+      typically via a list of point indices. If :attr:`landmarks` is a sparse
+      tensor of shape ``(n_landmarks, n_points)``, each row defines a landmark in
+      barycentric coordinates. This allows us to define landmarks in a
+      continuous space (e.g. on a triangle or an edge) instead
+      of being constrained to the vertices of the shape.
 
-    For visualization, PolyData can be converted into a pyvista PolyData or a
-    vedo Mesh with the `to_pyvista` and `to_vedo` methods.
+    - For **visualization** purposes, a :class:`PolyData` can be converted to
+      a `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_
+      or a `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_
+      using the :meth:`to_pyvista` and :meth:`to_vedo` methods.
 
-    Also, PolyData can be saved to a file with the `save` method. The format
-    accepted by PyVista are supported (.ply, .stl, .vtk).
+    - The :meth:`save` method lets you save shape data to any file whose format
+      is supported by `PyVista <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata.save>`_ (.ply, .stl, .vtk...).
+
 
     Parameters
     ----------
     points
-        The points of the shape. Could also be a vedo mesh, a pyvista mesh or a
-        path to a file. If it is a mesh or a path, the edges and triangles are
-        inferred from it.
+        The vertices of the shape, usually given as a
+        ``(n_points, 3)`` torch Tensor of xyz coordinates for 3D data
+        or as a ``(n_points, 2)`` torch Tensor of xy coordinates for 2D data.
+        This first argument can also be a
+        `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_,
+        a `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ or a
+        path to a file, in which case the edges and triangles are
+        automatically inferred.
     edges
-        The edges of the shape.
+        The edges of the shape, understood as a set of non-oriented curves
+        or as a wireframe mesh. The edges are encoded as a ``(n_points, 2)`` torch Tensor
+        of integer values. Each row ``[a, b]`` corresponds to a
+        non-oriented edge between points ``a`` and ``b``.
+        If ``triangles`` is not None, the edges will be automatically
+        derived from it and this argument will be ignored.
     triangles
-        The triangles of the shape.
+        The triangles of the shape, understood as a surface mesh.
+        The triangles are encoded as a ``(n_triangles, 3)`` torch
+        Tensor of integer values. Each row ``[a, b, c]`` corresponds to a
+        triangle with vertices ``a``, ``b`` and ``c``.
+        If ``edges`` and ``triangles`` are both None, the shape is
+        understood as a point cloud.
     device
-        The device on which the shape is stored. If None it is inferred
-        from the points.
+        The device on which the shape is stored (e.g. ``"cpu"`` or ``"cuda"``).
+        If None it is inferred from the points.
     landmarks
         The landmarks of the shape.
     control_points
@@ -101,7 +117,7 @@ class PolyData(polydata_type):
     Examples
     --------
 
-    See the corresponding [examples](../../../generated/gallery/#data)
+    Please also check the :ref:`gallery <data_examples>`.
 
     """
 
@@ -251,9 +267,9 @@ class PolyData(polydata_type):
 
         # /!\ If triangles is not None, edges will be ignored
         if triangles is not None:
-            # Call the setter that will clone and check the validity of the
-            # triangles
+            # Call the setter that will clone and check the validity of the triangles
             self.triangles = triangles
+            # N.B.: we do not use the edges argument
             self._edges = None
 
         elif edges is not None:
@@ -296,24 +312,17 @@ class PolyData(polydata_type):
         # Initialize stiff_edges
         self._stiff_edges = stiff_edges
 
+        # ----------------------------------------------------------------------------
+        # Start of the Python magic (hack?) to load the features-computing methods,
+        # memoize the properties (with cache clearing when users update the points,
+        # edges or triangles), and add the methods to the class with a docstring that
+        # is fully compatible with Sphinx autodoc.
+        # ----------------------------------------------------------------------------
+
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
         # https://www.youtube.com/watch?v=sVjtp6tGo0g
-
-        self.cached_methods = [
-            "point_convolution",
-            "point_normals",
-            "point_frames",
-            "point_moments",
-            "point_quadratic_coefficients",
-            "point_quadratic_fits",
-            "point_principal_curvatures",
-            "point_shape_indices",
-            "point_curvedness",
-            "point_curvature_colors",
-            "mesh_convolution",
-        ]
-        for method_name in self.cached_methods:
+        for method_name in self._cached_methods:
             setattr(
                 self,
                 method_name,
@@ -321,6 +330,20 @@ class PolyData(polydata_type):
                     getattr(self, "_" + method_name)
                 ),
             )
+
+    _cached_methods = (
+        "point_convolution",
+        "point_normals",
+        "point_frames",
+        "point_moments",
+        "point_quadratic_coefficients",
+        "point_quadratic_fits",
+        "point_principal_curvatures",
+        "point_shape_indices",
+        "point_curvedness",
+        "point_curvature_colors",
+        "mesh_convolution",
+    )
 
     from ..convolutions import _mesh_convolution, _point_convolution
     from ..features import (
@@ -335,6 +358,17 @@ class PolyData(polydata_type):
         _point_shape_indices,
     )
     from .utils import cache_clear
+
+    # for method_name in _cached_methods:
+    #    setattr(__name__, method_name, copy_doc(getattr(__name__, "_" + method_name)))
+
+    @copy_doc(_point_normals)
+    def point_normals(self):
+        pass
+
+    # ----------------------------------------------------------------------------
+    # End of the Python magic. Thanks StackOverflow and AnthonyExplains!
+    # ----------------------------------------------------------------------------
 
     @typecheck
     @one_and_only_one(["target_reduction", "n_points", "ratio"])
