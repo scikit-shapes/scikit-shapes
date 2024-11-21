@@ -58,11 +58,34 @@ class PolyData(polydata_type):
 
     A :class:`PolyData` object can be created from:
 
-    - Points, edges and triangles as `torch.Tensors <https://pytorch.org/docs/stable/tensors.html#torch.Tensor>`_.
+    - Points, edges and triangles as `torch.Tensors <https://pytorch.org/docs/stable/tensors.html#torch.Tensor>`_,
+      `numpy.arrays <https://numpy.org/doc/stable/reference/generated/numpy.array.html>`_, lists or tuples of numbers.
     - A path to a file containing a mesh, in a format that is accepted by
       `pyvista.read <https://docs.pyvista.org/api/utilities/_autosummary/pyvista.read>`_.
     - A `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
     - A `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
+
+
+    .. warning::
+
+        Internally, points are stored as **float32 torch Tensors** while indices for
+        edges and triangles are stored as **int64 torch Tensors**. If you provide
+        numpy arrays, lists or tuples, they will be converted to torch Tensors with the
+        correct dtype. Since float32 precision corresponds to scientific notation
+        with about 7 significant decimal digits, you may run into issues if you provide
+        data that is centered far away from the origin.
+        For instance, a sphere of radius 1 and centered at (1e6, 1e6, 1e6) will
+        not be represented accurately. In such cases, we recommend centering the
+        data around the origin before creating the :class:`PolyData` object.
+
+        As a general rule, scikit-shapes accepts data in a wide range of formats
+        but **always outputs torch Tensors** with float32 precision for point coordinates
+        and int64 precision for indices.
+        This design choice is motivated by a requirement for consistency
+        (the output type of our methods should not surprise downstream functions)
+        and support for both GPU computing and automatic differentiation
+        (which are not supported by NumPy).
+
 
 
     Main features:
@@ -134,6 +157,45 @@ class PolyData(polydata_type):
 
     Examples
     --------
+
+    .. testcode::
+
+        import skshapes as sks
+
+        shape = sks.PolyData(
+            points=[[0, 0], [1, 0], [0, 1], [1, 1]], triangles=[[0, 1, 2], [1, 2, 3]]
+        )
+        print(shape.points)
+
+
+    .. testoutput::
+
+        tensor([[0., 0.],
+                [1., 0.],
+                [0., 1.],
+                [1., 1.]])
+
+    .. testcode::
+
+        print(shape.edges)
+
+    .. testoutput::
+
+        tensor([[0, 1],
+                [0, 2],
+                [1, 2],
+                [1, 3],
+                [2, 3]])
+
+    .. testcode::
+
+        print(shape.triangles)
+
+    .. testoutput::
+
+        tensor([[0, 1, 2],
+                [1, 2, 3]])
+
 
     Please also check the :ref:`gallery <data_examples>`.
 
