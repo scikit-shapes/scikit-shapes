@@ -1,6 +1,6 @@
 .. _data_examples:
 
-Data
-----
+Data manipulation
+------------------
 
-The data classes are designed to store geometric data and associated features for shape analysis.
+How to load, manipulate and save shape data.

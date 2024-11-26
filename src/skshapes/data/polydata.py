@@ -413,17 +413,17 @@ class PolyData(polydata_type):
 
     # N.B.: _cached_methods is also used in the decorator add_cached_methods_to_sphinx.
     _cached_methods = (
+        "mesh_convolution",
         "point_convolution",
-        "point_normals",
+        "point_curvature_colors",
+        "point_curvedness",
         "point_frames",
         "point_moments",
+        "point_normals",
+        "point_principal_curvatures",
         "point_quadratic_coefficients",
         "point_quadratic_fits",
-        "point_principal_curvatures",
         "point_shape_indices",
-        "point_curvedness",
-        "point_curvature_colors",
-        "mesh_convolution",
     )
 
     from ..convolutions import _mesh_convolution, _point_convolution
@@ -445,22 +445,39 @@ class PolyData(polydata_type):
     # ----------------------------------------------------------------------------
 
     @typecheck
-    @one_and_only_one(["target_reduction", "n_points", "ratio"])
-    def decimate(
+    @one_and_only_one(["n_points", "ratio", "scale"])
+    def resample(
         self,
         *,
-        target_reduction: Number | None = None,
         n_points: int | None = None,
         ratio: Number | None = None,
+        scale: Number | None = None,
+        method: Literal["auto"] = "auto",
     ) -> PolyData:
-        """Decimation of the shape.
+        """Resample the shape with a different number of vertices.
+
+        .. warning::
+
+            Supsampling has not been implemented yet.
+            Currently, we only support decimation.
+
+        To handle multiple scales at once, please consider using the
+        :class:`Multiscale<skshapes.multiscaling.multiscale.Multiscale>` class.
 
         Parameters
         ----------
-        target_reduction
-            The target reduction ratio.
         n_points
-            The number of points to keep.
+            The number of points to keep in the output shape.
+        ratio
+            The ratio of points to keep in the output shape.
+            A ratio of 1.0 keeps all the points, while a ratio of 0.1
+            keeps 10% of the points.
+        scale
+            The typical distance between vertices in the output shape.
+        method
+            The method to use for resampling. Currently, only "auto" is
+            supported. It corresponds to using quadratic decimation on
+            a triangle surface mesh.
 
         Raises
         ------
@@ -472,12 +489,35 @@ class PolyData(polydata_type):
         -------
         PolyData
             The decimated shape.
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            lowres = shape.resample(ratio=0.1)
+            print(f"from {shape.n_points} to {lowres.n_points} points")
+
+        .. testoutput::
+
+            from 842 to 85 points
+
         """
         kwargs = {
-            "target_reduction": target_reduction,
             "n_points": n_points,
             "ratio": ratio,
         }
+
+        if scale is not None:
+            msg = "Resampling with a scale is not implemented yet."
+            raise NotImplementedError(msg)
+
+        if method != "auto":
+            msg = "Only the 'auto' method is implemented for now."
+            raise NotImplementedError(msg)
 
         if self.is_triangle_mesh:
             from ..decimation import Decimation
@@ -514,6 +554,37 @@ class PolyData(polydata_type):
         -------
         PolyData
             The copy of the shape.
+
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            a = sks.Sphere()
+            b = a.copy()
+            b.points[1, :] = 7
+
+            print("Original:")
+            print(a.points[0:4, :])
+            print("Edited copy:")
+            print(b.points[0:4, :])
+
+        .. testoutput::
+
+            Original:
+            tensor([[ 0.0000,  0.0000,  0.5000],
+                    [ 0.0000,  0.0000, -0.5000],
+                    [ 0.0541,  0.0000,  0.4971],
+                    [ 0.1075,  0.0000,  0.4883]])
+            Edited copy:
+            tensor([[0.0000, 0.0000, 0.5000],
+                    [7.0000, 7.0000, 7.0000],
+                    [0.0541, 0.0000, 0.4971],
+                    [0.1075, 0.0000, 0.4883]])
+
         """
         kwargs = {"points": self._points.clone()}
 

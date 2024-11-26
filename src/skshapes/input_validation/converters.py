@@ -67,9 +67,10 @@ def convert_inputs(func):
             # Do not waste time on default arguments
             if param_name in bound_args.arguments:
 
-                # Is the param_type a Float32Tensor or Int64Tensor?
+                # Detect if type hints require a specific float32 and/or int64 dtype
+                # More vague types (e.g. "Int") are not converted
                 target_dtypes = detect_array_dtypes(param_type)
-                if target_dtypes:
+                if target_dtypes:  # is not []
 
                     # At this point, we know that the parameter has been set
                     # and that it is supposed to be a torch.Tensor.
@@ -99,6 +100,7 @@ def convert_inputs(func):
                         bound_args.arguments[param_name] = value.to(
                             dtype=dtype
                         )
+                    # Note that other types of "value" (e.g. a string) are not converted
 
         return func(*bound_args.args, **bound_args.kwargs)
 
