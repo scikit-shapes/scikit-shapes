@@ -609,7 +609,7 @@ class PolyData(polydata_type):
 
     @typecheck
     def to(self, device: str | torch.device) -> PolyData:
-        """Copy the shape on a given device."""
+        """Copy the shape onto a given device."""
         torch_device = torch.Tensor().to(device).device
         if self.device == torch_device:
             return self
@@ -623,7 +623,36 @@ class PolyData(polydata_type):
     ###########################
     @typecheck
     def to_vedo(self) -> vedo.Mesh:
-        """Vedo Mesh converter."""
+        """Converts the shape to a `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
+
+        Returns
+        -------
+        vedo.Mesh
+            The shape as a `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
+
+
+        Examples
+        --------
+
+        .. code-block:: python
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            print(shape.to_vedo())
+
+        .. code-block::
+
+            vedo.mesh.Mesh at (0x30e7f0e0)
+            name          : Mesh
+            elements      : vertices=842 polygons=1,680 lines=0
+            position      : (0, 0, 0)
+            scaling       : (1.00000, 1.00000, 1.00000)
+            size          : average=0.500000, diagonal=1.72721
+            center of mass: (0, 0, 0)
+            bounds        : x=(-0.499, 0.499), y=(-0.497, 0.497), z=(-0.500, 0.500)
+
+        """
         return vedo.Mesh(self.to_pyvista())
 
     ###########################
@@ -631,7 +660,35 @@ class PolyData(polydata_type):
     ###########################
     @typecheck
     def to_pyvista(self) -> pyvista.PolyData:
-        """Pyvista PolyData converter."""
+        """Converts the shape to a `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
+
+        Returns
+        -------
+        pyvista.PolyData
+            The shape as a `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
+
+        Examples
+        --------
+
+        .. code-block:: python
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            print(shape.to_pyvista())
+
+        .. code-block::
+
+            PolyData (0x7f9b96ab0e80)
+            N Cells:    1680
+            N Points:   842
+            N Strips:   0
+            X Bounds:   -4.993e-01, 4.993e-01
+            Y Bounds:   -4.965e-01, 4.965e-01
+            Z Bounds:   -5.000e-01, 5.000e-01
+            N Arrays:   0
+
+        """
         if self.dim == 3:
             points = self._points.detach().cpu().numpy()
         else:
@@ -727,10 +784,10 @@ class PolyData(polydata_type):
         backend: Literal["pyvista", "vedo"] = "pyvista",
         **kwargs,
     ) -> None:
-        """Plot the shape.
+        """Displays the shape, typically using a PyVista interactive window.
 
-        Available backends are "pyvista" and "vedo". See the documentation of
-        the corresponding plot method for the available arguments:
+        Available backends are ``"pyvista"`` and ``"vedo"``. See the documentation of
+        the corresponding plot methods for possible arguments:
 
         - https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html
         - https://vedo.embl.es/docs/vedo/plotter.html#show
@@ -760,6 +817,8 @@ class PolyData(polydata_type):
             The edges of the shape. If the shape is a triangle mesh, the edges
             are computed from the triangles. If the shape is not a triangle
             mesh, the edges are directly returned.
+            If the shape is a point cloud without explicit topology information,
+            returns None.
         """
         if self._edges is not None:
             return self._edges
