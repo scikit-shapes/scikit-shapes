@@ -116,12 +116,13 @@ myst_enable_extensions = [
     "colon_fence",
 ]
 
-intersphinx_mapping = {
-    "python": ("https://docs.python.org/3", None),
-    "matplotlib": ("https://matplotlib.org/stable/", None),
-    "numpy": ("https://numpy.org/doc/stable/", None),
-    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-}
+if False:
+    intersphinx_mapping = {
+        "python": ("https://docs.python.org/3", None),
+        "matplotlib": ("https://matplotlib.org/stable/", None),
+        "numpy": ("https://numpy.org/doc/stable/", None),
+        "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    }
 
 nitpick_ignore = [
     ("py:class", "_io.StringIO"),

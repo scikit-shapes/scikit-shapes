@@ -18,6 +18,7 @@ def display(
     cmap="RdBu_r",
     silhouette=True,
     style="surface",
+    vectors=None,
 ):
     """Uses PyVista to display a 3D shape according to our style guide.
 
@@ -135,6 +136,14 @@ def display(
             roughness=1,
         )
 
+    if vectors is not None:
+        pl.add_arrows(
+            mesh.points,
+            vectors.cpu().numpy(),
+            mag=1,
+            color="blue",
+        )
+
     # elev = 0, azim = 0 is the +x direction
     # elev = 0, azim = 90 is the +y direction
     # elev = 90, azim = 0 is the +z direction
@@ -146,7 +155,7 @@ def display(
         headlight_intensity = 0.5
 
         if "pbr" in material:
-            light_intensity = 3.0
+            light_intensity = 2.5
             headlight_intensity = 2.0
 
         n_lights = np.ceil(light_intensity).astype(int)
@@ -181,7 +190,7 @@ def display(
     # Unfortunately, SSAO is buggy with subplots, as discussed in this open issue:
     # https://gitlab.kitware.com/vtk/vtk/-/issues/18849
     if pl.shape == (1, 1):
-        pl.enable_ssao(radius=1)
+        pl.enable_ssao(radius=mesh.length / 16)
         pl.enable_anti_aliasing("ssaa", multi_samples=32)
         # pl.enable_shadows()
 

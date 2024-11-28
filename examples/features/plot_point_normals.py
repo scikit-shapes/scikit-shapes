@@ -14,10 +14,11 @@ import pyvista as pv
 
 import skshapes as sks
 
-bunny = sks.PolyData(pv.examples.download_bunny())
+mesh = sks.PolyData(pv.examples.download_bunny()).resample(n_points=1000)
 
 ###############################################################################
 # Then, we compute the point normals.
 
-normals = bunny.point_normals()
-print(normals)
+normals = mesh.point_normals()
+
+sks.doc.display(shape=mesh, vectors=0.01 * normals, title="Surface normals")
