@@ -6,6 +6,8 @@ import sys
 import warnings
 from pathlib import Path
 
+from sphinx_gallery.sorting import ExplicitOrder
+
 # Allow to import local modules
 sys.path.insert(0, str(Path().resolve()))
 # conf_module is where we define dynamic_scraper and reset_pyvista
@@ -20,7 +22,7 @@ from pyvista.core.utilities.docs import (  # noqa: F401
 )
 
 # Otherwise VTK reader issues on some systems, causing sphinx to crash. See also #226.
-#locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
+# locale.setlocale(locale.LC_ALL, "en_US.UTF-8")
 
 
 # Manage errors
@@ -42,7 +44,7 @@ if not Path.exists(pyvista.FIGURE_PATH):
 
 # necessary when building the sphinx gallery
 pyvista.BUILDING_GALLERY = True
-os.environ['PYVISTA_BUILDING_GALLERY'] = 'true'
+os.environ["PYVISTA_BUILDING_GALLERY"] = "true"
 
 warnings.filterwarnings(
     "ignore",
@@ -75,11 +77,11 @@ extensions = [
     "sphinx_math_dollar",
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
-    'sphinx_gallery.gen_gallery',
+    "sphinx_gallery.gen_gallery",
 ]
 
 
-pygments_style = 'sphinx'
+pygments_style = "sphinx"
 
 myst_enable_extensions = [
     "amsmath",
@@ -119,7 +121,6 @@ intersphinx_mapping = {
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
-
 }
 
 nitpick_ignore = [
@@ -127,24 +128,37 @@ nitpick_ignore = [
     ("py:class", "_io.BytesIO"),
 ]
 
-
-
 sphinx_gallery_conf = {
-    'examples_dirs': '../../examples',   # path to your example scripts
-    'gallery_dirs': 'auto_examples',  # path to where to save gallery generated output
-    'filename_pattern': '/plot_', # execute only files that start with `plot_`
+    "examples_dirs": "../../examples",  # path to your example scripts
+    "subsection_order": ExplicitOrder(
+        [
+            "../../examples/data",
+            "../../examples/features",
+            "../../examples/multiscaling",
+            "../../examples/registration",
+            "../../examples/applications",
+            "../../examples/customization",
+        ]
+    ),
+    "gallery_dirs": "auto_examples",  # path to where to save gallery generated output
+    "filename_pattern": "/plot_",  # execute only files that start with `plot_`
     "ignore_pattern": "/utils_",
-    "image_scrapers": (dynamic_scraper, "matplotlib"), # dynamic_scraper is defined in conf_module.py
+    "image_scrapers": (
+        dynamic_scraper,
+        "matplotlib",
+    ),  # dynamic_scraper is defined in conf_module.py
     "first_notebook_cell": "%matplotlib inline",
     "backreferences_dir": None,
     # Reset module did not work with sphinx-gallery 0.16.0
     # we assume that documentation settings are not modified in examples
-    "reset_modules": (reset_pyvista,), # reset_pyvista is defined in conf_module.py
+    "reset_modules": (
+        reset_pyvista,
+    ),  # reset_pyvista is defined in conf_module.py
     "reset_modules_order": "both",
     "reference_url": {
-         # The module you locally document uses None
+        # The module you locally document uses None
         "sphinx_gallery": None,
-    }
+    },
 }
 
 suppress_warnings = ["config.cache"]

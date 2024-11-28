@@ -21,7 +21,7 @@ import skshapes as sks
 #
 # .. image:: ../../images/landmarks_skull.gif
 
-filename = "../data/skulls/skull_erectus.vtk"
+filename = "../test_data/skulls/skull_erectus.vtk"
 shape = sks.PolyData(filename)
 
 if not pv.BUILDING_GALLERY:

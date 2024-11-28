@@ -1,6 +1,6 @@
 .. _data_examples:
 
-Data manipulation
-------------------
+Loading and manipulating data
+------------------------------
 
 How to load, manipulate and save shape data.

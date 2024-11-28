@@ -33,8 +33,8 @@ import skshapes as sks
 source_color = "teal"
 target_color = "red"
 
-source = sks.PolyData("../data/elephants/pose_B.obj")
-target = sks.PolyData("../data/elephants/pose_A.obj")
+source = sks.PolyData("../test_data/elephants/pose_B.obj")
+target = sks.PolyData("../test_data/elephants/pose_A.obj")
 
 # Make sure that underlying simplicial complex are the same
 triangles = source.triangles

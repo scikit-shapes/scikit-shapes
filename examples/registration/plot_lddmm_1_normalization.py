@@ -277,8 +277,8 @@ cpos = [(3.6401575998373183, -1.183408993703478, 1.0915912440258628),
  (-0.1745415166347431, 0.04933887578777028, 0.9834129012306287)]
 
 # 5 - 8
-source = sks.PolyData("../data/cactus/cactus3.ply")
-target = sks.PolyData("../data/cactus/cactus11.ply")
+source = sks.PolyData("../test_data/cactus/cactus3.ply")
+target = sks.PolyData("../test_data/cactus/cactus11.ply")
 target.points += torch.Tensor([0.5, 0.5, 0])
 
 decimation = sks.Decimation(n_points = 500)

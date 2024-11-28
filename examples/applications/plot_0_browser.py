@@ -12,8 +12,8 @@ import skshapes as sks
 
 # sphinx_gallery_thumbnail_path = 'source/images/demo_browser.gif'
 
-source = sks.PolyData("../data/cactus/cactus3.ply")
-target = sks.PolyData("../data/cactus/cactus11.ply")
+source = sks.PolyData("../test_data/cactus/cactus3.ply")
+target = sks.PolyData("../test_data/cactus/cactus11.ply")
 
 loss = sks.L2Loss()
 model = sks.IntrinsicDeformation(n_steps=5)
