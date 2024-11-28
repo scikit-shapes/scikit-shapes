@@ -422,6 +422,7 @@ class PolyData(polydata_type):
         "point_frames",
         "point_moments",
         "point_normals",
+        "point_mean_gauss_curvatures",
         "point_principal_curvatures",
         "point_quadratic_coefficients",
         "point_quadratic_fits",

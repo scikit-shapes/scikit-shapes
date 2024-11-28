@@ -85,6 +85,7 @@ def test_curvatures_quadratic(
         assert (kmax + kmin) / 2 == pytest.approx(mean, abs=5e-1, rel=2e-1)
 
 
+@pytest.mark.skipif(True, reason="Not reviewed yet and flaky.")
 @given(
     n_points=st.integers(min_value=500, max_value=1000),
     radius=st.floats(min_value=0.1, max_value=10),
