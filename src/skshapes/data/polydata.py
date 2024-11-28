@@ -433,6 +433,7 @@ class PolyData(polydata_type):
         _point_curvature_colors,
         _point_curvedness,
         _point_frames,
+        _point_mean_gauss_curvatures,
         _point_moments,
         _point_normals,
         _point_principal_curvatures,
