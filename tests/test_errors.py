@@ -150,7 +150,7 @@ def test_errors_decimation():
     mesh_2 = sks.Sphere().resample(ratio=0.5)
     pointcloud = sks.PolyData(points=mesh_1.points)
 
-    with pytest.raises(ValueError, match="only works on triangle meshes"):
+    with pytest.raises(NotImplementedError, match="triangle meshes"):
         pointcloud.resample(ratio=0.1)
 
     with pytest.raises(

@@ -14,11 +14,56 @@ import pyvista as pv
 
 import skshapes as sks
 
-mesh = sks.PolyData(pv.examples.download_bunny()).resample(n_points=1000)
+mesh = sks.PolyData(pv.examples.download_bunny())
+
+# To improve the readability of the figures below, we resample the mesh to have
+# a fixed number of points and normalize it to fit in the unit sphere.
+mesh = mesh.resample(n_points=500).normalize()
 
 ###############################################################################
 # Then, we compute the point normals.
 
 normals = mesh.point_normals()
 
-sks.doc.display(shape=mesh, vectors=0.01 * normals, title="Surface normals")
+sks.doc.display(
+    title="Surface normals",
+    shape=mesh,
+    vectors=-0.2 * normals,
+    vectors_color=normals.abs(),
+)
+
+###############################################################################
+# Then, we compute the point normals.
+
+
+pl = pv.Plotter(shape=(2, 2))
+
+for i, scale in enumerate([0.01, 0.05, 0.1, 0.2]):
+
+    normals = mesh.point_normals(scale=scale)
+
+    pl.subplot(i // 2, i % 2)
+    sks.doc.display(
+        title=f"Normals at scale {scale:.2f}",
+        plotter=pl,
+        shape=mesh,
+        vectors=-0.2 * normals,
+        vectors_color=normals.abs(),
+    )
+
+pl.show()
+
+
+###############################################################################
+# Then, we compute the point normals.
+
+points = mesh.to_point_cloud()
+normals = points.point_normals(scale=0.1)
+
+sks.doc.display(
+    title="Point normals",
+    shape=points,
+    point_size=40,
+    vectors=0.2 * normals,
+    vectors_color=normals.abs(),
+)

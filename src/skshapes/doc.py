@@ -17,8 +17,10 @@ def display(
     scalars=None,
     cmap="RdBu_r",
     silhouette=True,
-    style="surface",
     vectors=None,
+    vectors_color="skyblue",
+    opacity=None,
+    point_size=60,
 ):
     """Uses PyVista to display a 3D shape according to our style guide.
 
@@ -75,6 +77,12 @@ def display(
     # If shape is a numpy array or a torch Tensor, convert it to PolyData
     if isinstance(shape, np.ndarray | torch.Tensor):
         shape = PolyData(points=shape)
+
+    if shape.is_triangle_mesh:
+        style = "surface"
+    elif shape.is_wireframe:
+        style = "wireframe"
+    else:
         style = "points"
 
     mesh = shape.to_pyvista()
@@ -105,7 +113,7 @@ def display(
             )
     elif style == "points":
         material = dict(
-            point_size=60,
+            point_size=point_size,
             render_points_as_spheres=True,
         )
 
@@ -119,6 +127,7 @@ def display(
         color=color,
         scalars=scalars,
         cmap=cmap,
+        opacity=opacity,
         **material,
     )
 
@@ -137,12 +146,27 @@ def display(
         )
 
     if vectors is not None:
-        pl.add_arrows(
-            mesh.points,
-            vectors.cpu().numpy(),
-            mag=1,
-            color="blue",
+        if not isinstance(vectors_color, str):
+            mesh.point_data["vectors_rgba"] = vectors_color.cpu().numpy()
+
+        mesh.point_data["vectors"] = vectors
+        arrows = mesh.glyph(
+            scale="vectors",
+            orient="vectors",
         )
+
+        if isinstance(vectors_color, str):
+            pl.add_mesh(arrows, color=vectors_color)
+        else:
+            pl.add_mesh(arrows, scalars="vectors_rgba")
+
+        if False:
+            pl.add_arrows(
+                mesh.points,
+                vectors.cpu().numpy(),
+                mag=1,
+                color=vectors_color,
+            )
 
     # elev = 0, azim = 0 is the +x direction
     # elev = 0, azim = 90 is the +y direction

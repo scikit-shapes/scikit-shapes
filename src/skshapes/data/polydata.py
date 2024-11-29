@@ -695,11 +695,11 @@ class PolyData(polydata_type):
 
         """
         if self.dim == 3:
-            points = self._points.detach().cpu().numpy()
+            points = self.points.detach().cpu().numpy()
         else:
             points = np.concatenate(
                 [
-                    self._points.detach().cpu().numpy(),
+                    self.points.detach().cpu().numpy(),
                     np.zeros((self.n_points, 1)),
                 ],
                 axis=1,
@@ -838,17 +838,20 @@ class PolyData(polydata_type):
     @edges.setter
     @convert_inputs
     @typecheck
-    def edges(self, edges: Edges) -> None:
+    def edges(self, edges: Edges | None) -> None:
         """Set the edges of the shape and set the triangles to None.
 
         Also reinitialize edge_data, triangle_data and the cache.
         """
-        if edges.max() >= self.n_points:
-            raise IndexError(
-                "The maximum vertex index in edges array is larger than the"
-                + " number of points."
-            )
-        self._edges = edges.clone().to(self.device)
+        if edges is None:
+            self._edges = None
+        else:
+            if edges.max() >= self.n_points:
+                raise IndexError(
+                    "The maximum vertex index in edges array is larger than the"
+                    + " number of points."
+                )
+            self._edges = edges.clone().to(self.device)
         self._triangles = None
         self.edge_data = None
         self.triangle_data = None
@@ -913,18 +916,22 @@ class PolyData(polydata_type):
     @triangles.setter
     @convert_inputs
     @typecheck
-    def triangles(self, triangles: Triangles) -> None:
+    def triangles(self, triangles: Triangles | None) -> None:
         """Set the triangles of the shape and set edges to None.
 
         Also reinitialize edge_data, triangle_data and the cache.
         """
-        if triangles.max() >= self.n_points:
-            raise IndexError(
-                "The maximum vertex index in triangles array is larger than"
-                + " the number of points."
-            )
+        if triangles is None:
+            self._triangles = None
+        else:
+            if triangles.max() >= self.n_points:
+                raise IndexError(
+                    "The maximum vertex index in triangles array is larger than"
+                    + " the number of points."
+                )
 
-        self._triangles = triangles.clone().to(self.device)
+            self._triangles = triangles.clone().to(self.device)
+
         self._edges = None
         self.edge_data = None
         self.triangle_data = None
@@ -1313,13 +1320,13 @@ class PolyData(polydata_type):
     @typecheck
     def dim(self) -> int:
         """Dimension of the shape getter."""
-        return self._points.shape[1]
+        return self.points.shape[1]
 
     @property
     @typecheck
     def n_points(self) -> int:
         """Number of points getter."""
-        return self._points.shape[0]
+        return self.points.shape[0]
 
     @property
     @typecheck
@@ -1349,7 +1356,7 @@ class PolyData(polydata_type):
         """
         # TODO: add support for batch vectors
         # TODO: add support for point weights
-        return self._points.mean(dim=0, keepdim=True)
+        return self.points.mean(dim=0, keepdim=True)
 
     @property
     @typecheck
@@ -1362,12 +1369,47 @@ class PolyData(polydata_type):
         # TODO: add support for batch vectors
         # TODO: add support for point weights
         return (
-            ((self._points - self.mean_point) ** 2)
+            ((self.points - self.mean_point) ** 2)
             .sum(dim=1)
             .mean(dim=0)
             .sqrt()
             .view(-1)
         )
+
+    @property
+    @typecheck
+    def radius(self) -> Float1dTensor:
+        """Radius of the shape.
+
+        Returns the radius of the smallest sphere, centered around the mean point, that contains the shape.
+        """
+        # TODO: add support for batch vectors
+        return (
+            ((self.points - self.mean_point) ** 2)
+            .sum(dim=1)
+            .max(dim=0)
+            .values.sqrt()
+            .view(-1)
+        )
+
+    @typecheck
+    def normalize(self, inplace=False) -> PolyData:
+        """Normalize the shape.
+
+        Center the shape at the origin and scale it so that the standard
+        deviation of the points is 1.
+
+        Returns
+        -------
+        PolyData
+            The normalized shape.
+        """
+        new = self if inplace else self.copy()
+
+        new.points = new.points - new.mean_point
+        new.points = new.points / new.radius
+
+        return new
 
     @property
     @typecheck
@@ -1440,10 +1482,23 @@ class PolyData(polydata_type):
         # TODO: Normalize?
         return torch.linalg.cross(B - A, C - A)
 
+    @property
     @typecheck
     def is_triangle_mesh(self) -> bool:
-        """Check if the shape is triangular."""
+        """Check if the shape has triangle connectivity."""
         return self._triangles is not None
+
+    @property
+    @typecheck
+    def is_wireframe(self) -> bool:
+        """Check if the shape has edge connectivity."""
+        return (self._triangles is None) and (self._edges is not None)
+
+    @property
+    @typecheck
+    def is_point_cloud(self) -> bool:
+        """Check if the shape is a point cloud."""
+        return (self._triangles is None) and (self._edges is None)
 
     @property
     @typecheck
@@ -1594,3 +1649,102 @@ class PolyData(polydata_type):
             )
 
         return points, weights
+
+    @typecheck
+    def to_point_cloud(self) -> PolyData:
+        new = self.copy()
+        new.edges = None
+        new.triangles = None
+        return new
+
+    @typecheck
+    def __repr__(self) -> str:
+        """String representation of the shape.
+
+        Returns
+        -------
+        str
+            A succinct description of the shape data.
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            print(shape)
+
+        .. testoutput::
+
+            skshapes.PolyData (... on cpu, float32), a 3D triangle mesh with:
+            - 842 points, 2,520 edges, 1,680 triangles
+            - center (-0.000, -0.000, -0.000), radius 0.500
+            - bounds x=(-0.499, 0.499), y=(-0.497, 0.497), z=(-0.500, 0.500)
+
+        .. testcode::
+
+            shape.point_data["norms"] = shape.points.norm(dim=1)
+            shape.edge_data["squared_indices"] = shape.edges**2
+            tri = shape.triangles
+            shape.triangle_data["tensors"] = tri.view(-1, 3, 1) * tri.view(-1, 1, 3)
+            print(shape)
+
+        .. testoutput::
+
+            skshapes.PolyData (... on cpu, float32), a 3D triangle mesh with:
+            - 842 points, 2,520 edges, 1,680 triangles
+            - center (-0.000, -0.000, -0.000), radius 0.500
+            - bounds x=(-0.499, 0.499), y=(-0.497, 0.497), z=(-0.500, 0.500)
+            - point data:
+              : "norms" : [842], float32, cpu
+            - edge data:
+              : "squared_indices" : [2520, 2], int64, cpu
+            - triangle data:
+              : "tensors" : [1680, 3, 3], int64, cpu
+
+        """
+
+        if self.is_triangle_mesh:
+            shape_type = "triangle mesh"
+            info = f"{self.n_points:,} points, {self.n_edges:,} edges, {self.n_triangles:,} triangles"
+        elif self.is_wireframe:
+            shape_type = "wireframe"
+            info = f"{self.n_points:,} points and {self.n_edges:,} edges"
+        elif self.is_point_cloud:
+            shape_type = "point cloud"
+            info = f"{self.n_points:,} points"
+        else:
+            msg = "Unknown shape type"
+            raise NotImplementedError(msg)
+
+        def suffix(dtype):
+            return str(dtype).split(".")[-1].split("'")[0]
+
+        repr_str = f"skshapes.{self.__class__.__name__} (0x{id(self):x} on {self.device}, {suffix(float_dtype)}), "
+        repr_str += f"a {self.dim}D {shape_type} with:\n"
+        repr_str += f"- {info}\n"
+
+        center = ", ".join(
+            f"{coord:.3f}" for coord in self.mean_point[0].cpu().numpy()
+        )
+        repr_str += (
+            f"- center ({center}), radius {float(self.radius.item()):.3f}\n"
+        )
+        repr_str += f"- bounds x=({self.points[:, 0].min():.3f}, {self.points[:, 0].max():.3f}), "
+        repr_str += f"y=({self.points[:, 1].min():.3f}, {self.points[:, 1].max():.3f}), "
+        if self.dim == 3:
+            repr_str += f"z=({self.points[:, 2].min():.3f}, {self.points[:, 2].max():.3f})"
+
+        for data, data_name in [
+            (self.point_data, "point data"),
+            (self.edge_data, "edge data"),
+            (self.triangle_data, "triangle data"),
+        ]:
+            if len(data) > 0:
+                repr_str += f"\n- {data_name}:"
+                for key in data:
+                    repr_str += f'\n  : "{key}" : {list(data[key].shape)}, {suffix(data[key].dtype)}, {data.device}'
+
+        return repr_str
