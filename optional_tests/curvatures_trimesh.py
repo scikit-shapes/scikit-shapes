@@ -1,10 +1,14 @@
 # ruff: noqa
 
+import pytest
 import numpy as np
 
 import skshapes as sks
 
 
+@pytest.mark.skipif(
+    True, reason="Not reviewed yet and troublesome with trimesh dependency."
+)
 def test_sphere_trimesh():
     import matplotlib.pyplot as plt
     import pyvista as pv
@@ -181,6 +185,3 @@ def test_sphere_trimesh():
 
     pl.link_views()
     pl.show()
-
-
-test_sphere_trimesh()
