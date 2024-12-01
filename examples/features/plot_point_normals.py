@@ -18,7 +18,7 @@ mesh = sks.PolyData(pv.examples.download_bunny())
 
 # To improve the readability of the figures below, we resample the mesh to have
 # a fixed number of points and normalize it to fit in the unit sphere.
-mesh = mesh.resample(n_points=500).normalize()
+mesh = mesh.resample(n_points=200).normalize()
 
 ###############################################################################
 # Then, we compute the point normals.
@@ -57,13 +57,18 @@ pl.show()
 ###############################################################################
 # Then, we compute the point normals.
 
+
 points = mesh.to_point_cloud()
 normals = points.point_normals(scale=0.1)
 
+pl = pv.Plotter()
+sks.doc.display(plotter=pl, shape=mesh, opacity=0.3)
 sks.doc.display(
+    plotter=pl,
     title="Point normals",
     shape=points,
-    point_size=40,
+    point_size=20,
     vectors=0.2 * normals,
     vectors_color=normals.abs(),
 )
+pl.show()

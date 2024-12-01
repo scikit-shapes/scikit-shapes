@@ -29,6 +29,10 @@ def _point_normals(
     Points
         A ``(n_points, 3)`` tensor of normal vectors at the vertices of the mesh.
     """
+    if self.dim != 3:
+        msg = "Currently, point normals are only supported in 3D."
+        raise NotImplementedError(msg)
+
     if scale is None:
         if self.triangles is None:
             msg = "If no triangles are provided, you must specify a scale."
@@ -37,7 +41,9 @@ def _point_normals(
         tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
 
         # TODO: instead of distributing to the vertices equally, we should
-        #       distribute according to the angles of the triangles.
+        #       distribute according to the angles of the triangles,
+        #       via the cotangent formula (see Keenan Crane's lecture notes
+        #       on discrete differential geometry)
         n = sum(
             scatter(
                 src=tri_n,
@@ -58,16 +64,22 @@ def _point_normals(
         local_nuv = local_QL.eigenvectors  # (N, 3, 3)
         n = local_nuv[:, :, 0]
 
-        # Orient the normals according to the triangles, if any:
         if self.triangles is not None:
-            n_0 = self.point_normals(scale=None, **kwargs)
-            assert n_0.shape == (self.n_points, 3)
+            local_direction = self.point_normals(scale=None, **kwargs)
 
         else:
-            n_0 = n.mean(dim=0, keepdim=True)
-            assert n_0.shape == (1, 3)
+            # Orient the normals to point locally outwards,
+            # i.e. flip the normals if they point towards the local average:
+            local_avg = self.point_moments(order=1, scale=scale, **kwargs)
+            assert local_avg.shape == (self.n_points, 3)
+            local_direction = self.points - local_avg
 
-        n = (n_0 * n).sum(-1).sign().view(-1, 1) * n
+        # N.B.: sign(0) = 0, which is annoying, so we have to handle this
+        #       by hand with booleans.
+        assert local_direction.shape == (self.n_points, 3)
+        no_flip = ((local_direction * n).sum(-1) >= 0).type_as(n).view(-1, 1)
+        n = (2 * no_flip - 1) * n
+        assert n.shape == (self.n_points, 3)
 
     # Try to enforce some consistency...
     if False:

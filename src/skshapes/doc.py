@@ -131,7 +131,7 @@ def display(
         **material,
     )
 
-    if style == "surface":
+    if style == "surface" and opacity is None:
         silhouette_width = pl.shape[0] * 0.0025 * mesh.length
         mesh["silhouette_width"] = silhouette_width * np.ones(mesh.n_points)
         # Now use those normals to warp the surface
