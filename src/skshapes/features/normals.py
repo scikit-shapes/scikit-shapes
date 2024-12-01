@@ -1,12 +1,42 @@
 """Point normals and tangent vectors."""
 
+from functools import cached_property
+
 import torch
 import torch.nn.functional as F
 from pykeops.torch import LazyTensor
 
 from ..input_validation import typecheck
-from ..types import FloatTensor, Number, Points, Triangles
+from ..types import FloatTensor, Number, Points, TriangleNormals, Triangles
 from ..utils import diagonal_ranges, scatter
+
+
+@cached_property
+@typecheck
+def triangle_area_normals(self) -> TriangleNormals:
+    """Normal of each triangle."""
+    ABC = self.triangle_points  # (n_triangles, 3, dim)
+    A = ABC[:, 0, :]
+    B = ABC[:, 1, :]
+    C = ABC[:, 2, :]
+
+    if self.dim == 2:
+        # Add a zero z coordinate to the points to compute the
+        # cross product
+        A = torch.cat((A, torch.zeros_like(A[:, 0]).view(-1, 1)), dim=1)
+        B = torch.cat((B, torch.zeros_like(B[:, 0]).view(-1, 1)), dim=1)
+        C = torch.cat((C, torch.zeros_like(C[:, 0]).view(-1, 1)), dim=1)
+
+    area_normals = torch.linalg.cross(B - A, C - A)
+    assert area_normals.shape == (self.n_triangles, 3)
+    return area_normals
+
+
+@cached_property
+@typecheck
+def triangle_normals(self) -> TriangleNormals:
+    """Unit-length normals associated to each triangle."""
+    return torch.nn.functional.normalize(self.triangle_area_normals)
 
 
 @typecheck
@@ -38,7 +68,7 @@ def _point_normals(
             msg = "If no triangles are provided, you must specify a scale."
             raise ValueError(msg)
 
-        tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
+        tri_n = self.triangle_area_normals  # N.B.: magnitude = triangle area
 
         # TODO: instead of distributing to the vertices equally, we should
         #       distribute according to the angles of the triangles,

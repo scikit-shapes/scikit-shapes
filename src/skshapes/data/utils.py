@@ -406,13 +406,16 @@ def instance_lru_cache(
 def cache_clear(self):
     """Reload all cached properties."""
     cls = self.__class__
+    # Below, the third argument to getattr is there to return a default value
+    # instead of throwing an AttributeError.
     attrs = [
         a
         for a in dir(self)
         if isinstance(getattr(cls, a, cls), cached_property)
     ]
     for a in attrs:
-        delattr(self, a)
+        self.__dict__.pop(a, None)
+        # delattr(self, a)
 
     if hasattr(self, "cached_methods"):
         for a in self.cached_methods:

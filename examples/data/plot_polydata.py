@@ -75,9 +75,9 @@ surface_mesh.edge_data["signal_edges"] = torch.rand(surface_mesh.n_edges, 3, 3)
 surface_mesh.point_data["signal_points"] = surface_mesh.points[:, 0]
 
 # Some features are already available in the mesh object
-surface_mesh.triangle_data["centers"] = surface_mesh.triangle_centers
+surface_mesh.triangle_data["centers"] = surface_mesh.triangle_centroids
 surface_mesh.triangle_data["areas"] = surface_mesh.triangle_areas
-surface_mesh.edge_data["centers"] = surface_mesh.edge_centers
+surface_mesh.edge_data["centers"] = surface_mesh.edge_midpoints
 surface_mesh.edge_data["lengths"] = surface_mesh.edge_lengths
 
 # Call the plot method display information about the signal data (size, type, device)

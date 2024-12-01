@@ -9,6 +9,14 @@ from .curvatures import (
     smooth_curvatures,
     smooth_curvatures_2,
 )
+from .face_properties import (
+    edge_lengths,
+    edge_midpoints,
+    edge_points,
+    triangle_areas,
+    triangle_centroids,
+    triangle_points,
+)
 from .implicit_quadrics import implicit_quadrics
 from .moments import _point_moments
 from .normals import (
@@ -16,4 +24,6 @@ from .normals import (
     _point_normals,
     smooth_normals,
     tangent_vectors,
+    triangle_area_normals,
+    triangle_normals,
 )

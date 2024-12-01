@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+from functools import cached_property
 from pathlib import Path
 from typing import Literal
 from warnings import warn
@@ -19,7 +20,6 @@ from ..triangle_mesh import EdgeTopology
 from ..types import (
     Edges,
     Float1dTensor,
-    Float2dTensor,
     Int1dTensor,
     IntSequence,
     IntTensor,
@@ -430,6 +430,14 @@ class PolyData(polydata_type):
     )
 
     from ..convolutions import _mesh_convolution, _point_convolution
+
+    # ----------------------------------------------------------------------------
+    # End of the Python magic. Thanks StackOverflow and AnthonyExplains!
+    # ----------------------------------------------------------------------------
+    # N.B.: The features that start with an underscore are exposed as memoized methods
+    #       with an instance cache, via the Python magic above.
+    #       The features that do not start with an underscore are exposed as
+    #       simple @cached_properties.
     from ..features import (
         _point_curvature_colors,
         _point_curvedness,
@@ -441,13 +449,17 @@ class PolyData(polydata_type):
         _point_quadratic_coefficients,
         _point_quadratic_fits,
         _point_shape_indices,
+        edge_lengths,
+        edge_midpoints,
+        edge_points,
+        triangle_area_normals,
+        triangle_areas,
+        triangle_centroids,
+        triangle_normals,
+        triangle_points,
     )
     from ..topology import _k_ring_graph, _knn_graph
     from .utils import cache_clear
-
-    # ----------------------------------------------------------------------------
-    # End of the Python magic. Thanks StackOverflow and AnthonyExplains!
-    # ----------------------------------------------------------------------------
 
     @typecheck
     @one_and_only_one(["n_points", "ratio", "scale"])
@@ -1347,7 +1359,7 @@ class PolyData(polydata_type):
         else:
             return 0
 
-    @property
+    @cached_property
     @typecheck
     def mean_point(self) -> Points:
         """Mean point of the shape.
@@ -1358,7 +1370,7 @@ class PolyData(polydata_type):
         # TODO: add support for point weights
         return self.points.mean(dim=0, keepdim=True)
 
-    @property
+    @cached_property
     @typecheck
     def standard_deviation(self) -> Float1dTensor:
         """Standard deviation of the shape.
@@ -1376,7 +1388,7 @@ class PolyData(polydata_type):
             .view(-1)
         )
 
-    @property
+    @cached_property
     @typecheck
     def radius(self) -> Float1dTensor:
         """Radius of the shape.
@@ -1410,77 +1422,6 @@ class PolyData(polydata_type):
         new.points = new.points / new.radius
 
         return new
-
-    @property
-    @typecheck
-    def edge_centers(self) -> Points:
-        """Center of each edge."""
-        # Raise an error if edges are not defined
-        if self.edges is None:
-            msg = "Edges are not defined"
-            raise AttributeError(msg)
-
-        return (
-            self.points[self.edges[:, 0]] + self.points[self.edges[:, 1]]
-        ) / 2
-
-    @property
-    @typecheck
-    def edge_lengths(self) -> Float1dTensor:
-        """Length of each edge."""
-        # Raise an error if edges are not defined
-        if self.edges is None:
-            msg = "Edges are not defined"
-            raise AttributeError(msg)
-
-        return (
-            self.points[self.edges[:, 0]] - self.points[self.edges[:, 1]]
-        ).norm(dim=1)
-
-    @property
-    @typecheck
-    def triangle_centers(self) -> Points:
-        """Center of the triangles."""
-        # Raise an error if triangles are not defined
-        if self.triangles is None:
-            msg = "Triangles are not defined"
-            raise AttributeError(msg)
-
-        A = self.points[self.triangles[:, 0]]
-        B = self.points[self.triangles[:, 1]]
-        C = self.points[self.triangles[:, 2]]
-
-        return (A + B + C) / 3
-
-    @property
-    @typecheck
-    def triangle_areas(self) -> Float1dTensor:
-        """Area of each triangle."""
-        # Raise an error if triangles are not defined
-        return self.triangle_normals.norm(dim=1) / 2
-
-    @property
-    @typecheck
-    def triangle_normals(self) -> Float2dTensor:
-        """Normal of each triangle."""
-        # Raise an error if triangles are not defined
-        if self.triangles is None:
-            msg = "Triangles are not defined"
-            raise AttributeError(msg)
-
-        A = self.points[self.triangles[:, 0]]
-        B = self.points[self.triangles[:, 1]]
-        C = self.points[self.triangles[:, 2]]
-
-        if self.dim == 2:
-            # Add a zero z coordinate to the points to compute the
-            # cross product
-            A = torch.cat((A, torch.zeros_like(A[:, 0]).view(-1, 1)), dim=1)
-            B = torch.cat((B, torch.zeros_like(B[:, 0]).view(-1, 1)), dim=1)
-            C = torch.cat((C, torch.zeros_like(C[:, 0]).view(-1, 1)), dim=1)
-
-        # TODO: Normalize?
-        return torch.linalg.cross(B - A, C - A)
 
     @property
     @typecheck
@@ -1632,11 +1573,11 @@ class PolyData(polydata_type):
             The weights of the weighted point cloud.
         """
         if self.triangles is not None:
-            points = self.triangle_centers
+            points = self.triangle_centroids
             weights = self.triangle_areas / self.triangle_areas.sum()
 
         elif self.edges is not None:
-            points = self.edge_centers
+            points = self.edge_midpoints
             weights = self.edge_lengths / self.edge_lengths.sum()
 
         else:

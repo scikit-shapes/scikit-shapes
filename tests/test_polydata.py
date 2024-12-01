@@ -90,7 +90,7 @@ def test_polydata_creation():
     assert triangle.n_points == 3
     assert triangle.is_triangle_mesh
 
-    assert triangle.edge_centers is not None
+    assert triangle.edge_midpoints is not None
     assert triangle.edge_lengths is not None
     assert triangle.triangle_areas is not None
 
@@ -104,7 +104,7 @@ def test_polydata_creation():
     assert triangle.n_points == 3
     assert triangle.is_triangle_mesh is False
 
-    assert triangle.edge_centers is not None
+    assert triangle.edge_midpoints is not None
     assert triangle.edge_lengths is not None
 
     with pytest.raises(AttributeError, match="Triangles are not defined"):
@@ -168,7 +168,7 @@ def test_geometry_features():
     assert square.n_edges == 4
 
     with pytest.raises(AttributeError, match="Triangles are not defined"):
-        square.triangle_centers  # noqa: B018 (useless expression)
+        square.triangle_centroids  # noqa: B018 (useless expression)
     with pytest.raises(AttributeError, match="Triangles are not defined"):
         square.triangle_normals  # noqa: B018 (useless expression)
 
@@ -181,7 +181,7 @@ def test_geometry_features():
     )
 
     assert torch.allclose(
-        square.edge_centers,
+        square.edge_midpoints,
         torch.tensor(
             [[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]], dtype=sks.float_dtype
         ),
@@ -211,7 +211,7 @@ def test_geometry_features():
     )
 
     assert torch.allclose(
-        triangle.triangle_centers,
+        triangle.triangle_centroids,
         torch.tensor([[1 / 3, 1 / 3]], dtype=sks.float_dtype),
     )
 
@@ -224,9 +224,9 @@ def test_geometry_features():
 
     for attribute in [
         "triangle_areas",
-        "triangle_centers",
+        "triangle_centroids",
         "edge_lengths",
-        "edge_centers",
+        "edge_midpoints",
     ]:
         with pytest.raises(AttributeError):
             getattr(pointcloud, attribute)
