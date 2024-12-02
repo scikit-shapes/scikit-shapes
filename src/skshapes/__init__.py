@@ -21,17 +21,17 @@ from .triangle_mesh import *
 from .types import *
 
 __all__ = [
-    "types",
-    "features",
-    "convolutions",
     "applications",
+    "convolutions",
     "data",
-    "triangle_mesh",
+    "decimation",
+    "features",
+    "input_validation",
     "loss",
     "morphing",
-    "optimization",
     "multiscaling",
-    "decimation",
+    "optimization",
     "tasks",
-    "input_validation",
+    "triangle_mesh",
+    "types",
 ]
