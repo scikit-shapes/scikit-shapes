@@ -417,6 +417,33 @@ def cache_clear(self):
         self.__dict__.pop(a, None)
         # delattr(self, a)
 
-    if hasattr(self, "cached_methods"):
-        for a in self.cached_methods:
-            getattr(self, a).cache_clear()
+    if hasattr(self, "_cached_methods"):
+        for a in self._cached_methods:
+            cached_method = getattr(self, a)
+            # N.B.: in the __init__ of PolyData, cached methods may not have been
+            #       set to an actual cached method yet, with a cache_clear method.
+            if hasattr(cached_method, "cache_clear"):
+                cached_method.cache_clear()
+
+    if hasattr(self, "_cached_properties"):
+        for a in self._cached_properties:
+            if hasattr(self, "_cached_" + a):
+                delattr(self, "_cached_" + a)
+
+
+def immutable_cached_property(*, function, cache):
+    """This decorator is roughly equivalent to @cached_property, but better suited here.
+
+    Notably, it does not allow the cached property to be set to a new value,
+    and allows the docstrings to be discovered by pytest.
+    """
+
+    def cached_func(self):
+        if not cache:
+            return function(self)
+        else:
+            if not hasattr(self, "_cached" + function.__name__):
+                setattr(self, "_cached" + function.__name__, function(self))
+            return getattr(self, "_cached" + function.__name__)
+
+    return property(cached_func)

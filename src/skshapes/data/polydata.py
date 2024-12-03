@@ -31,7 +31,7 @@ from ..types import (
     int_dtype,
     polydata_type,
 )
-from .utils import DataAttributes
+from .utils import DataAttributes, immutable_cached_property
 
 
 def add_cached_methods_to_sphinx(cls):
@@ -43,7 +43,7 @@ def add_cached_methods_to_sphinx(cls):
     in the `__init__` method, the Sphinx documentation will look as though
     it was a regular method.
     """
-    for method_name in cls._cached_methods:
+    for method_name in cls._cached_methods + cls._cached_properties:
         # As far as Sphinx is concerned,
         # self.method_name = self._method_name
         # Then, at the end of the __init__, we overwrite self.method_name
@@ -411,6 +411,18 @@ class PolyData(polydata_type):
                 ),
             )
 
+        # Cached properties are not cached if cache_size is 0
+        for method_name in self._cached_properties:
+
+            setattr(
+                PolyData,
+                method_name,
+                immutable_cached_property(
+                    function=getattr(PolyData, "_" + method_name),
+                    cache=cache_size != 0,
+                ),
+            )
+
     # N.B.: _cached_methods is also used in the decorator add_cached_methods_to_sphinx.
     _cached_methods = (
         "knn_graph",
@@ -428,17 +440,26 @@ class PolyData(polydata_type):
         "point_quadratic_fits",
         "point_shape_indices",
     )
+    _cached_properties = (
+        "edge_lengths",
+        "edge_midpoints",
+        "edge_points",
+        "triangle_area_normals",
+        "triangle_areas",
+        "triangle_centroids",
+        "triangle_normals",
+        "triangle_points",
+    )
 
     from ..convolutions import _mesh_convolution, _point_convolution
 
     # ----------------------------------------------------------------------------
     # End of the Python magic. Thanks StackOverflow and AnthonyExplains!
     # ----------------------------------------------------------------------------
-    # N.B.: The features that start with an underscore are exposed as memoized methods
-    #       with an instance cache, via the Python magic above.
-    #       The features that do not start with an underscore are exposed as
-    #       simple @cached_properties.
     from ..features import (
+        _edge_lengths,
+        _edge_midpoints,
+        _edge_points,
         _point_curvature_colors,
         _point_curvedness,
         _point_frames,
@@ -449,14 +470,11 @@ class PolyData(polydata_type):
         _point_quadratic_coefficients,
         _point_quadratic_fits,
         _point_shape_indices,
-        edge_lengths,
-        edge_midpoints,
-        edge_points,
-        triangle_area_normals,
-        triangle_areas,
-        triangle_centroids,
-        triangle_normals,
-        triangle_points,
+        _triangle_area_normals,
+        _triangle_areas,
+        _triangle_centroids,
+        _triangle_normals,
+        _triangle_points,
     )
     from ..topology import _k_ring_graph, _knn_graph
     from .utils import cache_clear
@@ -1572,11 +1590,11 @@ class PolyData(polydata_type):
         weights
             The weights of the weighted point cloud.
         """
-        if self.triangles is not None:
+        if self.is_triangle_mesh:
             points = self.triangle_centroids
             weights = self.triangle_areas / self.triangle_areas.sum()
 
-        elif self.edges is not None:
+        elif self.is_wireframe:
             points = self.edge_midpoints
             weights = self.edge_lengths / self.edge_lengths.sum()
 
@@ -1668,7 +1686,8 @@ class PolyData(polydata_type):
         repr_str += f"- {info}\n"
 
         center = ", ".join(
-            f"{coord:.3f}" for coord in self.mean_point[0].cpu().numpy()
+            f"{coord:.3f}"
+            for coord in self.mean_point[0].detach().cpu().numpy()
         )
         repr_str += (
             f"- center ({center}), radius {float(self.radius.item()):.3f}\n"

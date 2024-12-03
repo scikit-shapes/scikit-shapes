@@ -1,5 +1,3 @@
-from functools import cached_property
-
 import torch
 
 from ..input_validation import typecheck
@@ -13,9 +11,8 @@ from ..types import (
 )
 
 
-@cached_property
 @typecheck
-def edge_points(self) -> EdgePoints:
+def _edge_points(self) -> EdgePoints:
     """The coordinates of edge vertices.
 
     Returns
@@ -99,9 +96,8 @@ def edge_points(self) -> EdgePoints:
     return edge_points
 
 
-@cached_property
 @typecheck
-def triangle_points(self) -> TrianglePoints:
+def _triangle_points(self) -> TrianglePoints:
     """The coordinates of triangle vertices.
 
     Returns
@@ -168,9 +164,8 @@ def triangle_points(self) -> TrianglePoints:
     return triangle_points
 
 
-@cached_property
 @typecheck
-def edge_midpoints(self) -> EdgeMidpoints:
+def _edge_midpoints(self) -> EdgeMidpoints:
     """The coordinates of points at the center of each edge.
 
     Returns
@@ -214,9 +209,8 @@ def edge_midpoints(self) -> EdgeMidpoints:
     return midpoints
 
 
-@cached_property
 @typecheck
-def edge_lengths(self) -> EdgeLengths:
+def _edge_lengths(self) -> EdgeLengths:
     """The lengths of all edge segments.
 
     Returns
@@ -259,9 +253,8 @@ def edge_lengths(self) -> EdgeLengths:
     return lengths
 
 
-@cached_property
 @typecheck
-def triangle_centroids(self) -> TriangleCentroids:
+def _triangle_centroids(self) -> TriangleCentroids:
     """The coordinates of points at the arithmetic center of each triangle.
 
     Returns
@@ -297,9 +290,36 @@ def triangle_centroids(self) -> TriangleCentroids:
     return midpoints
 
 
-@cached_property
 @typecheck
-def triangle_areas(self) -> TriangleAreas:
-    """Area of each triangle."""
+def _triangle_areas(self) -> TriangleAreas:
+    """The areas of the mesh triangles.
+
+    Returns
+    -------
+    triangle_areas
+        A ``(n_triangles,)`` Tensor that contains a non-negative area value for each
+        triangle. Please note that the orientation of triangles is not taken into
+        account here. If you need to compute the signed area of a 2D triangle,
+        please consider using :meth:`~skshapes.polydata.PolyData.triangle_area_normals`
+        and extract the third coordinate of the normal vectors.
+
+    Examples
+    --------
+
+    .. testcode::
+
+        import skshapes as sks
+
+        mesh = sks.PolyData(
+            points=[[0, 0], [1, 0], [1, 1]],
+            triangles=[[0, 1, 2], [0, 2, 1], [0, 0, 1], [2, 2, 2]],
+        )
+        print(mesh.triangle_areas)
+
+    .. testoutput::
+
+            tensor([0.5000, 0.5000, 0.0000, 0.0000])
+
+    """
     # Raise an error if triangles are not defined
-    return self.triangle_area_normals.norm(dim=1) / 2
+    return self.triangle_area_normals.norm(dim=1)

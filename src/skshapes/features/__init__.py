@@ -10,20 +10,20 @@ from .curvatures import (
     smooth_curvatures_2,
 )
 from .face_properties import (
-    edge_lengths,
-    edge_midpoints,
-    edge_points,
-    triangle_areas,
-    triangle_centroids,
-    triangle_points,
+    _edge_lengths,
+    _edge_midpoints,
+    _edge_points,
+    _triangle_areas,
+    _triangle_centroids,
+    _triangle_points,
 )
 from .implicit_quadrics import implicit_quadrics
 from .moments import _point_moments
 from .normals import (
     _point_frames,
     _point_normals,
+    _triangle_area_normals,
+    _triangle_normals,
     smooth_normals,
     tangent_vectors,
-    triangle_area_normals,
-    triangle_normals,
 )

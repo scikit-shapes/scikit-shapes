@@ -1,7 +1,5 @@
 """Point normals and tangent vectors."""
 
-from functools import cached_property
-
 import torch
 import torch.nn.functional as F
 from pykeops.torch import LazyTensor
@@ -11,10 +9,55 @@ from ..types import FloatTensor, Number, Points, TriangleNormals, Triangles
 from ..utils import diagonal_ranges, scatter
 
 
-@cached_property
 @typecheck
-def triangle_area_normals(self) -> TriangleNormals:
-    """Normal of each triangle."""
+def _triangle_area_normals(self) -> TriangleNormals:
+    r"""The normals of the mesh triangles, weighted by their areas.
+
+    For 3D triangles :math:`ABC`, this is the cross product
+    :math:`\tfrac{1}{2} \overrightarrow{AB} \times \overrightarrow{AC}`.
+    For 2D triangles, this is the 3D vector ``(0, 0, signed_area)``.
+
+    Returns
+    -------
+    area_normals
+        A ``(n_triangles, 3)`` tensor that contains the normal vector of each triangle,
+        weighted by its area.
+
+    Examples
+    --------
+
+    .. testcode::
+
+        import skshapes as sks
+
+        mesh_2D = sks.PolyData(
+            points=[[0, 0], [1, 0], [1, 1]],
+            triangles=[[0, 1, 2], [0, 2, 1], [0, 1, 1], [2, 2, 2]],
+        )
+        print(mesh_2D.triangle_area_normals)
+
+    .. testoutput::
+
+        tensor([[ 0.0000,  0.0000,  0.5000],
+                [ 0.0000,  0.0000, -0.5000],
+                [ 0.0000,  0.0000,  0.0000],
+                [ 0.0000,  0.0000,  0.0000]])
+
+    .. testcode::
+
+        mesh_3D = sks.PolyData(
+            points=[[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]],
+            triangles=[[0, 1, 2], [0, 1, 3], [0, 2, 3]],
+        )
+        print(mesh_3D.triangle_area_normals)
+
+    .. testoutput::
+
+        tensor([[ 0.0000,  0.0000,  0.5000],
+                [ 0.0000, -1.0000,  0.0000],
+                [ 1.0000,  0.0000,  0.0000]])
+
+    """
     ABC = self.triangle_points  # (n_triangles, 3, dim)
     A = ABC[:, 0, :]
     B = ABC[:, 1, :]
@@ -29,13 +72,58 @@ def triangle_area_normals(self) -> TriangleNormals:
 
     area_normals = torch.linalg.cross(B - A, C - A)
     assert area_normals.shape == (self.n_triangles, 3)
-    return area_normals
+    return area_normals / 2
 
 
-@cached_property
 @typecheck
-def triangle_normals(self) -> TriangleNormals:
-    """Unit-length normals associated to each triangle."""
+def _triangle_normals(self) -> TriangleNormals:
+    """Unit-length normals associated to each triangle.
+
+    Please note that if a triangle is degenerate (i.e. with zero area),
+    the normal vector will be zero.
+
+    Returns
+    -------
+    triangle_normals
+        A ``(n_triangles, 3)`` tensor that contains the normal vector of each triangle.
+
+    Examples
+    --------
+
+    .. testcode::
+
+        import skshapes as sks
+
+        mesh_2D = sks.PolyData(
+            points=[[0, 0], [1, 0], [1, 1]],
+            triangles=[[0, 1, 2], [0, 2, 1], [0, 1, 1], [2, 2, 2]],
+        )
+        print(mesh_2D.triangle_normals)
+
+    .. testoutput::
+
+        tensor([[ 0.,  0.,  1.],
+                [ 0.,  0., -1.],
+                [ 0.,  0.,  0.],
+                [ 0.,  0.,  0.]])
+
+    .. testcode::
+
+        mesh_3D = sks.PolyData(
+            points=[[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 4]],
+            triangles=[[0, 1, 2], [0, 1, 3], [0, 2, 3], [0, 1, 1], [2, 2, 2]],
+        )
+        print(mesh_3D.triangle_normals)
+
+    .. testoutput::
+
+        tensor([[ 0.,  0.,  1.],
+                [ 0., -1.,  0.],
+                [ 1.,  0.,  0.],
+                [ 0.,  0.,  0.],
+                [ 0.,  0.,  0.]])
+
+    """
     return torch.nn.functional.normalize(self.triangle_area_normals)
 
 
