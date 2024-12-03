@@ -1,104 +1,107 @@
 """Converters for arguments."""
 
+import itertools
 from functools import wraps
+from inspect import isclass, signature
+from types import UnionType
+from typing import Union, get_args, get_origin, get_type_hints
 
+import jaxtyping
 import numpy as np
 import torch
 
-from ..types import float_dtype, int_dtype
+
+def detect_array_dtypes(t):
+    if get_origin(t) in [Union, UnionType]:
+        # If type is a Union, we iterate through the types
+        # and return a list of acceptable dtypes, without duplicates
+        return list(
+            set(
+                itertools.chain(*[detect_array_dtypes(a) for a in get_args(t)])
+            )
+        )
+
+    # We only bother converting to specific dtypes.
+    # Notably, landmarks may be specified with "Int" and are not affected.
+    elif isclass(t) and issubclass(t, jaxtyping.AbstractArray):
+        if len(t.dtypes) == 1 and t.dtypes[0] in [
+            "float32",
+            "float64",
+            "int64",
+        ]:
+            return list(t.dtypes)
+        else:
+            return []
+
+    else:
+        return []
 
 
-def _convert_arg(x: np.ndarray | torch.Tensor):
-    """Convert an array to the right type.
-
-    Depending on the type of the input, it converts the input to the right
-    type (torch.Tensor) and convert the dtype of the tensor to the right one
-    (float32 for float, int64 for int).
-
-    Parameters
-    ----------
-    x
-        the input array
-
-    Raises
-    ------
-    ValueError
-        if the input is a complex tensor
-
-    Returns
-    -------
-    torch.Tensor
-        corresponding tensor with the right dtype
-
-    """
-    if isinstance(x, np.ndarray):
-        x = torch.from_numpy(x)
-
-    if isinstance(x, torch.Tensor):
-        if torch.is_floating_point(x) and x.dtype != float_dtype:
-            return x.to(float_dtype)
-        elif torch.is_complex(x):
-            msg = "Complex tensors are not supported"
-            raise ValueError(msg)
-        elif not torch.is_floating_point(x) and x.dtype != int_dtype:
-            return x.to(int_dtype)
-
-    return x
+def closest_dtype(dtype, target_dtypes):
+    if target_dtypes == ["float32"]:
+        return torch.float32
+    elif target_dtypes == ["int64"]:
+        return torch.int64
+    elif sorted(target_dtypes) == ["float32", "int64"]:
+        if dtype in [torch.float32, torch.float64]:
+            return torch.float32
+        elif dtype in [torch.int32, torch.int64]:
+            return torch.int64
+        else:
+            return dtype
+    else:
+        msg = f"Unsupported target dtype: {target_dtypes}"
+        raise NotImplementedError(msg)
 
 
-def convert_inputs(func: callable):
-    """Convert a function's inputs to the right type.
-
-    It converts the inputs arrays to the right type (torch.Tensor) and
-    convert the dtype of the tensor to the right one (float32 for float,
-    int64 for int), before calling the function. It allows to use the
-    function with numpy arrays or torch tensors, but keep in mind that
-    scikit-shapes will always convert the inputs to torch tensors.
-
-    If used in combination with the typecheck decorator, it must be called
-    first :
-
-    .. code-block:: python
-
-        import numpy as np
-        import skshapes as sks
-        from skshapes.types import NumericalTensor
-
-
-        @sks.convert_inputs
-        @sks.typecheck
-        def foo(a: NumericalTensor) -> NumericalTensor:
-            return a
-
-
-        foo(np.zeros(10))  # OK
-
-
-        @sks.typecheck
-        @sks.convert_inputs
-        def bar(a: NumericalTensor) -> NumericalTensor:
-            return a
-
-
-        bar(np.zeros(10))  # Beartype error
-
-    TODO: so far, it only works with numpy arrays and torch tensors.
-    Is it relevant to add support for lists and tuples ? -> must be careful
-    on which arguments are converted (only the ones that are supposed to be
-    converted to torch.Tensor).
-    """
-
+def convert_inputs(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Convert args and kwargs to torch.Tensor
-        # and convert the dtype to the right one
-        new_args = []
-        for arg in args:
-            new_args.append(_convert_arg(arg))
+        sig = signature(func)
+        bound_args = sig.bind(*args, **kwargs)
+        bound_args.apply_defaults()
 
-        for key, value in kwargs.items():
-            kwargs[key] = _convert_arg(value)
+        # Iterate through the function's parameters and type hints
+        for param_name, param_type in get_type_hints(func).items():
 
-        return func(*new_args, **kwargs)
+            # Do not waste time on default arguments
+            if param_name in bound_args.arguments:
+
+                # Detect if type hints require a specific float32 and/or int64 dtype
+                # More vague types (e.g. "Int") are not converted
+                target_dtypes = detect_array_dtypes(param_type)
+                if target_dtypes:  # is not []
+
+                    # At this point, we know that the parameter has been set
+                    # and that it is supposed to be a torch.Tensor.
+                    # If it is a NumPy array, a torch Tensor (maybe with incorrect dtype),
+                    # a list or a tuple, we convert it to a torch.Tensor with the correct
+                    # dtype. Otherwise, we may be in a situation where the param_type
+                    # is a Union of different types (e.g. points in PolyData, that
+                    # can also be the path to a file). In this case, we do not attempt
+                    # to convert anything, and let the function or beartype raise an error
+                    # if the input is not of the right type.
+                    value = bound_args.arguments[param_name]
+
+                    # We attempt to convert lists, tuples, numpy arrays and torch tensors
+                    # that do not have the correct dtype.
+                    if isinstance(value, list | tuple):
+                        value = torch.tensor(value)
+
+                    if isinstance(value, np.ndarray):
+                        value = torch.from_numpy(value)
+
+                    if isinstance(value, torch.Tensor):
+                        if torch.is_complex(value):
+                            msg = "Complex tensors are not supported"
+                            raise ValueError(msg)
+
+                        dtype = closest_dtype(value.dtype, target_dtypes)
+                        bound_args.arguments[param_name] = value.to(
+                            dtype=dtype
+                        )
+                    # Note that other types of "value" (e.g. a string) are not converted
+
+        return func(*bound_args.args, **bound_args.kwargs)
 
     return wrapper

@@ -28,7 +28,7 @@ list_optimizers = [
     sks.Adagrad(),
 ]
 
-mesh_3d = sks.Sphere().decimate(target_reduction=0.995)
+mesh_3d = sks.Sphere().resample(n_points=5)
 mesh_2d = sks.Circle(n_points=7)
 
 

@@ -17,7 +17,10 @@ def display(
     scalars=None,
     cmap="RdBu_r",
     silhouette=True,
-    style="surface",
+    vectors=None,
+    vectors_color="skyblue",
+    opacity=None,
+    point_size=60,
 ):
     """Uses PyVista to display a 3D shape according to our style guide.
 
@@ -74,6 +77,12 @@ def display(
     # If shape is a numpy array or a torch Tensor, convert it to PolyData
     if isinstance(shape, np.ndarray | torch.Tensor):
         shape = PolyData(points=shape)
+
+    if shape.is_triangle_mesh:
+        style = "surface"
+    elif shape.is_wireframe:
+        style = "wireframe"
+    else:
         style = "points"
 
     mesh = shape.to_pyvista()
@@ -104,7 +113,7 @@ def display(
             )
     elif style == "points":
         material = dict(
-            point_size=60,
+            point_size=point_size,
             render_points_as_spheres=True,
         )
 
@@ -118,10 +127,11 @@ def display(
         color=color,
         scalars=scalars,
         cmap=cmap,
+        opacity=opacity,
         **material,
     )
 
-    if style == "surface":
+    if style == "surface" and opacity is None:
         silhouette_width = pl.shape[0] * 0.0025 * mesh.length
         mesh["silhouette_width"] = silhouette_width * np.ones(mesh.n_points)
         # Now use those normals to warp the surface
@@ -135,6 +145,29 @@ def display(
             roughness=1,
         )
 
+    if vectors is not None:
+        if not isinstance(vectors_color, str):
+            mesh.point_data["vectors_rgba"] = vectors_color.cpu().numpy()
+
+        mesh.point_data["vectors"] = vectors
+        arrows = mesh.glyph(
+            scale="vectors",
+            orient="vectors",
+        )
+
+        if isinstance(vectors_color, str):
+            pl.add_mesh(arrows, color=vectors_color)
+        else:
+            pl.add_mesh(arrows, scalars="vectors_rgba")
+
+        if False:
+            pl.add_arrows(
+                mesh.points,
+                vectors.cpu().numpy(),
+                mag=1,
+                color=vectors_color,
+            )
+
     # elev = 0, azim = 0 is the +x direction
     # elev = 0, azim = 90 is the +y direction
     # elev = 90, azim = 0 is the +z direction
@@ -146,7 +179,7 @@ def display(
         headlight_intensity = 0.5
 
         if "pbr" in material:
-            light_intensity = 3.0
+            light_intensity = 2.5
             headlight_intensity = 2.0
 
         n_lights = np.ceil(light_intensity).astype(int)
@@ -181,7 +214,7 @@ def display(
     # Unfortunately, SSAO is buggy with subplots, as discussed in this open issue:
     # https://gitlab.kitware.com/vtk/vtk/-/issues/18849
     if pl.shape == (1, 1):
-        pl.enable_ssao(radius=1)
+        pl.enable_ssao(radius=mesh.length / 16)
         pl.enable_anti_aliasing("ssaa", multi_samples=32)
         # pl.enable_shadows()
 

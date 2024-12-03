@@ -11,6 +11,7 @@ the common class for point clouds, wireframe and triangle meshes.
 - Add landmarks
 - Add control points
 - Save the object and load it back
+
 """
 
 ###############################################################################
@@ -18,6 +19,7 @@ the common class for point clouds, wireframe and triangle meshes.
 # -------------------
 #
 # There are two ways to create a `PolyData` object:
+#
 # - from a file
 # - explicitly with `points`, `edges` (optional), `triangles` (optional)
 
@@ -31,7 +33,7 @@ cpos = [(-1.6657788922829617, 7.472045340108491, 3.9439767221656665),
 
 
 # Load a mesh from a .ply file
-mesh = sks.PolyData("../data/human/human.ply")
+mesh = sks.PolyData("../test_data/human/human.ply")
 
 # Extract the points, edges and triangles from the mesh
 points, edges, triangles = mesh.points, mesh.edges, mesh.triangles
@@ -73,9 +75,9 @@ surface_mesh.edge_data["signal_edges"] = torch.rand(surface_mesh.n_edges, 3, 3)
 surface_mesh.point_data["signal_points"] = surface_mesh.points[:, 0]
 
 # Some features are already available in the mesh object
-surface_mesh.triangle_data["centers"] = surface_mesh.triangle_centers
+surface_mesh.triangle_data["centers"] = surface_mesh.triangle_centroids
 surface_mesh.triangle_data["areas"] = surface_mesh.triangle_areas
-surface_mesh.edge_data["centers"] = surface_mesh.edge_centers
+surface_mesh.edge_data["centers"] = surface_mesh.edge_midpoints
 surface_mesh.edge_data["lengths"] = surface_mesh.edge_lengths
 
 # Call the plot method display information about the signal data (size, type, device)

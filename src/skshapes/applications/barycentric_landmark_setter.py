@@ -384,7 +384,7 @@ def barycentric_coordinates(mesh, point):
                 tmp = []
                 for i in indices:
                     a, b, c = mesh.triangles[:, i]
-                    normals = mesh.triangle_normals[i]
+                    normals = mesh.triangle_area_normals[i]
 
                     tmp.append(
                         torch.abs(vectors[a].dot(normals))

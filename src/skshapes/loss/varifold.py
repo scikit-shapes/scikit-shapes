@@ -13,12 +13,11 @@ from .baseloss import BaseLoss
 def extract_geom(shape: polydata_type) -> tuple[Points, Points, Float1dTensor]:
     """Utility function to extract the geometry of a PolyData object."""
 
-    centers = shape.triangle_centers
-    normals = shape.triangle_normals
+    centers = shape.triangle_centroids
+    normals = shape.triangle_normals  # unit norm
     areas = shape.triangle_areas
-    normalized_normals = normals / normals.norm(dim=1)[:, None]
 
-    return centers, normalized_normals, areas
+    return centers, normals, areas
 
 
 def varifold_scalar(

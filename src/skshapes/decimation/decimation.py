@@ -126,7 +126,7 @@ class Decimation:
 
             self.target_reduction = 1 - self.n_points / mesh.n_points
 
-        if not mesh.is_triangle_mesh():
+        if not mesh.is_triangle_mesh:
             msg = "Quadric decimation only works on triangle meshes"
             raise ValueError(msg)
 

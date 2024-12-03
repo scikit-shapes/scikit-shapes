@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+from functools import cached_property
 from pathlib import Path
 from typing import Literal
 from warnings import warn
@@ -19,7 +20,6 @@ from ..triangle_mesh import EdgeTopology
 from ..types import (
     Edges,
     Float1dTensor,
-    Float2dTensor,
     Int1dTensor,
     IntSequence,
     IntTensor,
@@ -31,56 +31,113 @@ from ..types import (
     int_dtype,
     polydata_type,
 )
-from .utils import DataAttributes
+from .utils import DataAttributes, immutable_cached_property
 
 
+def add_cached_methods_to_sphinx(cls):
+    """Ensures that e.g. ``PolyData.point_normals`` is documented in Sphinx.
+
+    Cached methods are instance methods that are memoized with ``functools.lru_cache``.
+    This small decorator ensures that although ``PolyData.point_normals`` is a cached
+    front-end for the private method ``PolyData._point_normals`` that is instantiated
+    in the `__init__` method, the Sphinx documentation will look as though
+    it was a regular method.
+    """
+    for method_name in cls._cached_methods + cls._cached_properties:
+        # As far as Sphinx is concerned,
+        # self.method_name = self._method_name
+        # Then, at the end of the __init__, we overwrite self.method_name
+        # with a memoized version of self._method_name.
+        setattr(cls, method_name, getattr(cls, "_" + method_name))
+    return cls
+
+
+@add_cached_methods_to_sphinx
 class PolyData(polydata_type):
-    """A polygonal data object. It is composed of points, edges and triangles.
+    """A polygonal shape that is composed of points, edges and/or triangles.
 
-    Three types of objects can be provided to initialize a PolyData object:
+    A :class:`PolyData` object can be created from:
 
-    - a vedo mesh
-    - a pyvista mesh
-    - a path to a mesh
-    - points, edges and triangles as torch tensors
+    - Points, edges and triangles as `torch.Tensors <https://pytorch.org/docs/stable/tensors.html#torch.Tensor>`_,
+      `numpy.arrays <https://numpy.org/doc/stable/reference/generated/numpy.array.html>`_, lists or tuples of numbers.
+    - A path to a file containing a mesh, in a format that is accepted by
+      `pyvista.read <https://docs.pyvista.org/api/utilities/_autosummary/pyvista.read>`_.
+    - A `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
+    - A `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
 
-    PolyData object has support for data attributes: point_data,
-    edge_data and triangle_data. These are dictionaries of torch tensors that
-    can be used to store any kind of data associated with the points, edges or
-    triangles of the shape.
 
-    Landmarks can be defined on the shape. The easiest way to define landmarks
-    is to provide a list of indices.
+    .. warning::
 
-    Landmarks can also be defined as a sparse
-    tensor of shape (n_landmarks, n_points) where each line is a landmark in
-    barycentric coordinates. It allows to define landmarks in a continuous
-    space (on a triangle or an edge) and not only on the vertices of the shape.
+        Internally, points are stored as **float32 torch Tensors** while indices for
+        edges and triangles are stored as **int64 torch Tensors**. If you provide
+        numpy arrays, lists or tuples, they will be converted to torch Tensors with the
+        correct dtype. Since float32 precision corresponds to scientific notation
+        with about 7 significant decimal digits, you may run into issues if you provide
+        data that is centered far away from the origin.
+        For instance, a sphere of radius 1 and centered at (1e6, 1e6, 1e6) will
+        not be represented accurately. In such cases, we recommend centering the
+        data around the origin before creating the :class:`PolyData` object.
 
-    Control Points can be defined on the shape. Control Points is another
-    PolyData that is used to control the deformation of the shape. It is used
-    in the context of the [`ExtrinsicDeformation`](../../morphing/extrinsic_deformation)
-    model.
+        As a general rule, scikit-shapes accepts data in a wide range of formats
+        but **always outputs torch Tensors** with float32 precision for point coordinates
+        and int64 precision for indices.
+        This design choice is motivated by a requirement for consistency
+        (the output type of our methods should not surprise downstream functions)
+        and support for both GPU computing and automatic differentiation
+        (which are not supported by NumPy).
 
-    For visualization, PolyData can be converted into a pyvista PolyData or a
-    vedo Mesh with the `to_pyvista` and `to_vedo` methods.
 
-    Also, PolyData can be saved to a file with the `save` method. The format
-    accepted by PyVista are supported (.ply, .stl, .vtk).
+
+    Main features:
+
+    - Custom scalar- or vector-valued **signals** on a :class:`PolyData` can
+      be stored in the three attributes :attr:`point_data`,
+      :attr:`edge_data` and :attr:`triangle_data` that behave as dictionaries of torch Tensors.
+
+    - **Landmarks** or "keypoints" can also be defined on the shape,
+      typically via a list of point indices. If :attr:`landmarks` is a sparse
+      tensor of shape ``(n_landmarks, n_points)``, each row defines a landmark in
+      barycentric coordinates. This allows us to define landmarks in a
+      continuous space (e.g. on a triangle or an edge) instead
+      of being constrained to the vertices of the shape.
+
+    - For **visualization** purposes, a :class:`PolyData` can be converted to
+      a `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_
+      or a `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_
+      using the :meth:`to_pyvista` and :meth:`to_vedo` methods.
+
+    - The :meth:`save` method lets you save shape data to any file whose format
+      is supported by `PyVista <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata.save>`_ (.ply, .stl, .vtk...).
+
 
     Parameters
     ----------
     points
-        The points of the shape. Could also be a vedo mesh, a pyvista mesh or a
-        path to a file. If it is a mesh or a path, the edges and triangles are
-        inferred from it.
+        The vertices of the shape, usually given as a
+        ``(n_points, 3)`` torch Tensor of xyz coordinates for 3D data
+        or as a ``(n_points, 2)`` torch Tensor of xy coordinates for 2D data.
+        This first argument can also be a
+        `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_,
+        a `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ or a
+        path to a file, in which case the edges and triangles are
+        automatically inferred.
     edges
-        The edges of the shape.
+        The edges of the shape, understood as a set of non-oriented curves
+        or as a wireframe mesh. The edges are encoded as a ``(n_points, 2)`` torch Tensor
+        of integer values. Each row ``[a, b]`` corresponds to a
+        non-oriented edge between points ``a`` and ``b``.
+        If ``triangles`` is not None, the edges will be automatically
+        derived from it and this argument will be ignored.
     triangles
-        The triangles of the shape.
+        The triangles of the shape, understood as a surface mesh.
+        The triangles are encoded as a ``(n_triangles, 3)`` torch
+        Tensor of integer values. Each row ``[a, b, c]`` corresponds to a
+        triangle with vertices ``a``, ``b`` and ``c``.
+        If ``edges`` and ``triangles`` are both None, the shape is
+        understood as a point cloud.
     device
-        The device on which the shape is stored. If None it is inferred
-        from the points.
+        The device on which the shape is stored (e.g. ``"cpu"`` or ``"cuda"``).
+        If None it is inferred from the points.
     landmarks
         The landmarks of the shape.
     control_points
@@ -101,7 +158,46 @@ class PolyData(polydata_type):
     Examples
     --------
 
-    See the corresponding [examples](../../../generated/gallery/#data)
+    .. testcode::
+
+        import skshapes as sks
+
+        shape = sks.PolyData(
+            points=[[0, 0], [1, 0], [0, 1], [1, 1]], triangles=[[0, 1, 2], [1, 2, 3]]
+        )
+        print(shape.points)
+
+
+    .. testoutput::
+
+        tensor([[0., 0.],
+                [1., 0.],
+                [0., 1.],
+                [1., 1.]])
+
+    .. testcode::
+
+        print(shape.edges)
+
+    .. testoutput::
+
+        tensor([[0, 1],
+                [0, 2],
+                [1, 2],
+                [1, 3],
+                [2, 3]])
+
+    .. testcode::
+
+        print(shape.triangles)
+
+    .. testoutput::
+
+        tensor([[0, 1, 2],
+                [1, 2, 3]])
+
+
+    Please also check the :ref:`gallery <data_examples>`.
 
     """
 
@@ -251,9 +347,9 @@ class PolyData(polydata_type):
 
         # /!\ If triangles is not None, edges will be ignored
         if triangles is not None:
-            # Call the setter that will clone and check the validity of the
-            # triangles
+            # Call the setter that will clone and check the validity of the triangles
             self.triangles = triangles
+            # N.B.: we do not use the edges argument
             self._edges = None
 
         elif edges is not None:
@@ -296,24 +392,17 @@ class PolyData(polydata_type):
         # Initialize stiff_edges
         self._stiff_edges = stiff_edges
 
+        # ----------------------------------------------------------------------------
+        # Start of the Python magic (hack?) to load the features-computing methods,
+        # memoize the properties (with cache clearing when users update the points,
+        # edges or triangles), and add the methods to the class with a docstring that
+        # is fully compatible with Sphinx autodoc.
+        # ----------------------------------------------------------------------------
+
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
         # https://www.youtube.com/watch?v=sVjtp6tGo0g
-
-        self.cached_methods = [
-            "point_convolution",
-            "point_normals",
-            "point_frames",
-            "point_moments",
-            "point_quadratic_coefficients",
-            "point_quadratic_fits",
-            "point_principal_curvatures",
-            "point_shape_indices",
-            "point_curvedness",
-            "point_curvature_colors",
-            "mesh_convolution",
-        ]
-        for method_name in self.cached_methods:
+        for method_name in self._cached_methods:
             setattr(
                 self,
                 method_name,
@@ -322,37 +411,108 @@ class PolyData(polydata_type):
                 ),
             )
 
+        # Cached properties are not cached if cache_size is 0
+        for method_name in self._cached_properties:
+
+            setattr(
+                PolyData,
+                method_name,
+                immutable_cached_property(
+                    function=getattr(PolyData, "_" + method_name),
+                    cache=cache_size != 0,
+                ),
+            )
+
+    # N.B.: _cached_methods is also used in the decorator add_cached_methods_to_sphinx.
+    _cached_methods = (
+        "knn_graph",
+        "k_ring_graph",
+        "mesh_convolution",
+        "point_convolution",
+        "point_curvature_colors",
+        "point_curvedness",
+        "point_frames",
+        "point_moments",
+        "point_normals",
+        "point_mean_gauss_curvatures",
+        "point_principal_curvatures",
+        "point_quadratic_coefficients",
+        "point_quadratic_fits",
+        "point_shape_indices",
+    )
+    _cached_properties = (
+        "edge_lengths",
+        "edge_midpoints",
+        "edge_points",
+        "triangle_area_normals",
+        "triangle_areas",
+        "triangle_centroids",
+        "triangle_normals",
+        "triangle_points",
+    )
+
     from ..convolutions import _mesh_convolution, _point_convolution
+
+    # ----------------------------------------------------------------------------
+    # End of the Python magic. Thanks StackOverflow and AnthonyExplains!
+    # ----------------------------------------------------------------------------
     from ..features import (
+        _edge_lengths,
+        _edge_midpoints,
+        _edge_points,
         _point_curvature_colors,
         _point_curvedness,
         _point_frames,
+        _point_mean_gauss_curvatures,
         _point_moments,
         _point_normals,
         _point_principal_curvatures,
         _point_quadratic_coefficients,
         _point_quadratic_fits,
         _point_shape_indices,
+        _triangle_area_normals,
+        _triangle_areas,
+        _triangle_centroids,
+        _triangle_normals,
+        _triangle_points,
     )
+    from ..topology import _k_ring_graph, _knn_graph
     from .utils import cache_clear
 
     @typecheck
-    @one_and_only_one(["target_reduction", "n_points", "ratio"])
-    def decimate(
+    @one_and_only_one(["n_points", "ratio", "scale"])
+    def resample(
         self,
         *,
-        target_reduction: Number | None = None,
         n_points: int | None = None,
         ratio: Number | None = None,
+        scale: Number | None = None,
+        method: Literal["auto"] = "auto",
     ) -> PolyData:
-        """Decimation of the shape.
+        """Resample the shape with a different number of vertices.
+
+        .. warning::
+
+            Supsampling has not been implemented yet.
+            Currently, we only support decimation.
+
+        To handle multiple scales at once, please consider using the
+        :class:`Multiscale<skshapes.multiscaling.multiscale.Multiscale>` class.
 
         Parameters
         ----------
-        target_reduction
-            The target reduction ratio.
         n_points
-            The number of points to keep.
+            The number of points to keep in the output shape.
+        ratio
+            The ratio of points to keep in the output shape.
+            A ratio of 1.0 keeps all the points, while a ratio of 0.1
+            keeps 10% of the points.
+        scale
+            The typical distance between vertices in the output shape.
+        method
+            The method to use for resampling. Currently, only "auto" is
+            supported. It corresponds to using quadratic decimation on
+            a triangle surface mesh.
 
         Raises
         ------
@@ -364,12 +524,35 @@ class PolyData(polydata_type):
         -------
         PolyData
             The decimated shape.
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            lowres = shape.resample(ratio=0.1)
+            print(f"from {shape.n_points} to {lowres.n_points} points")
+
+        .. testoutput::
+
+            from 842 to 85 points
+
         """
         kwargs = {
-            "target_reduction": target_reduction,
             "n_points": n_points,
             "ratio": ratio,
         }
+
+        if scale is not None:
+            msg = "Resampling with a scale is not implemented yet."
+            raise NotImplementedError(msg)
+
+        if method != "auto":
+            msg = "Only the 'auto' method is implemented for now."
+            raise NotImplementedError(msg)
 
         if self.is_triangle_mesh:
             from ..decimation import Decimation
@@ -406,6 +589,37 @@ class PolyData(polydata_type):
         -------
         PolyData
             The copy of the shape.
+
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            a = sks.Sphere()
+            b = a.copy()
+            b.points[1, :] = 7
+
+            print("Original:")
+            print(a.points[0:4, :])
+            print("Edited copy:")
+            print(b.points[0:4, :])
+
+        .. testoutput::
+
+            Original:
+            tensor([[ 0.0000,  0.0000,  0.5000],
+                    [ 0.0000,  0.0000, -0.5000],
+                    [ 0.0541,  0.0000,  0.4971],
+                    [ 0.1075,  0.0000,  0.4883]])
+            Edited copy:
+            tensor([[0.0000, 0.0000, 0.5000],
+                    [7.0000, 7.0000, 7.0000],
+                    [0.0541, 0.0000, 0.4971],
+                    [0.1075, 0.0000, 0.4883]])
+
         """
         kwargs = {"points": self._points.clone()}
 
@@ -430,7 +644,7 @@ class PolyData(polydata_type):
 
     @typecheck
     def to(self, device: str | torch.device) -> PolyData:
-        """Copy the shape on a given device."""
+        """Copy the shape onto a given device."""
         torch_device = torch.Tensor().to(device).device
         if self.device == torch_device:
             return self
@@ -444,7 +658,36 @@ class PolyData(polydata_type):
     ###########################
     @typecheck
     def to_vedo(self) -> vedo.Mesh:
-        """Vedo Mesh converter."""
+        """Converts the shape to a `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
+
+        Returns
+        -------
+        vedo.Mesh
+            The shape as a `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
+
+
+        Examples
+        --------
+
+        .. code-block:: python
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            print(shape.to_vedo())
+
+        .. code-block::
+
+            vedo.mesh.Mesh at (0x30e7f0e0)
+            name          : Mesh
+            elements      : vertices=842 polygons=1,680 lines=0
+            position      : (0, 0, 0)
+            scaling       : (1.00000, 1.00000, 1.00000)
+            size          : average=0.500000, diagonal=1.72721
+            center of mass: (0, 0, 0)
+            bounds        : x=(-0.499, 0.499), y=(-0.497, 0.497), z=(-0.500, 0.500)
+
+        """
         return vedo.Mesh(self.to_pyvista())
 
     ###########################
@@ -452,13 +695,41 @@ class PolyData(polydata_type):
     ###########################
     @typecheck
     def to_pyvista(self) -> pyvista.PolyData:
-        """Pyvista PolyData converter."""
+        """Converts the shape to a `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
+
+        Returns
+        -------
+        pyvista.PolyData
+            The shape as a `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
+
+        Examples
+        --------
+
+        .. code-block:: python
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            print(shape.to_pyvista())
+
+        .. code-block::
+
+            PolyData (0x7f9b96ab0e80)
+            N Cells:    1680
+            N Points:   842
+            N Strips:   0
+            X Bounds:   -4.993e-01, 4.993e-01
+            Y Bounds:   -4.965e-01, 4.965e-01
+            Z Bounds:   -5.000e-01, 5.000e-01
+            N Arrays:   0
+
+        """
         if self.dim == 3:
-            points = self._points.detach().cpu().numpy()
+            points = self.points.detach().cpu().numpy()
         else:
             points = np.concatenate(
                 [
-                    self._points.detach().cpu().numpy(),
+                    self.points.detach().cpu().numpy(),
                     np.zeros((self.n_points, 1)),
                 ],
                 axis=1,
@@ -548,10 +819,10 @@ class PolyData(polydata_type):
         backend: Literal["pyvista", "vedo"] = "pyvista",
         **kwargs,
     ) -> None:
-        """Plot the shape.
+        """Displays the shape, typically using a PyVista interactive window.
 
-        Available backends are "pyvista" and "vedo". See the documentation of
-        the corresponding plot method for the available arguments:
+        Available backends are ``"pyvista"`` and ``"vedo"``. See the documentation of
+        the corresponding plot methods for possible arguments:
 
         - https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html
         - https://vedo.embl.es/docs/vedo/plotter.html#show
@@ -581,6 +852,8 @@ class PolyData(polydata_type):
             The edges of the shape. If the shape is a triangle mesh, the edges
             are computed from the triangles. If the shape is not a triangle
             mesh, the edges are directly returned.
+            If the shape is a point cloud without explicit topology information,
+            returns None.
         """
         if self._edges is not None:
             return self._edges
@@ -595,17 +868,20 @@ class PolyData(polydata_type):
     @edges.setter
     @convert_inputs
     @typecheck
-    def edges(self, edges: Edges) -> None:
+    def edges(self, edges: Edges | None) -> None:
         """Set the edges of the shape and set the triangles to None.
 
         Also reinitialize edge_data, triangle_data and the cache.
         """
-        if edges.max() >= self.n_points:
-            raise IndexError(
-                "The maximum vertex index in edges array is larger than the"
-                + " number of points."
-            )
-        self._edges = edges.clone().to(self.device)
+        if edges is None:
+            self._edges = None
+        else:
+            if edges.max() >= self.n_points:
+                raise IndexError(
+                    "The maximum vertex index in edges array is larger than the"
+                    + " number of points."
+                )
+            self._edges = edges.clone().to(self.device)
         self._triangles = None
         self.edge_data = None
         self.triangle_data = None
@@ -658,125 +934,6 @@ class PolyData(polydata_type):
 
             self._stiff_edges = stiff_edges.clone().to(self.device)
 
-    @typecheck
-    def k_ring_graph(self, k: int = 2, verbose: bool = False) -> Edges:
-        """Compute the k-ring graph of the shape.
-
-        The k-ring graph is the graph where each vertex is connected to its
-        k-neighbors, where the neighborhoods are defined by the edges.
-
-        Parameters
-        ----------
-        k, optional
-            the size of the neighborhood, by default 2
-        verbose, optional
-            whether or not display information about the remaining number of steps
-
-        Returns
-        -------
-            The k-ring neighbors edges.
-        """
-        if not k > 0:
-            msg = "The number of neighbors k must be positive"
-            raise ValueError(msg)
-
-        edges = self.edges
-
-        if verbose:
-            print(f"Computing k-neighbors graph with k = {k}")  # noqa: T201
-            print(f"Step 1/{k}")  # noqa: T201
-
-        # Compute the adjacency matrix
-        adjacency_matrix = torch.zeros(
-            size=(self.n_points, self.n_points),
-            dtype=int_dtype,
-            device=self.device,
-        )
-        for i in range(self.n_edges):
-            i0, i1 = self.edges[i]
-            adjacency_matrix[i0, i1] = 1
-            adjacency_matrix[i1, i0] = 1
-
-        M = adjacency_matrix
-        k_ring_edges = edges.clone()
-        k_ring_edges = torch.sort(k_ring_edges, dim=1).values
-
-        for i in range(k - 1):
-
-            if verbose:
-                print(f"Step {i+2}/{k}")  # noqa: T201
-
-            # Iterate the adjacency matrix
-            M = M @ adjacency_matrix
-
-            # Get the connectivity (at least one path between the two vertices)
-            a, b = torch.where(M > 0)
-
-            last_edges = torch.stack((a, b), dim=1)
-
-            # Remove the diagonal and the duplicates with the convention
-            # edges[i, 0] < edges[i, 1]
-            last_edges = last_edges[
-                torch.where(last_edges[:, 0] - last_edges[:, 1] < 0)
-            ]
-
-            # Concatenate the new edges and remove the duplicates
-            k_ring_edges = torch.cat((k_ring_edges, last_edges), dim=0)
-            k_ring_edges = torch.unique(k_ring_edges, dim=0)
-
-        return k_ring_edges
-
-    @typecheck
-    def knn_graph(self, k: int = 2, include_edges: bool = False) -> Edges:
-        """Return the k-nearest neighbors edges of a shape.
-
-        Parameters
-        ----------
-        shape
-            The shape to process.
-        k
-            The number of neighbors.
-        include_edges
-            If True, the edges of the shape are concatenated with the k-nearest
-            neighbors edges.
-
-        Returns
-        -------
-        Edges
-            The k-nearest neighbors edges.
-        """
-        if not k > 0:
-            msg = "The number of neighbors k must be positive"
-            raise ValueError(msg)
-
-        from pykeops.torch import LazyTensor
-
-        points = self.points
-
-        points_i = LazyTensor(points[:, None, :])  # (N, 1, 3)
-        points_j = LazyTensor(points[None, :, :])  # (1, N, 3)
-
-        D_ij = ((points_i - points_j) ** 2).sum(-1)
-
-        out = D_ij.argKmin(K=k + 1, dim=1)
-
-        out = out[:, 1:]
-
-        knn_edges = torch.zeros(
-            (k * self.n_points, 2), dtype=int_dtype, device=self.device
-        )
-        knn_edges[:, 0] = torch.repeat_interleave(
-            torch.arange(self.n_points), k
-        )
-        knn_edges[:, 1] = out.flatten()
-
-        if include_edges and self.edges is not None:
-            knn_edges = torch.cat([self.edges, knn_edges], dim=0)
-
-        knn_edges, _ = torch.sort(knn_edges, dim=1)
-
-        return torch.unique(knn_edges, dim=0)
-
     #################################
     #### Triangles getter/setter ####
     #################################
@@ -789,18 +946,22 @@ class PolyData(polydata_type):
     @triangles.setter
     @convert_inputs
     @typecheck
-    def triangles(self, triangles: Triangles) -> None:
+    def triangles(self, triangles: Triangles | None) -> None:
         """Set the triangles of the shape and set edges to None.
 
         Also reinitialize edge_data, triangle_data and the cache.
         """
-        if triangles.max() >= self.n_points:
-            raise IndexError(
-                "The maximum vertex index in triangles array is larger than"
-                + " the number of points."
-            )
+        if triangles is None:
+            self._triangles = None
+        else:
+            if triangles.max() >= self.n_points:
+                raise IndexError(
+                    "The maximum vertex index in triangles array is larger than"
+                    + " the number of points."
+                )
 
-        self._triangles = triangles.clone().to(self.device)
+            self._triangles = triangles.clone().to(self.device)
+
         self._edges = None
         self.edge_data = None
         self.triangle_data = None
@@ -1189,13 +1350,13 @@ class PolyData(polydata_type):
     @typecheck
     def dim(self) -> int:
         """Dimension of the shape getter."""
-        return self._points.shape[1]
+        return self.points.shape[1]
 
     @property
     @typecheck
     def n_points(self) -> int:
         """Number of points getter."""
-        return self._points.shape[0]
+        return self.points.shape[0]
 
     @property
     @typecheck
@@ -1216,7 +1377,7 @@ class PolyData(polydata_type):
         else:
             return 0
 
-    @property
+    @cached_property
     @typecheck
     def mean_point(self) -> Points:
         """Mean point of the shape.
@@ -1225,9 +1386,9 @@ class PolyData(polydata_type):
         """
         # TODO: add support for batch vectors
         # TODO: add support for point weights
-        return self._points.mean(dim=0, keepdim=True)
+        return self.points.mean(dim=0, keepdim=True)
 
-    @property
+    @cached_property
     @typecheck
     def standard_deviation(self) -> Float1dTensor:
         """Standard deviation of the shape.
@@ -1238,88 +1399,65 @@ class PolyData(polydata_type):
         # TODO: add support for batch vectors
         # TODO: add support for point weights
         return (
-            ((self._points - self.mean_point) ** 2)
+            ((self.points - self.mean_point) ** 2)
             .sum(dim=1)
             .mean(dim=0)
             .sqrt()
             .view(-1)
         )
 
-    @property
+    @cached_property
     @typecheck
-    def edge_centers(self) -> Points:
-        """Center of each edge."""
-        # Raise an error if edges are not defined
-        if self.edges is None:
-            msg = "Edges are not defined"
-            raise AttributeError(msg)
+    def radius(self) -> Float1dTensor:
+        """Radius of the shape.
 
+        Returns the radius of the smallest sphere, centered around the mean point, that contains the shape.
+        """
+        # TODO: add support for batch vectors
         return (
-            self.points[self.edges[:, 0]] + self.points[self.edges[:, 1]]
-        ) / 2
+            ((self.points - self.mean_point) ** 2)
+            .sum(dim=1)
+            .max(dim=0)
+            .values.sqrt()
+            .view(-1)
+        )
+
+    @typecheck
+    def normalize(self, inplace=False) -> PolyData:
+        """Normalize the shape.
+
+        Center the shape at the origin and scale it so that the standard
+        deviation of the points is 1.
+
+        Returns
+        -------
+        PolyData
+            The normalized shape.
+        """
+        new = self if inplace else self.copy()
+
+        new.points = new.points - new.mean_point
+        new.points = new.points / new.radius
+
+        return new
 
     @property
-    @typecheck
-    def edge_lengths(self) -> Float1dTensor:
-        """Length of each edge."""
-        # Raise an error if edges are not defined
-        if self.edges is None:
-            msg = "Edges are not defined"
-            raise AttributeError(msg)
-
-        return (
-            self.points[self.edges[:, 0]] - self.points[self.edges[:, 1]]
-        ).norm(dim=1)
-
-    @property
-    @typecheck
-    def triangle_centers(self) -> Points:
-        """Center of the triangles."""
-        # Raise an error if triangles are not defined
-        if self.triangles is None:
-            msg = "Triangles are not defined"
-            raise AttributeError(msg)
-
-        A = self.points[self.triangles[:, 0]]
-        B = self.points[self.triangles[:, 1]]
-        C = self.points[self.triangles[:, 2]]
-
-        return (A + B + C) / 3
-
-    @property
-    @typecheck
-    def triangle_areas(self) -> Float1dTensor:
-        """Area of each triangle."""
-        # Raise an error if triangles are not defined
-        return self.triangle_normals.norm(dim=1) / 2
-
-    @property
-    @typecheck
-    def triangle_normals(self) -> Float2dTensor:
-        """Normal of each triangle."""
-        # Raise an error if triangles are not defined
-        if self.triangles is None:
-            msg = "Triangles are not defined"
-            raise AttributeError(msg)
-
-        A = self.points[self.triangles[:, 0]]
-        B = self.points[self.triangles[:, 1]]
-        C = self.points[self.triangles[:, 2]]
-
-        if self.dim == 2:
-            # Add a zero z coordinate to the points to compute the
-            # cross product
-            A = torch.cat((A, torch.zeros_like(A[:, 0]).view(-1, 1)), dim=1)
-            B = torch.cat((B, torch.zeros_like(B[:, 0]).view(-1, 1)), dim=1)
-            C = torch.cat((C, torch.zeros_like(C[:, 0]).view(-1, 1)), dim=1)
-
-        # TODO: Normalize?
-        return torch.linalg.cross(B - A, C - A)
-
     @typecheck
     def is_triangle_mesh(self) -> bool:
-        """Check if the shape is triangular."""
+        """Check if the shape has triangle connectivity."""
         return self._triangles is not None
+
+    @property
+    @typecheck
+    def is_wireframe(self) -> bool:
+        """Check if the shape has edge connectivity."""
+        return (self._triangles is None) and (self._edges is not None)
+
+    @property
+    @typecheck
+    def is_point_cloud(self) -> bool:
+        """Check if the shape is a point cloud."""
+        return (self._triangles is None) and (self._edges is None)
 
     @property
     @typecheck
@@ -1452,12 +1590,12 @@ class PolyData(polydata_type):
         weights
             The weights of the weighted point cloud.
         """
-        if self.triangles is not None:
-            points = self.triangle_centers
+        if self.is_triangle_mesh:
+            points = self.triangle_centroids
             weights = self.triangle_areas / self.triangle_areas.sum()
 
-        elif self.edges is not None:
-            points = self.edge_centers
+        elif self.is_wireframe:
+            points = self.edge_midpoints
             weights = self.edge_lengths / self.edge_lengths.sum()
 
         else:
@@ -1470,3 +1608,103 @@ class PolyData(polydata_type):
             )
 
         return points, weights
+
+    @typecheck
+    def to_point_cloud(self) -> PolyData:
+        new = self.copy()
+        new.edges = None
+        new.triangles = None
+        return new
+
+    @typecheck
+    def __repr__(self) -> str:
+        """String representation of the shape.
+
+        Returns
+        -------
+        str
+            A succinct description of the shape data.
+
+        Examples
+        --------
+
+        .. testcode::
+
+            import skshapes as sks
+
+            shape = sks.Sphere()
+            print(shape)
+
+        .. testoutput::
+
+            skshapes.PolyData (... on cpu, float32), a 3D triangle mesh with:
+            - 842 points, 2,520 edges, 1,680 triangles
+            - center (-0.000, -0.000, -0.000), radius 0.500
+            - bounds x=(-0.499, 0.499), y=(-0.497, 0.497), z=(-0.500, 0.500)
+
+        .. testcode::
+
+            shape.point_data["norms"] = shape.points.norm(dim=1)
+            shape.edge_data["squared_indices"] = shape.edges**2
+            tri = shape.triangles
+            shape.triangle_data["tensors"] = tri.view(-1, 3, 1) * tri.view(-1, 1, 3)
+            print(shape)
+
+        .. testoutput::
+
+            skshapes.PolyData (... on cpu, float32), a 3D triangle mesh with:
+            - 842 points, 2,520 edges, 1,680 triangles
+            - center (-0.000, -0.000, -0.000), radius 0.500
+            - bounds x=(-0.499, 0.499), y=(-0.497, 0.497), z=(-0.500, 0.500)
+            - point data:
+              : "norms" : [842], float32, cpu
+            - edge data:
+              : "squared_indices" : [2520, 2], int64, cpu
+            - triangle data:
+              : "tensors" : [1680, 3, 3], int64, cpu
+
+        """
+
+        if self.is_triangle_mesh:
+            shape_type = "triangle mesh"
+            info = f"{self.n_points:,} points, {self.n_edges:,} edges, {self.n_triangles:,} triangles"
+        elif self.is_wireframe:
+            shape_type = "wireframe"
+            info = f"{self.n_points:,} points and {self.n_edges:,} edges"
+        elif self.is_point_cloud:
+            shape_type = "point cloud"
+            info = f"{self.n_points:,} points"
+        else:
+            msg = "Unknown shape type"
+            raise NotImplementedError(msg)
+
+        def suffix(dtype):
+            return str(dtype).split(".")[-1].split("'")[0]
+
+        repr_str = f"skshapes.{self.__class__.__name__} (0x{id(self):x} on {self.device}, {suffix(float_dtype)}), "
+        repr_str += f"a {self.dim}D {shape_type} with:\n"
+        repr_str += f"- {info}\n"
+
+        center = ", ".join(
+            f"{coord:.3f}"
+            for coord in self.mean_point[0].detach().cpu().numpy()
+        )
+        repr_str += (
+            f"- center ({center}), radius {float(self.radius.item()):.3f}\n"
+        )
+        repr_str += f"- bounds x=({self.points[:, 0].min():.3f}, {self.points[:, 0].max():.3f}), "
+        repr_str += f"y=({self.points[:, 1].min():.3f}, {self.points[:, 1].max():.3f}), "
+        if self.dim == 3:
+            repr_str += f"z=({self.points[:, 2].min():.3f}, {self.points[:, 2].max():.3f})"
+
+        for data, data_name in [
+            (self.point_data, "point data"),
+            (self.edge_data, "edge data"),
+            (self.triangle_data, "triangle data"),
+        ]:
+            if len(data) > 0:
+                repr_str += f"\n- {data_name}:"
+                for key in data:
+                    repr_str += f'\n  : "{key}" : {list(data[key].shape)}, {suffix(data[key].dtype)}, {data.device}'
+
+        return repr_str

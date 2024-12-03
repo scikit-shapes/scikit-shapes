@@ -65,6 +65,17 @@ Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 Points2d = JaxFloat[torch.Tensor, "_ 2"]
 Points3d = JaxFloat[torch.Tensor, "_ 3"]
 
+EdgeLengths = JaxFloat[torch.Tensor, "n_edges"]
+EdgeMidpoints = JaxFloat[torch.Tensor, "n_edges dim"]
+EdgePoints = JaxFloat[torch.Tensor, "n_edges 2 dim"]
+TriangleAreas = JaxFloat[torch.Tensor, "n_triangles"]
+TriangleCentroids = JaxFloat[torch.Tensor, "n_triangles dim"]
+TriangleNormals = JaxFloat[torch.Tensor, "n_triangles dim"]
+TrianglePoints = JaxFloat[torch.Tensor, "n_triangles 3 dim"]
+
+# name the dimension to ensure identical number of points
+Points3d_n = JaxFloat[torch.Tensor, "n 3"]
+
 Points = Points2d | Points3d  # 3D or 2D points
 
 # Points sequences for sequence of poses (i.e. sequence of shapes)

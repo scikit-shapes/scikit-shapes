@@ -5,8 +5,126 @@ import torch.nn.functional as F
 from pykeops.torch import LazyTensor
 
 from ..input_validation import typecheck
-from ..types import FloatTensor, Number, Points, Triangles
-from ..utils import diagonal_ranges
+from ..types import FloatTensor, Number, Points, TriangleNormals, Triangles
+from ..utils import diagonal_ranges, scatter
+
+
+@typecheck
+def _triangle_area_normals(self) -> TriangleNormals:
+    r"""The normals of the mesh triangles, weighted by their areas.
+
+    For 3D triangles :math:`ABC`, this is the cross product
+    :math:`\tfrac{1}{2} \overrightarrow{AB} \times \overrightarrow{AC}`.
+    For 2D triangles, this is the 3D vector ``(0, 0, signed_area)``.
+
+    Returns
+    -------
+    area_normals
+        A ``(n_triangles, 3)`` tensor that contains the normal vector of each triangle,
+        weighted by its area.
+
+    Examples
+    --------
+
+    .. testcode::
+
+        import skshapes as sks
+
+        mesh_2D = sks.PolyData(
+            points=[[0, 0], [1, 0], [1, 1]],
+            triangles=[[0, 1, 2], [0, 2, 1], [0, 1, 1], [2, 2, 2]],
+        )
+        print(mesh_2D.triangle_area_normals)
+
+    .. testoutput::
+
+        tensor([[ 0.0000,  0.0000,  0.5000],
+                [ 0.0000,  0.0000, -0.5000],
+                [ 0.0000,  0.0000,  0.0000],
+                [ 0.0000,  0.0000,  0.0000]])
+
+    .. testcode::
+
+        mesh_3D = sks.PolyData(
+            points=[[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 2]],
+            triangles=[[0, 1, 2], [0, 1, 3], [0, 2, 3]],
+        )
+        print(mesh_3D.triangle_area_normals)
+
+    .. testoutput::
+
+        tensor([[ 0.0000,  0.0000,  0.5000],
+                [ 0.0000, -1.0000,  0.0000],
+                [ 1.0000,  0.0000,  0.0000]])
+
+    """
+    ABC = self.triangle_points  # (n_triangles, 3, dim)
+    A = ABC[:, 0, :]
+    B = ABC[:, 1, :]
+    C = ABC[:, 2, :]
+
+    if self.dim == 2:
+        # Add a zero z coordinate to the points to compute the
+        # cross product
+        A = torch.cat((A, torch.zeros_like(A[:, 0]).view(-1, 1)), dim=1)
+        B = torch.cat((B, torch.zeros_like(B[:, 0]).view(-1, 1)), dim=1)
+        C = torch.cat((C, torch.zeros_like(C[:, 0]).view(-1, 1)), dim=1)
+
+    area_normals = torch.linalg.cross(B - A, C - A)
+    assert area_normals.shape == (self.n_triangles, 3)
+    return area_normals / 2
+
+
+@typecheck
+def _triangle_normals(self) -> TriangleNormals:
+    """Unit-length normals associated to each triangle.
+
+    Please note that if a triangle is degenerate (i.e. with zero area),
+    the normal vector will be zero.
+
+    Returns
+    -------
+    triangle_normals
+        A ``(n_triangles, 3)`` tensor that contains the normal vector of each triangle.
+
+    Examples
+    --------
+
+    .. testcode::
+
+        import skshapes as sks
+
+        mesh_2D = sks.PolyData(
+            points=[[0, 0], [1, 0], [1, 1]],
+            triangles=[[0, 1, 2], [0, 2, 1], [0, 1, 1], [2, 2, 2]],
+        )
+        print(mesh_2D.triangle_normals)
+
+    .. testoutput::
+
+        tensor([[ 0.,  0.,  1.],
+                [ 0.,  0., -1.],
+                [ 0.,  0.,  0.],
+                [ 0.,  0.,  0.]])
+
+    .. testcode::
+
+        mesh_3D = sks.PolyData(
+            points=[[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 4]],
+            triangles=[[0, 1, 2], [0, 1, 3], [0, 2, 3], [0, 1, 1], [2, 2, 2]],
+        )
+        print(mesh_3D.triangle_normals)
+
+    .. testoutput::
+
+        tensor([[ 0.,  0.,  1.],
+                [ 0., -1.,  0.],
+                [ 1.,  0.,  0.],
+                [ 0.,  0.,  0.],
+                [ 0.,  0.,  0.]])
+
+    """
+    return torch.nn.functional.normalize(self.triangle_area_normals)
 
 
 @typecheck
@@ -16,23 +134,44 @@ def _point_normals(
     scale: Number | None = None,
     **kwargs,
 ) -> Points:
+    """Compute a smooth field of normals at the vertices of a mesh.
+
+    Parameters
+    ----------
+    scale : Number, optional
+        The scale of the Gaussian smoothing window. If None, the normals are
+        computed directly from the triangles. The default is None.
+
+    Returns
+    -------
+    Points
+        A ``(n_points, 3)`` tensor of normal vectors at the vertices of the mesh.
+    """
+    if self.dim != 3:
+        msg = "Currently, point normals are only supported in 3D."
+        raise NotImplementedError(msg)
+
     if scale is None:
         if self.triangles is None:
             msg = "If no triangles are provided, you must specify a scale."
             raise ValueError(msg)
 
-        tri_n = self.triangle_normals  # N.B.: magnitude = triangle area
-        n = torch.zeros_like(self.points)
+        tri_n = self.triangle_area_normals  # N.B.: magnitude = triangle area
+
         # TODO: instead of distributing to the vertices equally, we should
-        #       distribute according to the angles of the triangles.
-        for k in range(3):
-            # n[self.triangles[k, i]] += tri_n[i]
-            n.scatter_reduce_(
-                dim=0,
-                index=self.triangles[k].view(-1, 1),
+        #       distribute according to the angles of the triangles,
+        #       via the cotangent formula (see Keenan Crane's lecture notes
+        #       on discrete differential geometry)
+        n = sum(
+            scatter(
                 src=tri_n,
+                index=self.triangles[:, k],
                 reduce="sum",
+                min_length=self.n_points,
             )
+            for k in range(3)
+        )
+        assert n.shape == self.points.shape
 
     else:
         # Get a smooth field of normals via the Structure Tensor:
@@ -43,16 +182,22 @@ def _point_normals(
         local_nuv = local_QL.eigenvectors  # (N, 3, 3)
         n = local_nuv[:, :, 0]
 
-        # Orient the normals according to the triangles, if any:
         if self.triangles is not None:
-            n_0 = self.point_normals(scale=None, **kwargs)
-            assert n_0.shape == (self.n_points, 3)
+            local_direction = self.point_normals(scale=None, **kwargs)
 
         else:
-            n_0 = n.mean(dim=0, keepdim=True)
-            assert n_0.shape == (1, 3)
+            # Orient the normals to point locally outwards,
+            # i.e. flip the normals if they point towards the local average:
+            local_avg = self.point_moments(order=1, scale=scale, **kwargs)
+            assert local_avg.shape == (self.n_points, 3)
+            local_direction = self.points - local_avg
 
-        n = (n_0 * n).sum(-1).sign().view(-1, 1) * n
+        # N.B.: sign(0) = 0, which is annoying, so we have to handle this
+        #       by hand with booleans.
+        assert local_direction.shape == (self.n_points, 3)
+        no_flip = ((local_direction * n).sum(-1) >= 0).type_as(n).view(-1, 1)
+        n = (2 * no_flip - 1) * n
+        assert n.shape == (self.n_points, 3)
 
     # Try to enforce some consistency...
     if False:

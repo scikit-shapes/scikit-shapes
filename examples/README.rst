@@ -3,4 +3,4 @@
 Gallery of examples
 ===================
 
-The examples below shows functionalities of scikit-shapes.
+The examples below showcase the main features of scikit-shapes in self-contained How-To guides.

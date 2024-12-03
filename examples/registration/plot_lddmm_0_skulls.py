@@ -22,8 +22,8 @@ sys.path.append(pykeops.get_build_folder())
 # Prepare the data
 # ----------------
 
-source = sks.PolyData("../data/skulls/template.vtk")
-target = sks.PolyData("../data/skulls/skull_neandertalis.vtk")
+source = sks.PolyData("../test_data/skulls/template.vtk")
+target = sks.PolyData("../test_data/skulls/skull_neandertalis.vtk")
 
 # Add control points to the source shape
 source.control_points = source.bounding_grid(N=20, offset=0.1)

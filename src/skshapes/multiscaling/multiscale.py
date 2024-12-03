@@ -108,7 +108,7 @@ class Multiscale:
             self._decimation_module = decimation_module
 
         if decimation_module is None:
-            if shape.is_triangle_mesh():
+            if shape.is_triangle_mesh:
                 min_n_points = 1
                 decimation_module = Decimation(n_points=min_n_points)
 

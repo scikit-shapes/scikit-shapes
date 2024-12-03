@@ -10,7 +10,7 @@ import skshapes as sks
 from skshapes.errors import DeviceError
 
 shape1 = sks.PolyData(pyvista.Sphere())
-shape2 = sks.PolyData(pyvista.Sphere()).decimate(target_reduction=0.5)
+shape2 = sks.PolyData(pyvista.Sphere()).resample(ratio=0.5)
 
 
 @pytest.mark.skipif(

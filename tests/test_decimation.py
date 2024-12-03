@@ -59,7 +59,7 @@ def test_decimation_basic():
 
     # Check that calling .decimate() on the mesh gives the same result
 
-    decimated_sphere2 = sphere.decimate(n_points=15)
+    decimated_sphere2 = sphere.resample(n_points=15)
 
     assert torch.allclose(decimated_sphere.points, decimated_sphere2.points)
     assert torch.allclose(
@@ -71,7 +71,7 @@ def test_decimation_basic():
     # test with target_reduction
     decimation = sks.Decimation(target_reduction=target_reduction)
     decimated_sphere = decimation.fit_transform(sphere)
-    decimated_sphere2 = sphere.decimate(target_reduction=target_reduction)
+    decimated_sphere2 = sphere.resample(ratio=1 - target_reduction)
 
     assert torch.allclose(decimated_sphere.points, decimated_sphere2.points)
     assert torch.allclose(
@@ -107,12 +107,12 @@ def test_decimation_basic():
 
     with pytest.raises(InputStructureError):
         # n_points and target_reduction are mutually exclusive
-        mesh.decimate(n_points=10, target_reduction=0.9)
+        mesh.resample(n_points=10, ratio=0.1)
 
     with pytest.raises(InputStructureError):
         # at least one of n_points, n_target_reduction or ratio must be
         # specified
-        mesh.decimate()
+        mesh.resample()
 
 
 def test_decimation_landmarks():
