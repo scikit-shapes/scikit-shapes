@@ -40,7 +40,7 @@ jobs:
       # This step is needed to run pyvista displays in tests,
       # e.g. in the tests of skshapes.doc.display.
       - name: Setup headless display
-        uses: pyvista/setup-headless-display-action@v2
+        uses: pyvista/setup-headless-display-action@v3
 
       # Tests are run first with minimal dependencies, to ensure that the core functionality is working
       - name: Test (minimal dependencies)
@@ -57,7 +57,7 @@ jobs:
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: false
           files: ./coverage.xml, ./coverage_opt.xml

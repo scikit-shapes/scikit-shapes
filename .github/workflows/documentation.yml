@@ -46,7 +46,7 @@ jobs:
 
         # https://github.com/pyvista/setup-headless-display-action
         - name: Setup headless display
-          uses: pyvista/setup-headless-display-action@v2
+          uses: pyvista/setup-headless-display-action@v3
 
         - name: build documentation (pull request or push)
           run: |
