@@ -25,6 +25,7 @@ from ..types import (
     IntTensor,
     Landmarks,
     Number,
+    PointDensities,
     Points,
     Triangles,
     float_dtype,
@@ -135,6 +136,15 @@ class PolyData(polydata_type):
         triangle with vertices ``a``, ``b`` and ``c``.
         If ``edges`` and ``triangles`` are both None, the shape is
         understood as a point cloud.
+    point_densities
+        The densities of the points, which act as a multiplier to compute masses
+        in :meth:`skshapes.polydata.PolyData.point_masses`.
+        For point clouds (with each point having a mass of 1 by default),
+        point densities exactly correspond to point masses.
+        For wireframes, point densities correspond to multipliers on the lengths
+        of the edges.
+        For triangle meshes, point densities correspond to multipliers on the areas
+        of the triangles and can be understood as local thicknesses.
     device
         The device on which the shape is stored (e.g. ``"cpu"`` or ``"cuda"``).
         If None it is inferred from the points.
@@ -209,6 +219,7 @@ class PolyData(polydata_type):
         *,
         edges: Edges | None = None,
         triangles: Triangles | None = None,
+        point_densities: PointDensities | None = None,
         device: str | torch.device | None = None,
         landmarks: Landmarks | IntSequence | None = None,
         control_points: polydata_type | None = None,
@@ -362,6 +373,10 @@ class PolyData(polydata_type):
             self._triangles = None
             self._edges = None
 
+        self._point_densities = None
+        if point_densities is not None:
+            self.point_densities = point_densities
+
         if landmarks is not None:
             # Call the setter that will clone and check the validity of the
             # landmarks
@@ -433,6 +448,7 @@ class PolyData(polydata_type):
         "point_curvedness",
         "point_frames",
         "point_moments",
+        "point_neighborhoods",
         "point_normals",
         "point_mean_gauss_curvatures",
         "point_principal_curvatures",
@@ -444,6 +460,7 @@ class PolyData(polydata_type):
         "edge_lengths",
         "edge_midpoints",
         "edge_points",
+        "point_masses",
         "triangle_area_normals",
         "triangle_areas",
         "triangle_centroids",
@@ -463,6 +480,7 @@ class PolyData(polydata_type):
         _point_curvature_colors,
         _point_curvedness,
         _point_frames,
+        _point_masses,
         _point_mean_gauss_curvatures,
         _point_moments,
         _point_normals,
@@ -476,6 +494,7 @@ class PolyData(polydata_type):
         _triangle_normals,
         _triangle_points,
     )
+    from ..neighborhoods import _point_neighborhoods
     from ..topology import _k_ring_graph, _knn_graph
     from .utils import cache_clear
 
@@ -1000,6 +1019,53 @@ class PolyData(polydata_type):
         self._points = points.clone().to(self.device)
         self.cache_clear()
 
+    #######################################
+    #### Point Densities setter/getter ####
+    #######################################
+    @property
+    @typecheck
+    def point_densities(self) -> PointDensities:
+        """The density of each point of the shape.
+
+        The densities of the points act as a multiplier to compute masses
+        in :meth:`skshapes.polydata.PolyData.point_masses`.
+        For point clouds (with each point having a mass of 1 by default),
+        point densities exactly correspond to point masses.
+        For wireframes, point densities correspond to multipliers on the lengths
+        of the edges.
+        For triangle meshes, point densities correspond to multipliers on the areas
+        of the triangles and can be understood as local thicknesses.
+        """
+        # TODO: add support for multiscaling
+        if self._point_densities is None:
+            self._point_densities = torch.ones_like(self.points[:, 0])
+        return self._point_densities
+
+    @point_densities.setter
+    @convert_inputs
+    @typecheck
+    def point_densities(self, densities: PointDensities) -> None:
+        """Setter for the point densities.
+
+        Parameters
+        ----------
+        densities
+            The new densities for the points of the shape.
+
+        Raises
+        ------
+        ShapeError
+            If the new density is not a vector of shape ``(n_points,)``.
+        """
+        if densities.shape != (self.n_points,):
+            msg = f"The new densities should be a vector of shape (n_points,) = ({self.n_points},)."
+            raise ShapeError(msg)
+
+        self._point_densities = densities.clone().to(self.device)
+        # Point densities play an important role in convolutions
+        # and neighborhood computations, so we clear the cache
+        self.cache_clear()
+
     ##############################
     #### Device getter/setter ####
     ##############################
@@ -1458,41 +1524,6 @@ class PolyData(polydata_type):
     def is_point_cloud(self) -> bool:
         """Check if the shape is a point cloud."""
         return (self._triangles is None) and (self._edges is None)
-
-    @property
-    @typecheck
-    def point_weights(self) -> Float1dTensor:
-        """Point weights."""
-        from ..utils import scatter
-
-        if self.triangles is not None:
-            areas = self.triangle_areas / 3
-            # Triangles are stored in a (n_triangles, 3) tensor,
-            # so we must repeat the areas 3 times, without interleaving.
-            areas = areas.repeat(3)
-            unbalanced_weights = scatter(
-                index=self.triangles.flatten(),
-                src=areas,
-                reduce="sum",
-            )
-
-        elif self.edges is not None:
-            lengths = self.edge_lengths / 2
-            # Edges are stored in a (n_edges, 2) tensor,
-            # so we must repeat the lengths 2 times, without interleaving.
-            lengths = lengths.repeat(2)
-            unbalanced_weights = scatter(
-                index=self.edges.flatten(),
-                src=lengths,
-                reduce="sum",
-            )
-
-        else:
-            unbalanced_weights = torch.ones(
-                self.n_points, dtype=float_dtype, device=self.device
-            )
-
-        return unbalanced_weights
 
     @typecheck
     def bounding_grid(

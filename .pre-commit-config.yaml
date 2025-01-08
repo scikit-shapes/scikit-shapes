@@ -32,21 +32,21 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: "24.4.2"
+    rev: "24.10.0"
     hooks:
       - id: black
         alias: black
         name: black
-        language_version: python3.11
+        language_version: python3.12
         files: skshapes/|tests/
         verbose: true
 
   - repo: https://github.com/adamchainz/blacken-docs
-    rev: "1.16.0"  # replace with latest tag on GitHub
+    rev: "1.19.1"  # replace with latest tag on GitHub
     hooks:
       - id: blacken-docs
         additional_dependencies:
-          - black==22.12.0
+          - black==24.10.0
 
   - repo: https://github.com/codespell-project/codespell
     rev: "v2.3.0"

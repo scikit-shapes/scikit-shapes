@@ -5,10 +5,134 @@ from ..types import (
     EdgeLengths,
     EdgeMidpoints,
     EdgePoints,
+    PointMasses,
     TriangleAreas,
     TriangleCentroids,
     TrianglePoints,
 )
+
+
+@typecheck
+def _point_masses(self) -> PointMasses:
+    """Point weights.
+
+    These correspond to:
+
+    - Unit values for point clouds.
+    - Half of the sum of the lengths of adjacent edges for wireframe meshes.
+    - One third of the sum of the areas of adjacent triangles for triangle meshes.
+
+    If ``self.point_densities`` is defined, the point masses are multiplied by these
+    point densities.
+
+    Returns
+    -------
+    point_masses
+        A ``(n_points,)`` Tensor that contains the point masses.
+
+    Examples
+    --------
+
+    .. testcode::
+
+        import skshapes as sks
+
+        cloud = sks.PolyData(
+            points=[[0, 0], [1, 0], [1, 1]],
+            point_densities=[0, 0.5, 2],
+        )
+        print(cloud.point_masses)
+
+    .. testoutput::
+
+        tensor([0.0000, 0.5000, 2.0000])
+
+    .. testcode::
+
+        curve = sks.PolyData(
+            points=[[0, 0], [1, 0], [2, 1]],
+            edges=[[0, 1], [1, 2]],
+        )
+        print(curve.point_masses)
+
+    .. testoutput::
+
+        tensor([0.5000, 1.2071, 0.7071])
+
+    .. testcode::
+
+        mesh = sks.PolyData(
+            points=[[0, 0], [1, 0], [0, 2]],
+            triangles=[[0, 1, 2]],
+        )
+        print(mesh.point_masses)
+
+    .. testoutput::
+
+        tensor([0.3333, 0.3333, 0.3333])
+
+    .. testcode::
+
+        sphere = sks.Sphere()
+        print(sphere)
+
+    .. testoutput::
+
+        skshapes.PolyData (0x7fa37e296490 on cpu, float32), a 3D triangle mesh with:
+        - 842 points, 2,520 edges, 1,680 triangles
+        - center (-0.000, -0.000, -0.000), radius 0.500
+        - bounds x=(-0.499, 0.499), y=(-0.497, 0.497), z=(-0.500, 0.500)
+
+    .. testcode::
+
+        print(sphere.point_masses.shape, sphere.point_masses.sum())
+
+    .. testoutput::
+
+        torch.Size([842]) tensor(3.1255)
+
+    .. testcode::
+
+        sphere.point_densities = (sphere.points[:, 2] > 0).float()
+        print(sphere.point_masses.shape, sphere.point_masses.sum())
+
+    .. testoutput::
+
+        torch.Size([842]) tensor(1.6540)
+
+    """
+    from ..utils import scatter
+
+    if self.is_triangle_mesh:
+        areas = self.triangle_areas / 3
+        # Triangles are stored in a (n_triangles, 3) tensor,
+        # so we must repeat the areas 3 times, without interleaving.
+        areas = areas.repeat(3)
+        raw_masses = scatter(
+            index=self.triangles.flatten(),
+            src=areas,
+            reduce="sum",
+        )
+
+    elif self.is_wireframe:
+        lengths = self.edge_lengths / 2
+        # Edges are stored in a (n_edges, 2) tensor,
+        # so we must repeat the lengths 2 times, without interleaving.
+        lengths = lengths.repeat(2)
+        raw_masses = scatter(
+            index=self.edges.flatten(),
+            src=lengths,
+            reduce="sum",
+        )
+
+    else:
+        # For point clouds, we use a constant weight of 1 by default
+        raw_masses = torch.ones_like(self.points[:, 0])
+
+    assert raw_masses.shape == (self.n_points,)
+    assert self.point_densities.shape == (self.n_points,)
+    # Multiply by the point densities
+    return self.point_densities * raw_masses
 
 
 @typecheck

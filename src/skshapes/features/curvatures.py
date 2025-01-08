@@ -555,7 +555,7 @@ def _point_mean_gauss_curvatures(
         # assert v.shape == (N, 3)
 
         # Point weights, typically one:
-        m = self.point_weights
+        m = self.point_masses
         assert m.shape == (N,)
 
         # Wrap as LazyTensors:

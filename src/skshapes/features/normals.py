@@ -130,102 +130,117 @@ def _triangle_normals(self) -> TriangleNormals:
 @typecheck
 def _point_normals(
     self,
-    *,
-    scale: Number | None = None,
     **kwargs,
 ) -> Points:
     """Compute a smooth field of normals at the vertices of a mesh.
 
+    Please refer to :ref:`this example <point_normals_example>` for an illustration
+    of the difference between parameter values.
+
     Parameters
     ----------
-    scale : Number, optional
-        The scale of the Gaussian smoothing window. If None, the normals are
-        computed directly from the triangles. The default is None.
+    kwargs :
+        These arguments will be passed to
+        :meth:`~skshapes.polydata.Polydata.point_neighborhoods`
+        in order to create a neighborhood structure.
 
     Returns
     -------
     Points
         A ``(n_points, 3)`` tensor of normal vectors at the vertices of the mesh.
+
+
+    Examples
+    --------
+
+    .. testcode::
+
+        import skshapes as sks
+
+        mesh = sks.Sphere()
+        raw_normals = mesh.point_normals()
+        smooth_normals = mesh.point_normals(
+            window="gaussian",
+            distance="ambient",
+            radius=0.3,
+        )
+
+        print(mesh.points.shape, raw_normals.shape, smooth_normals.shape)
+
+    .. testoutput::
+
+        torch.Size([842, 3]) torch.Size([842, 3]) torch.Size([842, 3])
+
     """
     if self.dim != 3:
         msg = "Currently, point normals are only supported in 3D."
         raise NotImplementedError(msg)
 
-    if scale is None:
-        if self.triangles is None:
-            msg = "If no triangles are provided, you must specify a scale."
-            raise ValueError(msg)
+    # N.B.: self.point_neighborhoods is a cached method
+    point_neighborhoods = self.point_neighborhoods(**kwargs)
 
-        tri_n = self.triangle_area_normals  # N.B.: magnitude = triangle area
+    if self.is_triangle_mesh:
+        # On a triangle mesh, "raw" point_normals are computed by aggregating
+        # triangle normals onto vertices.
 
         # TODO: instead of distributing to the vertices equally, we should
         #       distribute according to the angles of the triangles,
         #       via the cotangent formula (see Keenan Crane's lecture notes
         #       on discrete differential geometry)
-        n = sum(
+        raw_normals = sum(
             scatter(
-                src=tri_n,
+                src=self.triangle_area_normals,  # N.B.: magnitude = triangle area,
                 index=self.triangles[:, k],
                 reduce="sum",
                 min_length=self.n_points,
             )
             for k in range(3)
         )
-        assert n.shape == self.points.shape
+        assert raw_normals.shape == self.points.shape
+        raw_normals = F.normalize(raw_normals, p=2, dim=-1)
+        assert raw_normals.shape == self.points.shape
+
+        # N.B.: if point_neighborhoods is trivial, smooth_normals == raw_normals
+        smooth_normals = point_neighborhoods.convolve(signal=raw_normals)
+        assert smooth_normals.shape == (self.n_points, 3)
 
     else:
+        if point_neighborhoods.is_trivial:
+            msg = "If no triangles are provided, you must specify a non-trivial neighborhood structure with e.g. a positive keyword argument scale=..."
+            raise ValueError(msg)
+
         # Get a smooth field of normals via the Structure Tensor:
-        local_cov = self.point_moments(
-            order=2, scale=scale, central=True, **kwargs
-        )
-        local_QL = torch.linalg.eigh(local_cov)
+        local_covariance = self.point_moments(order=2, central=True, **kwargs)
+        assert local_covariance.shape == (self.n_points, self.dim, self.dim)
+
+        local_QL = torch.linalg.eigh(local_covariance)
         local_nuv = local_QL.eigenvectors  # (N, 3, 3)
-        n = local_nuv[:, :, 0]
+        assert local_nuv.shape == (self.n_points, self.dim, self.dim)
 
-        if self.triangles is not None:
-            local_direction = self.point_normals(scale=None, **kwargs)
+        # The normal is the eigenvector associated to the smallest eigenvalue
+        raw_normals = local_nuv[:, :, 0]
 
-        else:
-            # Orient the normals to point locally outwards,
-            # i.e. flip the normals if they point towards the local average:
-            local_avg = self.point_moments(order=1, scale=scale, **kwargs)
-            assert local_avg.shape == (self.n_points, 3)
-            local_direction = self.points - local_avg
+        # At this stage, smooth_normals is only defined up to a sign.
+        # Arbitrarily, we decide to orient the normals to point locally outwards,
+        # i.e. flip the normals if they point towards the local average:
+        local_average = self.point_moments(order=1, **kwargs)
+        assert local_average.shape == self.points.shape
+        local_direction = self.points - local_average
 
         # N.B.: sign(0) = 0, which is annoying, so we have to handle this
         #       by hand with booleans.
-        assert local_direction.shape == (self.n_points, 3)
-        no_flip = ((local_direction * n).sum(-1) >= 0).type_as(n).view(-1, 1)
-        n = (2 * no_flip - 1) * n
-        assert n.shape == (self.n_points, 3)
-
-    # Try to enforce some consistency...
-    if False:
-        n = F.normalize(n, p=2, dim=-1)
-        # n_e = n[self.edges[0]] + n[self.edges[1]]
-        # The backward of torch.index_select is much faster than that of
-        # indexing:
-        n_e = torch.index_select(n, 0, self.edges[0]) + torch.index_select(
-            n, 0, self.edges[1]
+        assert local_direction.shape == (self.n_points, self.dim)
+        no_flip = (
+            ((local_direction * raw_normals).sum(-1) >= 0)
+            .type_as(raw_normals)
+            .view(-1, 1)
         )
-        assert n_e.shape == (len(self.edges[0]), 3)
+        smooth_normals = (2 * no_flip - 1) * raw_normals
+        assert smooth_normals.shape == (self.n_points, 3)
 
-        n_v = torch.zeros_like(n)
-        n_v.scatter_reduce_(
-            dim=0,
-            index=self.edges.reshape(-1, 1),
-            src=n_e.tile(2, 1),
-            reduce="mean",
-            include_self=False,
-        )
-
-        assert n_v.shape == (self.n_points, 3)
-        # n_v = n_v - n
-        n = (n_v * n).sum(-1).sign().view(-1, 1) * n
-
-    n = F.normalize(n, p=2, dim=-1)
-    assert n.shape == (self.n_points, 3)
-    return n
+    smooth_normals = F.normalize(smooth_normals, p=2, dim=-1)
+    assert smooth_normals.shape == (self.n_points, 3)
+    return smooth_normals
 
 
 @typecheck

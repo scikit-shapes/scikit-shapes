@@ -13,6 +13,7 @@ from .face_properties import (
     _edge_lengths,
     _edge_midpoints,
     _edge_points,
+    _point_masses,
     _triangle_areas,
     _triangle_centroids,
     _triangle_points,
