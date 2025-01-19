@@ -78,7 +78,7 @@ def _point_masses(self) -> PointMasses:
 
     .. testoutput::
 
-        skshapes.PolyData (0x7fa37e296490 on cpu, float32), a 3D triangle mesh with:
+        skshapes.PolyData (... on cpu, float32), a 3D triangle mesh with:
         - 842 points, 2,520 edges, 1,680 triangles
         - center (-0.000, -0.000, -0.000), radius 0.500
         - bounds x=(-0.499, 0.499), y=(-0.497, 0.497), z=(-0.500, 0.500)
@@ -98,7 +98,7 @@ def _point_masses(self) -> PointMasses:
 
     .. testoutput::
 
-        torch.Size([842]) tensor(1.6540)
+        torch.Size([842]) tensor(1.5628)
 
     """
     from ..utils import scatter
@@ -106,10 +106,10 @@ def _point_masses(self) -> PointMasses:
     if self.is_triangle_mesh:
         areas = self.triangle_areas / 3
         # Triangles are stored in a (n_triangles, 3) tensor,
-        # so we must repeat the areas 3 times, without interleaving.
-        areas = areas.repeat(3)
+        # so we must repeat the areas 3 times, WITH interleaving.
+        areas = areas.repeat_interleave(3)  # [a1, a1, a1, a2, a2, a2, ...]
         raw_masses = scatter(
-            index=self.triangles.flatten(),
+            index=self.triangles.flatten(),  # [i1, j1, k1, i2, j2, k2, ...]
             src=areas,
             reduce="sum",
         )
@@ -117,10 +117,10 @@ def _point_masses(self) -> PointMasses:
     elif self.is_wireframe:
         lengths = self.edge_lengths / 2
         # Edges are stored in a (n_edges, 2) tensor,
-        # so we must repeat the lengths 2 times, without interleaving.
-        lengths = lengths.repeat(2)
+        # so we must repeat the lengths 2 times, WITH interleaving.
+        lengths = lengths.repeat_interleave(2)  # [l1, l1, l2, l2, ...]
         raw_masses = scatter(
-            index=self.edges.flatten(),
+            index=self.edges.flatten(),  # [i1, j1, i2, j2, ...]
             src=lengths,
             reduce="sum",
         )

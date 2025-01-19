@@ -160,9 +160,8 @@ def _point_normals(
         mesh = sks.Sphere()
         raw_normals = mesh.point_normals()
         smooth_normals = mesh.point_normals(
-            window="gaussian",
-            distance="ambient",
-            radius=0.3,
+            method="gaussian kernel",
+            scale=0.3,
         )
 
         print(mesh.points.shape, raw_normals.shape, smooth_normals.shape)
@@ -201,13 +200,17 @@ def _point_normals(
         assert raw_normals.shape == self.points.shape
 
         # N.B.: if point_neighborhoods is trivial, smooth_normals == raw_normals
-        smooth_normals = point_neighborhoods.convolve(signal=raw_normals)
+        smooth_normals = point_neighborhoods.smooth(
+            signal=raw_normals,
+            input_type="function",
+            output_type="function",
+        )
         assert smooth_normals.shape == (self.n_points, 3)
 
     else:
-        if point_neighborhoods.is_trivial:
-            msg = "If no triangles are provided, you must specify a non-trivial neighborhood structure with e.g. a positive keyword argument scale=..."
-            raise ValueError(msg)
+        # if point_neighborhoods.is_trivial:
+        #    msg = "If no triangles are provided, you must specify a non-trivial neighborhood structure with e.g. a positive keyword argument scale=..."
+        #    raise ValueError(msg)
 
         # Get a smooth field of normals via the Structure Tensor:
         local_covariance = self.point_moments(order=2, central=True, **kwargs)

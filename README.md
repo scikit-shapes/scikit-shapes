@@ -86,7 +86,7 @@ pytest
 ```
 - build the documentation (and serve it locally)
 ```bash
-pip install -r requirement_docs.txt
+pip install -r requirements_docs.txt
 cd doc/source/
 make clean
 make html

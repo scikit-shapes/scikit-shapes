@@ -173,7 +173,7 @@ def test_geometry_features():
         square.triangle_normals  # noqa: B018 (useless expression)
 
     assert torch.allclose(
-        square.point_weights, torch.tensor([1, 1, 1, 1], dtype=sks.float_dtype)
+        square.point_masses, torch.tensor([1, 1, 1, 1], dtype=sks.float_dtype)
     )
 
     assert torch.allclose(

@@ -48,7 +48,9 @@ def _mesh_convolution(
     if not weight_by_length:
         values = torch.ones(2 * n_edges, dtype=float_dtype)
     else:
-        values = self.edge_lengths.repeat(2).to(dtype=float_dtype)
+        values = self.edge_lengths.repeat(2).to(
+            dtype=float_dtype
+        )  # TODO: repeat_interleave or not??
 
     S = torch.sparse_coo_tensor(
         indices=indices,

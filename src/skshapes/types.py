@@ -21,6 +21,12 @@ correspondence = {
     torch.int32: Int32,
 }
 
+torch_to_np_dtypes = {
+    torch.float32: np.float32,
+    torch.float64: np.float64,
+    torch.int64: np.int64,
+    torch.int32: np.int32,
+}
 
 JaxFloat = correspondence[float_dtype]
 JaxDouble = Float64
@@ -67,7 +73,12 @@ Points3d = JaxFloat[torch.Tensor, "_ 3"]
 
 PointMasses = JaxFloat[torch.Tensor, "n_points"]
 PointDensities = JaxFloat[torch.Tensor, "n_points"]
+PointVectorSignals = JaxFloat[torch.Tensor, "n_points n_channels"]
 PointAnySignals = JaxFloat[torch.Tensor, "n_points ..."]
+
+PointEigenvectors = JaxFloat[torch.Tensor, "n_points n_modes"]
+Eigenvalues = JaxFloat[torch.Tensor, "n_modes"]
+
 EdgeLengths = JaxFloat[torch.Tensor, "n_edges"]
 EdgeMidpoints = JaxFloat[torch.Tensor, "n_edges dim"]
 EdgePoints = JaxFloat[torch.Tensor, "n_edges 2 dim"]
