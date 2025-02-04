@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import functools
 from functools import cached_property
 from pathlib import Path
 from typing import Literal
@@ -14,6 +13,7 @@ import torch
 import vedo
 from pyvista.core.pointset import PolyData as PyvistaPolyData
 
+from ..cache import add_cached_methods_to_sphinx, cache_methods_and_properties
 from ..errors import DeviceError, ShapeError
 from ..input_validation import convert_inputs, one_and_only_one, typecheck
 from ..multiscaling import Decimation, Multiscale
@@ -33,25 +33,7 @@ from ..types import (
     int_dtype,
     polydata_type,
 )
-from .utils import DataAttributes, immutable_cached_property
-
-
-def add_cached_methods_to_sphinx(cls):
-    """Ensures that e.g. ``PolyData.point_normals`` is documented in Sphinx.
-
-    Cached methods are instance methods that are memoized with ``functools.lru_cache``.
-    This small decorator ensures that although ``PolyData.point_normals`` is a cached
-    front-end for the private method ``PolyData._point_normals`` that is instantiated
-    in the `__init__` method, the Sphinx documentation will look as though
-    it was a regular method.
-    """
-    for method_name in cls._cached_methods + cls._cached_properties:
-        # As far as Sphinx is concerned,
-        # self.method_name = self._method_name
-        # Then, at the end of the __init__, we overwrite self.method_name
-        # with a memoized version of self._method_name.
-        setattr(cls, method_name, getattr(cls, "_" + method_name))
-    return cls
+from .data_attributes import DataAttributes
 
 
 @add_cached_methods_to_sphinx
@@ -418,26 +400,11 @@ class PolyData(polydata_type):
         # Cached methods: for reference on the Python syntax,
         # see "don't lru_cache methods! (intermediate) anthony explains #382",
         # https://www.youtube.com/watch?v=sVjtp6tGo0g
-        for method_name in self._cached_methods:
-            setattr(
-                self,
-                method_name,
-                functools.lru_cache(maxsize=cache_size)(
-                    getattr(self, "_" + method_name)
-                ),
-            )
-
-        # Cached properties are not cached if cache_size is 0
-        for method_name in self._cached_properties:
-
-            setattr(
-                PolyData,
-                method_name,
-                immutable_cached_property(
-                    function=getattr(PolyData, "_" + method_name),
-                    cache=cache_size != 0,
-                ),
-            )
+        cache_methods_and_properties(
+            cls=PolyData,
+            instance=self,
+            cache_size=cache_size,
+        )
 
     # N.B.: _cached_methods is also used in the decorator add_cached_methods_to_sphinx.
     _cached_methods = (
@@ -470,6 +437,7 @@ class PolyData(polydata_type):
         "triangle_points",
     )
 
+    from ..cache import cache_clear
     from ..convolutions import _mesh_convolution, _point_convolution
 
     # ----------------------------------------------------------------------------
@@ -499,7 +467,6 @@ class PolyData(polydata_type):
     )
     from ..neighborhoods import _point_neighborhoods
     from ..topology import _k_ring_graph, _knn_graph
-    from .utils import cache_clear
 
     @typecheck
     @one_and_only_one(["n_points", "ratio", "scale"])
