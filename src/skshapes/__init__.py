@@ -3,7 +3,6 @@
 from .applications import *
 from .convolutions import *
 from .data import *
-from .decimation import *
 from .doc import *
 from .features import *
 from .globals import (
@@ -31,7 +30,6 @@ __all__ = [
     "morphing",
     "optimization",
     "multiscaling",
-    "decimation",
     "tasks",
     "input_validation",
 ]

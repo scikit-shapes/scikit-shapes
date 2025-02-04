@@ -14,9 +14,6 @@ import skshapes as sks
 
 
 ##############################################################################
-# Set landmark for one shape
-# --------------------------
-#
 # LandmarkSetter can be used to set landmarks interactively on a mesh.
 #
 # .. image:: ../../images/landmarks_skull.gif
@@ -34,9 +31,6 @@ else:
 print(shape.landmark_indices)
 
 ##############################################################################
-# Set landmark in correspondence for several shape
-# ------------------------------------------------
-#
 # Using LandmarkSetter with a list of shapes will set landmarks in correspondence.
 # One the landmarks are selected on the first shape of the list (the reference shape),
 # the user can select the same landmarks on the other shapes.

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import torch
 
-from ..decimation import Decimation
 from ..errors import NotFittedError
 from ..input_validation import convert_inputs, one_and_only_one, typecheck
 from ..types import (
@@ -18,6 +17,7 @@ from ..types import (
     shape_type,
 )
 from ..utils import scatter
+from .decimation import Decimation
 
 
 class Multiscale:

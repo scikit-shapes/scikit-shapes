@@ -16,6 +16,7 @@ from pyvista.core.pointset import PolyData as PyvistaPolyData
 
 from ..errors import DeviceError, ShapeError
 from ..input_validation import convert_inputs, one_and_only_one, typecheck
+from ..multiscaling import Decimation, Multiscale
 from ..triangle_mesh import EdgeTopology
 from ..types import (
     Edges,
@@ -599,13 +600,9 @@ class PolyData(polydata_type):
                 "ratio": ratio,
             }
             if strict:
-                from ..multiscaling import Multiscale
-
                 multi_self = Multiscale(self, ratios=[1])
                 multi_self.append(**kwargs)
                 return multi_self.at(**kwargs)
-
-            from ..decimation import Decimation
 
             d = Decimation(**kwargs)
             return d.fit_transform(self)

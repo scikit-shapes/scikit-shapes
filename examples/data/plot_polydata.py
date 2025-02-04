@@ -15,8 +15,6 @@ the common class for point clouds, wireframe and triangle meshes.
 """
 
 ###############################################################################
-# `PolyData` creation
-# -------------------
 #
 # There are two ways to create a `PolyData` object:
 #

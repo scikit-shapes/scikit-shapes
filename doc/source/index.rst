@@ -20,5 +20,6 @@ Content
 
     installation
     auto_examples/index
+    user_guide/index
     api
     contributing

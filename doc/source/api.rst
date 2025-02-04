@@ -16,7 +16,6 @@ Modules
     morphing
     tasks
     features
-    decimation
     multiscaling
     convolutions
 

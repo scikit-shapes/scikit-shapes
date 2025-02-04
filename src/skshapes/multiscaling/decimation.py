@@ -6,7 +6,6 @@ import fast_simplification
 import numpy as np
 import torch
 
-from ..data import PolyData
 from ..errors import NotFittedError
 from ..input_validation import no_more_than_one, one_and_only_one, typecheck
 from ..types import Int1dTensor, Number, float_dtype, int_dtype, polydata_type
@@ -343,6 +342,9 @@ class Decimation:
 
         # Convert the index_mapping numpy array to torch tensor
         index_mapping = torch.Tensor(index_mapping).to(int_dtype)
+
+        # The import is here to avoid circular imports
+        from ..data import PolyData
 
         decimated_mesh = PolyData(
             torch.from_numpy(points).to(float_dtype),
