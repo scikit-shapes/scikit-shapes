@@ -448,6 +448,7 @@ class PolyData(polydata_type):
         "point_curvedness",
         "point_frames",
         "point_moments",
+        "point_Moments",
         "point_neighborhoods",
         "point_normals",
         "point_mean_gauss_curvatures",
@@ -482,6 +483,7 @@ class PolyData(polydata_type):
         _point_frames,
         _point_masses,
         _point_mean_gauss_curvatures,
+        _point_Moments,
         _point_moments,
         _point_normals,
         _point_principal_curvatures,
@@ -507,6 +509,7 @@ class PolyData(polydata_type):
         ratio: Number | None = None,
         scale: Number | None = None,
         method: Literal["auto"] = "auto",
+        strict: bool = True,
     ) -> PolyData:
         """Resample the shape with a different number of vertices.
 
@@ -532,6 +535,9 @@ class PolyData(polydata_type):
             The method to use for resampling. Currently, only "auto" is
             supported. It corresponds to using quadratic decimation on
             a triangle surface mesh.
+        strict
+            If False, the decimation may run faster but with a value of n_points
+            that is slightly different from the requested value.
 
         Raises
         ------
@@ -557,13 +563,27 @@ class PolyData(polydata_type):
 
         .. testoutput::
 
-            from 842 to 85 points
+            from 842 to 84 points
+
+        .. testcode::
+
+            lowres = shape.resample(n_points=100)
+            print(f"from {shape.n_points} to {lowres.n_points} points")
+
+        .. testoutput::
+
+            from 842 to 100 points
+
+        .. testcode::
+
+            lowres = shape.resample(n_points=100, strict=False)
+            print(f"from {shape.n_points} to {lowres.n_points} points")
+
+        .. testoutput::
+
+            from 842 to 101 points
 
         """
-        kwargs = {
-            "n_points": n_points,
-            "ratio": ratio,
-        }
 
         if scale is not None:
             msg = "Resampling with a scale is not implemented yet."
@@ -574,10 +594,22 @@ class PolyData(polydata_type):
             raise NotImplementedError(msg)
 
         if self.is_triangle_mesh:
+            kwargs = {
+                "n_points": n_points,
+                "ratio": ratio,
+            }
+            if strict:
+                from ..multiscaling import Multiscale
+
+                multi_self = Multiscale(self, ratios=[1])
+                multi_self.append(**kwargs)
+                return multi_self.at(**kwargs)
+
             from ..decimation import Decimation
 
             d = Decimation(**kwargs)
             return d.fit_transform(self)
+
         else:
             msg = "Decimation is only implemented for triangle meshes so far."
             raise NotImplementedError(msg)

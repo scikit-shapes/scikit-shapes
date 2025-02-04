@@ -76,6 +76,10 @@ PointDensities = JaxFloat[torch.Tensor, "n_points"]
 PointVectorSignals = JaxFloat[torch.Tensor, "n_points n_channels"]
 PointAnySignals = JaxFloat[torch.Tensor, "n_points ..."]
 
+PointDisplacements = JaxFloat[torch.Tensor, "n_points dim"]
+PointCovariances = JaxFloat[torch.Tensor, "n_points dim dim"]
+PointSymmetricTensors = JaxFloat[torch.Tensor, "n_points dim dim ..."]
+
 PointEigenvectors = JaxFloat[torch.Tensor, "n_points n_modes"]
 Eigenvalues = JaxFloat[torch.Tensor, "n_modes"]
 
@@ -124,6 +128,10 @@ class image_type:
 
 
 shape_type = polydata_type | image_type
+
+
+class neighborhoods_type:
+    """Class for neighborhoods."""
 
 
 @beartype

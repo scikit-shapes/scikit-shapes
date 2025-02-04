@@ -59,7 +59,7 @@ def test_decimation_basic():
 
     # Check that calling .decimate() on the mesh gives the same result
 
-    decimated_sphere2 = sphere.resample(n_points=15)
+    decimated_sphere2 = sphere.resample(n_points=15, strict=False)
 
     assert torch.allclose(decimated_sphere.points, decimated_sphere2.points)
     assert torch.allclose(
@@ -71,7 +71,9 @@ def test_decimation_basic():
     # test with target_reduction
     decimation = sks.Decimation(target_reduction=target_reduction)
     decimated_sphere = decimation.fit_transform(sphere)
-    decimated_sphere2 = sphere.resample(ratio=1 - target_reduction)
+    decimated_sphere2 = sphere.resample(
+        ratio=1 - target_reduction, strict=False
+    )
 
     assert torch.allclose(decimated_sphere.points, decimated_sphere2.points)
     assert torch.allclose(
