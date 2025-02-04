@@ -4,6 +4,7 @@ from typing import Literal
 
 import torch
 
+from ..cache import add_cached_methods_to_sphinx, cache_methods_and_properties
 from ..input_validation import typecheck
 from ..types import (
     Double2dTensor,
@@ -20,6 +21,7 @@ from ..types import (
 )
 
 
+@add_cached_methods_to_sphinx
 class Moments:
     @typecheck
     def __init__(
@@ -38,37 +40,51 @@ class Moments:
         self.neighborhoods = neighborhoods
         self.method = method
 
-    @property
+        # N.B.: Moments properties have no parameters, so there is no need
+        #       to setup a cache_size
+        cache_methods_and_properties(
+            cls=Moments,
+            instance=self,
+            cache_size=None,
+        )
+
+    _cached_methods = ("tensors",)
+
+    _cached_properties = (
+        "masses",
+        "means",
+        "covariances",
+        "covariance_eigenvalues",
+        "covariance_eigenvectors",
+    )
+
     @typecheck
-    def masses(self) -> PointMasses:
+    def _masses(self) -> PointMasses:
         return self.tensors(order=0, central=False)
 
-    @property
     @typecheck
-    def means(self) -> PointDisplacements:
+    def _means(self) -> PointDisplacements:
         return self.tensors(order=1, central=False)
 
-    @property
     @typecheck
-    def covariances(self) -> PointCovariances:
+    def _covariances(self) -> PointCovariances:
         return self.tensors(order=2, central=True)
 
-    @property
     @typecheck
-    def covariance_eigenvalues(self) -> PointDisplacements:
+    def _covariance_eigenvalues_eigenvectors(self):
         covariances = self.covariances
-        eigvals, eigvecs = torch.linalg.eigh(covariances)
-        return eigvals
-
-    @property
-    @typecheck
-    def covariance_eigenvectors(self) -> PointCovariances:
-        covariances = self.covariances
-        eigvals, eigvecs = torch.linalg.eigh(covariances)
-        return eigvecs
+        return torch.linalg.eigh(covariances)
 
     @typecheck
-    def tensors(self, *, order: int, central: bool) -> PointAnySignals:
+    def _covariance_eigenvalues(self) -> PointDisplacements:
+        return self.covariance_eigenvalues_eigenvectors.eigenvalues
+
+    @typecheck
+    def _covariance_eigenvectors(self) -> PointCovariances:
+        return self.covariance_eigenvalues_eigenvectors.eigenvectors
+
+    @typecheck
+    def _tensors(self, *, order: int, central: bool) -> PointAnySignals:
         """
         Examples
         --------
@@ -88,7 +104,7 @@ class Moments:
 
         .. testoutput::
 
-            torch.Size([100]) torch.float32
+            ...torch.Size([100]) torch.float32
 
         .. testcode::
 
@@ -98,7 +114,7 @@ class Moments:
 
         .. testoutput::
 
-            torch.Size([100, 3]) torch.float32
+            ...torch.Size([100, 3]) torch.float32
 
         .. testcode::
 
@@ -108,7 +124,7 @@ class Moments:
 
         .. testoutput::
 
-            torch.Size([100, 3, 3]) torch.float32
+            ...torch.Size([100, 3, 3]) torch.float32
 
         """
         if order == 0:

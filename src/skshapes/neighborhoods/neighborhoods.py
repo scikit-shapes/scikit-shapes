@@ -225,7 +225,7 @@ class Neighborhoods(neighborhoods_type):
 
         .. testoutput::
 
-            torch.Size([3, 2, 2]) torch.float32
+            ...torch.Size([3, 2, 2]) torch.float32
             tensor(True)
 
         .. testcode::
@@ -250,7 +250,7 @@ class Neighborhoods(neighborhoods_type):
 
         .. testoutput::
 
-            torch.Size([10, 3, 3, 5]) torch.float32
+            ...torch.Size([10, 3, 3, 5]) torch.float32
             tensor(True)
 
         """

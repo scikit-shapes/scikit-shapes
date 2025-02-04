@@ -250,8 +250,8 @@ def test_polydata_creation_2d():
     assert mesh_back.dim == 2
 
     vedo_mesh = flat_triangle.to_vedo()
-    assert vedo_mesh.points().shape == (3, 3)
-    assert np.allclose(vedo_mesh.points()[:, 2], 0)
+    assert vedo_mesh.points.shape == (3, 3)
+    assert np.allclose(vedo_mesh.points[:, 2], 0)
     mesh_back = sks.PolyData(vedo_mesh)
     assert mesh_back.dim == 2
 
