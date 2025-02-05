@@ -50,7 +50,6 @@ jobs:
 
         - name: build documentation (pull request or push)
           run: |
-            sphinx-apidoc -o doc/source/api/ --module-first --force src/skshapes
             sphinx-build -b html doc/source/ doc/_build/html
 
         - name: upload artifact
