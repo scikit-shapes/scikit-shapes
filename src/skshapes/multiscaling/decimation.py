@@ -344,7 +344,7 @@ class Decimation:
         index_mapping = torch.Tensor(index_mapping).to(int_dtype)
 
         # The import is here to avoid circular imports
-        from ..data import PolyData
+        from .._data import PolyData
 
         decimated_mesh = PolyData(
             torch.from_numpy(points).to(float_dtype),

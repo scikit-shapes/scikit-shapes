@@ -4,7 +4,7 @@ import numpy as np
 import pyvista as pv
 import torch
 
-from .data import PolyData
+from ._data import PolyData
 
 
 def display(

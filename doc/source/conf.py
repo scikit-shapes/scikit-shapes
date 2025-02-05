@@ -193,6 +193,7 @@ nitpick_ignore_regex = {
     ("py:.*", "Module"),
     ("py:.*", "pyvista.*"),
     ("py:.*", "vedo.*"),
+    ("py:.*", ".*"),
 }
 autosummary_ignore_module_all = False
 

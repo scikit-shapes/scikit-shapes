@@ -11,7 +11,7 @@ import torch
 
 from ..types import float_dtype, int_dtype
 from ..input_validation import typecheck
-from ..data import PolyData
+from .._data import PolyData
 
 
 class BarycentricLandmarkSetter(vedo.Plotter):

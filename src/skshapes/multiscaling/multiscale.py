@@ -39,7 +39,7 @@ class Multiscale:
     :meth:`at<skshapes.multiscaling.multiscale.Multiscale.at>` method and add models at new sampling resolutions using the
     :meth:`append<skshapes.multiscaling.multiscale.Multiscale.append>` method.
 
-    Signals (:attr:`~skshapes.data.polydata.PolyData.point_data`) defined at one scale can be propagated to the other scales using the :meth:`~skshapes.multiscaling.multiscale.Multiscale.propagate` method.
+    Signals (:attr:`~skshapes._data.polydata.PolyData.point_data`) defined at one scale can be propagated to the other scales using the :meth:`~skshapes.multiscaling.multiscale.Multiscale.propagate` method.
     This is illustrated in :ref:`this tutorial <multiscale_signal_propagation_example>`.
 
     Likewise, if landmarks are defined on the original shape, they are propagated to the coarser scales as illustrated in :ref:`this tutorial <multiscale_landmarks_example>`.
