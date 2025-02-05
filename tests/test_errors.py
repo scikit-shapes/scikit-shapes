@@ -125,7 +125,7 @@ def test_errors_polydata():
 
 def test_errors_dataset_attributes():
     """Raise some errors for the DatasetAttributes class."""
-    attributes = sks.data.DataAttributes(n=50, device="cpu")
+    attributes = sks._data.DataAttributes(n=50, device="cpu")
 
     # add two attributes
     attributes.append(torch.rand(50, 3))
@@ -133,7 +133,7 @@ def test_errors_dataset_attributes():
     print(attributes)  # noqa: T201
 
     with pytest.raises(ValueError, match="should not be empty"):
-        sks.data.DataAttributes.from_dict({})
+        sks._data.DataAttributes.from_dict({})
 
     with pytest.raises(
         ValueError, match="cannot change the number of elements"

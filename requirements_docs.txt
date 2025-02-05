@@ -11,6 +11,7 @@ sphinx-copybutton
 sphinx-design
 sphinx-gallery <= 0.15.0
 sphinx-math-dollar
+sphinx-rtd-theme
 
 # To generate interactive scenes
 ipython
