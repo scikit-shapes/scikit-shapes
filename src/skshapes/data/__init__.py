@@ -1,4 +1,4 @@
-"""Data classes: PolyData, Images."""
+"""Polygonal data (point clouds, curves, surfaces), segmentation maps and images."""
 
 from math import pi
 from typing import Union

@@ -20,6 +20,7 @@ from .triangle_mesh import *
 from .types import *
 
 __all__ = [
+    "PolyData",
     "types",
     "features",
     "convolutions",

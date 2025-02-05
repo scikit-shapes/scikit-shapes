@@ -196,9 +196,31 @@ class Neighborhoods(neighborhoods_type):
         output_type: Literal["function", "measure"] = "function",
         skew_symmetric_channels: list[bool] | None = None,
     ) -> PointSymmetricTensors:
-        """
+        """Faster implementation of :meth:`smooth` for smoothing a field of symmetric tensors.
 
+        Parameters
+        ----------
 
+        signal
+            The signal to smooth. The shape of the tensor should be
+            ``(n_points, dim, dim, *)``, where ``dim`` is the dimension of the symmetric tensors
+            between 1 and 3, and ``*`` refers to an arbitrary number of channel dimensions.
+            This method assumes that for each pair of indices ``(i, j)``,
+            ``signal[:, i, j] == signal[:, j, i]``.
+        input_type
+            How to interpret the input signal. If \"function\", the signal is
+            understood as sampled values of a continuous function that is defined on
+            the shape. If \"measure\", the signal is understood as a distribution of mass
+            that should *not* be rescaled by the masses or densities of the points.
+        output_type
+            How to interpret the output signal.
+        skew_symmetric_channels
+            A list of booleans indicating whether each channel of the input signal is
+            skew-symmetric. If None, all channels are assumed to be symmetric.
+            If ``signal`` is a ``(n_points, D, D, C)`` tensor and ``skew_symmetric_channels``
+            is a list of booleans of length ``C``, then for every index ``c`` such that
+            ``skew_symmetric_channels[c] == True``, we expect that
+            ``signal[:, i, j, c] == -signal[:, j, i, c]`` for all pairs of indices ``(i, j)``.
 
         Examples
         --------

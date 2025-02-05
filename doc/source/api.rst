@@ -3,23 +3,9 @@
 API
 ===
 
-.. currentmodule:: skshapes
-
-Modules
--------
-
 .. autosummary::
+    :toctree: stubs
+    :recursive:
+    :template: custom-module-template.rst
 
-    types
-    data
-    loss
-    morphing
-    tasks
-    features
-    multiscaling
-    convolutions
-
-.. toctree::
-    :hidden:
-
-    api/modules
+    skshapes

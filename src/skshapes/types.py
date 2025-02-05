@@ -33,17 +33,16 @@ JaxDouble = Float64
 JaxInt = correspondence[int_dtype]
 
 # Numpy array types
-FloatArray = Float[np.ndarray, "..."]  # Any float format numpy array
-IntArray = Int[np.ndarray, "..."]  # Any int format numpy array
+FloatArray = Float[np.ndarray, "*_"]  # Any float format numpy array
+IntArray = Int[np.ndarray, "*_"]  # Any int format numpy array
 NumericalArray = FloatArray | IntArray
 Float1dArray = Float[np.ndarray, "_"]
 Int1dArray = Int[np.ndarray, "_"]
 
 # Numerical typestyp
-FloatTensor = JaxFloat[
-    torch.Tensor, "..."
-]  # Only Float32 tensors are FloatTensors
-IntTensor = JaxInt[torch.Tensor, "..."]  # Only Int64 tensors are IntTensors
+# Only Float32 tensors are FloatTensors
+FloatTensor = JaxFloat[torch.Tensor, "*_"]
+IntTensor = JaxInt[torch.Tensor, "*_"]  # Only Int64 tensors are IntTensors
 NumericalTensor = FloatTensor | IntTensor
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]
 IntTensorArray = JaxInt[torch.Tensor, "_"]
@@ -64,7 +63,7 @@ IntSequence = Int[torch.Tensor, "_"] | Int[np.ndarray, "_"] | list[int]
 
 NumberSequence = FloatSequence | IntSequence
 
-DoubleTensor = JaxDouble[torch.Tensor, "..."]
+DoubleTensor = JaxDouble[torch.Tensor, "*_"]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 
 # Specific numerical types
@@ -74,11 +73,11 @@ Points3d = JaxFloat[torch.Tensor, "_ 3"]
 PointMasses = JaxFloat[torch.Tensor, "n_points"]
 PointDensities = JaxFloat[torch.Tensor, "n_points"]
 PointVectorSignals = JaxFloat[torch.Tensor, "n_points n_channels"]
-PointAnySignals = JaxFloat[torch.Tensor, "n_points ..."]
+PointAnySignals = JaxFloat[torch.Tensor, "n_points *channels"]
 
 PointDisplacements = JaxFloat[torch.Tensor, "n_points dim"]
 PointCovariances = JaxFloat[torch.Tensor, "n_points dim dim"]
-PointSymmetricTensors = JaxFloat[torch.Tensor, "n_points dim dim ..."]
+PointSymmetricTensors = JaxFloat[torch.Tensor, "n_points dim dim *channels"]
 
 PointEigenvectors = JaxFloat[torch.Tensor, "n_points n_modes"]
 Eigenvalues = JaxFloat[torch.Tensor, "n_modes"]

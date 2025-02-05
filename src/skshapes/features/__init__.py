@@ -1,3 +1,5 @@
+"""Point normals, curvatures, etc."""
+
 from .curvatures import (
     _point_curvature_colors,
     _point_curvedness,

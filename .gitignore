@@ -191,4 +191,5 @@ skshapes/data/edges_extraction.cpp
 **/_build/*
 **/auto_examples/*
 doc/source/api/*
+doc/source/stubs/*
 doc/source/sg_execution_times.rst

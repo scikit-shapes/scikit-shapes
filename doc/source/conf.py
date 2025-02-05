@@ -110,7 +110,56 @@ exclude_patterns = [
     ".venv",
 ]
 
-html_theme = "furo"
+
+
+if True:
+    html_theme = "sphinx_rtd_theme"
+    # See https://stackoverflow.com/questions/2701998/automatically-document-all-modules-recursively-with-sphinx-autodoc/62613202#62613202
+    # for the templating magic...
+    templates_path = ["_templates"]
+    autosummary_generate = True
+    # Apply some custom CSS to the RTD theme
+    html_static_path = ["_static"]
+    html_css_files = ["custom.css"]
+else:
+    # I could not make this work. One day, maybe?
+    html_theme = "sphinx_immaterial"
+
+    if False:
+        python_apigen_modules = {
+            "skshapes": "api/",
+        }
+
+        python_apigen_default_groups = [
+            ("class:.*", "Classes"),
+            ("data:.*", "Variables"),
+            ("function:.*", "Functions"),
+            ("classmethod:.*", "Class methods"),
+            ("method:.*", "Methods"),
+            (r"method:.*\.[A-Z][A-Za-z,_]*", "Constructors"),
+            (r"method:.*\.__[A-Za-z,_]*__", "Special methods"),
+            (r"method:.*\.__(init|new)__", "Constructors"),
+            (r"method:.*\.__(str|repr)__", "String representation"),
+            ("property:.*", "Properties"),
+            (r".*:.*\.is_[a-z,_]*", "Attributes"),
+        ]
+        python_apigen_default_order = [
+            ("class:.*", 10),
+            ("data:.*", 11),
+            ("function:.*", 12),
+            ("classmethod:.*", 40),
+            ("method:.*", 50),
+            (r"method:.*\.[A-Z][A-Za-z,_]*", 20),
+            (r"method:.*\.__[A-Za-z,_]*__", 28),
+            (r"method:.*\.__(init|new)__", 20),
+            (r"method:.*\.__(str|repr)__", 30),
+            ("property:.*", 60),
+            (r".*:.*\.is_[a-z,_]*", 70),
+        ]
+        python_apigen_order_tiebreaker = "alphabetical"
+        python_apigen_case_insensitive_filesystem = False
+        python_apigen_show_base_classes = True
+
 
 myst_enable_extensions = [
     "colon_fence",
@@ -128,6 +177,24 @@ nitpick_ignore = [
     ("py:class", "_io.StringIO"),
     ("py:class", "_io.BytesIO"),
 ]
+
+nitpick_ignore_regex = {
+    ("py:.*", "jaxtyping.*"),
+    ("py:.*", ".*Tensor.*"),
+    ("py:.*", "typing.*"),
+    ("py:.*", "collections.*"),
+    ("py:.*", "callable.*"),
+    ("py:.*", "torch.*"),
+    ("py:.*", "nn.*"),
+    ("py:.*", "optional"),
+    ("py:.*", "shape_type"),
+    ("py:.*", "shape_object"),
+    ("py:.*", "ndarray"),
+    ("py:.*", "Module"),
+    ("py:.*", "pyvista.*"),
+    ("py:.*", "vedo.*"),
+}
+autosummary_ignore_module_all = False
 
 sphinx_gallery_conf = {
     "examples_dirs": "../../examples",  # path to your example scripts
