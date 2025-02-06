@@ -18,17 +18,18 @@ from matplotlib import pyplot as plt
 import skshapes as sks
 
 N, D = 32, 2
-s = torch.linspace(-.5, 4.5, N+1)[:-1]
-x = torch.FloatTensor([[
-    t.cos() + .2 * (6 * t).cos(),
-    t.sin() + .1 * (4 * t).cos(),
+s = torch.linspace(-0.5, 4.5, N + 1)[:-1]
+x = torch.FloatTensor(
+    [
+        [
+            t.cos() + 0.2 * (6 * t).cos(),
+            t.sin() + 0.1 * (4 * t).cos(),
+        ]
+        for t in s
     ]
-    for t in s])
+)
 
 shape = sks.PolyData(x)
-
-
-
 
 
 def display_covariances(moments):
@@ -59,9 +60,7 @@ def display_covariances(moments):
         linewidth=2,
         alpha=0.5,
     )
-    #plt.plot(centers[i, 0] + ellipses[i, 0], centers[i, 1] + ellipses[i, 1], c="r", )
-
-
+    # plt.plot(centers[i, 0] + ellipses[i, 0], centers[i, 1] + ellipses[i, 1], c="r", )
 
 
 plt.figure(figsize=(12, 10))
@@ -73,7 +72,15 @@ for i, sigma in enumerate([0.1, 0.2, 0.5, 1.0]):
     ax = plt.subplot(2, 2, i + 1)
     ax.set_title(f"Moments at scale = {sigma:.1f}")
     display_covariances(moments)
-    plt.scatter(x[:, 0], x[:, 1], c=moments.masses, cmap="viridis", s=80,edgecolors='black', zorder=2)
+    plt.scatter(
+        x[:, 0],
+        x[:, 1],
+        c=moments.masses,
+        cmap="viridis",
+        s=80,
+        edgecolors="black",
+        zorder=2,
+    )
     plt.axis("square")
     plt.axis([-1.2, 1.2, -1.2, 1.2])
     plt.colorbar(fraction=0.046, pad=0.04)

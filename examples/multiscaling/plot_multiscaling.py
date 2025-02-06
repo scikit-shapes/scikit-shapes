@@ -8,7 +8,7 @@ We use the :class:`skshapes.Multiscale<skshapes.multiscaling.multiscale.Multisca
 """
 
 ###############################################################################
-# First, we load the Stanford bunny as a triangle mesh.
+# First, we load the Stanford bunny as a triangle mesh.
 
 import pyvista as pv
 
@@ -17,7 +17,7 @@ import skshapes as sks
 bunny = sks.PolyData(pv.examples.download_bunny())
 
 ###############################################################################
-# Then, we create the multiscale representation with different sampling ratios.
+# Then, we create the multiscale representation with different sampling ratios.
 
 multiscale_bunny = sks.Multiscale(shape=bunny, ratios=[0.1, 0.01, 0.001])
 
@@ -39,10 +39,9 @@ for i, ratio in enumerate([1, 0.1, 0.01, 0.001]):
         shape=sampled_bunny,
         show_edges=True,
         title=f".at(ratio={ratio}), {sampled_bunny.n_points:,} points",
-        )
+    )
 
 pl.show()
-
 
 
 ###############################################################################
@@ -63,7 +62,7 @@ for i, ratio in enumerate([0.5, 0.1, 0.05, 0.01]):
         shape=sampled_bunny,
         show_edges=True,
         title=f".at(ratio={ratio}), {sampled_bunny.n_points:,} points",
-        )
+    )
 
 pl.show()
 
@@ -85,6 +84,6 @@ for i, n_points in enumerate([3000, 1000, 300, 100]):
         shape=sampled_bunny,
         show_edges=True,
         title=f".at(n_points={n_points}), {sampled_bunny.n_points:,} points",
-        )
+    )
 
 pl.show()

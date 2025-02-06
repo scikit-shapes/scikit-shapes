@@ -31,27 +31,28 @@ import torch
 
 import skshapes as sks
 
-# sphinx_gallery_thumbnail_number = 9
+# sphinx_gallery_thumbnail_number = 9
 
 ###############################################################################
-# Load data
+# Load data
 
 plot_kwargs = {
     "smooth_shading": True,
     "pbr": True,
     "metallic": 0.7,
     "roughness": 0.6,
-
 }
 
-cpos = [(1.6256104086078755, -9.701422233882411, 1.3012755902068773),
- (1.191160019984921, 0.01901107976782581, -0.0052552929581526076),
- (0.006053690112347382, 0.13347614338229413, 0.9910335372649167)]
+cpos = [
+    (1.6256104086078755, -9.701422233882411, 1.3012755902068773),
+    (1.191160019984921, 0.01901107976782581, -0.0052552929581526076),
+    (0.006053690112347382, 0.13347614338229413, 0.9910335372649167),
+]
 
 source = sks.Sphere()
 target = sks.Sphere()
 
-decimation = sks.Decimation(n_points = 200)
+decimation = sks.Decimation(n_points=200)
 source = decimation.fit_transform(source)
 target = decimation.transform(target)
 
@@ -94,13 +95,15 @@ plotter = pv.Plotter()
 plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs)
 plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs)
 for i in range(len(path)):
-    plotter.add_mesh(path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs)
+    plotter.add_mesh(
+        path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs
+    )
 plotter.camera_position = cpos
 plotter.show()
 
 
 ###############################################################################
-# Extrapolation
+# Extrapolation
 
 back = model.morph(
     shape=source,
@@ -123,9 +126,15 @@ plotter = pv.Plotter()
 plotter.open_gif("lddmm_no_normalization.gif", fps=4)
 for i in range(len(path)):
     plotter.clear_actors()
-    plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs)
-    plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs)
-    plotter.add_mesh(path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs)
+    plotter.add_mesh(
+        source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs
+    )
+    plotter.add_mesh(
+        target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs
+    )
+    plotter.add_mesh(
+        path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs
+    )
     plotter.camera_position = cpos
     plotter.write_frame()
 plotter.close()
@@ -159,7 +168,9 @@ plotter = pv.Plotter()
 plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs)
 plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs)
 for i in range(len(path)):
-    plotter.add_mesh(path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs)
+    plotter.add_mesh(
+        path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs
+    )
 plotter.camera_position = cpos
 plotter.show()
 
@@ -187,9 +198,15 @@ plotter = pv.Plotter()
 plotter.open_gif("lddmm_normalization.gif", fps=4)
 for i in range(len(path)):
     plotter.clear_actors()
-    plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs)
-    plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs)
-    plotter.add_mesh(path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs)
+    plotter.add_mesh(
+        source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs
+    )
+    plotter.add_mesh(
+        target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs
+    )
+    plotter.add_mesh(
+        path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs
+    )
     plotter.camera_position = cpos
     plotter.write_frame()
 plotter.close()
@@ -223,7 +240,9 @@ plotter = pv.Plotter()
 plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs)
 plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs)
 for i in range(len(path)):
-    plotter.add_mesh(path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs)
+    plotter.add_mesh(
+        path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs
+    )
 plotter.camera_position = cpos
 plotter.show()
 
@@ -251,9 +270,15 @@ plotter = pv.Plotter()
 plotter.open_gif("lddmm_normalization.gif", fps=4)
 for i in range(len(path)):
     plotter.clear_actors()
-    plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs)
-    plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs)
-    plotter.add_mesh(path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs)
+    plotter.add_mesh(
+        source.to_pyvista(), color="teal", opacity=0.2, **plot_kwargs
+    )
+    plotter.add_mesh(
+        target.to_pyvista(), color="red", opacity=0.2, **plot_kwargs
+    )
+    plotter.add_mesh(
+        path[i].to_pyvista(), color="tan", opacity=0.8, **plot_kwargs
+    )
     plotter.camera_position = cpos
     plotter.write_frame()
 plotter.close()
@@ -269,19 +294,20 @@ plot_kwargs = {
     "pbr": True,
     "metallic": 0.7,
     "roughness": 0.6,
-
 }
 
-cpos = [(3.6401575998373183, -1.183408993703478, 1.0915912440258628),
- (0.7463583722710609, 0.762569822371006, 0.48035204596817493),
- (-0.1745415166347431, 0.04933887578777028, 0.9834129012306287)]
+cpos = [
+    (3.6401575998373183, -1.183408993703478, 1.0915912440258628),
+    (0.7463583722710609, 0.762569822371006, 0.48035204596817493),
+    (-0.1745415166347431, 0.04933887578777028, 0.9834129012306287),
+]
 
 # 5 - 8
 source = sks.PolyData("../test_data/cactus/cactus3.ply")
 target = sks.PolyData("../test_data/cactus/cactus11.ply")
 target.points += torch.Tensor([0.5, 0.5, 0])
 
-decimation = sks.Decimation(n_points = 500)
+decimation = sks.Decimation(n_points=500)
 source = decimation.fit_transform(source)
 target = decimation.transform(target)
 
@@ -305,7 +331,7 @@ task = sks.Registration(
     optimizer=sks.LBFGS(),
     n_iter=1,
     verbose=True,
-    regularization_weight=0.001
+    regularization_weight=0.001,
 )
 
 start = time()
@@ -316,7 +342,9 @@ path = task.path_
 
 plotter = pv.Plotter()
 for frame in path:
-    plotter.add_mesh(frame.to_pyvista(), color="tan", opacity=0.3, **plot_kwargs)
+    plotter.add_mesh(
+        frame.to_pyvista(), color="tan", opacity=0.3, **plot_kwargs
+    )
 plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.5, **plot_kwargs)
 plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.5, **plot_kwargs)
 plotter.camera_position = cpos
@@ -331,7 +359,7 @@ back = model.morph(
     parameter=task.parameter_,
     return_path=True,
     return_regularization=True,
-    final_time=-1.0
+    final_time=-1.0,
 ).path
 
 model.n_steps = 2 * n_steps
@@ -341,14 +369,16 @@ forward = model.morph(
     parameter=task.parameter_,
     return_path=True,
     return_regularization=True,
-    final_time=2.0
+    final_time=2.0,
 ).path
 
 path = back[::-1] + forward[1:]
 
 plotter = pv.Plotter()
 for frame in path:
-    plotter.add_mesh(frame.to_pyvista(), color="tan", opacity=0.3, **plot_kwargs)
+    plotter.add_mesh(
+        frame.to_pyvista(), color="tan", opacity=0.3, **plot_kwargs
+    )
 plotter.add_mesh(source.to_pyvista(), color="teal", opacity=0.5, **plot_kwargs)
 plotter.add_mesh(target.to_pyvista(), color="red", opacity=0.5, **plot_kwargs)
 plotter.camera_position = cpos

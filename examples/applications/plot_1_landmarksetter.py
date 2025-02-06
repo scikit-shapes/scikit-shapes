@@ -14,7 +14,7 @@ import skshapes as sks
 
 
 ##############################################################################
-# LandmarkSetter can be used to set landmarks interactively on a mesh.
+# LandmarkSetter can be used to set landmarks interactively on a mesh.
 #
 # .. image:: ../../images/landmarks_skull.gif
 
@@ -25,15 +25,15 @@ if not pv.BUILDING_GALLERY:
     app = sks.LandmarkSetter(shape)
     app.start()
 else:
-    shape.landmark_indices = [95, 114, 155,   3,   9,  65,  29,  55,  74]
+    shape.landmark_indices = [95, 114, 155, 3, 9, 65, 29, 55, 74]
 
 
 print(shape.landmark_indices)
 
 ##############################################################################
-# Using LandmarkSetter with a list of shapes will set landmarks in correspondence.
-# One the landmarks are selected on the first shape of the list (the reference shape),
-# the user can select the same landmarks on the other shapes.
+# Using LandmarkSetter with a list of shapes will set landmarks in correspondence.
+# One the landmarks are selected on the first shape of the list (the reference shape),
+# the user can select the same landmarks on the other shapes.
 #
 # .. image:: ../../images/demolandmarks.gif
 

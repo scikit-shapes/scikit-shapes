@@ -55,7 +55,9 @@ model = sks.ExtrinsicDeformation(
     control_points=True,
 )
 
-registration = sks.Registration(model=model, regularization_weight=0.1, **kwargs)
+registration = sks.Registration(
+    model=model, regularization_weight=0.1, **kwargs
+)
 
 registration.fit(source=source, target=target)
 
@@ -85,7 +87,9 @@ model = sks.IntrinsicDeformation(
     metric="as_isometric_as_possible",
 )
 
-registration = sks.Registration(model=model, regularization_weight=500, **kwargs)
+registration = sks.Registration(
+    model=model, regularization_weight=500, **kwargs
+)
 
 registration.fit(source=source, target=target)
 

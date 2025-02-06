@@ -42,12 +42,16 @@ target.triangles = source.triangles
 
 plotter = pv.Plotter()
 plotter.add_mesh(source.to_pyvista(), color=source_color, label="source")
-plotter.add_mesh(target.to_pyvista().translate([250, 0, 0]), color=target_color, label="target")
+plotter.add_mesh(
+    target.to_pyvista().translate([250, 0, 0]),
+    color=target_color,
+    label="target",
+)
 plotter.camera_position = [
     (107.13691493781944, -436.8511227598446, 929.44474582162),
     (138.38692092895508, -5.646553039550781, 2.4097938537597656),
-    (-0.07742352421458944, 0.9049853883599757, 0.41833843327279513)
-    ]
+    (-0.07742352421458944, 0.9049853883599757, 0.41833843327279513),
+]
 plotter.add_legend()
 plotter.show()
 
@@ -64,18 +68,19 @@ plotter.show()
 
 lbfgs = sks.LBFGS()
 
+
 def time_refinement(
-        parameter: torch.Tensor,
-        model: sks.BaseModel,
-        loss: sks.BaseLoss,
-        source: sks. PolyData,
-        target: sks.PolyData,
-        regularization_weight: float,
-        optimizer: sks.BaseOptimizer = lbfgs,
-        n_iter: int = 4,
-        gpu: bool = True,
-        verbose: bool = False
-        ) -> tuple[torch.Tensor, sks.Registration, sks.BaseModel, list[sks.PolyData]]:
+    parameter: torch.Tensor,
+    model: sks.BaseModel,
+    loss: sks.BaseLoss,
+    source: sks.PolyData,
+    target: sks.PolyData,
+    regularization_weight: float,
+    optimizer: sks.BaseOptimizer = lbfgs,
+    n_iter: int = 4,
+    gpu: bool = True,
+    verbose: bool = False,
+) -> tuple[torch.Tensor, sks.Registration, sks.BaseModel, list[sks.PolyData]]:
     """Double the number of steps by linear interpolation and refit the registration model.
 
     Parameters
@@ -111,9 +116,11 @@ def time_refinement(
     if verbose:
         print("Doubling the number of steps by linear interpolation...")
     n_steps = 2 * n_steps
-    new_parameter = torch.zeros((parameter.shape[0], n_steps, parameter.shape[2]))
+    new_parameter = torch.zeros(
+        (parameter.shape[0], n_steps, parameter.shape[2])
+    )
     for i in range(parameter.shape[1]):
-        new_parameter[:, 2* i, :] = parameter[:, i, :] / 2
+        new_parameter[:, 2 * i, :] = parameter[:, i, :] / 2
         new_parameter[:, 2 * i + 1, :] = parameter[:, i, :] / 2
 
     # Update the model's n_steps and the regularization weight of the registration.
@@ -138,9 +145,12 @@ def time_refinement(
     )
 
     # Fit the refined parameter
-    registration.fit(source=source, target=target, initial_parameter=new_parameter)
+    registration.fit(
+        source=source, target=target, initial_parameter=new_parameter
+    )
 
     return registration.parameter_, refined_model
+
 
 ###############################################################################
 # Define function for Space refinement
@@ -179,13 +189,8 @@ from trimesh.triangles import barycentric_to_points, points_to_barycentric
 
 @torch.no_grad
 def compute_coordinates(
-    fine: sks.PolyData,
-    coarse: sks.PolyData
-    ) -> tuple[
-        sks.Int1dTensor,
-        sks.Float2dTensor,
-        sks.Float1dTensor
-    ]:
+    fine: sks.PolyData, coarse: sks.PolyData
+) -> tuple[sks.Int1dTensor, sks.Float2dTensor, sks.Float1dTensor]:
     """Compute coordinates of the fine points in the coarse mesh.
 
     We follow the approach of "Geometric Modeling in Shape Space", the coordinates
@@ -217,7 +222,9 @@ def compute_coordinates(
 
     mesh = Trimesh(vertices=vertices, faces=faces)
 
-    closest, distance, triangle_id = closest_point(mesh=mesh, points=fine_points)
+    closest, distance, triangle_id = closest_point(
+        mesh=mesh, points=fine_points
+    )
 
     triangle_id = torch.tensor(triangle_id, dtype=sks.int_dtype)
     closest = torch.tensor(closest, dtype=sks.float_dtype)
@@ -231,7 +238,9 @@ def compute_coordinates(
 
     # descr = (triangle_id, barycentric, product with normal)
 
-    normals = coarse.triangle_normals / coarse.triangle_normals.norm(dim=-1, keepdim=True)
+    normals = coarse.triangle_normals / coarse.triangle_normals.norm(
+        dim=-1, keepdim=True
+    )
 
     # p - p' = fine_points - closest
     a = fine.points - closest
@@ -246,14 +255,8 @@ def compute_coordinates(
     return triangle_id, barycentric, orthogonal_coordinate
 
 
-
 @torch.no_grad
-def refine(
-    coarse_mesh,
-    coord_barycentric,
-    triangle_id,
-    orthogonal_coordinate
-):
+def refine(coarse_mesh, coord_barycentric, triangle_id, orthogonal_coordinate):
     """Given a system of coordinates, refine the points in the origin mesh.
 
     Parameters
@@ -273,7 +276,9 @@ def refine(
         The fine points
     """
 
-    Ns = coarse_mesh.triangle_normals[triangle_id] / coarse_mesh.triangle_normals[triangle_id].norm(dim=-1, keepdim=True)
+    Ns = coarse_mesh.triangle_normals[
+        triangle_id
+    ] / coarse_mesh.triangle_normals[triangle_id].norm(dim=-1, keepdim=True)
 
     # Get the triangle
     t = coarse_mesh.points[coarse_mesh.triangles[triangle_id]]
@@ -282,25 +287,28 @@ def refine(
     orthogonal = orthogonal_coordinate.repeat(3, 1).T * Ns
 
     # Compute the projection on the triangles
-    projections = barycentric_to_points(barycentric=coord_barycentric, triangles=t)
+    projections = barycentric_to_points(
+        barycentric=coord_barycentric, triangles=t
+    )
     projections = torch.tensor(projections, dtype=sks.float_dtype)
 
     return projections + orthogonal
 
+
 def space_refinement(
-        coarse_source: sks.PolyData,
-        coarse_target: sks.PolyData,
-        fine_source: sks.PolyData,
-        fine_target: sks.PolyData,
-        coarse_model: sks.BaseModel,
-        coarse_parameter: torch.Tensor,
-        loss: sks.BaseLoss,
-        regularization_weight: float,
-        optimizer: sks.BaseOptimizer=lbfgs,
-        n_iter: int=4,
-        gpu: bool=True,
-        verbose: bool=False
-        ) -> tuple[torch.Tensor, sks.BaseModel]:
+    coarse_source: sks.PolyData,
+    coarse_target: sks.PolyData,
+    fine_source: sks.PolyData,
+    fine_target: sks.PolyData,
+    coarse_model: sks.BaseModel,
+    coarse_parameter: torch.Tensor,
+    loss: sks.BaseLoss,
+    regularization_weight: float,
+    optimizer: sks.BaseOptimizer = lbfgs,
+    n_iter: int = 4,
+    gpu: bool = True,
+    verbose: bool = False,
+) -> tuple[torch.Tensor, sks.BaseModel]:
     """Refine the path following the space refinement strategy.
 
     We start by refining the path from coarse to high resolution and then
@@ -342,9 +350,10 @@ def space_refinement(
         The parameter and the model in fine resolution.
     """
 
-
     # Compute the path at coarse level
-    coarse_path = coarse_model.morph(shape=coarse_source, parameter=coarse_parameter, return_path=True).path
+    coarse_path = coarse_model.morph(
+        shape=coarse_source, parameter=coarse_parameter, return_path=True
+    ).path
 
     # Copy the model
     fine_model = coarse_model.copy()
@@ -356,16 +365,25 @@ def space_refinement(
         print("Projecting the fine meshes on the coarse meshes...")
 
     # Compute the coordinates of the fine points in the coarse meshes
-    triangle_id_source, barycentric_coord_source, orthogonal_coordinate_source = compute_coordinates(fine_source, coarse_source)
-    triangle_id_target, barycentric_coord_target, orthogonal_coordinate_target = compute_coordinates(fine_target, coarse_target)
-
+    (
+        triangle_id_source,
+        barycentric_coord_source,
+        orthogonal_coordinate_source,
+    ) = compute_coordinates(fine_source, coarse_source)
+    (
+        triangle_id_target,
+        barycentric_coord_target,
+        orthogonal_coordinate_target,
+    ) = compute_coordinates(fine_target, coarse_target)
 
     fine_parameter = fine_model.inital_parameter(shape=fine_source)
     print(fine_parameter.shape)
     # fine_parameter = torch.zeros(size=(fine_source.n_points, fine_model.n_free_steps, 3), dtype=sks.float_dtype)
 
     new_points = torch.zeros_like(fine_source.points, dtype=sks.float_dtype)
-    previous_points = torch.zeros_like(fine_source.points, dtype=sks.float_dtype)
+    previous_points = torch.zeros_like(
+        fine_source.points, dtype=sks.float_dtype
+    )
 
     if verbose:
         print("Refining the path from coarse to fine...")
@@ -389,19 +407,21 @@ def space_refinement(
                 coarse_mesh=p,
                 coord_barycentric=barycentric_coord_source,
                 triangle_id=triangle_id_source,
-                orthogonal_coordinate=orthogonal_coordinate_source
-                )
+                orthogonal_coordinate=orthogonal_coordinate_source,
+            )
 
             newpoints_target = refine(
                 coarse_mesh=p,
                 coord_barycentric=barycentric_coord_target,
                 triangle_id=triangle_id_target,
-                orthogonal_coordinate=orthogonal_coordinate_target
-                )
+                orthogonal_coordinate=orthogonal_coordinate_target,
+            )
 
-            new_points = ((i+1) / len(coarse_path)) * newpoints_source + (1 - (i+1) / len(coarse_path)) * newpoints_target
+            new_points = ((i + 1) / len(coarse_path)) * newpoints_source + (
+                1 - (i + 1) / len(coarse_path)
+            ) * newpoints_target
 
-            fine_parameter[:, i-1, :] = new_points - previous_points
+            fine_parameter[:, i - 1, :] = new_points - previous_points
 
     if verbose:
         print("Optimizing the fine path wrt the metric...")
@@ -417,7 +437,11 @@ def space_refinement(
     )
 
     registration.model = fine_model
-    registration.fit(source=fine_source, target=fine_target, initial_parameter=fine_parameter)
+    registration.fit(
+        source=fine_source,
+        target=fine_target,
+        initial_parameter=fine_parameter,
+    )
 
     return registration.parameter_, fine_model
 
@@ -439,8 +463,12 @@ decimation_module = sks.Decimation(n_points=650)
 decimation_module.fit(source)
 n_points = [n_points_coarse]
 
-multisource = sks.Multiscale(source, n_points=n_points, decimation_module=decimation_module)
-multitarget = sks.Multiscale(target, n_points=n_points, decimation_module=decimation_module)
+multisource = sks.Multiscale(
+    source, n_points=n_points, decimation_module=decimation_module
+)
+multitarget = sks.Multiscale(
+    target, n_points=n_points, decimation_module=decimation_module
+)
 
 coarse_source = multisource.at(n_points=n_points_coarse)
 coarse_target = multitarget.at(n_points=n_points_coarse)
@@ -449,13 +477,19 @@ fine_target = multitarget.at(n_points=target.n_points)
 
 # Plot the coarse source and target
 plotter = pv.Plotter()
-plotter.add_mesh(coarse_source.to_pyvista(), color=source_color, label="coarse source")
-plotter.add_mesh(coarse_target.to_pyvista().translate([250, 0, 0]), color=target_color, label="coarse target")
+plotter.add_mesh(
+    coarse_source.to_pyvista(), color=source_color, label="coarse source"
+)
+plotter.add_mesh(
+    coarse_target.to_pyvista().translate([250, 0, 0]),
+    color=target_color,
+    label="coarse target",
+)
 plotter.camera_position = [
     (107.13691493781944, -436.8511227598446, 929.44474582162),
     (138.38692092895508, -5.646553039550781, 2.4097938537597656),
-    (-0.07742352421458944, 0.9049853883599757, 0.41833843327279513)
-    ]
+    (-0.07742352421458944, 0.9049853883599757, 0.41833843327279513),
+]
 plotter.add_legend()
 plotter.show()
 
@@ -488,8 +522,8 @@ linear_parameter = registration.parameter_
 cpos = [
     (-180.28077332975926, -359.5814717933118, 468.17714455864336),
     (23.941261291503906, -56.907809257507324, 2.4097938537597656),
-    (-0.06479680268614828, 0.8494856829410709, 0.5236176552025292)
-    ]
+    (-0.06479680268614828, 0.8494856829410709, 0.5236176552025292),
+]
 
 
 plotter = pv.Plotter()
@@ -532,7 +566,11 @@ registration = sks.Registration(
     verbose=True,
 )
 
-registration.fit(source=coarse_source, target=coarse_target, initial_parameter=linear_parameter)
+registration.fit(
+    source=coarse_source,
+    target=coarse_target,
+    initial_parameter=linear_parameter,
+)
 path = registration.path_
 parameter = registration.parameter_
 
@@ -570,10 +608,12 @@ parameter, model = time_refinement(
     target=coarse_target,
     regularization_weight=0.0001,
     n_iter=3,
-    verbose=True
-    )
+    verbose=True,
+)
 
-path = model.morph(shape=coarse_source, parameter=parameter, return_path=True).path
+path = model.morph(
+    shape=coarse_source, parameter=parameter, return_path=True
+).path
 
 plotter = pv.Plotter()
 plotter.open_gif("coarse_isometric_refined.gif", fps=8)
@@ -604,10 +644,12 @@ parameter, model = space_refinement(
     coarse_parameter=parameter,
     regularization_weight=0.0001,
     n_iter=1,
-    verbose=1
-    )
+    verbose=1,
+)
 
-path = model.morph(shape=fine_source, parameter=parameter, return_path=True).path
+path = model.morph(
+    shape=fine_source, parameter=parameter, return_path=True
+).path
 
 plotter = pv.Plotter()
 plotter.open_gif("fine_registration.gif", fps=8)

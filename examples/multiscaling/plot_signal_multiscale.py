@@ -9,9 +9,8 @@ using rules that are specified by a :class:`FineToCoarsePolicy <skshapes.types.F
 and a :class:`CoarseToFinePolicy <skshapes.types.CoarseToFinePolicy>`.
 """
 
-
 ###############################################################################
-# First, we load the Stanford bunny as a triangle mesh and sub-sample it using 10%, 1% and 0.5% of the original point count.
+# First, we load the Stanford bunny as a triangle mesh and sub-sample it using 10%, 1% and 0.5% of the original point count.
 
 import pyvista as pv
 
@@ -48,7 +47,9 @@ multiscale_bunny.propagate(
 pl = pv.Plotter(shape=(2, 2))
 for i, ratio in enumerate(ratios):
     pl.subplot(i // 2, i % 2)
-    sks.doc.display(plotter=pl, shape=multiscale_bunny.at(ratio=ratio), scalars="height")
+    sks.doc.display(
+        plotter=pl, shape=multiscale_bunny.at(ratio=ratio), scalars="height"
+    )
 pl.show()
 
 ###############################################################################
@@ -72,7 +73,9 @@ multiscale_bunny.propagate(
 pl = pv.Plotter(shape=(2, 2))
 for i, ratio in enumerate(reversed(ratios)):
     pl.subplot(i // 2, i % 2)
-    sks.doc.display(plotter=pl, shape=multiscale_bunny.at(ratio=ratio), scalars="signal")
+    sks.doc.display(
+        plotter=pl, shape=multiscale_bunny.at(ratio=ratio), scalars="signal"
+    )
 pl.show()
 
 
@@ -89,11 +92,13 @@ multiscale_bunny.propagate(
     coarse_to_fine_policy=sks.CoarseToFinePolicy(
         smoothing="mesh_convolution",
         n_smoothing_steps=2,
-        ),
+    ),
 )
 
 pl = pv.Plotter(shape=(2, 2))
 for i, ratio in enumerate(reversed(ratios)):
     pl.subplot(i // 2, i % 2)
-    sks.doc.display(plotter=pl, shape=multiscale_bunny.at(ratio=ratio), scalars="signal")
+    sks.doc.display(
+        plotter=pl, shape=multiscale_bunny.at(ratio=ratio), scalars="signal"
+    )
 pl.show()

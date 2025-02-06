@@ -8,7 +8,7 @@ We use the :meth:`~skshapes.data.polydata.PolyData.point_normals` method to comp
 """
 
 ###############################################################################
-# First, we load the Stanford bunny as a triangle mesh.
+# First, we load the Stanford bunny as a triangle mesh.
 
 import pyvista as pv
 
@@ -21,7 +21,7 @@ mesh = sks.PolyData(pv.examples.download_bunny())
 mesh = mesh.resample(n_points=200).normalize()
 
 ###############################################################################
-# Then, we compute the point normals.
+# Then, we compute the point normals.
 
 normals = mesh.point_normals()
 
@@ -33,7 +33,7 @@ sks.doc.display(
 )
 
 ###############################################################################
-# Then, we compute the point normals.
+# Then, we compute the point normals.
 
 
 pl = pv.Plotter(shape=(2, 2))
@@ -55,7 +55,7 @@ pl.show()
 
 
 ###############################################################################
-# Then, we compute the point normals.
+# Then, we compute the point normals.
 
 
 points = mesh.to_point_cloud()
