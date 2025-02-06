@@ -21,7 +21,7 @@ from .face_properties import (
     _triangle_points,
 )
 from .implicit_quadrics import implicit_quadrics
-from .moments import _point_Moments, _point_moments
+from .moments import _point_moments
 from .normals import (
     _point_frames,
     _point_normals,

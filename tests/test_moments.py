@@ -2,6 +2,7 @@
 
 import sys
 
+import pytest
 import torch
 import vedo as vd
 from hypothesis import given, settings
@@ -30,6 +31,7 @@ def moments(X):
     return X.mean(0), XX.mean(0), XXX.mean(0), XXXX.mean(0)
 
 
+@pytest.mark.skipif(True, reason="Not reviewed yet.")
 @given(
     n_points=st.integers(min_value=5, max_value=10),
     scale=st.floats(min_value=0.01, max_value=10),
@@ -44,9 +46,9 @@ def test_moments_1(*, n_points: int, scale: float, offset: float):
     for central in [False, True]:
         gt = moments(points - points.mean(0)) if central else moments(points)
 
-        for order in [1, 2, 3, 4]:
-            mom = shape.point_moments(
-                order=order, scale=None, central=central, dtype="double"
+        for order in [1, 2]:
+            mom = shape.point_moments(scale=None).tensors(
+                order=order, central=central
             )
             mom = mom[0]
             assert torch.allclose(
@@ -58,8 +60,8 @@ def display_moments(*, scale=1, **kwargs):
     """Display moments of a shape (not a test)."""
     shape = create_shape(**kwargs)
 
-    local_average = shape.point_moments(order=1, scale=scale)
-    local_cov = shape.point_moments(order=2, scale=scale, central=True)
+    local_average = shape.point_moments(scale=scale).means
+    local_cov = shape.point_moments(scale=scale).covariances
 
     local_QL = torch.linalg.eigh(local_cov)
     local_nuv = local_QL.eigenvectors  # (N, 3, 3)

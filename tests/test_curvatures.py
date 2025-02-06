@@ -140,7 +140,7 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
         highlight = shape.points[:, 1].argmin()
 
     for i, s in enumerate(scales):
-        Xm = shape.point_moments(order=1, scale=s)
+        Xm = shape.point_moments(scale=s).means
         curvedness = shape.point_curvedness(scale=s)
         # r2 = shape.point_quadratic_coefficients(scale=s).r2
         kmax, kmin = shape.point_principal_curvatures(scale=s)

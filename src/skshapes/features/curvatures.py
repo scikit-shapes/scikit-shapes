@@ -310,6 +310,7 @@ def _point_quadratic_coefficients(
 
     # Recover the local moments of order 1, 2, 3, 4:
     def central_moments(*, order):
+        raise NotImplementedError()
         return self.point_moments(
             order=order, scale=scale, central=True, dtype="double", **kwargs
         ).to(float_dtype)
@@ -397,7 +398,7 @@ def _point_quadratic_fits(
     N = self.n_points
 
     # Local average:
-    Xm = self.point_moments(order=1, scale=scale, central=False, **kwargs)
+    Xm = self.point_moments(**kwargs).means
     assert Xm.shape == (N, 3)
 
     # Local quadratic coefficients in tangent space:
@@ -672,7 +673,7 @@ def _point_mean_gauss_curvatures(
         N = self.n_points
 
         # Local average:
-        Xm = self.point_moments(order=1, scale=scale, central=False, **kwargs)
+        Xm = self.point_moments(**kwargs).means
         assert Xm.shape == (N, 3)
 
         # Local quadratic coefficients in tangent space:

@@ -56,6 +56,8 @@ class Moments:
         "covariances",
         "covariance_eigenvalues",
         "covariance_eigenvectors",
+        "covariance_eigenvalues_eigenvectors",
+        "covariance_axes",
     )
 
     @typecheck
@@ -84,6 +86,12 @@ class Moments:
         return self.covariance_eigenvalues_eigenvectors.eigenvectors
 
     @typecheck
+    def _covariance_axes(self) -> PointCovariances:
+        return self.covariance_eigenvectors * (
+            self.covariance_eigenvalues.view(self.n_points, 1, self.dim) ** 0.5
+        )
+
+    @typecheck
     def _tensors(self, *, order: int, central: bool) -> PointAnySignals:
         """
         Examples
@@ -96,7 +104,7 @@ class Moments:
             # Create a 3-dimensional shape with 100 points
             shape = sks.Sphere().resample(n_points=100)
             # Consider the local moments at scale 0.5
-            moments = shape.point_Moments(scale=0.5)
+            moments = shape.point_moments(scale=0.5)
 
             # Compute local masses
             mom_0 = moments.tensors(order=0, central=False)
@@ -236,7 +244,7 @@ class Moments:
 
 
 @typecheck
-def _point_Moments(
+def _point_moments(
     self,
     method: Literal["float32", "float64", "cosine"] = "cosine",
     **kwargs,
@@ -290,7 +298,7 @@ def symmetric_sum(a, b):
 
 
 @typecheck
-def _point_moments(
+def _point_moments_old(
     self,
     *,
     order: int = 2,
@@ -316,7 +324,7 @@ def _point_moments(
     # We use a recursive formulation to best leverage our cache!
     def recursion(*, k: int):
         assert (k < order) or (central and k == order)
-        return self.point_moments(
+        return self.point_moments_old(
             order=k,
             features=features,
             central=False,

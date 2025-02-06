@@ -213,7 +213,7 @@ def _point_normals(
         #    raise ValueError(msg)
 
         # Get a smooth field of normals via the Structure Tensor:
-        local_covariance = self.point_moments(order=2, central=True, **kwargs)
+        local_covariance = self.point_moments(**kwargs).covariances
         assert local_covariance.shape == (self.n_points, self.dim, self.dim)
 
         local_QL = torch.linalg.eigh(local_covariance)
@@ -226,7 +226,7 @@ def _point_normals(
         # At this stage, smooth_normals is only defined up to a sign.
         # Arbitrarily, we decide to orient the normals to point locally outwards,
         # i.e. flip the normals if they point towards the local average:
-        local_average = self.point_moments(order=1, **kwargs)
+        local_average = self.point_moments(**kwargs).means
         assert local_average.shape == self.points.shape
         local_direction = self.points - local_average
 
