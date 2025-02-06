@@ -6,6 +6,6 @@ API
 .. autosummary::
     :toctree: stubs
     :recursive:
-    :template: custom-module-template.rst
+    :template: custom-api-template.rst
 
     skshapes
