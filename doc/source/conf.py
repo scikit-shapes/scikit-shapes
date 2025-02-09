@@ -59,7 +59,7 @@ warnings.filterwarnings(
 )
 
 project = "Scikit-Shapes"
-copyright = "2024, The Scikit-Shapes team"
+copyright = "2024-2025, The Scikit-Shapes team"
 author = "The Scikit-Shapes team"
 version = release = importlib.metadata.version("skshapes")
 

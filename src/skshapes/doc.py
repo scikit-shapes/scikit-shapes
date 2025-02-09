@@ -3,8 +3,11 @@
 import numpy as np
 import pyvista as pv
 import torch
+from matplotlib import cm
+from matplotlib import pyplot as plt
 from matplotlib.collections import LineCollection
 
+from . import Sphere
 from ._data import PolyData
 
 
@@ -22,6 +25,9 @@ def display(
     vectors_color="skyblue",
     opacity=None,
     point_size=60,
+    style=None,
+    scalar_bar=False,
+    clim=None,
 ):
     """Uses PyVista to display a 3D shape according to our style guide.
 
@@ -79,12 +85,13 @@ def display(
     if isinstance(shape, np.ndarray | torch.Tensor):
         shape = PolyData(points=shape)
 
-    if shape.is_triangle_mesh:
-        style = "surface"
-    elif shape.is_wireframe:
-        style = "wireframe"
-    else:
-        style = "points"
+    if style is None:
+        if shape.is_triangle_mesh:
+            style = "surface"
+        elif shape.is_wireframe:
+            style = "wireframe"
+        else:
+            style = "points"
 
     mesh = shape.to_pyvista()
 
@@ -100,9 +107,13 @@ def display(
             # If the normals are not correctly oriented, flip them
             mesh = mesh.compute_normals(flip_normals=True)
 
+    if isinstance(smooth, bool):
+        smooth = 4 if smooth else 0
+
+    line_width = 0.005 * mesh.length if show_edges else 0
     if style == "surface":
         if smooth:
-            mesh = mesh.subdivide(subfilter="loop", nsub=4)
+            mesh = mesh.subdivide(subfilter="loop", nsub=smooth)
             material = dict(
                 pbr=True,
                 metallic=0.0,
@@ -117,8 +128,17 @@ def display(
             point_size=point_size,
             render_points_as_spheres=True,
         )
+    elif style == "wireframe":
+        material = dict()
+        show_edges = True
+        line_width = 0.01 * mesh.length
 
-    line_width = 0.005 * mesh.length if show_edges else 0
+    if scalar_bar:
+        scalar_bar_args = dict(
+            title_font_size=0, unconstrained_font_size=True, above_label=""
+        )
+    else:
+        scalar_bar_args = dict()
 
     pl.add_mesh(
         mesh,
@@ -129,6 +149,8 @@ def display(
         scalars=scalars,
         cmap=cmap,
         opacity=opacity,
+        clim=clim,
+        scalar_bar_args=scalar_bar_args,
         **material,
     )
 
@@ -209,7 +231,7 @@ def display(
             font="times",
             position="upper_edge",
         )
-    if scalars is not None:
+    if scalars is not None and not scalar_bar:
         pl.remove_scalar_bar()
 
     # Unfortunately, SSAO is buggy with subplots, as discussed in this open issue:
@@ -284,3 +306,105 @@ def colored_line(x, y, c, ax, **lc_kwargs):
     lc.set_array(c)  # set the colors of each segment
 
     return ax.add_collection(lc)
+
+
+def display_covariances(points, moments, landmark_indices=None, plotter=None):
+
+    N = moments.n_points
+    D = moments.dim
+    masses = moments.masses
+    centers = moments.means
+    axes = moments.covariance_axes
+    assert axes.shape == (N, D, D)
+
+    if D == 2:
+        # Draw ellipses
+        T = 65
+        t = torch.linspace(0, 2 * torch.pi, T)
+        t = torch.cat((t, torch.FloatTensor([float("nan")])))
+        circle = torch.stack([torch.cos(t), torch.sin(t)], dim=0)
+        assert circle.shape == (D, T + 1)
+        ellipses = axes @ circle
+        assert ellipses.shape == (N, D, T + 1)
+        ellipses = centers[:, :, None] + ellipses
+
+        ellipses = ellipses.permute(0, 2, 1).reshape(N * (T + 1), D)
+
+        colored_line(
+            ellipses[:, 0],
+            ellipses[:, 1],
+            masses.view(N, 1).repeat(1, T + 1).reshape(-1),
+            plt.gca(),
+            cmap=cm.viridis,
+            linewidth=2,
+            alpha=0.5,
+        )
+
+        plt.scatter(
+            points[:, 0],
+            points[:, 1],
+            c=moments.masses,
+            cmap="viridis",
+            s=80,
+            edgecolors="black",
+            zorder=2,
+        )
+
+        plt.axis("square")
+        plt.axis([-1.2, 1.2, -1.2, 1.2])
+        plt.colorbar(fraction=0.046, pad=0.04)
+
+    elif D == 3:
+        assert landmark_indices is not None
+
+        landmarks = []
+        ellipses = []
+        for li in landmark_indices:
+            landmark = Sphere().normalize()
+            ellipse = Sphere().normalize()
+            landmark.points = centers[li] + 0.02 * landmark.points
+            ellipse.points = centers[li] + ellipse.points @ axes[li].T
+
+            ellipse.point_data["mass"] = masses[li] * torch.ones_like(
+                ellipse.points[:, 0]
+            )
+
+            landmarks.append(landmark.to_pyvista())
+            ellipses.append(ellipse.to_pyvista())
+
+        ellipses = pv.MultiBlock(ellipses)
+        landmarks = pv.MultiBlock(landmarks)
+
+        plotter.add_mesh(
+            ellipses, scalars="mass", opacity=0.8, style="wireframe"
+        )
+        plotter.add_mesh(landmarks, color="red")
+
+
+def wiggly_curve(*, n_points, dim):
+    """Create a wiggly curve in 2D or 3D.
+
+    Parameters
+    ----------
+    n_points : int
+        Number of points in the curve.
+    dim : int
+        Dimension of the curve (2 or 3).
+
+    Returns
+    -------
+    PolyData
+        The wiggly curve.
+    """
+    assert dim == 2
+    s = torch.linspace(-0.5, 4.5, n_points + 1)[:-1]
+    x = torch.FloatTensor(
+        [
+            [
+                t.cos() + 0.2 * (6 * t).cos(),
+                t.sin() + 0.1 * (4 * t).cos(),
+            ]
+            for t in s
+        ]
+    )
+    return PolyData(x)

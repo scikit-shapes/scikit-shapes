@@ -30,8 +30,8 @@ ratios = [1, 0.1, 0.01, 0.001]
 multiscale = sks.Multiscale(shape=mesh, ratios=ratios)
 
 ###############################################################################
-# The :attr:`~skshapes.data.polydata.PolyData.landmark_points` and
-# :attr:`~skshapes.data.polydata.PolyData.landmark_indices` attributes of the shape
+# The :attr:`~skshapes.PolyData.landmark_points` and
+# :attr:`~skshapes.PolyData.landmark_indices` attributes of the shape
 # are transported consistently between the different scales.
 
 pl = pv.Plotter()

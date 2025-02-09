@@ -2,7 +2,7 @@
 The `PolyData` class: point cloud, wireframe and triangle meshes
 ================================================================
 
-This notebook describes the `PolyData <../../api/skshapes.data.html#skshapes.data.polydata.PolyData>`_ class,
+This notebook describes the :class:`skshapes.PolyData` class,
 the common class for point clouds, wireframe and triangle meshes.
 
 - Load and create `PolyData`

@@ -29,6 +29,7 @@ def _point_neighborhoods(
     ] = "auto",
     laplacian_method: Literal["auto", "exact", "log(x)=x-1"] = "auto",
 ):
+    """Blablabla."""
 
     if method == "auto":
         # For triangle meshes, we may consider the tufted Laplacian instead.

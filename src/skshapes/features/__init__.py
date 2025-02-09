@@ -1,5 +1,6 @@
 """Point normals, curvatures, etc."""
 
+from ._moments import Moments, _point_moments
 from .curvatures import (
     _point_curvature_colors,
     _point_curvedness,
@@ -21,7 +22,6 @@ from .face_properties import (
     _triangle_points,
 )
 from .implicit_quadrics import implicit_quadrics
-from .moments import _point_moments
 from .normals import (
     _point_frames,
     _point_normals,
@@ -30,3 +30,8 @@ from .normals import (
     smooth_normals,
     tangent_vectors,
 )
+
+__all__ = [
+    "Moments",
+    "implicit_quadrics",
+]

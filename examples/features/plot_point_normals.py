@@ -4,7 +4,7 @@
 How to compute point normals
 ==================================
 
-We use the :meth:`~skshapes.data.polydata.PolyData.point_normals` method to compute normal vectors at each vertex of a triangle mesh. This is useful for estimating the curvature of the surface.
+We use the :meth:`~skshapes.PolyData.point_normals` method to compute normal vectors at each vertex of a triangle mesh. This is useful for estimating the curvature of the surface.
 """
 
 ###############################################################################

@@ -249,6 +249,7 @@ def _point_moments(
     method: Literal["float32", "float64", "cosine"] = "cosine",
     **kwargs,
 ) -> Moments:
+    """Compute the local moments of a point cloud."""
     return Moments(
         points=self.points,
         neighborhoods=self.point_neighborhoods(**kwargs),

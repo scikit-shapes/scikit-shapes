@@ -141,7 +141,7 @@ def _point_normals(
     ----------
     kwargs :
         These arguments will be passed to
-        :meth:`~skshapes.polydata.Polydata.point_neighborhoods`
+        :meth:`~skshapes.Polydata.point_neighborhoods`
         in order to create a neighborhood structure.
 
     Returns

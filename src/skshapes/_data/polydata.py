@@ -121,7 +121,7 @@ class PolyData(polydata_type):
         understood as a point cloud.
     point_densities
         The densities of the points, which act as a multiplier to compute masses
-        in :meth:`skshapes.polydata.PolyData.point_masses`.
+        in :attr:`~skshapes.PolyData.point_masses`.
         For point clouds (with each point having a mass of 1 by default),
         point densities exactly correspond to point masses.
         For wireframes, point densities correspond to multipliers on the lengths
@@ -1022,7 +1022,7 @@ class PolyData(polydata_type):
         """The density of each point of the shape.
 
         The densities of the points act as a multiplier to compute masses
-        in :meth:`~skshapes.polydata.PolyData.point_masses`.
+        in :attr:`~skshapes.PolyData.point_masses`.
         For point clouds (with each point having a mass of 1 by default),
         point densities exactly correspond to point masses.
         For wireframes, point densities correspond to multipliers on the lengths

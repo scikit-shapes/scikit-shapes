@@ -424,7 +424,7 @@ def _triangle_areas(self) -> TriangleAreas:
         A ``(n_triangles,)`` Tensor that contains a non-negative area value for each
         triangle. Please note that the orientation of triangles is not taken into
         account here. If you need to compute the signed area of a 2D triangle,
-        please consider using :meth:`~skshapes.polydata.PolyData.triangle_area_normals`
+        please consider using :attr:`~skshapes.PolyData.triangle_area_normals`
         and extract the third coordinate of the normal vectors.
 
     Examples
