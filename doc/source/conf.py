@@ -202,8 +202,8 @@ sphinx_gallery_conf = {
     "subsection_order": ExplicitOrder(
         [
             "../../examples/data",
-            "../../examples/features",
             "../../examples/multiscaling",
+            "../../examples/features",
             "../../examples/registration",
             "../../examples/applications",
             "../../examples/customization",
