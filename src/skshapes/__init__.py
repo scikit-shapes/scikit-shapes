@@ -1,9 +1,8 @@
 """Scikit-Shapes: shape analysis in python."""
 
+from ._data import Circle, PolyData, Sphere
 from .applications import *
 from .convolutions import *
-from .data import *
-from .decimation import *
 from .doc import *
 from .features import *
 from .globals import (
@@ -21,17 +20,18 @@ from .triangle_mesh import *
 from .types import *
 
 __all__ = [
+    "PolyData",
+    "Sphere",
+    "Circle",
     "types",
     "features",
     "convolutions",
     "applications",
-    "data",
     "triangle_mesh",
     "loss",
     "morphing",
     "optimization",
     "multiscaling",
-    "decimation",
     "tasks",
     "input_validation",
 ]

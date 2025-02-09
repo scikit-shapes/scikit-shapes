@@ -11,7 +11,7 @@ import torch
 
 from ..types import float_dtype, int_dtype
 from ..input_validation import typecheck
-from ..data import PolyData
+from .._data import PolyData
 
 
 class BarycentricLandmarkSetter(vedo.Plotter):
@@ -384,7 +384,7 @@ def barycentric_coordinates(mesh, point):
                 tmp = []
                 for i in indices:
                     a, b, c = mesh.triangles[:, i]
-                    normals = mesh.triangle_normals[i]
+                    normals = mesh.triangle_area_normals[i]
 
                     tmp.append(
                         torch.abs(vectors[a].dot(normals))

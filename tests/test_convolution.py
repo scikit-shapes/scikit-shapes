@@ -128,7 +128,7 @@ def test_convolution_functional(
     polydata_x = sks.PolyData(X)
     polydata_y = sks.PolyData(Y)
 
-    weights_j = polydata_x.point_weights
+    weights_j = polydata_x.point_masses
 
     assert weights_j.dtype == sks.float_dtype
     assert polydata_x.points.dtype == sks.float_dtype

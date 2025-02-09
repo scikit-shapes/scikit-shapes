@@ -21,23 +21,28 @@ correspondence = {
     torch.int32: Int32,
 }
 
+torch_to_np_dtypes = {
+    torch.float32: np.float32,
+    torch.float64: np.float64,
+    torch.int64: np.int64,
+    torch.int32: np.int32,
+}
 
 JaxFloat = correspondence[float_dtype]
 JaxDouble = Float64
 JaxInt = correspondence[int_dtype]
 
 # Numpy array types
-FloatArray = Float[np.ndarray, "..."]  # Any float format numpy array
-IntArray = Int[np.ndarray, "..."]  # Any int format numpy array
+FloatArray = Float[np.ndarray, "*_"]  # Any float format numpy array
+IntArray = Int[np.ndarray, "*_"]  # Any int format numpy array
 NumericalArray = FloatArray | IntArray
 Float1dArray = Float[np.ndarray, "_"]
 Int1dArray = Int[np.ndarray, "_"]
 
 # Numerical typestyp
-FloatTensor = JaxFloat[
-    torch.Tensor, "..."
-]  # Only Float32 tensors are FloatTensors
-IntTensor = JaxInt[torch.Tensor, "..."]  # Only Int64 tensors are IntTensors
+# Only Float32 tensors are FloatTensors
+FloatTensor = JaxFloat[torch.Tensor, "*_"]
+IntTensor = JaxInt[torch.Tensor, "*_"]  # Only Int64 tensors are IntTensors
 NumericalTensor = FloatTensor | IntTensor
 FloatTensorArray = JaxFloat[torch.Tensor, "_"]
 IntTensorArray = JaxInt[torch.Tensor, "_"]
@@ -58,12 +63,35 @@ IntSequence = Int[torch.Tensor, "_"] | Int[np.ndarray, "_"] | list[int]
 
 NumberSequence = FloatSequence | IntSequence
 
-DoubleTensor = JaxDouble[torch.Tensor, "..."]
+DoubleTensor = JaxDouble[torch.Tensor, "*_"]
 Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 
 # Specific numerical types
 Points2d = JaxFloat[torch.Tensor, "_ 2"]
 Points3d = JaxFloat[torch.Tensor, "_ 3"]
+
+PointMasses = JaxFloat[torch.Tensor, "n_points"]
+PointDensities = JaxFloat[torch.Tensor, "n_points"]
+PointVectorSignals = JaxFloat[torch.Tensor, "n_points n_channels"]
+PointAnySignals = JaxFloat[torch.Tensor, "n_points *channels"]
+
+PointDisplacements = JaxFloat[torch.Tensor, "n_points dim"]
+PointCovariances = JaxFloat[torch.Tensor, "n_points dim dim"]
+PointSymmetricTensors = JaxFloat[torch.Tensor, "n_points dim dim *channels"]
+
+PointEigenvectors = JaxFloat[torch.Tensor, "n_points n_modes"]
+Eigenvalues = JaxFloat[torch.Tensor, "n_modes"]
+
+EdgeLengths = JaxFloat[torch.Tensor, "n_edges"]
+EdgeMidpoints = JaxFloat[torch.Tensor, "n_edges dim"]
+EdgePoints = JaxFloat[torch.Tensor, "n_edges 2 dim"]
+TriangleAreas = JaxFloat[torch.Tensor, "n_triangles"]
+TriangleCentroids = JaxFloat[torch.Tensor, "n_triangles dim"]
+TriangleNormals = JaxFloat[torch.Tensor, "n_triangles dim"]
+TrianglePoints = JaxFloat[torch.Tensor, "n_triangles 3 dim"]
+
+# name the dimension to ensure identical number of points
+Points3d_n = JaxFloat[torch.Tensor, "n 3"]
 
 Points = Points2d | Points3d  # 3D or 2D points
 
@@ -99,6 +127,10 @@ class image_type:
 
 
 shape_type = polydata_type | image_type
+
+
+class neighborhoods_type:
+    """Class for neighborhoods."""
 
 
 @beartype

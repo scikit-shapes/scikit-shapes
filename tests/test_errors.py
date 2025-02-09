@@ -9,7 +9,7 @@ from skshapes.errors import NotFittedError, ShapeError
 
 def test_errors_metrics():
     """Raise some errors for the metrics."""
-    triangle_mesh = sks.Sphere().decimate(n_points=10)
+    triangle_mesh = sks.Sphere().resample(n_points=10)
     edges = triangle_mesh.edges
     points = triangle_mesh.points
     wireframe_mesh = sks.PolyData(points=points, edges=edges)
@@ -125,7 +125,7 @@ def test_errors_polydata():
 
 def test_errors_dataset_attributes():
     """Raise some errors for the DatasetAttributes class."""
-    attributes = sks.data.utils.DataAttributes(n=50, device="cpu")
+    attributes = sks._data.DataAttributes(n=50, device="cpu")
 
     # add two attributes
     attributes.append(torch.rand(50, 3))
@@ -133,7 +133,7 @@ def test_errors_dataset_attributes():
     print(attributes)  # noqa: T201
 
     with pytest.raises(ValueError, match="should not be empty"):
-        sks.data.utils.DataAttributes.from_dict({})
+        sks._data.DataAttributes.from_dict({})
 
     with pytest.raises(
         ValueError, match="cannot change the number of elements"
@@ -146,17 +146,17 @@ def test_errors_dataset_attributes():
 
 def test_errors_decimation():
     """Trigger some errors for the decimation class."""
-    mesh_1 = sks.Sphere().decimate(target_reduction=0.9)
-    mesh_2 = sks.Sphere().decimate(target_reduction=0.5)
+    mesh_1 = sks.Sphere().resample(ratio=0.1)
+    mesh_2 = sks.Sphere().resample(ratio=0.5)
     pointcloud = sks.PolyData(points=mesh_1.points)
 
-    with pytest.raises(ValueError, match="only works on triangle meshes"):
-        pointcloud.decimate(target_reduction=0.9)
+    with pytest.raises(NotImplementedError, match="triangle meshes"):
+        pointcloud.resample(ratio=0.1)
 
     with pytest.raises(
         ValueError, match="n_points must be lower than mesh.n_points"
     ):
-        mesh_1.decimate(n_points=100000)
+        mesh_1.resample(n_points=100000)
 
     with pytest.raises(ValueError, match="n_points must be positive"):
         d = sks.Decimation(n_points=0)

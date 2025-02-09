@@ -60,7 +60,7 @@ def _point_convolution(
     N = self.n_points
     M = target.n_points
 
-    weights_j = self.point_weights
+    weights_j = self.point_masses
     assert weights_j.shape == (N,)
 
     X = self.points

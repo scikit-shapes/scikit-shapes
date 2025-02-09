@@ -11,7 +11,7 @@ deformation_models = [
     sks.RigidMotion(),
 ]
 
-sphere = sks.Sphere().decimate(target_reduction=0.99)
+sphere = sks.Sphere().resample(n_points=10)
 circle = sks.Circle()
 
 

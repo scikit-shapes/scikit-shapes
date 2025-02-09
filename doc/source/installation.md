@@ -1,5 +1,5 @@
-Installation
-============
+Getting started
+===============
 
 So far, scikit-shapes is only available for linux and macOS, if you are a windows user, you can consider using [wsl](https://learn.microsoft.com/en-us/windows/wsl/about)
 

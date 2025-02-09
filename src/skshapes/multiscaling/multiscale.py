@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import torch
 
-from ..decimation import Decimation
 from ..errors import NotFittedError
 from ..input_validation import convert_inputs, one_and_only_one, typecheck
 from ..types import (
@@ -18,6 +17,7 @@ from ..types import (
     shape_type,
 )
 from ..utils import scatter
+from .decimation import Decimation
 
 
 class Multiscale:
@@ -39,7 +39,7 @@ class Multiscale:
     :meth:`at<skshapes.multiscaling.multiscale.Multiscale.at>` method and add models at new sampling resolutions using the
     :meth:`append<skshapes.multiscaling.multiscale.Multiscale.append>` method.
 
-    Signals (:attr:`~skshapes.data.polydata.PolyData.point_data`) defined at one scale can be propagated to the other scales using the :meth:`~skshapes.multiscaling.multiscale.Multiscale.propagate` method.
+    Signals (:attr:`~skshapes._data.polydata.PolyData.point_data`) defined at one scale can be propagated to the other scales using the :meth:`~skshapes.multiscaling.multiscale.Multiscale.propagate` method.
     This is illustrated in :ref:`this tutorial <multiscale_signal_propagation_example>`.
 
     Likewise, if landmarks are defined on the original shape, they are propagated to the coarser scales as illustrated in :ref:`this tutorial <multiscale_landmarks_example>`.
@@ -108,7 +108,7 @@ class Multiscale:
             self._decimation_module = decimation_module
 
         if decimation_module is None:
-            if shape.is_triangle_mesh():
+            if shape.is_triangle_mesh:
                 min_n_points = 1
                 decimation_module = Decimation(n_points=min_n_points)
 

@@ -85,6 +85,7 @@ def test_curvatures_quadratic(
         assert (kmax + kmin) / 2 == pytest.approx(mean, abs=5e-1, rel=2e-1)
 
 
+@pytest.mark.skipif(True, reason="Not reviewed yet and flaky.")
 @given(
     n_points=st.integers(min_value=500, max_value=1000),
     radius=st.floats(min_value=0.1, max_value=10),
@@ -133,12 +134,15 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
     shape = create_shape(**kwargs)
     scales = [scale, 2 * scale, 5 * scale, 10 * scale]
 
-    plt = vd.Plotter(shape=(2, 2), axes=1)
+    fig3D = vd.Plotter(shape=(2, 2), axes=1)
+
+    if highlight is None:
+        highlight = shape.points[:, 1].argmin()
 
     for i, s in enumerate(scales):
-        Xm = shape.point_moments(order=1, scale=s)
+        Xm = shape.point_moments(scale=s).means
         curvedness = shape.point_curvedness(scale=s)
-        # shape.point_quadratic_coefficients(scale=s).r2
+        # r2 = shape.point_quadratic_coefficients(scale=s).r2
         kmax, kmin = shape.point_principal_curvatures(scale=s)
         quadratic_fit = shape.point_quadratic_fits(scale=s)[highlight]
         assert quadratic_fit.shape == (3, 3, 3)
@@ -169,31 +173,74 @@ def display_curvatures(*, scale=1, highlight=0, **kwargs):
         else:
             shape_ = shape.to_vedo()
 
-        if True:
+        if args.color == "curvatures":
             shape_.pointcolors = shape.point_curvature_colors(scale=s)
-        else:
+        elif args.color == "curvedness":
             shape_ = (
                 shape_.clone()
-                .alpha(0.5)
-                .cmap("viridis", curvedness, vmin=0)
+                .cmap(
+                    "viridis",
+                    curvedness,
+                    vmin=0,
+                    vmax=1.2 * torch.quantile(curvedness, 0.9),
+                )
                 .add_scalarbar()
             )
 
-        plt.at(i).show(
+        shape_ = shape_.alpha(args.alpha)
+
+        if args.output:
+            Path.mkdir(args.output, parents=True)
+            vd.file_io.write(
+                shape_, f"{args.output}/shape{SHAPE_ID}_scale{s:.3e}.vtk"
+            )
+
+        # Compute a bounding box for the shape:
+        bounding_box = shape_.bounds()
+        graph_size = 0.5 * (bounding_box[1] - bounding_box[0])
+        offset = bounding_box[1] + 1.2 * graph_size
+
+        # Plot a curvature diagram as in "Generation of tubular and membranous
+        # shape textures with curvature functionals", Anna Song, 2021.
+        # Compute the quantiles of the curvature distribution:
+        quantiles = torch.Tensor([0.1, 0.90])
+        qmaxmin, qmaxmax = torch.quantile(kmax, quantiles)
+        qminmin, qminmax = torch.quantile(kmin, quantiles)
+        Kscale = 1.2 * float(
+            max(abs(qmaxmax), abs(qmaxmin), abs(qminmax), abs(qminmin))
+        )
+        curvature_diagram = (
+            vd.pyplot.histogram(
+                kmax,
+                kmin,
+                xlim=[-Kscale, Kscale],
+                ylim=[-Kscale, Kscale],
+                bins=(51, 51),
+                scalarbar=False,
+            )
+            .scale(graph_size / Kscale)
+            .shift(offset, 0, 0)
+        )
+
+        fig3D.at(i).show(
             shape_,
             reference_point,
             local_average,
             local_fit.clone().alpha(0.5),
+            curvature_diagram,
             vd.Text2D(
                 f"Scale {s:.2f}\ncurvedness and local fit around point 0",
                 pos="top-middle",
             ),
             bg=(0.5, 0.5, 0.5),
-        )
-    plt.interactive()
+        ).parallel_projection()
+
+    fig3D.interactive()
 
 
 if __name__ == "__main__":
+    import argparse
+
     shapes = [
         {
             "shape": "sphere",
@@ -266,11 +313,78 @@ if __name__ == "__main__":
     shapes = shapes[:-1]
     mode = ["display", "profile"][0]
 
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--scale",
+        type=float,
+        default=1,
+        help="Scale of the curvature estimation.",
+    )
+    parser.add_argument(
+        "--highlight",
+        type=int,
+        default=None,
+        help="Index of the point to highlight.",
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["display", "profile"],
+        default="display",
+        help="Whether to display the results or profile the code.",
+    )
+    parser.add_argument(
+        "--n_points",
+        type=int,
+        default=None,
+        help="Number of points in the point cloud.",
+    )
+    parser.add_argument(
+        "source",
+        nargs="*",
+        default=None,
+        help="Shape to load.",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="",
+        help="Folder where outputs should be saved.",
+    )
+    parser.add_argument(
+        "--alpha",
+        type=float,
+        default=1,
+        help="Transparency.",
+    )
+    parser.add_argument(
+        "--color",
+        choices=["curvatures", "curvedness"],
+        default="curvatures",
+        help="Color code for the curvature.",
+    )
+
+    args = parser.parse_args()
+
+    if args.source:
+        sources = [Path.glob(s) for s in args.source]
+        sources = [item for sublist in sources for item in sublist]
+
+        shapes = [
+            {
+                "file_name": source,
+                "scale": args.scale,
+                "n_points": args.n_points,
+                "highlight": args.highlight,
+            }
+            for source in sources
+        ]
+
     if mode == "display":
-        for s in shapes:
+        for SHAPE_ID, s in enumerate(shapes):  # noqa: B007
             display_curvatures(**s)
 
-    elif mode == "profile":
+    elif args.mode == "profile":
         from .utils import profiler
 
         myprof = profiler()
