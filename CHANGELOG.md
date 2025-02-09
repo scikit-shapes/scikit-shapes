@@ -8,6 +8,16 @@
 
 ### removed
 
+## 0.3
+
+Released on February 9, 2025.
+
+### Added
+
+* Major revamp of `PolyData`, with a switch to an object-oriented API.
+* Introduction of `point_neighborhoods`.
+* Cosmetic improvements to the documentation.
+
 ## 0.2
 
 Released on June 14, 2024.
