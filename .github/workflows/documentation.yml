@@ -50,7 +50,7 @@ jobs:
 
         - name: build documentation (pull request or push)
           run: |
-            sphinx-build -b html doc/source/ doc/_build/html
+            PYKEOPS_VERBOSE=0 KEOPS_VERBOSE=0 sphinx-build -b html doc/source/ doc/_build/html
 
         - name: upload artifact
           uses: actions/upload-artifact@v4
