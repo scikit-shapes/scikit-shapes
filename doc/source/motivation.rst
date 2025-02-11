@@ -32,7 +32,7 @@ This has slowed down progress in the field, with researchers having to choose be
   slower than their C++ counterparts.
 
 **Solution.**
-Fortunately, a collection of open source packages has just cut this Gordian knot.
+Fortunately, a collection of open source packages has just solved this issue.
 Modern libraries such as `PyTorch <https://pytorch.org/>`_,
 `KeOps <https://www.kernel-operations.io/>`_,
 `PotPourri3D <https://github.com/nmwsharp/potpourri3d>`_ and
@@ -71,21 +71,17 @@ of standard methods and as a stepping stone for cutting-edge research projects.
   is a key requirement for credibility.
   Scikit-Shapes scales to high-resolution data and fully leverages
   the GPU if it is available.
-- **Portable.** .
-  As of 2025, .
-  However,
+- **Portable.** Our long-term goal is to have Scikit-Shapes run on mobile devices.
+  As of 2025, this is still a stretch too far so we focus on
+  supporting standard laptops and workstations.
+  We keep our codebase modular and intend to provide a
+  `WebGPU <https://www.w3.org/TR/webgpu/>`_ backend as early as reasonably possible.
 
 Scikit-Shapes is named after
 `Scikit-Image <https://scikit-image.org/>`_
 and
 `Scikit-Learn <https://scikit-learn.org/stable/>`_:
 whenever possible, we follow their conventions and design principles.
-This library is funded by
-`INRIA <https://inria.fr/en>`_, the
-`PRAIRIE-PSAI <https://prairie-institute.fr/>`_
-institute,
-and is distributed under the permissive
-`MIT license <https://github.com/scikit-shapes/scikit-shapes/blob/main/LICENSE>`_.
 While the infrastructure of the library is still under construction,
 we hope to release a first usable version and open our code to contributions
 by the end of 2025.

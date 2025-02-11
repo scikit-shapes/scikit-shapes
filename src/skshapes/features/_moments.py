@@ -194,10 +194,10 @@ class Moments:
                 moments = moments.float()
 
             elif self.method == "cosine":
-                omega = 2 * torch.pi / (100 * self.neighborhoods.scale)
+                ell = 10 * self.neighborhoods.scale
 
                 def trigonometric_features(xyz_):
-                    XYZ = omega * xyz_
+                    XYZ = xyz_ / ell
 
                     # N.B.: this is symmetric so we could cut sub-diagonal terms
                     dif_i = XYZ.view(N, D, 1) - XYZ.view(N, 1, D)
@@ -231,7 +231,7 @@ class Moments:
                     trigonometric_features(xyz_ref) if central else trig_i
                 )
 
-                moments = (0.5 / omega**2) * (trig_ref * trig_j).sum(-1)
+                moments = (0.5 * ell**2) * (trig_ref * trig_j).sum(-1)
                 assert moments.shape == (N, D, D)
 
             assert moments.shape == (self.n_points, self.dim, self.dim)

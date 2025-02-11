@@ -1,8 +1,8 @@
 """
 .. _point_moments_example:
 
-How to compute point moments
-==================================
+How to compute local geometric moments
+=======================================
 
 We use the :meth:`~skshapes.PolyData.point_moments` method to compute local averages and covariance matrices. This is useful for estimating point normals and curvatures.
 """

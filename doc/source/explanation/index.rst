@@ -1,4 +1,10 @@
 How Scikit-Shapes works
 =======================
 
-Blabla
+Features
+--------
+
+.. toctree::
+   :maxdepth: 1
+
+   features/moments
