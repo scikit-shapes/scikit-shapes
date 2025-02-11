@@ -1,0 +1,187 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scikit-Shapes: Shape analysis in Python &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=56c72f64" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4621528c"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Why Scikit-Shapes?" href="motivation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Scikit-Shapes: Shape analysis in Python</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scikit-shapes-shape-analysis-in-python">
+<h1>Scikit-Shapes: Shape analysis in Python<a class="headerlink" href="#scikit-shapes-shape-analysis-in-python" title="Link to this heading"></a></h1>
+<p>Welcome to the documentation of Scikit-Shapes, an open source library for shape analysis in Python.
+Our source code is available on <a class="reference external" href="https://github.com/scikit-shapes/scikit-shapes">GitHub</a>.</p>
+<p>To get started, check out the installation instructions and have a look at the examples.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This library is still in very active development.
+We expect to release a first usable version in September 2025.</p>
+</div>
+<section id="licensing-and-citations">
+<h2>Licensing and citations<a class="headerlink" href="#licensing-and-citations" title="Link to this heading"></a></h2>
+<p>This library is licensed under the permissive <a class="reference external" href="https://en.wikipedia.org/wiki/MIT_License">MIT license</a>,
+which is fully compatible with both <strong>academic</strong> and <strong>commercial</strong> applications.</p>
+<p>Scikit-Shapes provides a user-friendly interface for a collection of research papers,
+whose authors must be credited.
+If you use this library in an academic context, <strong>please run</strong> the following piece of
+code to print a <strong>list of the references that have been used in your experiment</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="c1"># Run your code here</span>
+<span class="o">...</span>
+
+<span class="c1"># At the end of your script, print the relevant references.</span>
+<span class="c1"># This list is updated dynamically by calls to the library functions</span>
+<span class="c1"># and may be displayed in both bibtex and plain text (APA) formats:</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sks</span><span class="o">.</span><span class="n">bibliography</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;bibtex&quot;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sks</span><span class="o">.</span><span class="n">bibliography</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;APA&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading"></a></h2>
+<p>Authors:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.jeanfeydy.com/">Jean Feydy</a> (2023-), project leader.</p></li>
+<li><p><a class="reference external" href="https://www.linkedin.com/in/louis-pujol-722997225/">Louis Pujol</a> (2023-24), core developer.</p></li>
+</ul>
+<p>This library is maintained in the
+<a class="reference external" href="https://team.inria.fr/heka/fr/">HeKA team</a>,
+a joint research group between
+<a class="reference external" href="https://www.inria.fr/en">INRIA</a>,
+<a class="reference external" href="https://www.inserm.fr/en">INSERM</a>
+and the
+<a class="reference external" href="https://u-paris.fr/en/">Université Paris Cité</a>.
+It is funded by
+<a class="reference external" href="https://inria.fr/en">INRIA</a>, the
+<a class="reference external" href="https://prairie-institute.fr/">PRAIRIE-PSAI</a>
+institute,
+and is distributed under the permissive
+<a class="reference external" href="https://github.com/scikit-shapes/scikit-shapes/blob/main/LICENSE">MIT license</a>.</p>
+</section>
+<section id="content">
+<h2>Content<a class="headerlink" href="#content" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="motivation.html" class="btn btn-neutral float-right" title="Why Scikit-Shapes?" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

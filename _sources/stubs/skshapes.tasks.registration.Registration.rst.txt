@@ -1,0 +1,27 @@
+skshapes.tasks.registration.Registration
+========================================
+
+.. currentmodule:: skshapes.tasks.registration
+
+.. autoclass:: Registration
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Registration.__init__
+      ~Registration.fit
+      ~Registration.fit_transform
+      ~Registration.transform
+   
+   
+
+   
+   
+   

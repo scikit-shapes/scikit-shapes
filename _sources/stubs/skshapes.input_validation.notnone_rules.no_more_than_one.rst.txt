@@ -1,0 +1,6 @@
+skshapes.input\_validation.notnone\_rules.no\_more\_than\_one
+=============================================================
+
+.. currentmodule:: skshapes.input_validation.notnone_rules
+
+.. autofunction:: no_more_than_one

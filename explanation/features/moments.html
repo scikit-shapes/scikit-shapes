@@ -1,0 +1,450 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Computing local moments &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Contributing" href="../../contributing.html" />
+    <link rel="prev" title="How Scikit-Shapes works" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">How Scikit-Shapes works</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#features">Features</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Computing local moments</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#definition">Definition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#implementation">Implementation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#naive-quadratic-expansion">Naive quadratic expansion</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#stable-trigonometric-expansion">Stable trigonometric expansion</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">How Scikit-Shapes works</a></li>
+      <li class="breadcrumb-item active">Computing local moments</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/explanation/features/moments.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="computing-local-moments">
+<span id="explanation-moments"></span><h1>Computing local moments<a class="headerlink" href="#computing-local-moments" title="Link to this heading"></a></h1>
+<p>As a pre-processing for shape analysis and registration,
+one often needs to compute local features such as point normals
+and curvatures.
+In this context, local point moments are a useful building block.
+We now explain in depth the implementation of our
+<a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData.point_moments" title="skshapes.PolyData.point_moments"><code class="xref py py-meth docutils literal notranslate"><span class="pre">point_moments()</span></code></a> method.</p>
+<section id="definition">
+<h2>Definition<a class="headerlink" href="#definition" title="Link to this heading"></a></h2>
+<p>Let us consider a point cloud <span class="math notranslate nohighlight">\(x_1, \dots, x_N\)</span> in dimension <span class="math notranslate nohighlight">\(D = 2\)</span> or <span class="math notranslate nohighlight">\(3\)</span>.
+We associate to every point <span class="math notranslate nohighlight">\(x_i\)</span> a local neighborhood <span class="math notranslate nohighlight">\(\nu_i(x)\)</span>,
+understood as a distribution of mass on the <span class="math notranslate nohighlight">\(N\)</span> points.
+The full <a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData.point_neighborhoods" title="skshapes.PolyData.point_neighborhoods"><code class="xref py py-meth docutils literal notranslate"><span class="pre">point_neighborhoods()</span></code></a> structure is encoded
+in the <span class="math notranslate nohighlight">\(N \times N\)</span> matrix:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathcal{V} ~=~
+\left(
+\begin{array}{ccc}
+~ &amp; \nu_1 &amp; ~ \\ \hline
+~ &amp; \vdots &amp; \\ \hline
+~ &amp; \nu_N &amp; ~
+\end{array}
+\right)
+~=~
+\begin{pmatrix}
+\nu_1(x_1) &amp; \dots &amp; \nu_1(x_N) \\
+\vdots &amp; \ddots &amp; \vdots \\
+\nu_N(x_1) &amp; \dots &amp; \nu_N(x_N)
+\end{pmatrix}~.\end{split}\]</div>
+<p><strong>Order 0.</strong> The local mass <span class="math notranslate nohighlight">\(m_i\)</span> around point <span class="math notranslate nohighlight">\(x_i\)</span> is defined by:</p>
+<div class="math notranslate nohighlight">
+\[m_i ~=~ \sum_{j=1}^N \nu_i(x_j)~.\]</div>
+<p><strong>Order 1.</strong> The local mean <span class="math notranslate nohighlight">\(\overline{x}_i\)</span> around point <span class="math notranslate nohighlight">\(x_i\)</span> is defined by:</p>
+<div class="math notranslate nohighlight">
+\[\overline{x}_i ~=~ \frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j) x_j~.\]</div>
+<p><strong>Order 2.</strong> The local covariance matrix <span class="math notranslate nohighlight">\(\Sigma_i\)</span> around point <span class="math notranslate nohighlight">\(x_i\)</span> is defined by:</p>
+<div class="math notranslate nohighlight">
+\[\Sigma_i ~=~ \frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j) \, (x_j - \overline{x}_i) (x_j - \overline{x}_i)^\intercal~.\]</div>
+<p>Just like other
+<a class="reference external" href="https://en.wikipedia.org/wiki/Scale-invariant_feature_transform">feature transforms</a>
+or
+<a class="reference external" href="https://en.wikipedia.org/wiki/Shape_context">shape contexts</a>,
+point moments encode some information
+about the local geometry of the shape. They are popular in shape analysis as precursors
+to rotation-invariant features:
+see the vast literature on the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Riesz_transform">Riesz transform</a>,
+<a class="reference external" href="https://en.wikipedia.org/wiki/Steerable_filter">steerable filters</a>
+and
+<a class="reference external" href="https://en.wikipedia.org/wiki/Image_moment">Hu’s geometric moment invariants</a>.</p>
+</section>
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Link to this heading"></a></h2>
+<p><strong>Local masses and means.</strong>
+Moments of order 0 and 1 are easy to compute using matrix-matrix products with the
+neighborhood operator <span class="math notranslate nohighlight">\(\mathcal{V}\)</span>. The vector of local masses <span class="math notranslate nohighlight">\(m = (m_1, \dots, m_N)\)</span> is given by:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}m
+~=~ \begin{pmatrix} m_1 \\ \vdots \\ m_N \end{pmatrix}
+~=~ \mathcal{V} \begin{pmatrix} 1 \\ \vdots \\ 1 \end{pmatrix}~,\end{split}\]</div>
+<p>and the <span class="math notranslate nohighlight">\(N\times D\)</span> matrix of local means <span class="math notranslate nohighlight">\((\overline{x}_1, \dots, \overline{x}_N)\)</span> is given by:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left(
+\begin{array}{ccc}
+~ &amp; \overline{x}_1 &amp; ~ \\ \hline
+~ &amp; \vdots &amp; \\ \hline
+~ &amp; \overline{x}_N &amp; ~
+\end{array}
+\right)
+~=~ \frac{1}{m} \mathcal{V}
+\left(
+\begin{array}{ccc}
+~ &amp; x_1 &amp; ~ \\ \hline
+~ &amp; \vdots &amp; \\ \hline
+~ &amp; x_N &amp; ~
+\end{array}
+\right)~.\end{split}\]</div>
+<p>On the other hand, computing local covariances at scale is surprisingly tricky.</p>
+<p><strong>Local covariances.</strong>  To compute the local covariance matrix <span class="math notranslate nohighlight">\(\Sigma_i\)</span> around point <span class="math notranslate nohighlight">\(x_i\)</span>,
+performing the summation:</p>
+<div class="math notranslate nohighlight">
+\[\Sigma_i ~=~ \frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j) \,(x_j - \overline{x}_i) (x_j - \overline{x}_i)^\intercal\]</div>
+<p>in parallel over the indices <span class="math notranslate nohighlight">\(i\)</span> is do-able if the neighborhood weight
+<span class="math notranslate nohighlight">\(\nu_i(x_j)\)</span> is known in closed form.
+For instance, if we use a Gaussian window of radius <span class="math notranslate nohighlight">\(\sigma\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\nu_i(x_j) ~=~ \exp\left(-\tfrac{1}{2\sigma^2} \|x_i - x_j\|^2\right)~,\]</div>
+<p>the
+<a class="reference external" href="https://www.kernel-operations.io/">KeOps</a>
+library performs the summation in fractions of a second on a GPU,
+even for large clouds of <span class="math notranslate nohighlight">\(N &gt; 100k\)</span> points.</p>
+<p><strong>Limitations of the brute force approach.</strong>
+Unfortunately, this approach is not tractable in all settings:</p>
+<ul>
+<li><p>The
+<a class="reference external" href="https://en.wikipedia.org/wiki/Low-rank_matrix_approximations#Nystr%C3%B6m_approximation">Nystroem approximation</a>,
+the
+<a class="reference external" href="https://en.wikipedia.org/wiki/Fast_multipole_method">Fast Multipole Method</a>
+or
+<a class="reference external" href="https://arxiv.org/abs/2012.00888">DiffusionNet</a>
+layers
+rely on <strong>low-rank approximations</strong> of the neighborhood matrix <span class="math notranslate nohighlight">\(\mathcal{V}\)</span>.</p></li>
+<li><p>The
+<a class="reference external" href="https://www.cs.cmu.edu/~kmcrane/Projects/HeatMethod/">heat method</a>
+for geodesic distance computations relies on an <strong>implicit</strong> definition.
+The neighborhood operator <span class="math notranslate nohighlight">\(\mathcal{V}\)</span> is defined as:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[\mathcal{V} ~=~ (\text{Id}_{N} - \tfrac{\sigma^2}{2}\Delta)^{-1}~
+\simeq~ \exp(\tfrac{\sigma^2}{2}\Delta)~,\]</div>
+</div></blockquote>
+<p>where <span class="math notranslate nohighlight">\(\Delta\)</span> is a discrete
+<span class="math notranslate nohighlight">\(N\times N\)</span> Laplacian matrix
+and matrix-matrix products with <span class="math notranslate nohighlight">\(\mathcal{V}\)</span> are implemented via
+a sparse Cholesky factorization.</p>
+</li>
+</ul>
+<p>In both settings, while matrix multiplication with <span class="math notranslate nohighlight">\(\mathcal{V}\)</span> is cheap,
+accessing all of the <span class="math notranslate nohighlight">\(N^2\)</span> entries
+<span class="math notranslate nohighlight">\(\nu_i(x_j)\)</span> of <span class="math notranslate nohighlight">\(\mathcal{V}\)</span> is not
+tractable when <span class="math notranslate nohighlight">\(N &gt; 10k\)</span>.</p>
+</section>
+<section id="naive-quadratic-expansion">
+<h2>Naive quadratic expansion<a class="headerlink" href="#naive-quadratic-expansion" title="Link to this heading"></a></h2>
+<p><strong>Expanding the squared difference.</strong>
+A simple work-around would be to remark that:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\Sigma_i ~
+&amp;=~ \frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j) \,(x_j - \overline{x}_i) (x_j - \overline{x}_i)^\intercal \\
+&amp;=~ \frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j) \, x_j x_j^\intercal - \overline{x}_i \overline{x}_i^\intercal~.\end{split}\]</div>
+<p>This is the <a class="reference external" href="https://en.wikipedia.org/wiki/Covariance#Auto-covariance_matrix_of_real_random_vectors">standard statistical formula</a>:</p>
+<div class="math notranslate nohighlight">
+\[\text{Var}(X)~=~ \mathbb{E}(X^2) - \mathbb{E}(X)^2~\geqslant ~0~,\]</div>
+<p>which quantifies the spread of a random variable <span class="math notranslate nohighlight">\(X \sim \nu_i\)</span>
+by computing the gap in
+<a class="reference external" href="https://en.wikipedia.org/wiki/Jensen%27s_inequality">Jensen’s inequality</a>
+when applied to the convex function <span class="math notranslate nohighlight">\(x \mapsto x^2\)</span>.</p>
+<p><strong>Numerical accuracy.</strong>
+Theoretically, we could use this identity to compute the
+<span class="math notranslate nohighlight">\(D\times D\)</span> covariance
+matrices <span class="math notranslate nohighlight">\(\Sigma_i\)</span> efficiently with:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\left(
+\begin{array}{ccc}
+~ &amp; \Sigma_1 &amp; ~ \\ \hline
+~ &amp; \vdots &amp; \\ \hline
+~ &amp; \Sigma_N &amp; ~
+\end{array}
+\right)
+~=~
+\frac{1}{m} \mathcal{V}
+\left(
+\begin{array}{ccc}
+~ &amp; x_1 x_1^\intercal &amp; ~ \\ \hline
+~ &amp; \vdots &amp; \\ \hline
+~ &amp; x_N x_N^\intercal &amp; ~
+\end{array}
+\right)
+~-~
+\left(
+\begin{array}{ccc}
+~ &amp; \overline{x}_1 \overline{x}_1^\intercal &amp; ~ \\ \hline
+~ &amp; \vdots &amp; \\ \hline
+~ &amp; \overline{x}_N \overline{x}_N^\intercal &amp; ~
+\end{array}
+\right)~.\end{split}\]</div>
+<p>Unfortunately, this formula runs into
+<a class="reference external" href="https://en.wikipedia.org/wiki/Catastrophic_cancellation">catastrophic cancellation</a>
+when it is implemented using
+<a class="reference external" href="https://en.wikipedia.org/wiki/Floating-point_arithmetic">floating-point arithmetic</a>.
+With neighborhoods <span class="math notranslate nohighlight">\(\nu_i\)</span> defined at scale <span class="math notranslate nohighlight">\(\sigma &gt; 0\)</span>,
+the coefficients of the covariance matrix <span class="math notranslate nohighlight">\(\Sigma_i\)</span> are typically of order <span class="math notranslate nohighlight">\(\sigma^2\)</span>,
+while <span class="math notranslate nohighlight">\(x_jx_j^\intercal\)</span>
+and <span class="math notranslate nohighlight">\(\overline{x}_i\overline{x}_i^\intercal\)</span>
+are of order <span class="math notranslate nohighlight">\(\max(\|x_i\|)^2\)</span>.</p>
+<p>In common shape processing scenarios, even if the point cloud
+<span class="math notranslate nohighlight">\((x_1, \dots, x_N)\)</span> is centered and normalized,
+the neighborhood scale <span class="math notranslate nohighlight">\(\sigma\)</span> is 100 to 1,000 times
+smaller than the diameter of the shape.
+We are interested in fine details and don’t want to over-smooth our shapes!</p>
+<p>As a consequence, the coefficients of the covariance matrix <span class="math notranslate nohighlight">\(\Sigma_i\)</span> are usually
+<strong>4 to 6 orders of magnitude smaller</strong> than both terms in the difference,
+which scale like <span class="math notranslate nohighlight">\(\|x_i\|^2\)</span>.
+They cannot be computed reliably from the identity above
+if the <span class="math notranslate nohighlight">\(x_jx_j^\intercal\)</span>
+and <span class="math notranslate nohighlight">\(\overline{x}_i\overline{x}_i^\intercal\)</span> are
+stored in single-precision
+<a class="reference external" href="https://en.wikipedia.org/wiki/Single-precision_floating-point_format">float32</a> format
+with 7 significant digits in base 10.</p>
+<p><strong>Portability.</strong>
+Performing the computation in double-precision
+<a class="reference external" href="https://en.wikipedia.org/wiki/Double-precision_floating-point_format">float64</a>,
+including the matrix multiply with the neighborhood operator <span class="math notranslate nohighlight">\(\mathcal{V}\)</span>,
+could provide a sufficient accuracy.
+However, while float64 arithmetic is supported by most CPUs and high-end GPUs,
+it is <strong>not implemented</strong> at the hardware level by consumer-grade GPUs.
+A typical “gaming” GPU such as a
+<a class="reference external" href="https://www.techpowerup.com/gpu-specs/geforce-rtx-4090.c3889">Nvidia RTX4090</a>
+experiences a <strong>x64 slow-down</strong> when switching from float32 to float64 arithmetic.</p>
+</section>
+<section id="stable-trigonometric-expansion">
+<h2>Stable trigonometric expansion<a class="headerlink" href="#stable-trigonometric-expansion" title="Link to this heading"></a></h2>
+<p><strong>Approximating x with sin(x).</strong>
+To provide a fast, general and portable implementation of point moments,
+we rely on the fact that if <span class="math notranslate nohighlight">\(x_j - \overline{x}_i\)</span> is of order
+<span class="math notranslate nohighlight">\(\sigma\)</span> and <span class="math notranslate nohighlight">\(\ell = 10\, \sigma\)</span>, then:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}x_j - \overline{x}_i~
+&amp;\simeq~ \ell \, \sin \left( \frac{x_j - \overline{x}_i}{\ell} \right) \\
+&amp;=~\ell\, \sin(X_j - \overline{X}_i)~,\end{split}\]</div>
+<p>where
+<span class="math notranslate nohighlight">\(X_j = x_j / \ell\)</span> and <span class="math notranslate nohighlight">\(\overline{X}_i = \overline{x}_i / \ell\)</span>.</p>
+<p>This implies that if the support of the neighborhood
+<span class="math notranslate nohighlight">\(\nu_i:x_j\mapsto \nu_i(x_j)\)</span> of point <span class="math notranslate nohighlight">\(x_i\)</span>
+is concentrated on points <span class="math notranslate nohighlight">\(x_j\)</span> which are at distance
+at most <span class="math notranslate nohighlight">\(5\,\sigma\)</span> of <span class="math notranslate nohighlight">\(x_i\)</span>,
+then:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\Sigma_i~
+&amp;=~\frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j) \,(x_j - \overline{x}_i) (x_j - \overline{x}_i)^\intercal \\
+&amp;\simeq~ \frac{\ell^2}{m_i}
+\sum_{j=1}^N \nu_i(x_j) \,\sin(X_j - \overline{X}_i) \sin(X_j - \overline{X}_i)^\intercal~.\end{split}\]</div>
+<p><strong>Trigonometric expansion.</strong>
+Denoting by <span class="math notranslate nohighlight">\(\imath\)</span> the imaginary unit
+and <span class="math notranslate nohighlight">\(\overline{z}\)</span> the complex conjugate of <span class="math notranslate nohighlight">\(z\)</span>,
+standard trigonometric identities let us rewrite this equation as:</p>
+<div class="math notranslate nohighlight">
+\[\Sigma_i~
+\simeq~ \frac{\ell^2}{m_i}
+\frac{1}{(2\imath)^2}
+\sum_{j=1}^N \nu_i(x_j) \,(z_{ij} - \overline{z}_{ij}) (z_{ij}^\intercal - \overline{z}_{ij}^\intercal)~,\]</div>
+<p>where <span class="math notranslate nohighlight">\(z_{ij} = \exp[\imath (X_j - \overline{X}_i)]\)</span> is a
+<span class="math notranslate nohighlight">\(D\)</span>-dimensional vector of unitary complex numbers.</p>
+<p>We know that for any complex-valued vector <span class="math notranslate nohighlight">\(z\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[(z - \overline{z}) (z^\intercal - \overline{z}^\intercal)
+~=~ 2 \,[
+    \text{Re}(zz^\intercal)
+    -
+    \text{Re}(z\overline{z}^\intercal)
+]\]</div>
+<p>We can thus write the relevant terms as products of <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> factors:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}z_{ij} z^\intercal_{ij}
+~&amp;=~
+\exp[\imath (X_j - \overline{X}_i)]\,\cdot\, \exp[\imath (X_j^\intercal - \overline{X}_i^\intercal)]\\
+~&amp;=~
+\exp[-\imath (\overline{X}_i + \overline{X}_i^\intercal)]\,\cdot\, \exp[\imath (X_j + X_j^\intercal)] \\
+z_{ij} \overline{z}^\intercal_{ij}
+~&amp;=~
+\exp[-\imath (X_j - \overline{X}_i)]\,\cdot\, \exp[\imath (X_j^\intercal - \overline{X}_i^\intercal)]\\
+~&amp;=~
+\exp[-\imath (\overline{X}_i - \overline{X}_i^\intercal)]\,\cdot\, \exp[\imath (X_j - X_j^\intercal)]~.\end{split}\]</div>
+<p>If we denote by <span class="math notranslate nohighlight">\(\langle w, z^\intercal \rangle = \text{Re}(\overline{w}z^\intercal)\)</span>
+the dot product applied coordinate-wise on our <span class="math notranslate nohighlight">\(2\times 2\)</span> or <span class="math notranslate nohighlight">\(3 \times 3\)</span> matrices,
+we can now rewrite the covariance matrix <span class="math notranslate nohighlight">\(\Sigma_i\)</span> as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\Sigma_i~
+\simeq~ \frac{\ell^2}{2}
+\bigg[\,
+&amp;\Big\langle
+\exp\big[ \imath (\overline{X}_i - \overline{X}_i^\intercal) \big],
+\frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j)\,
+\exp\big[ \imath (X_j - X_j^\intercal) \big]
+\Big\rangle \\
+~-~
+&amp;\Big\langle
+\exp \big[\imath (\overline{X}_i + \overline{X}_i^\intercal)\big],
+\frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j)\,
+\exp \big[\imath (X_j + X_j^\intercal) \big]
+\Big\rangle
+\,\bigg]\end{split}\]</div>
+<p><strong>Intuition.</strong>
+Looking at the diagonal coefficients of the covariance matrix <span class="math notranslate nohighlight">\(\Sigma_i\)</span>,
+we know that <span class="math notranslate nohighlight">\(\overline{X}_i = \overline{X}_i^\intercal\)</span>
+and <span class="math notranslate nohighlight">\(X_j = X_j^\intercal\)</span> with a slight abuse of notation
+so the formula simply reads:</p>
+<div class="math notranslate nohighlight">
+\[\text{diag}(\Sigma_i)
+~\simeq~ \frac{\ell^2}{2}
+\bigg[\,
+1
+~-~\Big\langle
+\exp \big[2 \imath \overline{X}_i\big],
+\frac{1}{m_i} \sum_{j=1}^N \nu_i(x_j)\,
+\exp \big[2\imath X_j \big]
+\Big\rangle
+\,\bigg]~.\]</div>
+<p>This formula estimates the spread of <span class="math notranslate nohighlight">\(X_j = x_j / \ell\)</span> in the neighborhood
+of <span class="math notranslate nohighlight">\(\overline{X}_i = \overline{x}_i / \ell\)</span> using a <strong>generalized Jensen’s inequality</strong>
+on the boundary of the (convex) unit disk of the complex plane.</p>
+<p><strong>Numerical analysis.</strong>
+To perform this computation, one simply needs to use a matrix-matrix product
+with the neighborhood operator <span class="math notranslate nohighlight">\(\mathcal{V}\)</span> to smooth the coefficients of
+the <span class="math notranslate nohighlight">\(D\times D\)</span> tensors:</p>
+<div class="math notranslate nohighlight">
+\[\cos(X_j + X_j^\intercal),
+~~\sin(X_j + X_j^\intercal),
+~~\cos(X_j - X_j^\intercal)~~\text{and}
+~~\sin(X_j - X_j^\intercal)~.\]</div>
+<p>The first three tensors are symmetric, while the latter is skew-symmetric.
+This leaves us with <span class="math notranslate nohighlight">\(3 \cdot 3 + 1 = 10\)</span> channels in dimension <span class="math notranslate nohighlight">\(D=2\)</span>,
+and <span class="math notranslate nohighlight">\(3\cdot 6 + 3 = 21\)</span> channels in dimension <span class="math notranslate nohighlight">\(D=3\)</span>.</p>
+<p>Crucially, <strong>the complex exponentials are all of order 1</strong>.
+Using this trigonometric expansion, we are estimating a quantity of order
+<span class="math notranslate nohighlight">\(\sigma^2\)</span> as the difference of two terms of order
+<span class="math notranslate nohighlight">\(\ell^2 = 100\, \sigma^2\)</span>.
+Even if the computation is performed in float32 arithmetic,
+this still leaves approximately <span class="math notranslate nohighlight">\(7-2 = 5\)</span> digits of decimal precision for <span class="math notranslate nohighlight">\(\Sigma_i\)</span>,
+which is suitable for our purposes.
+We thus favor this method by default in
+<a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData.point_moments" title="skshapes.PolyData.point_moments"><code class="xref py py-meth docutils literal notranslate"><span class="pre">point_moments()</span></code></a> and all downstream methods.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="How Scikit-Shapes works" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../contributing.html" class="btn btn-neutral float-right" title="Contributing" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

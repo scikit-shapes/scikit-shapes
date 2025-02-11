@@ -1,0 +1,211 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Computation times &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=56c72f64" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4621528c"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Computation times</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/sg_execution_times.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="computation-times">
+<span id="sphx-glr-sg-execution-times"></span><h1>Computation times<a class="headerlink" href="#computation-times" title="Link to this heading"></a></h1>
+<p><strong>08:42.418</strong> total execution time for 17 files <strong>from all galleries</strong>:</p>
+<div class="docutils container">
+<style scoped>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+</style>
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script type="text/javascript" class="init">
+$(document).ready( function () {
+    $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+} );
+</script><table class="table table-striped sg-datatable docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Example</p></th>
+<th class="head"><p>Time</p></th>
+<th class="head"><p>Mem (MB)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/registration/plot_lddmm_1_normalization.html#sphx-glr-auto-examples-registration-plot-lddmm-1-normalization-py"><span class="std std-ref">LDDMM with normalized kernel</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/registration/plot_lddmm_1_normalization.py</span></code>)</p></td>
+<td><p>03:27.775</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_examples/registration/plot_karateka.html#sphx-glr-auto-examples-registration-plot-karateka-py"><span class="std std-ref">Intrinsic vs Extrinsic deformation</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/registration/plot_karateka.py</span></code>)</p></td>
+<td><p>01:16.547</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/registration/plot_multiscale_elastic.html#sphx-glr-auto-examples-registration-plot-multiscale-elastic-py"><span class="std std-ref">Elastic metric and multiscale strategy</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/registration/plot_multiscale_elastic.py</span></code>)</p></td>
+<td><p>01:08.663</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_examples/registration/plot_rigid_1_3d.html#sphx-glr-auto-examples-registration-plot-rigid-1-3d-py"><span class="std std-ref">Rigid alignment in 3D with landmarks</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/registration/plot_rigid_1_3d.py</span></code>)</p></td>
+<td><p>01:02.176</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/multiscaling/plot_multiscaling_landmarks.html#sphx-glr-auto-examples-multiscaling-plot-multiscaling-landmarks-py"><span class="std std-ref">Multiscaling and landmarks</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/multiscaling/plot_multiscaling_landmarks.py</span></code>)</p></td>
+<td><p>00:29.846</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_examples/features/plot_point_moments.html#sphx-glr-auto-examples-features-plot-point-moments-py"><span class="std std-ref">How to compute local geometric moments</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/features/plot_point_moments.py</span></code>)</p></td>
+<td><p>00:29.110</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/features/plot_point_normals.html#sphx-glr-auto-examples-features-plot-point-normals-py"><span class="std std-ref">How to compute local point normals</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/features/plot_point_normals.py</span></code>)</p></td>
+<td><p>00:22.315</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_examples/multiscaling/plot_multiscaling.html#sphx-glr-auto-examples-multiscaling-plot-multiscaling-py"><span class="std std-ref">Multiscaling with triangle meshes</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/multiscaling/plot_multiscaling.py</span></code>)</p></td>
+<td><p>00:05.995</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/registration/plot_lddmm_0_skulls.html#sphx-glr-auto-examples-registration-plot-lddmm-0-skulls-py"><span class="std std-ref">Registration with LDDMM</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/registration/plot_lddmm_0_skulls.py</span></code>)</p></td>
+<td><p>00:05.213</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_examples/registration/plot_rigid_0_2d.html#sphx-glr-auto-examples-registration-plot-rigid-0-2d-py"><span class="std std-ref">Rigid alignment in 2D</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/registration/plot_rigid_0_2d.py</span></code>)</p></td>
+<td><p>00:04.622</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/multiscaling/plot_signal_multiscale.html#sphx-glr-auto-examples-multiscaling-plot-signal-multiscale-py"><span class="std std-ref">Multiscaling and signal propagation</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/multiscaling/plot_signal_multiscale.py</span></code>)</p></td>
+<td><p>00:03.743</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_examples/data/plot_pyvista.html#sphx-glr-auto-examples-data-plot-pyvista-py"><span class="std std-ref">PolyData conversion from and to PyVista or Vedo</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/data/plot_pyvista.py</span></code>)</p></td>
+<td><p>00:03.707</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/data/plot_polydata.html#sphx-glr-auto-examples-data-plot-polydata-py"><span class="std std-ref">The PolyData class: point cloud, wireframe and triangle meshes</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/data/plot_polydata.py</span></code>)</p></td>
+<td><p>00:01.625</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_examples/applications/plot_1_landmarksetter.html#sphx-glr-auto-examples-applications-plot-1-landmarksetter-py"><span class="std std-ref">Set landmarks</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/applications/plot_1_landmarksetter.py</span></code>)</p></td>
+<td><p>00:00.471</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/customization/plot_custom_model_polydata.html#sphx-glr-auto-examples-customization-plot-custom-model-polydata-py"><span class="std std-ref">Write a custom deformation model for PolyData.</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/customization/plot_custom_model_polydata.py</span></code>)</p></td>
+<td><p>00:00.396</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="auto_examples/applications/plot_0_browser.html#sphx-glr-auto-examples-applications-plot-0-browser-py"><span class="std std-ref">Browse a sequence of shapes</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/applications/plot_0_browser.py</span></code>)</p></td>
+<td><p>00:00.214</p></td>
+<td><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="auto_examples/features/plot_point_curvatures.html#sphx-glr-auto-examples-features-plot-point-curvatures-py"><span class="std std-ref">How to compute local curvatures</span></a> (<code class="docutils literal notranslate"><span class="pre">../../examples/features/plot_point_curvatures.py</span></code>)</p></td>
+<td><p>00:00.000</p></td>
+<td><p>0.0</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

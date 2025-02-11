@@ -1,0 +1,61 @@
+
+
+.. _sphx_glr_auto_examples_applications:
+
+Using one of our interactive applications
+-----------------------------------------
+
+The application module contains small applications, written with `Vedo <https://vedo.embl.es/>`_ that can be helpful for geometric data processing.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="A Browser can be used to visualize a sequence of shapes. The user can navigate through the sequ...">
+
+.. only:: html
+
+  .. image:: /auto_examples/applications/images/thumb/sphx_glr_plot_0_browser_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_applications_plot_0_browser.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Browse a sequence of shapes</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Landmarks can be set manually or using the landmark setter.">
+
+.. only:: html
+
+  .. image:: /auto_examples/applications/images/thumb/sphx_glr_plot_1_landmarksetter_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_applications_plot_1_landmarksetter.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Set landmarks</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/applications/plot_0_browser
+   /auto_examples/applications/plot_1_landmarksetter
+

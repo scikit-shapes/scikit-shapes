@@ -1,0 +1,207 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting started &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=56c72f64" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4621528c"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User guide" href="user_guide/index.html" />
+    <link rel="prev" title="Why Scikit-Shapes?" href="motivation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#using-pip">Using pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#from-source">From source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#from-source-developer-mode">From source (developer mode)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting started</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/installation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="getting-started">
+<h1>Getting started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
+<p>Scikit-Shapes is a pure Python package, but some of its dependencies are only available for <strong>Linux</strong> and <strong>macOS</strong> systems.
+If you are a <strong>Windows</strong> user, we advise you to use the official
+<a class="reference external" href="https://learn.microsoft.com/en-us/windows/wsl/about">Windows Subsystem for Linux</a>:
+it should run seamlessly.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We welcome user feedback!
+If you run into issues with the installation process, please
+open an issue on our <a class="reference external" href="https://github.com/scikit-shapes/scikit-shapes/issues">GitHub repository</a>.</p>
+</div>
+<section id="using-pip">
+<h2>Using pip<a class="headerlink" href="#using-pip" title="Link to this heading"></a></h2>
+<p>Scikit-Shapes is available on <a class="reference external" href="https://pypi.org/project/skshapes/">PyPI</a>
+as the <code class="docutils literal notranslate"><span class="pre">skshapes</span></code> package. You can install the latest release with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>skshapes
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The most likely source of installation problems is the
+<a class="reference external" href="https://kernel-operations.io/keops/python/installation.html">KeOps</a> dependency.
+You may also want to install
+<a class="reference external" href="https://pytorch.org/">PyTorch</a> using a specific command, especially
+if you do not have a GPU.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>On Google Colab, you may run into conflicts between NumPy 1.x and 2.x.
+To avoid this, use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>!pip<span class="w"> </span>uninstall<span class="w"> </span>-y<span class="w"> </span>numpy
+!pip<span class="w"> </span>install<span class="w"> </span>skshapes
+</pre></div>
+</div>
+</div>
+</section>
+<section id="from-source">
+<h2>From source<a class="headerlink" href="#from-source" title="Link to this heading"></a></h2>
+<p>To install Scikit-Shapes from source, start by cloning the <a class="reference external" href="https://github.com/scikit-shapes/scikit-shapes">GitHub repository</a>. Then, on a terminal, navigate to the directory and run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>.
+</pre></div>
+</div>
+</section>
+<section id="from-source-developer-mode">
+<h2>From source (developer mode)<a class="headerlink" href="#from-source-developer-mode" title="Link to this heading"></a></h2>
+<p>To install Scikit-Shapes with the development environment, start by cloning the <a class="reference external" href="https://github.com/scikit-shapes/scikit-shapes">GitHub repository</a>. Then, on a terminal, navigate to the directory and run</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--editable<span class="w"> </span>.
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements_dev.txt
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--editable</span></code> option links the package in <code class="docutils literal notranslate"><span class="pre">site-package</span></code> to the source code in the current working directory. Then, any local change to the source code reflects directly in the environment.</p>
+<p>The development environment contains tools for linting, syntax checking and testing. Linting and syntax tests can be run by executing the command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
+</pre></div>
+</div>
+<p>You can run tests with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+</pre></div>
+</div>
+<p>This creates a coverage report in <code class="docutils literal notranslate"><span class="pre">htmlcov/</span></code>, that you can open in a web browser using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>firefox<span class="w"> </span>htmlcov/index.html
+</pre></div>
+</div>
+<p>You can also install the necessary tools to build the documentation with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements_docs.txt
+</pre></div>
+</div>
+<p>And render this website with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>doc/source
+make<span class="w"> </span>clean
+make<span class="w"> </span>html
+</pre></div>
+</div>
+<p>To serve it locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>doc/_build/html
+python<span class="w"> </span>-m<span class="w"> </span>http.server
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="motivation.html" class="btn btn-neutral float-left" title="Why Scikit-Shapes?" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="user_guide/index.html" class="btn btn-neutral float-right" title="User guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

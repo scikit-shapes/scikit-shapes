@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Write a custom deformation model for PolyData. &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="API reference" href="../../stubs/skshapes.html" />
+    <link rel="prev" title="Defining a custom model or loss function" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gallery of examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-and-manipulating-data">Loading and manipulating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#working-at-multiple-scales">Working at multiple scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#computing-shape-features">Computing shape features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registering-and-aligning-shapes-with-each-other">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#using-one-of-our-interactive-applications">Using one of our interactive applications</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#defining-a-custom-model-or-loss-function">Defining a custom model or loss function</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../data/index.html">Loading and manipulating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multiscaling/index.html">Working at multiple scales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../features/index.html">Computing shape features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../registration/index.html">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../applications/index.html">Using one of our interactive applications</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Defining a custom model or loss function</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Write a custom deformation model for PolyData.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Gallery of examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Defining a custom model or loss function</a></li>
+      <li class="breadcrumb-item active">Write a custom deformation model for PolyData.</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/customization/plot_custom_model_polydata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-customization-plot-custom-model-polydata-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="write-a-custom-deformation-model-for-polydata">
+<span id="sphx-glr-auto-examples-customization-plot-custom-model-polydata-py"></span><h1>Write a custom deformation model for PolyData.<a class="headerlink" href="#write-a-custom-deformation-model-for-polydata" title="Link to this heading"></a></h1>
+<p>This notebooks shows how to write a class to define a deformation model.</p>
+<p>All deformation models must inherit from <cite>sks.BaseModel</cite> and implement the
+following methods:</p>
+<ul class="simple">
+<li><p><cite>__init__</cite>: set hyperparameters of the deformation model</p></li>
+<li><p><cite>morph</cite>: compute the morphed shape from the source shape and the optimization parameter and optionally save additional information (deformation path, regularization…)</p></li>
+<li><p><cite>parameter_shape</cite>: return the shape of the parameter with respect to the shape to morph.</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+</pre></div>
+</div>
+<p>Define the deformation model</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Translation</span><span class="p">(</span><span class="n">sks</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_steps</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set the hyperparameters of the model.</span>
+
+<span class="sd">        At initialization, the model is provided with hyperparameters. These</span>
+<span class="sd">        hyperparameters are used to define the behavior of the model. In this</span>
+<span class="sd">        case, the hyperparameter is the number of steps in the morphing.</span>
+
+<span class="sd">        While not mandatory, `n_steps` is a common hyperparameter for morphing</span>
+<span class="sd">        models. It defines the number of intermediate shapes that are generated</span>
+<span class="sd">        between the initial and final shapes. For some models (ExtrinsicDeformation,</span>
+<span class="sd">        IntrinsicDeformation) it has a real impact on the output of the model.</span>
+<span class="sd">        On the other hand, for some models (RigidMotion, Translation) it has no</span>
+<span class="sd">        impact but is useful to create animations with a fixed number of frames.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">n_steps</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">morph</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">shape</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">polydata_type</span><span class="p">,</span>
+        <span class="n">parameter</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">Float1dTensor</span><span class="p">,</span>
+        <span class="n">return_path</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">return_regularization</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sks</span><span class="o">.</span><span class="n">MorphingOutput</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply the morphing to the shape.</span>
+
+<span class="sd">        This method is the core of the model. It takes a shape and a parameter</span>
+<span class="sd">        as input and returns a MorphingOutput object. This object contains the</span>
+<span class="sd">        morphed shape, the path (if return_path is True), and the regularization</span>
+<span class="sd">        term (if return_regularization is True).</span>
+
+<span class="sd">        The morphed shape attributes should be differentiable with respect to</span>
+<span class="sd">        the parameter. This is necessary for the optimization process to work</span>
+<span class="sd">        properly.</span>
+
+<span class="sd">        If return_path is True, the path is a list of shapes that represent the</span>
+<span class="sd">        intermediate shapes between the initial and final shapes. The length of</span>
+<span class="sd">        the path is defined by the hyperparameter n_steps. By default, the path</span>
+<span class="sd">        can be set to be [shape, morphed_shape].</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># It is often a good idea to check the input parameters or specific</span>
+        <span class="c1"># conditions before proceeding with the morphing.</span>
+        <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">dim</span><span class="p">,):</span>
+            <span class="n">error_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Expected parameter to have shape </span><span class="si">{</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">dim</span><span class="p">,)</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">parameter</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="n">error_msg</span>
+
+        <span class="c1"># Apply the morphing</span>
+        <span class="n">morphed_shape</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">morphed_shape</span><span class="o">.</span><span class="n">points</span> <span class="o">+=</span> <span class="n">parameter</span>  <span class="c1"># apply translation</span>
+
+        <span class="c1"># If return_path is True, we need to return successive shapes along</span>
+        <span class="c1"># the frames of the morphing, else path is None.</span>
+        <span class="k">if</span> <span class="n">return_path</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="p">[</span><span class="n">shape</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span><span class="p">):</span>
+                <span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">points</span> <span class="o">+=</span> <span class="n">parameter</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_steps</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># If return_regularization is True, we need to return the regularization</span>
+        <span class="c1"># term, else regularization is None.</span>
+        <span class="n">regularization</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="kc">None</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">return_regularization</span> <span class="k">else</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># The output of the morphing is a MorphingOutput object.</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">MorphingOutput</span><span class="p">(</span>
+            <span class="n">morphed_shape</span><span class="o">=</span><span class="n">morphed_shape</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+            <span class="n">regularization</span><span class="o">=</span><span class="n">regularization</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Custom attributes can be added to the output object.</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">translation_norm</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">parameter_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parameter shape.</span>
+
+<span class="sd">        This method returns the shape of the parameter tensor given the shape</span>
+<span class="sd">        of the input shape. This is useful to automatically initialize the</span>
+<span class="sd">        parameter tensor in the optimization process.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">shape</span><span class="o">.</span><span class="n">dim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">2</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">3</span><span class="p">,)</span>
+</pre></div>
+</div>
+<section id="validate-the-model">
+<h2>Validate the model<a class="headerlink" href="#validate-the-model" title="Link to this heading"></a></h2>
+<p>You can validate the model using the <cite>validate_polydata_morphing_model</cite> function.
+It is useful to detect if you did one of the following mistakes:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">shape_3d</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">shape_2d</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Circle</span><span class="p">()</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Translation</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">sks</span><span class="o">.</span><span class="n">validate_polydata_morphing_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">shape_3d</span><span class="p">)</span>
+<span class="n">sks</span><span class="o">.</span><span class="n">validate_polydata_morphing_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">shape_2d</span><span class="p">)</span>
+
+<span class="c1"># To make these tests fails, we can:</span>
+<span class="c1"># - Break the differentiability by adding parameter = parameter.detach() in the morph method</span>
+<span class="c1"># - Change the parameter shape in the parameter_shape method</span>
+<span class="c1"># - Remove sks.BaseModel inheritance</span>
+</pre></div>
+</div>
+</section>
+<section id="integrate-the-model-in-a-registration-task">
+<h2>Integrate the model in a registration task<a class="headerlink" href="#integrate-the-model-in-a-registration-task" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">loss</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">L2Loss</span><span class="p">()</span>  <span class="c1"># L2 loss</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Translation</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># our custom model</span>
+
+<span class="c1"># Source shape : a sphere</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+
+<span class="c1"># Target shape : the same sphere translated by 4 units along the x-axis</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">target</span><span class="o">.</span><span class="n">points</span> <span class="o">+=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># Registration</span>
+<span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Initial loss : 1.35e+04
+  = 1.35e+04 + 1 * 0.00e+00 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 0.00e+00
+  = 0.00e+00 + 1 * 0.00e+00 (fidelity + regularization_weight * regularization)
+
+&lt;skshapes.tasks.registration.Registration object at 0x7fa8843c3810&gt;
+</pre></div>
+</div>
+</section>
+<section id="access-the-output-of-the-registration-and-the-attributes-of-the-model">
+<h2>Access the output of the registration and the attributes of the model<a class="headerlink" href="#access-the-output-of-the-registration-and-the-attributes-of-the-model" title="Link to this heading"></a></h2>
+<p>Morphed shape and path (successive frames representing the deformations are accessible with <cite>morphed_shape_</cite> and <cite>path_</cite> argument)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">morphed_shape</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">morphed_shape_</span>
+<span class="n">frames</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">path_</span>
+
+<span class="n">source_color</span> <span class="o">=</span> <span class="s2">&quot;teal&quot;</span>
+<span class="n">target_color</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">source_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">target_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">frames</span><span class="p">:</span>
+
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">frame</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;grey&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_custom_model_polydata_001.png" srcset="../../_images/sphx_glr_plot_custom_model_polydata_001.png" alt="plot custom model polydata" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/customization/images/sphx_glr_plot_custom_model_polydata_001.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<p>The parameter of the registration is also accessible as well as the custom attributes added to the output object (<cite>translation_norm</cite> in this example)</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">parameter_</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">translation_norm_</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Translation vector: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">, norm: </span><span class="si">{</span><span class="n">norm</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Translation vector: tensor([4., 0., 0.]), norm: 4.0
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 0.396 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-customization-plot-custom-model-polydata-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/95956f4b60374b60b49863e6a48f3270/plot_custom_model_polydata.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_custom_model_polydata.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/3fee5567c09063ad480ab0dfaa15e468/plot_custom_model_polydata.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_custom_model_polydata.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Defining a custom model or loss function" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../stubs/skshapes.html" class="btn btn-neutral float-right" title="API reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

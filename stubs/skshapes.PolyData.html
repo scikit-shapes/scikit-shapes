@@ -1,0 +1,1233 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>skshapes.PolyData &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="skshapes.types" href="skshapes.types.html" />
+    <link rel="prev" title="skshapes.Circle" href="skshapes.Circle.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skshapes.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Sphere.html">skshapes.Sphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Circle.html">skshapes.Circle</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">skshapes.PolyData</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#skshapes.PolyData"><code class="docutils literal notranslate"><span class="pre">PolyData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.__init__"><code class="docutils literal notranslate"><span class="pre">PolyData.__init__()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.add_landmarks"><code class="docutils literal notranslate"><span class="pre">PolyData.add_landmarks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.bounding_grid"><code class="docutils literal notranslate"><span class="pre">PolyData.bounding_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.cache_clear"><code class="docutils literal notranslate"><span class="pre">PolyData.cache_clear()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.control_points"><code class="docutils literal notranslate"><span class="pre">PolyData.control_points</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.copy"><code class="docutils literal notranslate"><span class="pre">PolyData.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.device"><code class="docutils literal notranslate"><span class="pre">PolyData.device</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.dim"><code class="docutils literal notranslate"><span class="pre">PolyData.dim</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.edge_data"><code class="docutils literal notranslate"><span class="pre">PolyData.edge_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.edges"><code class="docutils literal notranslate"><span class="pre">PolyData.edges</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.is_point_cloud"><code class="docutils literal notranslate"><span class="pre">PolyData.is_point_cloud</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.is_triangle_mesh"><code class="docutils literal notranslate"><span class="pre">PolyData.is_triangle_mesh</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.is_wireframe"><code class="docutils literal notranslate"><span class="pre">PolyData.is_wireframe</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.k_ring_graph"><code class="docutils literal notranslate"><span class="pre">PolyData.k_ring_graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.knn_graph"><code class="docutils literal notranslate"><span class="pre">PolyData.knn_graph()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.landmark_indices"><code class="docutils literal notranslate"><span class="pre">PolyData.landmark_indices</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.landmark_points"><code class="docutils literal notranslate"><span class="pre">PolyData.landmark_points</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.landmark_points_3D"><code class="docutils literal notranslate"><span class="pre">PolyData.landmark_points_3D</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.landmarks"><code class="docutils literal notranslate"><span class="pre">PolyData.landmarks</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.mean_point"><code class="docutils literal notranslate"><span class="pre">PolyData.mean_point</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.mesh_convolution"><code class="docutils literal notranslate"><span class="pre">PolyData.mesh_convolution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.n_edges"><code class="docutils literal notranslate"><span class="pre">PolyData.n_edges</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.n_landmarks"><code class="docutils literal notranslate"><span class="pre">PolyData.n_landmarks</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.n_points"><code class="docutils literal notranslate"><span class="pre">PolyData.n_points</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.n_triangles"><code class="docutils literal notranslate"><span class="pre">PolyData.n_triangles</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.normalize"><code class="docutils literal notranslate"><span class="pre">PolyData.normalize()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.plot"><code class="docutils literal notranslate"><span class="pre">PolyData.plot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_convolution"><code class="docutils literal notranslate"><span class="pre">PolyData.point_convolution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_curvedness"><code class="docutils literal notranslate"><span class="pre">PolyData.point_curvedness()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_data"><code class="docutils literal notranslate"><span class="pre">PolyData.point_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_densities"><code class="docutils literal notranslate"><span class="pre">PolyData.point_densities</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_mean_gauss_curvatures"><code class="docutils literal notranslate"><span class="pre">PolyData.point_mean_gauss_curvatures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_moments"><code class="docutils literal notranslate"><span class="pre">PolyData.point_moments()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_neighborhoods"><code class="docutils literal notranslate"><span class="pre">PolyData.point_neighborhoods()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_normals"><code class="docutils literal notranslate"><span class="pre">PolyData.point_normals()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_principal_curvatures"><code class="docutils literal notranslate"><span class="pre">PolyData.point_principal_curvatures()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_quadratic_coefficients"><code class="docutils literal notranslate"><span class="pre">PolyData.point_quadratic_coefficients()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.point_shape_indices"><code class="docutils literal notranslate"><span class="pre">PolyData.point_shape_indices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.points"><code class="docutils literal notranslate"><span class="pre">PolyData.points</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.radius"><code class="docutils literal notranslate"><span class="pre">PolyData.radius</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.resample"><code class="docutils literal notranslate"><span class="pre">PolyData.resample()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.save"><code class="docutils literal notranslate"><span class="pre">PolyData.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.standard_deviation"><code class="docutils literal notranslate"><span class="pre">PolyData.standard_deviation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.stiff_edges"><code class="docutils literal notranslate"><span class="pre">PolyData.stiff_edges</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.to"><code class="docutils literal notranslate"><span class="pre">PolyData.to()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.to_pyvista"><code class="docutils literal notranslate"><span class="pre">PolyData.to_pyvista()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.to_vedo"><code class="docutils literal notranslate"><span class="pre">PolyData.to_vedo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.to_weighted_points"><code class="docutils literal notranslate"><span class="pre">PolyData.to_weighted_points()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.triangle_data"><code class="docutils literal notranslate"><span class="pre">PolyData.triangle_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skshapes.PolyData.triangles"><code class="docutils literal notranslate"><span class="pre">PolyData.triangles</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.types.html">skshapes.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.features.html">skshapes.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.convolutions.html">skshapes.convolutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.applications.html">skshapes.applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.triangle_mesh.html">skshapes.triangle_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.loss.html">skshapes.loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.morphing.html">skshapes.morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.optimization.html">skshapes.optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.multiscaling.html">skshapes.multiscaling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.tasks.html">skshapes.tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.input_validation.html">skshapes.input_validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="skshapes.html">API reference</a></li>
+      <li class="breadcrumb-item active">skshapes.PolyData</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/stubs/skshapes.PolyData.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="skshapes-polydata">
+<h1>skshapes.PolyData<a class="headerlink" href="#skshapes-polydata" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="skshapes.PolyData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skshapes.</span></span><span class="sig-name descname"><span class="pre">PolyData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_densities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landmarks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiff_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangle_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a></p>
+<p>A polygonal shape that is composed of points, edges and/or triangles.</p>
+<p>A <a class="reference internal" href="#skshapes.PolyData" title="skshapes.PolyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolyData</span></code></a> object can be created from:</p>
+<ul class="simple">
+<li><p>Points, edges and triangles as <a class="reference external" href="https://pytorch.org/docs/stable/tensors.html#torch.Tensor">torch.Tensors</a>,
+<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.array.html">numpy.arrays</a>, lists or tuples of numbers.</p></li>
+<li><p>A path to a file containing a mesh, in a format that is accepted by
+<a class="reference external" href="https://docs.pyvista.org/api/utilities/_autosummary/pyvista.read">pyvista.read</a>.</p></li>
+<li><p>A <a class="reference external" href="https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata">pyvista.PolyData</a> object.</p></li>
+<li><p>A <a class="reference external" href="https://vedo.embl.es/docs/vedo/mesh.html#Mesh">vedo.Mesh</a> object.</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Internally, points are stored as <strong>float32 torch Tensors</strong> while indices for
+edges and triangles are stored as <strong>int64 torch Tensors</strong>. If you provide
+numpy arrays, lists or tuples, they will be converted to torch Tensors with the
+correct dtype. Since float32 precision corresponds to scientific notation
+with about 7 significant decimal digits, you may run into issues if you provide
+data that is centered far away from the origin.
+For instance, a sphere of radius 1 and centered at (1e6, 1e6, 1e6) will
+not be represented accurately. In such cases, we recommend centering the
+data around the origin before creating the <a class="reference internal" href="#skshapes.PolyData" title="skshapes.PolyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolyData</span></code></a> object.</p>
+<p>As a general rule, scikit-shapes accepts data in a wide range of formats
+but <strong>always outputs torch Tensors</strong> with float32 precision for point coordinates
+and int64 precision for indices.
+This design choice is motivated by a requirement for consistency
+(the output type of our methods should not surprise downstream functions)
+and support for both GPU computing and automatic differentiation
+(which are not supported by NumPy).</p>
+</div>
+<p>Main features:</p>
+<ul class="simple">
+<li><p>Custom scalar- or vector-valued <strong>signals</strong> on a <a class="reference internal" href="#skshapes.PolyData" title="skshapes.PolyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolyData</span></code></a> can
+be stored in the three attributes <a class="reference internal" href="#skshapes.PolyData.point_data" title="skshapes.PolyData.point_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">point_data</span></code></a>,
+<a class="reference internal" href="#skshapes.PolyData.edge_data" title="skshapes.PolyData.edge_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">edge_data</span></code></a> and <a class="reference internal" href="#skshapes.PolyData.triangle_data" title="skshapes.PolyData.triangle_data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">triangle_data</span></code></a> that behave as dictionaries of torch Tensors.</p></li>
+<li><p><strong>Landmarks</strong> or “keypoints” can also be defined on the shape,
+typically via a list of point indices. If <a class="reference internal" href="#skshapes.PolyData.landmarks" title="skshapes.PolyData.landmarks"><code class="xref py py-attr docutils literal notranslate"><span class="pre">landmarks</span></code></a> is a sparse
+tensor of shape <code class="docutils literal notranslate"><span class="pre">(n_landmarks,</span> <span class="pre">n_points)</span></code>, each row defines a landmark in
+barycentric coordinates. This allows us to define landmarks in a
+continuous space (e.g. on a triangle or an edge) instead
+of being constrained to the vertices of the shape.</p></li>
+<li><p>For <strong>visualization</strong> purposes, a <a class="reference internal" href="#skshapes.PolyData" title="skshapes.PolyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolyData</span></code></a> can be converted to
+a <a class="reference external" href="https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata">pyvista.PolyData</a>
+or a <a class="reference external" href="https://vedo.embl.es/docs/vedo/mesh.html#Mesh">vedo.Mesh</a>
+using the <a class="reference internal" href="#skshapes.PolyData.to_pyvista" title="skshapes.PolyData.to_pyvista"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_pyvista()</span></code></a> and <a class="reference internal" href="#skshapes.PolyData.to_vedo" title="skshapes.PolyData.to_vedo"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_vedo()</span></code></a> methods.</p></li>
+<li><p>The <a class="reference internal" href="#skshapes.PolyData.save" title="skshapes.PolyData.save"><code class="xref py py-meth docutils literal notranslate"><span class="pre">save()</span></code></a> method lets you save shape data to any file whose format
+is supported by <a class="reference external" href="https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata.save">PyVista</a> (.ply, .stl, .vtk…).</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>points</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_</span> <span class="pre">2']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_</span> <span class="pre">3']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Mesh</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">PolyData</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – <p>The vertices of the shape, usually given as a
+<code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">3)</span></code> torch Tensor of xyz coordinates for 3D data
+or as a <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">2)</span></code> torch Tensor of xy coordinates for 2D data.
+This first argument can also be a
+<a class="reference external" href="https://vedo.embl.es/docs/vedo/mesh.html#Mesh">vedo.Mesh</a>,
+a <a class="reference external" href="https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata">pyvista.PolyData</a> or a
+path to a file, in which case the edges and triangles are
+automatically inferred.</p>
+</p></li>
+<li><p><strong>edges</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Int64[Tensor,</span> <span class="pre">'_</span> <span class="pre">2']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The edges of the shape, understood as a set of non-oriented curves
+or as a wireframe mesh. The edges are encoded as a <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">2)</span></code> torch Tensor
+of integer values. Each row <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b]</span></code> corresponds to a
+non-oriented edge between points <code class="docutils literal notranslate"><span class="pre">a</span></code> and <code class="docutils literal notranslate"><span class="pre">b</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">triangles</span></code> is not None, the edges will be automatically
+derived from it and this argument will be ignored.</p></li>
+<li><p><strong>triangles</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Int64[Tensor,</span> <span class="pre">'_</span> <span class="pre">3']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The triangles of the shape, understood as a surface mesh.
+The triangles are encoded as a <code class="docutils literal notranslate"><span class="pre">(n_triangles,</span> <span class="pre">3)</span></code> torch
+Tensor of integer values. Each row <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b,</span> <span class="pre">c]</span></code> corresponds to a
+triangle with vertices <code class="docutils literal notranslate"><span class="pre">a</span></code>, <code class="docutils literal notranslate"><span class="pre">b</span></code> and <code class="docutils literal notranslate"><span class="pre">c</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">edges</span></code> and <code class="docutils literal notranslate"><span class="pre">triangles</span></code> are both None, the shape is
+understood as a point cloud.</p></li>
+<li><p><strong>point_densities</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'n_points']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The densities of the points, which act as a multiplier to compute masses
+in <code class="xref py py-attr docutils literal notranslate"><span class="pre">point_masses</span></code>.
+For point clouds (with each point having a mass of 1 by default),
+point densities exactly correspond to point masses.
+For wireframes, point densities correspond to multipliers on the lengths
+of the edges.
+For triangle meshes, point densities correspond to multipliers on the areas
+of the triangles and can be understood as local thicknesses.</p></li>
+<li><p><strong>device</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">device</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The device on which the shape is stored (e.g. <code class="docutils literal notranslate"><span class="pre">&quot;cpu&quot;</span></code> or <code class="docutils literal notranslate"><span class="pre">&quot;cuda&quot;</span></code>).
+If None it is inferred from the points.</p></li>
+<li><p><strong>landmarks</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Int[Tensor,</span> <span class="pre">'_']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Int[ndarray,</span> <span class="pre">'_']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>], <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code>]</span>) – The landmarks of the shape.</p></li>
+<li><p><strong>control_points</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The control points of the shape.</p></li>
+<li><p><strong>stiff_edges</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Int64[Tensor,</span> <span class="pre">'_</span> <span class="pre">2']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The stiff edges structure of the shape, useful for as_isometric_as_possible</p></li>
+<li><p><strong>point_data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAttributes</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The point data of the shape.</p></li>
+<li><p><strong>edge_data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAttributes</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The edge data of the shape.</p></li>
+<li><p><strong>triangle_data</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataAttributes</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The triangle data of the shape.</p></li>
+<li><p><strong>cache_size</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – Size of the cache for memoized properties. Defaults to None (= no
+cache limit). Use a smaller value if you intend to e.g. compute
+point curvatures at many different scales.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span>
+    <span class="n">points</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">triangles</span><span class="o">=</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">points</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[0., 0.],
+        [1., 0.],
+        [0., 1.],
+        [1., 1.]])
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[0, 1],
+        [0, 2],
+        [1, 2],
+        [1, 3],
+        [2, 3]])
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">triangles</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[0, 1, 2],
+        [1, 2, 3]])
+</pre></div>
+</div>
+<p>Please also check the <a class="reference internal" href="../auto_examples/data/index.html#data-examples"><span class="std std-ref">gallery</span></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_densities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">landmarks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">control_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stiff_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triangle_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cache_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.__init__" title="skshapes.PolyData.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(points, *[, edges, triangles, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.add_landmarks" title="skshapes.PolyData.add_landmarks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_landmarks</span></code></a>(indices)</p></td>
+<td><p>Add vertices landmarks to the shape.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.bounding_grid" title="skshapes.PolyData.bounding_grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bounding_grid</span></code></a>([N, offset])</p></td>
+<td><p>Bounding grid of the shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.cache_clear" title="skshapes.PolyData.cache_clear"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cache_clear</span></code></a>()</p></td>
+<td><p>Reload all cached properties.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.copy" title="skshapes.PolyData.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>()</p></td>
+<td><p>Copy the shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_lengths</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_midpoints</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_points</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.k_ring_graph" title="skshapes.PolyData.k_ring_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">k_ring_graph</span></code></a>([k, verbose])</p></td>
+<td><p>Computes the k-ring graph of the shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.knn_graph" title="skshapes.PolyData.knn_graph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">knn_graph</span></code></a>([k, include_edges])</p></td>
+<td><p>Returns the k-nearest neighbors edges of a shape.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.mesh_convolution" title="skshapes.PolyData.mesh_convolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mesh_convolution</span></code></a>([weight_by_length])</p></td>
+<td><p>Convolution kernel on a triangle mesh or a wireframe PolyData.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.normalize" title="skshapes.PolyData.normalize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">normalize</span></code></a>([inplace])</p></td>
+<td><p>Normalize the shape.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.plot" title="skshapes.PolyData.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([backend])</p></td>
+<td><p>Displays the shape, typically using a PyVista interactive window.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.point_convolution" title="skshapes.PolyData.point_convolution"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_convolution</span></code></a>(*[, kernel, scale, ...])</p></td>
+<td><p>Convolution kernel on a PolyData.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_curvature_colors</span></code>(**kwargs)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.point_curvedness" title="skshapes.PolyData.point_curvedness"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_curvedness</span></code></a>(**kwargs)</p></td>
+<td><p>Point-wise curvedness, estimated at a given scale.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_frames</span></code>(*[, scale])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_masses</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.point_mean_gauss_curvatures" title="skshapes.PolyData.point_mean_gauss_curvatures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_mean_gauss_curvatures</span></code></a>(*[, scale, ...])</p></td>
+<td><p>Point-wise mean and gauss curvatures.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.point_moments" title="skshapes.PolyData.point_moments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_moments</span></code></a>([method])</p></td>
+<td><p>Compute the local moments of a point cloud.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.point_neighborhoods" title="skshapes.PolyData.point_neighborhoods"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_neighborhoods</span></code></a>(*[, method, scale, ...])</p></td>
+<td><p>Blablabla.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.point_normals" title="skshapes.PolyData.point_normals"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_normals</span></code></a>(**kwargs)</p></td>
+<td><p>Compute a smooth field of normals at the vertices of a mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.point_principal_curvatures" title="skshapes.PolyData.point_principal_curvatures"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_principal_curvatures</span></code></a>(**kwargs)</p></td>
+<td><p>Point-wise principal curvatures.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.point_quadratic_coefficients" title="skshapes.PolyData.point_quadratic_coefficients"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_quadratic_coefficients</span></code></a>(*[, scale])</p></td>
+<td><p>Point-wise principal curvatures.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_quadratic_fits</span></code>(*[, scale])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.point_shape_indices" title="skshapes.PolyData.point_shape_indices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_shape_indices</span></code></a>(**kwargs)</p></td>
+<td><p>Point-wise shape index, estimated at a given scale.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.resample" title="skshapes.PolyData.resample"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resample</span></code></a>(*[, n_points, ratio, scale, ...])</p></td>
+<td><p>Resample the shape with a different number of vertices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.save" title="skshapes.PolyData.save"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save</span></code></a>(filename)</p></td>
+<td><p>Save the shape to a file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.to" title="skshapes.PolyData.to"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to</span></code></a>(device)</p></td>
+<td><p>Copy the shape onto a given device.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_point_cloud</span></code>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.to_pyvista" title="skshapes.PolyData.to_pyvista"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_pyvista</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.to_vedo" title="skshapes.PolyData.to_vedo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_vedo</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.to_weighted_points" title="skshapes.PolyData.to_weighted_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_weighted_points</span></code></a>()</p></td>
+<td><p>Convert the shape to a weighted point cloud.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangle_area_normals</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangle_areas</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangle_centroids</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangle_normals</span></code></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangle_points</span></code></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.control_points" title="skshapes.PolyData.control_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">control_points</span></code></a></p></td>
+<td><p>Control points of the shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.device" title="skshapes.PolyData.device"><code class="xref py py-obj docutils literal notranslate"><span class="pre">device</span></code></a></p></td>
+<td><p>Device getter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.dim" title="skshapes.PolyData.dim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dim</span></code></a></p></td>
+<td><p>Dimension of the shape getter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.edge_data" title="skshapes.PolyData.edge_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edge_data</span></code></a></p></td>
+<td><p>Edge data getter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.edges" title="skshapes.PolyData.edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edges</span></code></a></p></td>
+<td><p>Edges getter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.is_point_cloud" title="skshapes.PolyData.is_point_cloud"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_point_cloud</span></code></a></p></td>
+<td><p>Check if the shape is a point cloud.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.is_triangle_mesh" title="skshapes.PolyData.is_triangle_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_triangle_mesh</span></code></a></p></td>
+<td><p>Check if the shape has triangle connectivity.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.is_wireframe" title="skshapes.PolyData.is_wireframe"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_wireframe</span></code></a></p></td>
+<td><p>Check if the shape has edge connectivity.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.landmark_indices" title="skshapes.PolyData.landmark_indices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">landmark_indices</span></code></a></p></td>
+<td><p>Indices of the landmarks.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.landmark_points" title="skshapes.PolyData.landmark_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">landmark_points</span></code></a></p></td>
+<td><p>Landmarks in spatial coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.landmark_points_3D" title="skshapes.PolyData.landmark_points_3D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">landmark_points_3D</span></code></a></p></td>
+<td><p>Landmarks in 3D coordinates.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.landmarks" title="skshapes.PolyData.landmarks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">landmarks</span></code></a></p></td>
+<td><p>Get the landmarks of the shape.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.mean_point" title="skshapes.PolyData.mean_point"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mean_point</span></code></a></p></td>
+<td><p>Mean point of the shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.n_edges" title="skshapes.PolyData.n_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_edges</span></code></a></p></td>
+<td><p>Number of edges getter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.n_landmarks" title="skshapes.PolyData.n_landmarks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_landmarks</span></code></a></p></td>
+<td><p>Return the number of landmarks.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.n_points" title="skshapes.PolyData.n_points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_points</span></code></a></p></td>
+<td><p>Number of points getter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.n_triangles" title="skshapes.PolyData.n_triangles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_triangles</span></code></a></p></td>
+<td><p>Number of triangles getter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.point_data" title="skshapes.PolyData.point_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_data</span></code></a></p></td>
+<td><p>Point data getter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.point_densities" title="skshapes.PolyData.point_densities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">point_densities</span></code></a></p></td>
+<td><p>The density of each point of the shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.points" title="skshapes.PolyData.points"><code class="xref py py-obj docutils literal notranslate"><span class="pre">points</span></code></a></p></td>
+<td><p>Points getter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.radius" title="skshapes.PolyData.radius"><code class="xref py py-obj docutils literal notranslate"><span class="pre">radius</span></code></a></p></td>
+<td><p>Radius of the shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.standard_deviation" title="skshapes.PolyData.standard_deviation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">standard_deviation</span></code></a></p></td>
+<td><p>Standard deviation of the shape.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.stiff_edges" title="skshapes.PolyData.stiff_edges"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stiff_edges</span></code></a></p></td>
+<td><p>Stiff edges getter</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.PolyData.triangle_data" title="skshapes.PolyData.triangle_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangle_data</span></code></a></p></td>
+<td><p>Triangle data getter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.PolyData.triangles" title="skshapes.PolyData.triangles"><code class="xref py py-obj docutils literal notranslate"><span class="pre">triangles</span></code></a></p></td>
+<td><p>Triangles getter.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.add_landmarks">
+<span class="sig-name descname"><span class="pre">add_landmarks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.add_landmarks" title="Link to this definition"></a></dt>
+<dd><p>Add vertices landmarks to the shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>indices</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Int[Tensor,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Int[ndarray,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The indices of the vertices to add to the landmarks.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.bounding_grid">
+<span class="sig-name descname"><span class="pre">bounding_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">N</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.bounding_grid" title="Link to this definition"></a></dt>
+<dd><p>Bounding grid of the shape.</p>
+<p>Compute a bounding grid of the shape. The grid is a PolyData with
+points and edges representing a regular grid enclosing the shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>N</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The number of points on each axis of the grid.</p></li>
+<li><p><strong>offset</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The offset of the grid with respect to the shape. If offset=0, the
+grid is exactly the bounding box of the shape. If offset=1, the
+grid is the bounding box of the shape dilated by a factor 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The bounding grid of the shape.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#skshapes.PolyData" title="skshapes.PolyData">PolyData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.cache_clear">
+<span class="sig-name descname"><span class="pre">cache_clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.cache_clear" title="Link to this definition"></a></dt>
+<dd><p>Reload all cached properties.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.control_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">control_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><span class="pre">polydata_type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#skshapes.PolyData.control_points" title="Link to this definition"></a></dt>
+<dd><p>Control points of the shape.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.copy">
+<span class="sig-name descname"><span class="pre">copy</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.copy" title="Link to this definition"></a></dt>
+<dd><p>Copy the shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The copy of the shape.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#skshapes.PolyData" title="skshapes.PolyData">PolyData</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">a</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">b</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mi">7</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Original:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="p">:])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Edited copy:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="p">:])</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>Original:
+tensor([[ 0.0000,  0.0000,  0.5000],
+        [ 0.0000,  0.0000, -0.5000],
+        [ 0.0541,  0.0000,  0.4971],
+        [ 0.1075,  0.0000,  0.4883]])
+Edited copy:
+tensor([[0.0000, 0.0000, 0.5000],
+        [7.0000, 7.0000, 7.0000],
+        [0.0541, 0.0000, 0.4971],
+        [0.1075, 0.0000, 0.4883]])
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.device">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">device</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">device</span></em><a class="headerlink" href="#skshapes.PolyData.device" title="Link to this definition"></a></dt>
+<dd><p>Device getter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.dim">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#skshapes.PolyData.dim" title="Link to this definition"></a></dt>
+<dd><p>Dimension of the shape getter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.edge_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edge_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataAttributes</span></em><a class="headerlink" href="#skshapes.PolyData.edge_data" title="Link to this definition"></a></dt>
+<dd><p>Edge data getter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">edges</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Int64</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">2'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#skshapes.PolyData.edges" title="Link to this definition"></a></dt>
+<dd><p>Edges getter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The edges of the shape. If the shape is a triangle mesh, the edges
+are computed from the triangles. If the shape is not a triangle
+mesh, the edges are directly returned.
+If the shape is a point cloud without explicit topology information,
+returns None.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Optional[Edges]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.is_point_cloud">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_point_cloud</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#skshapes.PolyData.is_point_cloud" title="Link to this definition"></a></dt>
+<dd><p>Check if the shape is a point cloud.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.is_triangle_mesh">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_triangle_mesh</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#skshapes.PolyData.is_triangle_mesh" title="Link to this definition"></a></dt>
+<dd><p>Check if the shape has triangle connectivity.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.is_wireframe">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_wireframe</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#skshapes.PolyData.is_wireframe" title="Link to this definition"></a></dt>
+<dd><p>Check if the shape has edge connectivity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.k_ring_graph">
+<span class="sig-name descname"><span class="pre">k_ring_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.k_ring_graph" title="Link to this definition"></a></dt>
+<dd><p>Computes the k-ring graph of the shape.</p>
+<p>The k-ring graph is the graph where each vertex is connected to its
+k-neighbors, where the neighborhoods are defined by the edges.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>k</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – the size of the neighborhood, by default 2</p></li>
+<li><p><strong>optional</strong> – the size of the neighborhood, by default 2</p></li>
+<li><p><strong>verbose</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – whether or not display information about the remaining number of steps</p></li>
+<li><p><strong>optional</strong> – whether or not display information about the remaining number of steps</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Int64[Tensor,</span> <span class="pre">'_</span> <span class="pre">2']</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The k-ring neighbors edges.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.knn_graph">
+<span class="sig-name descname"><span class="pre">knn_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.knn_graph" title="Link to this definition"></a></dt>
+<dd><p>Returns the k-nearest neighbors edges of a shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> – The shape to process.</p></li>
+<li><p><strong>k</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – The number of neighbors.</p></li>
+<li><p><strong>include_edges</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If True, the edges of the shape are concatenated with the k-nearest
+neighbors edges.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The k-nearest neighbors edges.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Edges</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.landmark_indices">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">landmark_indices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Int64</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'*_'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#skshapes.PolyData.landmark_indices" title="Link to this definition"></a></dt>
+<dd><p>Indices of the landmarks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If the landmarks are not indices (there are defined in barycentric
+    coordinates).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The indices of the landmarks. None if no landmarks are defined.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[IntTensor]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.landmark_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">landmark_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">2'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">3'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#skshapes.PolyData.landmark_points" title="Link to this definition"></a></dt>
+<dd><p>Landmarks in spatial coordinates.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.landmark_points_3D">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">landmark_points_3D</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">2'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">3'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#skshapes.PolyData.landmark_points_3D" title="Link to this definition"></a></dt>
+<dd><p>Landmarks in 3D coordinates.</p>
+<p>If self.dim == 3, it is equivalent to landmark_points. Otherwise, if
+self.dim == 2, it returns the landmarks with a third coordinate set to 0.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The landmarks in 3D coordinates.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Points</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.landmarks">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">landmarks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">is_sparse]]</span> <span class="pre">|</span> <span class="pre">None</span></em><a class="headerlink" href="#skshapes.PolyData.landmarks" title="Link to this definition"></a></dt>
+<dd><p>Get the landmarks of the shape.</p>
+<p>The format is a sparse tensor of shape (n_landmarks, n_points), each
+line is a landmark in barycentric coordinates. If you want to get the
+landmarks in 3D coordinates, use the landmark_points property. If you
+want to get the landmarks as a list of indices, use the
+landmark_indices property.</p>
+<p>If no landmarks are defined, returns None.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.mean_point">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean_point</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">2'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">3'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#skshapes.PolyData.mean_point" title="Link to this definition"></a></dt>
+<dd><p>Mean point of the shape.</p>
+<p>Return the mean point as a (N_batch, 3) tensor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.mesh_convolution">
+<span class="sig-name descname"><span class="pre">mesh_convolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight_by_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.mesh_convolution" title="Link to this definition"></a></dt>
+<dd><p>Convolution kernel on a triangle mesh or a wireframe PolyData.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>weight_by_length</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If True, the convolution kernel is weighted by the length of the edges.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>AttributeError</strong> – If the PolyData has no edges.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A (N, N) convolution kernel.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="skshapes.convolutions.linear_operator.LinearOperator.html#skshapes.convolutions.linear_operator.LinearOperator" title="skshapes.convolutions.linear_operator.LinearOperator">LinearOperator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.n_edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_edges</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#skshapes.PolyData.n_edges" title="Link to this definition"></a></dt>
+<dd><p>Number of edges getter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.n_landmarks">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_landmarks</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#skshapes.PolyData.n_landmarks" title="Link to this definition"></a></dt>
+<dd><p>Return the number of landmarks.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.n_points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#skshapes.PolyData.n_points" title="Link to this definition"></a></dt>
+<dd><p>Number of points getter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.n_triangles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_triangles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#skshapes.PolyData.n_triangles" title="Link to this definition"></a></dt>
+<dd><p>Number of triangles getter.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.normalize">
+<span class="sig-name descname"><span class="pre">normalize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inplace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.normalize" title="Link to this definition"></a></dt>
+<dd><p>Normalize the shape.</p>
+<p>Center the shape at the origin and scale it so that the standard
+deviation of the points is 1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The normalized shape.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#skshapes.PolyData" title="skshapes.PolyData">PolyData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">backend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'pyvista'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.plot" title="Link to this definition"></a></dt>
+<dd><p>Displays the shape, typically using a PyVista interactive window.</p>
+<p>Available backends are <code class="docutils literal notranslate"><span class="pre">&quot;pyvista&quot;</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;vedo&quot;</span></code>. See the documentation of
+the corresponding plot methods for possible arguments:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html">https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html</a></p></li>
+<li><p><a class="reference external" href="https://vedo.embl.es/docs/vedo/plotter.html#show">https://vedo.embl.es/docs/vedo/plotter.html#show</a></p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>backend</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'pyvista'</span></code>, <code class="docutils literal notranslate"><span class="pre">'vedo'</span></code>]</span>) – Which backend to use for plotting.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_convolution">
+<span class="sig-name descname"><span class="pre">point_convolution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cutoff</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geodesic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_convolution" title="Link to this definition"></a></dt>
+<dd><p>Convolution kernel on a PolyData.</p>
+<p>Creates a convolution kernel on a PolyData as a (N, N) linear operatorif no
+target is provided, or as a (M, N) linear operator if a target is provided.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kernel</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'uniform'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gaussian'</span></code>]</span>) – The kernel to use.</p></li>
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The scale of the kernel.</p></li>
+<li><p><strong>window</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">None</span></code>, <code class="docutils literal notranslate"><span class="pre">'ball'</span></code>, <code class="docutils literal notranslate"><span class="pre">'knn'</span></code>, <code class="docutils literal notranslate"><span class="pre">'spectral'</span></code>]</span>) – The type of window to use.</p></li>
+<li><p><strong>cutoff</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The cutoff value for the window.</p></li>
+<li><p><strong>geodesic</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether to use geodesic distances.</p></li>
+<li><p><strong>normalize</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – Whether to normalize the kernel.</p></li>
+<li><p><strong>dtype</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'float'</span></code>, <code class="docutils literal notranslate"><span class="pre">'double'</span></code>]]</span>) – The data type of the kernel.</p></li>
+<li><p><strong>target</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The target PolyData.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A (N, N) or (M, N) convolution kernel.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="skshapes.convolutions.linear_operator.LinearOperator.html#skshapes.convolutions.linear_operator.LinearOperator" title="skshapes.convolutions.linear_operator.LinearOperator">LinearOperator</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_curvedness">
+<span class="sig-name descname"><span class="pre">point_curvedness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_curvedness" title="Link to this definition"></a></dt>
+<dd><p>Point-wise curvedness, estimated at a given scale.</p>
+<p>For reference, see:
+“Surface shape and curvature scales”, Koenderink and van Doorn, 1992.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">point_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataAttributes</span></em><a class="headerlink" href="#skshapes.PolyData.point_data" title="Link to this definition"></a></dt>
+<dd><p>Point data getter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_densities">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">point_densities</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'n_points'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#skshapes.PolyData.point_densities" title="Link to this definition"></a></dt>
+<dd><p>The density of each point of the shape.</p>
+<p>The densities of the points act as a multiplier to compute masses
+in <code class="xref py py-attr docutils literal notranslate"><span class="pre">point_masses</span></code>.
+For point clouds (with each point having a mass of 1 by default),
+point densities exactly correspond to point masses.
+For wireframes, point densities correspond to multipliers on the lengths
+of the edges.
+For triangle meshes, point densities correspond to multipliers on the areas
+of the triangles and can be understood as local thicknesses.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_mean_gauss_curvatures">
+<span class="sig-name descname"><span class="pre">point_mean_gauss_curvatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'varifold'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mean_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_mean_gauss_curvatures" title="Link to this definition"></a></dt>
+<dd><p>Point-wise mean and gauss curvatures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">MeanGaussCurvatures</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_moments">
+<span class="sig-name descname"><span class="pre">point_moments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cosine'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_moments" title="Link to this definition"></a></dt>
+<dd><p>Compute the local moments of a point cloud.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.features.Moments.html#skshapes.features.Moments" title="skshapes.features._moments.Moments"><code class="xref py py-class docutils literal notranslate"><span class="pre">Moments</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_neighborhoods">
+<span class="sig-name descname"><span class="pre">point_neighborhoods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_neighbors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_normalization_iterations</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">smoothing_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">laplacian_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_neighborhoods" title="Link to this definition"></a></dt>
+<dd><p>Blablabla.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_normals">
+<span class="sig-name descname"><span class="pre">point_normals</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_normals" title="Link to this definition"></a></dt>
+<dd><p>Compute a smooth field of normals at the vertices of a mesh.</p>
+<p>Please refer to <a class="reference internal" href="../auto_examples/features/plot_point_normals.html#point-normals-example"><span class="std std-ref">this example</span></a> for an illustration
+of the difference between parameter values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – These arguments will be passed to
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">point_neighborhoods()</span></code>
+in order to create a neighborhood structure.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A <code class="docutils literal notranslate"><span class="pre">(n_points,</span> <span class="pre">3)</span></code> tensor of normal vectors at the vertices of the mesh.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Points</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">raw_normals</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">point_normals</span><span class="p">()</span>
+<span class="n">smooth_normals</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">point_normals</span><span class="p">(</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;gaussian kernel&quot;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">mesh</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">raw_normals</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">smooth_normals</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>torch.Size([842, 3]) torch.Size([842, 3]) torch.Size([842, 3])
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_principal_curvatures">
+<span class="sig-name descname"><span class="pre">point_principal_curvatures</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_principal_curvatures" title="Link to this definition"></a></dt>
+<dd><p>Point-wise principal curvatures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">PrincipalCurvatures</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_quadratic_coefficients">
+<span class="sig-name descname"><span class="pre">point_quadratic_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_quadratic_coefficients" title="Link to this definition"></a></dt>
+<dd><p>Point-wise principal curvatures.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">QuadraticCoefficients</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.point_shape_indices">
+<span class="sig-name descname"><span class="pre">point_shape_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.point_shape_indices" title="Link to this definition"></a></dt>
+<dd><p>Point-wise shape index, estimated at a given scale.</p>
+<p>For reference, see:
+“Surface shape and curvature scales”, Koenderink and van Doorn, 1992.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_']</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.points">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">points</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">2'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">3'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#skshapes.PolyData.points" title="Link to this definition"></a></dt>
+<dd><p>Points getter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.radius">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">radius</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#skshapes.PolyData.radius" title="Link to this definition"></a></dt>
+<dd><p>Radius of the shape.</p>
+<p>Returns the radius of the smallest sphere, centered around the mean point, that contains the shape.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.resample">
+<span class="sig-name descname"><span class="pre">resample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.resample" title="Link to this definition"></a></dt>
+<dd><p>Resample the shape with a different number of vertices.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Supsampling has not been implemented yet.
+Currently, we only support decimation.</p>
+</div>
+<p>To handle multiple scales at once, please consider using the
+<a class="reference internal" href="skshapes.multiscaling.multiscale.Multiscale.html#skshapes.multiscaling.multiscale.Multiscale" title="skshapes.multiscaling.multiscale.Multiscale"><code class="xref py py-class docutils literal notranslate"><span class="pre">Multiscale</span></code></a> class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_points</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The number of points to keep in the output shape.</p></li>
+<li><p><strong>ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The ratio of points to keep in the output shape.
+A ratio of 1.0 keeps all the points, while a ratio of 0.1
+keeps 10% of the points.</p></li>
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The typical distance between vertices in the output shape.</p></li>
+<li><p><strong>method</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'auto'</span></code>]</span>) – The method to use for resampling. Currently, only “auto” is
+supported. It corresponds to using quadratic decimation on
+a triangle surface mesh.</p></li>
+<li><p><strong>strict</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If False, the decimation may run faster but with a value of n_points
+that is slightly different from the requested value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>InputStructureError</strong> – If both target_reduction and n_points are provided.
+    If none of target_reduction and n_points are provided.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The decimated shape.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#skshapes.PolyData" title="skshapes.PolyData">PolyData</a></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">lowres</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">ratio</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;from </span><span class="si">{</span><span class="n">shape</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">lowres</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>from 842 to 84 points
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lowres</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;from </span><span class="si">{</span><span class="n">shape</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">lowres</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>from 842 to 100 points
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lowres</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;from </span><span class="si">{</span><span class="n">shape</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> to </span><span class="si">{</span><span class="n">lowres</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>from 842 to 101 points
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.save" title="Link to this definition"></a></dt>
+<dd><p>Save the shape to a file.</p>
+<p>Format accepted by PyVista are supported (.ply, .stl, .vtk)
+see: <a class="reference external" href="https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/pointset.py#L439-L1283">https://github.com/pyvista/pyvista/blob/release/0.40/pyvista/core/pointset.py#L439-L1283</a>  # noqa: E501</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The path where to save the shape.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.standard_deviation">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">standard_deviation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Float32</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#skshapes.PolyData.standard_deviation" title="Link to this definition"></a></dt>
+<dd><p>Standard deviation of the shape.</p>
+<p>Returns the standard deviation (radius) of the shape as a (N_batch,)
+tensor.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.stiff_edges">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stiff_edges</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Int64</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">2'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#skshapes.PolyData.stiff_edges" title="Link to this definition"></a></dt>
+<dd><p>Stiff edges getter</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.to">
+<span class="sig-name descname"><span class="pre">to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.to" title="Link to this definition"></a></dt>
+<dd><p>Copy the shape onto a given device.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#skshapes.PolyData" title="skshapes._data.polydata.PolyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolyData</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.to_pyvista">
+<span class="sig-name descname"><span class="pre">to_pyvista</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.to_pyvista" title="Link to this definition"></a></dt>
+<dd><p>Converts the shape to a <a class="reference external" href="https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata">pyvista.PolyData</a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>The shape as a <a class="reference external" href="https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata">pyvista.PolyData</a> object.</p>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pyvista.PolyData</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PolyData</span> <span class="p">(</span><span class="mh">0x7f9b96ab0e80</span><span class="p">)</span>
+<span class="n">N</span> <span class="n">Cells</span><span class="p">:</span>    <span class="mi">1680</span>
+<span class="n">N</span> <span class="n">Points</span><span class="p">:</span>   <span class="mi">842</span>
+<span class="n">N</span> <span class="n">Strips</span><span class="p">:</span>   <span class="mi">0</span>
+<span class="n">X</span> <span class="n">Bounds</span><span class="p">:</span>   <span class="o">-</span><span class="mf">4.993e-01</span><span class="p">,</span> <span class="mf">4.993e-01</span>
+<span class="n">Y</span> <span class="n">Bounds</span><span class="p">:</span>   <span class="o">-</span><span class="mf">4.965e-01</span><span class="p">,</span> <span class="mf">4.965e-01</span>
+<span class="n">Z</span> <span class="n">Bounds</span><span class="p">:</span>   <span class="o">-</span><span class="mf">5.000e-01</span><span class="p">,</span> <span class="mf">5.000e-01</span>
+<span class="n">N</span> <span class="n">Arrays</span><span class="p">:</span>   <span class="mi">0</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.to_vedo">
+<span class="sig-name descname"><span class="pre">to_vedo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.to_vedo" title="Link to this definition"></a></dt>
+<dd><p>Converts the shape to a <a class="reference external" href="https://vedo.embl.es/docs/vedo/mesh.html#Mesh">vedo.Mesh</a> object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>The shape as a <a class="reference external" href="https://vedo.embl.es/docs/vedo/mesh.html#Mesh">vedo.Mesh</a> object.</p>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>vedo.Mesh</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">to_vedo</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">vedo</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">Mesh</span> <span class="n">at</span> <span class="p">(</span><span class="mh">0x30e7f0e0</span><span class="p">)</span>
+<span class="n">name</span>          <span class="p">:</span> <span class="n">Mesh</span>
+<span class="n">elements</span>      <span class="p">:</span> <span class="n">vertices</span><span class="o">=</span><span class="mi">842</span> <span class="n">polygons</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="mi">680</span> <span class="n">lines</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">position</span>      <span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">scaling</span>       <span class="p">:</span> <span class="p">(</span><span class="mf">1.00000</span><span class="p">,</span> <span class="mf">1.00000</span><span class="p">,</span> <span class="mf">1.00000</span><span class="p">)</span>
+<span class="n">size</span>          <span class="p">:</span> <span class="n">average</span><span class="o">=</span><span class="mf">0.500000</span><span class="p">,</span> <span class="n">diagonal</span><span class="o">=</span><span class="mf">1.72721</span>
+<span class="n">center</span> <span class="n">of</span> <span class="n">mass</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">bounds</span>        <span class="p">:</span> <span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.499</span><span class="p">,</span> <span class="mf">0.499</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.497</span><span class="p">,</span> <span class="mf">0.497</span><span class="p">),</span> <span class="n">z</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mf">0.500</span><span class="p">,</span> <span class="mf">0.500</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.PolyData.to_weighted_points">
+<span class="sig-name descname"><span class="pre">to_weighted_points</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.PolyData.to_weighted_points" title="Link to this definition"></a></dt>
+<dd><p>Convert the shape to a weighted point cloud.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_</span> <span class="pre">2']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_</span> <span class="pre">3']</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_']</span></code>]</span></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><em>points</em> – The points of the weighted point cloud.</p></li>
+<li><p><em>weights</em> – The weights of the weighted point cloud.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.triangle_data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">triangle_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataAttributes</span></em><a class="headerlink" href="#skshapes.PolyData.triangle_data" title="Link to this definition"></a></dt>
+<dd><p>Triangle data getter.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.PolyData.triangles">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">triangles</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Int64</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_</span> <span class="pre">3'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#skshapes.PolyData.triangles" title="Link to this definition"></a></dt>
+<dd><p>Triangles getter.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skshapes.Circle.html" class="btn btn-neutral float-left" title="skshapes.Circle" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="skshapes.types.html" class="btn btn-neutral float-right" title="skshapes.types" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intrinsic Deformation &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Extrinsic Deformation" href="extrinsic_deformation.html" />
+    <link rel="prev" title="Registration" href="../registration/registration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#polygonal-data">Polygonal data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registration">Registration</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#morphing-models">Morphing models</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Intrinsic Deformation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#math">Math</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#code">Code</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="extrinsic_deformation.html">Extrinsic Deformation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rigid_motion.html">Rigid Deformation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#add-your-own-models-losses">Add your own models/losses</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">User guide</a></li>
+      <li class="breadcrumb-item active">Intrinsic Deformation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/models/intrinsic_deformation.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="intrinsic-deformation">
+<h1>Intrinsic Deformation<a class="headerlink" href="#intrinsic-deformation" title="Link to this heading"></a></h1>
+<p>Intrinsic deformations are defined as sequences of speed vectors applied to the points of a shape. The length of such a sequence is computed thanks to a Riemannian metric, whose role is to penalize certain transformation. Choosing such a metric roughly corresponds to penalize some distortions of the shape.</p>
+<section id="math">
+<h2>Math<a class="headerlink" href="#math" title="Link to this heading"></a></h2>
+<p>In intrinsic deformation is determined by a sequence of velocity vector fields <span class="math notranslate nohighlight">\(V = (V^t)_{1 \leq t \leq T}\)</span>. The shape after deformation is defined as:</p>
+<p><div class="math notranslate nohighlight">
+\[\text{Morph}(X_i, V) = X_i + \sum_{t=1}^T V^t_i.\]</div>
+</p>
+<p>We also define intermediate states <span class="math notranslate nohighlight">\((X^m)_{1 \leq m \leq T}\)</span> of the deformation:</p>
+<p><div class="math notranslate nohighlight">
+\[X_i^{m} = X_i + \sum_{t=1}^m V^t_i\]</div>
+</p>
+<p>The length of the deformation is determined by a Riemannian metric:</p>
+<p><div class="math notranslate nohighlight">
+\[\text{Length}(X, V^t) = \frac{1}{T}\sum_{t=1}^{T} \ll V^t, V^t \gg_{X^t},\]</div>
+</p>
+<p>where <span class="math notranslate nohighlight">\(\ll V^t, V^t \gg_{X^t}\)</span> is a Riemannian metric depending on the position of the points and the topology (edges, triangles) of the shape. This term informs about the “distortion” of the shape caused by the transformation:</p>
+<p>$$ X^t \rightarrow X^{t+1} = X^t + V^{t}$$</p>
+</section>
+<section id="code">
+<h2>Code<a class="headerlink" href="#code" title="Link to this heading"></a></h2>
+<p>Intrinsic Deformation is accessible in scikit-shapes through the class <a class="reference internal" href="../../stubs/skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.html#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation" title="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">IntrinsicDeformation</span></code></span></a>. The argument <code class="docutils literal notranslate"><span class="pre">n_steps</span></code> controls the number of time steps <span class="math notranslate nohighlight">\(T\)</span>, the higher <code class="docutils literal notranslate"><span class="pre">n_steps</span></code> is, the more flexible is the model. However, the memory impact grows linearly in <code class="docutils literal notranslate"><span class="pre">n_steps</span></code> and the running time is also impacted. The Riemannian metric is given with the argument <code class="docutils literal notranslate"><span class="pre">metric</span></code>. Available metrics are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../stubs/skshapes.morphing.intrinsic_deformation.as_isometric_as_possible.html#skshapes.morphing.intrinsic_deformation.as_isometric_as_possible" title="skshapes.morphing.intrinsic_deformation.as_isometric_as_possible"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">as-isometric-as-possible</span></code></span></a> (requires points and edges)</p></li>
+<li><p><a class="reference internal" href="../../stubs/skshapes.morphing.intrinsic_deformation.shell_energy_metric.html#skshapes.morphing.intrinsic_deformation.shell_energy_metric" title="skshapes.morphing.intrinsic_deformation.shell_energy_metric"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">shell-energy</span></code></span></a> (requires triangles)</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">loss</span> <span class="o">=</span> <span class="o">...</span>
+<span class="n">metric</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">ShellEnergyMetric</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">IntrinsicDeformation</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="n">metric</span><span class="p">)</span>
+
+<span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span><span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">path_</span>
+<span class="n">morphed_source</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">morphed_shape_</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../registration/registration.html" class="btn btn-neutral float-left" title="Registration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="extrinsic_deformation.html" class="btn btn-neutral float-right" title="Extrinsic Deformation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

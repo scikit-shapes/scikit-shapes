@@ -1,0 +1,6 @@
+skshapes.triangle\_mesh.geometry.cotan\_weights
+===============================================
+
+.. currentmodule:: skshapes.triangle_mesh.geometry
+
+.. autofunction:: cotan_weights

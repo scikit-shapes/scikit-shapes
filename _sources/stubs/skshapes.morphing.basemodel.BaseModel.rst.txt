@@ -1,0 +1,26 @@
+skshapes.morphing.basemodel.BaseModel
+=====================================
+
+.. currentmodule:: skshapes.morphing.basemodel
+
+.. autoclass:: BaseModel
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BaseModel.__init__
+      ~BaseModel.copy
+      ~BaseModel.inital_parameter
+   
+   
+
+   
+   
+   

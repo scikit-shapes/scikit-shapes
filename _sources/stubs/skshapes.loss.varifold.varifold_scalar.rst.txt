@@ -1,0 +1,6 @@
+skshapes.loss.varifold.varifold\_scalar
+=======================================
+
+.. currentmodule:: skshapes.loss.varifold
+
+.. autofunction:: varifold_scalar

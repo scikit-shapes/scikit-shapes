@@ -1,0 +1,6 @@
+skshapes.triangle\_mesh.geometry.triangle\_normals
+==================================================
+
+.. currentmodule:: skshapes.triangle_mesh.geometry
+
+.. autofunction:: triangle_normals

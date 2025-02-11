@@ -1,0 +1,219 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contributing &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=56c72f64" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4621528c"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Computing local moments" href="explanation/features/moments.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Contributing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-push-new-code-to-scikit-shapes">How to push new code to scikit-shapes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#our-continuous-integration-workflow">Our continuous integration workflow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#contributing-with-new-code">Contributing with new code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#test-your-modification-locally">Test your modification locally</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#in-a-virtual-environment">In a virtual environment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-nox">Using nox</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#open-a-pull-request">Open a pull request</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Contributing</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/contributing.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="contributing">
+<h1>Contributing<a class="headerlink" href="#contributing" title="Link to this heading"></a></h1>
+<p>Scikit-shapes is open to external contributions. You can contribute with new features, bug fixing, typo fixing, documentation improvement or whatever you think could be improved.</p>
+<p>The first step is to open an issue describing the problem you have or the modification you want to implement. The issue discussion will serve as a place to discuss about what to do next and to assign the work that has to be done.</p>
+<p>Then, if modifications have to be done to the codebase, the following instructions are made to help you in the process of integrating new code to scikit-shapes the smoothest way as possible.</p>
+<section id="how-to-push-new-code-to-scikit-shapes">
+<h2>How to push new code to scikit-shapes<a class="headerlink" href="#how-to-push-new-code-to-scikit-shapes" title="Link to this heading"></a></h2>
+<section id="our-continuous-integration-workflow">
+<h3>Our continuous integration workflow<a class="headerlink" href="#our-continuous-integration-workflow" title="Link to this heading"></a></h3>
+<p>Scikit-shapes is designed to become community-driven. It is a necessity to have an infrastructure that ease the integration of external code. The project infrastrucure is largely influenced by the guides from scientific-python: https://learn.scientific-python.org/</p>
+<p>All new code should be tested and documented and must pass our CI:</p>
+<p>The pre-commit hooks enforce some style requirements</p>
+<ul class="simple">
+<li><p>lint and format the code with <a class="reference external" href="https://docs.astral.sh/ruff/">ruff</a></p></li>
+<li><p>fix common misspellings with <a class="reference external" href="https://github.com/codespell-project/codespell">codespell</a></p></li>
+</ul>
+<p>Then, the unit and functional tests are run:</p>
+<ul class="simple">
+<li><p>run the tests with <a class="reference external" href="https://docs.pytest.org/en/8.0.x/">pytest</a></p></li>
+<li><p>create a code coverage report with <a class="reference external" href="https://pytest-cov.readthedocs.io/en/latest/">pytest-cov</a></p></li>
+<li><p>build the documentation with <a class="reference external" href="https://www.sphinx-doc.org/en/master/">sphinx</a></p></li>
+</ul>
+</section>
+</section>
+<section id="contributing-with-new-code">
+<h2>Contributing with new code<a class="headerlink" href="#contributing-with-new-code" title="Link to this heading"></a></h2>
+<p>If you want to contribute to scikit-shapes, the first step is to fork the main repository and create a local branch in which you will push your modification.</p>
+</section>
+<section id="test-your-modification-locally">
+<h2>Test your modification locally<a class="headerlink" href="#test-your-modification-locally" title="Link to this heading"></a></h2>
+<p>When you have a clone of your scikit-shapes branch on your system and have made some modifications to the codebase, you may want to test your modification locally</p>
+<section id="in-a-virtual-environment">
+<h3>In a virtual environment<a class="headerlink" href="#in-a-virtual-environment" title="Link to this heading"></a></h3>
+<p>Install your local version of scikit-shapes. With the <code class="docutils literal notranslate"><span class="pre">--editable</span></code> argument, further changes to the codebase will modify also the <code class="docutils literal notranslate"><span class="pre">skshapes</span></code> package on your environment. Then you don’t need to re-install the package every time you make a change.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--editable<span class="w"> </span>.
+</pre></div>
+</div>
+<p>Once your local version of scikit-shapes is installed, install the tests and documentation dependencies by running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements_dev.txt
+pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements_docs.txt
+</pre></div>
+</div>
+<p>Then, you can run :</p>
+<ul class="simple">
+<li><p>the precommit hooks:</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pre-commit<span class="w"> </span>install
+pre-commit<span class="w"> </span>run<span class="w"> </span>--all-files
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>the tests (and see code coverage report in your browser)</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pytest
+firefox<span class="w"> </span>htmlcov/index.html<span class="w"> </span><span class="c1"># replace firefox by your web browser</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>the documentation building</p></li>
+</ul>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Build the documentation</span>
+sphinx-apidoc<span class="w"> </span>-o<span class="w"> </span>doc/source/api/<span class="w"> </span>--module-first<span class="w"> </span>--force<span class="w"> </span>src/skshapes
+sphinx-build<span class="w"> </span>-b<span class="w"> </span>html<span class="w"> </span>doc/source/<span class="w"> </span>doc/_build/html
+<span class="c1"># Serve it locally</span>
+<span class="nb">cd</span><span class="w"> </span>doc/_build/html
+python<span class="w"> </span>-m<span class="w"> </span>http.server
+</pre></div>
+</div>
+</section>
+<section id="using-nox">
+<h3>Using nox<a class="headerlink" href="#using-nox" title="Link to this heading"></a></h3>
+<p>Nox is a solution to build virtual environment on-the-fly and run a sequence of instruction (a session). We provide three nox sessions, defined on the file <code class="docutils literal notranslate"><span class="pre">noxfile.py</span></code>, they can be run with the following instructions:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>nox
+nox<span class="w"> </span>-s<span class="w"> </span>tests
+nox<span class="w"> </span>-s<span class="w"> </span>documentation
+nox<span class="w"> </span>-s<span class="w"> </span>precommit
+nox<span class="w"> </span><span class="c1"># Run all the sessions</span>
+</pre></div>
+</div>
+<p>Note that running nox sessions for scikit-shapes is very time-consuming, because the library and its dependencies must be reinstalled every time a nox session is started (and scikit-shapes depends on pytorch). We recommend to configure a virtual environment.</p>
+</section>
+</section>
+<section id="open-a-pull-request">
+<h2>Open a pull request<a class="headerlink" href="#open-a-pull-request" title="Link to this heading"></a></h2>
+<p>When you think your code is ready to be merged, open a pull request to the main branch. The pre-commit hooks and the tests will run and a coverage report will be issued. Your modifications need to be approved by a maintainer before being merged to the main repository. If needed, modifications can be done after the opening of the pull request, each new push to your local branch will trigger the checks again.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="explanation/features/moments.html" class="btn btn-neutral float-left" title="Computing local moments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

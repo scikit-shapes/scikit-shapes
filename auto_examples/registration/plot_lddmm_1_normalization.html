@@ -1,0 +1,646 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LDDMM with normalized kernel &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Elastic metric and multiscale strategy" href="plot_multiscale_elastic.html" />
+    <link rel="prev" title="Registration with LDDMM" href="plot_lddmm_0_skulls.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gallery of examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-and-manipulating-data">Loading and manipulating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#working-at-multiple-scales">Working at multiple scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#computing-shape-features">Computing shape features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registering-and-aligning-shapes-with-each-other">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#using-one-of-our-interactive-applications">Using one of our interactive applications</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#defining-a-custom-model-or-loss-function">Defining a custom model or loss function</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../data/index.html">Loading and manipulating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multiscaling/index.html">Working at multiple scales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../features/index.html">Computing shape features</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Registering and aligning shapes with each other</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_karateka.html">Intrinsic vs Extrinsic deformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_rigid_0_2d.html">Rigid alignment in 2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_rigid_1_3d.html">Rigid alignment in 3D with landmarks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_lddmm_0_skulls.html">Registration with LDDMM</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">LDDMM with normalized kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_multiscale_elastic.html">Elastic metric and multiscale strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../applications/index.html">Using one of our interactive applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../customization/index.html">Defining a custom model or loss function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Gallery of examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Registering and aligning shapes with each other</a></li>
+      <li class="breadcrumb-item active">LDDMM with normalized kernel</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/registration/plot_lddmm_1_normalization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-registration-plot-lddmm-1-normalization-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="lddmm-with-normalized-kernel">
+<span id="sphx-glr-auto-examples-registration-plot-lddmm-1-normalization-py"></span><h1>LDDMM with normalized kernel<a class="headerlink" href="#lddmm-with-normalized-kernel" title="Link to this heading"></a></h1>
+<p>This notebook illustrates the interest of normalizing the cometric in the LDDMM
+model. We consider the registration of two spheres that differ by a translation
+first, and then a more complex registration task with a translation and a deformation.</p>
+<p>Without normalization, the carpooling artifact occurs: the sphere
+is contracted, then translated and finally expanded. in this situation, event if
+the morphed shape matches the target, the intermediate shapes are not meaningful
+and the extrapolation is not reliable.</p>
+<p>Normalizing the kernel adds regularization to the morphing, leanding to prevention
+of the carpooling artifact and improvement of the extrapolation to some extent.</p>
+<p>Options for normalization are:</p>
+<ul class="simple">
+<li><p>“rows”: normalize the rows of the kernel</p></li>
+<li><p>“columns”: normalize the columns of the kernel</p></li>
+<li><p>“both”: normalize both the rows and the columns of the kernel (for quare kernels, algorithm 5.7 in <a class="reference external" href="https://www.jeanfeydy.com/geometric_data_analysis.pdf">https://www.jeanfeydy.com/geometric_data_analysis.pdf</a>)</p></li>
+</ul>
+<p>Further explanation can be found in the p177 and onwards of <a class="reference external" href="https://www.jeanfeydy.com/geometric_data_analysis.pdf">https://www.jeanfeydy.com/geometric_data_analysis.pdf</a>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">time</span><span class="w"> </span><span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="c1"># sphinx_gallery_thumbnail_number = 9</span>
+</pre></div>
+</div>
+<p>Load data</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;smooth_shading&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;pbr&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;metallic&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+    <span class="s2">&quot;roughness&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">cpos</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mf">1.6256104086078755</span><span class="p">,</span> <span class="o">-</span><span class="mf">9.701422233882411</span><span class="p">,</span> <span class="mf">1.3012755902068773</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">1.191160019984921</span><span class="p">,</span> <span class="mf">0.01901107976782581</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0052552929581526076</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">0.006053690112347382</span><span class="p">,</span> <span class="mf">0.13347614338229413</span><span class="p">,</span> <span class="mf">0.9910335372649167</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+
+<span class="n">decimation</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Decimation</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">decimation</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">decimation</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+<span class="n">target</span><span class="o">.</span><span class="n">points</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">points</span> <span class="o">+</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_001.png" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_001.png" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_lddmm_1_normalization_001.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<section id="lddm-without-normalization">
+<h2>LDDM without normalization<a class="headerlink" href="#lddm-without-normalization" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">ExtrinsicDeformation</span><span class="p">(</span>
+    <span class="n">n_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">loss</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">L2Loss</span><span class="p">()</span>
+
+<span class="n">task</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">LBFGS</span><span class="p">(),</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">1e-1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+<span class="n">task</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Elapsed time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">path_</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_002.png" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_002.png" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_lddmm_1_normalization_002.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Initial loss : 8.04e+02
+  = 8.04e+02 + 0.1 * 0.00e+00 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 1.84e+00
+  = 1.42e+00 + 0.1 * 4.16e+00 (fidelity + regularization_weight * regularization)
+Loss after 2 iteration(s) : 5.25e-01
+  = 1.21e-01 + 0.1 * 4.04e+00 (fidelity + regularization_weight * regularization)
+Loss after 3 iteration(s) : 4.40e-01
+  = 3.99e-02 + 0.1 * 4.00e+00 (fidelity + regularization_weight * regularization)
+Elapsed time:  69.92670607566833
+</pre></div>
+</div>
+<p>Extrapolation</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">back</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span>
+    <span class="n">final_time</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">forward</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span>
+    <span class="n">final_time</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">back</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">forward</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="s2">&quot;lddmm_no_normalization.gif&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">clear_actors</span><span class="p">()</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_003.gif" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_003.gif" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></section>
+<section id="normalizing-the-rows-of-the-kernel">
+<h2>Normalizing the rows of the kernel<a class="headerlink" href="#normalizing-the-rows-of-the-kernel" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">model_norm</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">ExtrinsicDeformation</span><span class="p">(</span>
+    <span class="n">n_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">normalization</span><span class="o">=</span><span class="s2">&quot;rows&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">task_norm</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model_norm</span><span class="p">,</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">LBFGS</span><span class="p">(),</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+<span class="n">task_norm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Elapsed time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">task_norm</span><span class="o">.</span><span class="n">path_</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_004.png" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_004.png" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_lddmm_1_normalization_004.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Initial loss : 8.04e+02
+  = 8.04e+02 + 0 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 1.67e-03
+  = 1.67e-03 + 0 (fidelity + regularization_weight * regularization)
+Elapsed time:  41.609856843948364
+</pre></div>
+</div>
+<p>Extrapolation</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">back</span> <span class="o">=</span> <span class="n">model_norm</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">task_norm</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span>
+    <span class="n">final_time</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">model_norm</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">forward</span> <span class="o">=</span> <span class="n">model_norm</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">task_norm</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span>
+    <span class="n">final_time</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">back</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">forward</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="s2">&quot;lddmm_normalization.gif&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">clear_actors</span><span class="p">()</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_005.gif" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_005.gif" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></section>
+<section id="normalizing-both-rows-and-columns-of-the-kernel">
+<h2>Normalizing both rows and columns of the kernel<a class="headerlink" href="#normalizing-both-rows-and-columns-of-the-kernel" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">model_norm</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">ExtrinsicDeformation</span><span class="p">(</span>
+    <span class="n">n_steps</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">normalization</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">task_norm</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model_norm</span><span class="p">,</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">LBFGS</span><span class="p">(),</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+<span class="n">task_norm</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+<span class="n">elapsed_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">task_norm</span><span class="o">.</span><span class="n">path_</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_006.png" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_006.png" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_lddmm_1_normalization_006.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Initial loss : 8.04e+02
+  = 8.04e+02 + 0 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 4.98e-06
+  = 4.98e-06 + 0 (fidelity + regularization_weight * regularization)
+</pre></div>
+</div>
+<p>Extrapolation</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">back</span> <span class="o">=</span> <span class="n">model_norm</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">task_norm</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span>
+    <span class="n">final_time</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">model_norm</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">forward</span> <span class="o">=</span> <span class="n">model_norm</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">task_norm</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span>
+    <span class="n">final_time</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">back</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">forward</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="s2">&quot;lddmm_normalization.gif&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">clear_actors</span><span class="p">()</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_007.gif" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_007.gif" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></section>
+<section id="example-with-a-more-complex-shape">
+<h2>Example with a more complex shape<a class="headerlink" href="#example-with-a-more-complex-shape" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">n_steps</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="n">plot_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;smooth_shading&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;pbr&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s2">&quot;metallic&quot;</span><span class="p">:</span> <span class="mf">0.7</span><span class="p">,</span>
+    <span class="s2">&quot;roughness&quot;</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">cpos</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mf">3.6401575998373183</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.183408993703478</span><span class="p">,</span> <span class="mf">1.0915912440258628</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">0.7463583722710609</span><span class="p">,</span> <span class="mf">0.762569822371006</span><span class="p">,</span> <span class="mf">0.48035204596817493</span><span class="p">),</span>
+    <span class="p">(</span><span class="o">-</span><span class="mf">0.1745415166347431</span><span class="p">,</span> <span class="mf">0.04933887578777028</span><span class="p">,</span> <span class="mf">0.9834129012306287</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="c1"># 5 - 8</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="s2">&quot;../test_data/cactus/cactus3.ply&quot;</span><span class="p">)</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="s2">&quot;../test_data/cactus/cactus11.ply&quot;</span><span class="p">)</span>
+<span class="n">target</span><span class="o">.</span><span class="n">points</span> <span class="o">+=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+
+<span class="n">decimation</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Decimation</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">source</span> <span class="o">=</span> <span class="n">decimation</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">decimation</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">ExtrinsicDeformation</span><span class="p">(</span>
+    <span class="n">n_steps</span><span class="o">=</span><span class="n">n_steps</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">normalization</span><span class="o">=</span><span class="s2">&quot;both&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">loss</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">L2Loss</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="interpolation">
+<h2>Interpolation<a class="headerlink" href="#interpolation" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">task</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">LBFGS</span><span class="p">(),</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+<span class="n">task</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Elapsed time: &quot;</span><span class="p">,</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">path_</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_008.png" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_008.png" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-9">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_lddmm_1_normalization_008.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Initial loss : 2.50e+02
+  = 2.50e+02 + 0.001 * 0.00e+00 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 1.35e-01
+  = 9.99e-03 + 0.001 * 1.25e+02 (fidelity + regularization_weight * regularization)
+Elapsed time:  15.22480583190918
+</pre></div>
+</div>
+</section>
+<section id="extrapolation">
+<h2>Extrapolation<a class="headerlink" href="#extrapolation" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">back</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span>
+    <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">return_regularization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">final_time</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">model</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_steps</span>
+
+<span class="n">forward</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">task</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span>
+    <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">return_regularization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">final_time</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">back</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">forward</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">frame</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+        <span class="n">frame</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span>
+    <span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;teal&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">**</span><span class="n">plot_kwargs</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-10" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-10">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_lddmm_1_normalization_009.png" srcset="../../_images/sphx_glr_plot_lddmm_1_normalization_009.png" alt="plot lddmm 1 normalization" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-11" name="sd-tab-set-5" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-11">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_lddmm_1_normalization_009.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[(3.6401575998373183, -1.183408993703478, 1.0915912440258628),
+ (0.7463583722710609, 0.762569822371006, 0.48035204596817493),
+ (-0.17454151663474313, 0.049338875787770284, 0.9834129012306289)]
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (3 minutes 27.775 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-registration-plot-lddmm-1-normalization-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/ffd55f77bf308055cfda094bf5a2c745/plot_lddmm_1_normalization.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_lddmm_1_normalization.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/46ce762517cf31cb0b3636295e06b04e/plot_lddmm_1_normalization.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_lddmm_1_normalization.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_lddmm_0_skulls.html" class="btn btn-neutral float-left" title="Registration with LDDMM" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_multiscale_elastic.html" class="btn btn-neutral float-right" title="Elastic metric and multiscale strategy" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

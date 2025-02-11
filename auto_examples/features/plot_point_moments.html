@@ -1,0 +1,441 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How to compute local geometric moments &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Registering and aligning shapes with each other" href="../registration/index.html" />
+    <link rel="prev" title="How to compute local point normals" href="plot_point_normals.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gallery of examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-and-manipulating-data">Loading and manipulating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#working-at-multiple-scales">Working at multiple scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#computing-shape-features">Computing shape features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registering-and-aligning-shapes-with-each-other">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#using-one-of-our-interactive-applications">Using one of our interactive applications</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#defining-a-custom-model-or-loss-function">Defining a custom model or loss function</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../data/index.html">Loading and manipulating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multiscaling/index.html">Working at multiple scales</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Computing shape features</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_point_curvatures.html">How to compute local curvatures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_point_normals.html">How to compute local point normals</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">How to compute local geometric moments</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../registration/index.html">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../applications/index.html">Using one of our interactive applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../customization/index.html">Defining a custom model or loss function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Gallery of examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Computing shape features</a></li>
+      <li class="breadcrumb-item active">How to compute local geometric moments</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/features/plot_point_moments.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-features-plot-point-moments-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="how-to-compute-local-geometric-moments">
+<span id="point-moments-example"></span><span id="sphx-glr-auto-examples-features-plot-point-moments-py"></span><h1>How to compute local geometric moments<a class="headerlink" href="#how-to-compute-local-geometric-moments" title="Link to this heading"></a></h1>
+<p>We use the <a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData.point_moments" title="skshapes.PolyData.point_moments"><code class="xref py py-meth docutils literal notranslate"><span class="pre">point_moments()</span></code></a> method to compute local averages and covariance matrices. This is useful for estimating point normals and curvatures.</p>
+<p>First, we create a simple point cloud in 2D:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">n_points</span><span class="p">,</span> <span class="n">dim</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span>
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n_points</span><span class="p">,</span> <span class="n">dim</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>skshapes.PolyData (0x7fa88f604e50 on cpu, float32), a 2D point cloud with:
+- 3 points
+- center (0.431, 0.124), radius 0.238
+- bounds x=(0.222, 0.601), y=(0.029, 0.238),
+</pre></div>
+</div>
+<p>The method <a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData.point_neighborhoods" title="skshapes.PolyData.point_neighborhoods"><code class="xref py py-meth docutils literal notranslate"><span class="pre">point_neighborhoods()</span></code></a> associates
+to each point <span class="math notranslate nohighlight">\(x_i\)</span> in the shape a weight
+distribution <span class="math notranslate nohighlight">\(\nu_i(x)\)</span> over the ambient space.
+Typically, this corresponds to a normalized Gaussian window at scale <span class="math notranslate nohighlight">\(\sigma\)</span>.
+If <span class="math notranslate nohighlight">\(\mu(x)\)</span> denotes the uniform distribution on the support of the shape, then:</p>
+<div class="math notranslate nohighlight">
+\[\nu_i(x) \propto \exp\left(-\frac{||x-x_i||^2}{2\sigma^2}\right) \mu(x)\]</div>
+<p>The method <a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData.point_moments" title="skshapes.PolyData.point_moments"><code class="xref py py-meth docutils literal notranslate"><span class="pre">point_moments()</span></code></a> takes as input the same
+arguments, and returns a <a class="reference internal" href="../../stubs/skshapes.features.Moments.html#skshapes.features.Moments" title="skshapes.features.Moments"><code class="xref py py-class docutils literal notranslate"><span class="pre">skshapes.features.Moments</span></code></a> object
+that computes the moments of order 0, 1 and 2 of these distributions.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">moments</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">point_moments</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The total mass <span class="math notranslate nohighlight">\(m_i\)</span> of <span class="math notranslate nohighlight">\(\nu_i\)</span> is an estimate of the local point density:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">moments</span><span class="o">.</span><span class="n">masses</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([2.9560, 2.4417, 2.6095])
+</pre></div>
+</div>
+<p>The local mean <span class="math notranslate nohighlight">\(\overline{x}_i = \mathbb{E}_{x\sim \nu_i}[x]\)</span>
+is a point in the vicinity of <span class="math notranslate nohighlight">\(x_i\)</span>:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">moments</span><span class="o">.</span><span class="n">means</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[0.4366, 0.1215],
+        [0.4045, 0.1391],
+        [0.4529, 0.1125]])
+</pre></div>
+</div>
+<p>The local covariance matrix
+<span class="math notranslate nohighlight">\(\Sigma_i = \mathbb{E}_{x\sim \nu_i}[(x-\overline{x}_i)(x-\overline{x}_i)^{\intercal}]\)</span>
+is symmetric and positive semi-definite:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">moments</span><span class="o">.</span><span class="n">covariances</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[[ 0.0242, -0.0133],
+         [-0.0133,  0.0073]],
+
+        [[ 0.0255, -0.0140],
+         [-0.0140,  0.0077]],
+
+        [[ 0.0230, -0.0126],
+         [-0.0126,  0.0070]]])
+</pre></div>
+</div>
+<p>Its eigenvalues are non-negative and typically of order <span class="math notranslate nohighlight">\(\sigma^2\)</span>:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">L</span> <span class="o">=</span> <span class="n">moments</span><span class="o">.</span><span class="n">covariance_eigenvalues</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[2.3372e-06, 3.1545e-02],
+        [4.1747e-06, 3.3108e-02],
+        [4.6184e-06, 2.9921e-02]])
+</pre></div>
+</div>
+<p>Its eigenvectors are orthogonal and represent the principal directions of
+the local distribution of points:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">Q</span> <span class="o">=</span> <span class="n">moments</span><span class="o">.</span><span class="n">covariance_eigenvectors</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([[[-0.4819, -0.8762],
+         [-0.8762,  0.4819]],
+
+        [[-0.4807, -0.8769],
+         [-0.8769,  0.4807]],
+
+        [[-0.4826, -0.8759],
+         [-0.8759,  0.4826]]])
+</pre></div>
+</div>
+<p>The eigenvectors are stored column-wise, and sorted by increasing eigenvalue:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">LQt</span> <span class="o">=</span> <span class="n">L</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">n_points</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Q</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">QLQt</span> <span class="o">=</span> <span class="n">Q</span> <span class="o">@</span> <span class="n">LQt</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reconstruction error: </span><span class="si">{</span><span class="p">(</span><span class="n">QLQt</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">moments</span><span class="o">.</span><span class="n">covariances</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.2e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Reconstruction error: 5.59e-09
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>These attributes are computed when required, and cached in memory.</p>
+</div>
+<section id="on-a-2d-curve">
+<h2>On a 2D curve<a class="headerlink" href="#on-a-2d-curve" title="Link to this heading"></a></h2>
+<p>Going further, let’s consider a sampled curve in 2D:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">wiggly_curve</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>skshapes.PolyData (0x7fa890d6fe90 on cpu, float32), a 2D point cloud with:
+- 32 points
+- center (-0.078, 0.224), radius 1.283
+- bounds x=(-1.076, 1.196), y=(-0.923, 1.098),
+</pre></div>
+</div>
+<p>Intuitively, computing local moments
+<span class="math notranslate nohighlight">\(m_i\)</span> of order 0,
+<span class="math notranslate nohighlight">\(\overline{x}_i\)</span> of order 1
+and <span class="math notranslate nohighlight">\(\Sigma_i\)</span> of order 2 is equivalent to
+fitting a Gaussian distribution to each local neighborhood <span class="math notranslate nohighlight">\(\nu_i\)</span>.
+In dimension <span class="math notranslate nohighlight">\(D=2\)</span> or <span class="math notranslate nohighlight">\(D=3\)</span>, if <span class="math notranslate nohighlight">\(\lambda_{\mathbb{R}^D}\)</span> denotes
+the Lebesgue measure on the ambient space (i.e. the area or the volume), then:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{d}\nu_i(x) ~&amp;\simeq~ m_i\,\text{d}\mathcal{N}(\overline{x}_i, \Sigma_i)(x)  \\
+&amp;= ~\frac{m_i}{(2\pi\sigma^2)^{D/2} } \, \exp\left[-\tfrac{1}{2}(x-\overline{x}_i)^{\intercal}\Sigma_i^{-1}(x-\overline{x}_i)\right]\, \text{d}\lambda_{\mathbb{R}^D}(x)~\end{split}\]</div>
+<p>We visualize these descriptors by drawing ellipses centered at <span class="math notranslate nohighlight">\(\overline{x}_i\)</span>,
+colored by the local densities <span class="math notranslate nohighlight">\(m_i\)</span> and oriented in <span class="math notranslate nohighlight">\(\mathbb{R}^2\)</span> or <span class="math notranslate nohighlight">\(\mathbb{R}^3\)</span>
+with axes that are aligned with the eigenvectors of <span class="math notranslate nohighlight">\(\Sigma_i\)</span> and
+whose lengths are proportional to the square root of its eigenvalues:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sigma</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]):</span>
+    <span class="n">moments</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">point_moments</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+
+    <span class="c1"># Plot the ellipses</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Moments at scale = </span><span class="si">{</span><span class="n">sigma</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">sks</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">display_covariances</span><span class="p">(</span><span class="n">shape</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">moments</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_point_moments_001.png" srcset="../../_images/sphx_glr_plot_point_moments_001.png" alt="Moments at scale = 0.1, Moments at scale = 0.2, Moments at scale = 0.5, Moments at scale = 1.0" class = "sphx-glr-single-img"/><p>As evidenced here, <a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData.point_moments" title="skshapes.PolyData.point_moments"><code class="xref py py-meth docutils literal notranslate"><span class="pre">point_moments()</span></code></a> describes the local
+shape context at scale <span class="math notranslate nohighlight">\(\sigma\)</span>. We use it to compute point normals and
+curvatures that are robust to noise and sampling artifacts.</p>
+</section>
+<section id="on-a-3d-surface">
+<h2>On a 3D surface<a class="headerlink" href="#on-a-3d-surface" title="Link to this heading"></a></h2>
+<p>We can perform the same analysis on a 3D surface:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">pv</span><span class="o">.</span><span class="n">examples</span><span class="o">.</span><span class="n">download_bunny</span><span class="p">())</span>
+    <span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">5000</span><span class="p">)</span>
+    <span class="o">.</span><span class="n">normalize</span><span class="p">()</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>skshapes.PolyData (0x7fa890910850 on cpu, float32), a 3D triangle mesh with:
+- 5,000 points, 14,952 edges, 9,949 triangles
+- center (-0.000, 0.000, 0.000), radius 1.000
+- bounds x=(-0.581, 0.767), y=(-0.534, 0.807), z=(-0.597, 0.453)
+</pre></div>
+</div>
+<p>As expected, the point moments of order 1 and 2 now refer to 3D vectors and matrices:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">moments</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">point_moments</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;moments.masses:     &quot;</span><span class="p">,</span> <span class="n">moments</span><span class="o">.</span><span class="n">masses</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;moments.means:      &quot;</span><span class="p">,</span> <span class="n">moments</span><span class="o">.</span><span class="n">means</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;moments.covariances:&quot;</span><span class="p">,</span> <span class="n">moments</span><span class="o">.</span><span class="n">covariances</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>moments.masses:      torch.Size([5000])
+moments.means:       torch.Size([5000, 3])
+moments.covariances: torch.Size([5000, 3, 3])
+</pre></div>
+</div>
+<p>We visualize the ellipsoids on a subset of our full point cloud:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">landmark_indices</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">shape</span><span class="o">.</span><span class="n">n_points</span><span class="p">,</span> <span class="mi">50</span><span class="p">))</span>
+
+<span class="n">pl</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">sks</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">display</span><span class="p">(</span><span class="n">plotter</span><span class="o">=</span><span class="n">pl</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">sks</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">display_covariances</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">moments</span><span class="p">,</span> <span class="n">landmark_indices</span><span class="o">=</span><span class="n">landmark_indices</span><span class="p">,</span> <span class="n">plotter</span><span class="o">=</span><span class="n">pl</span>
+<span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_point_moments_002.png" srcset="../../_images/sphx_glr_plot_point_moments_002.png" alt="plot point moments" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/features/images/sphx_glr_plot_point_moments_002.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<p>Using the covariance eigenvalues <span class="math notranslate nohighlight">\(\lambda_1 \leqslant \lambda_2 \leqslant \lambda_3\)</span>,
+we can compute simple shape descriptors such as the plateness
+which is equal to 0 if the local ellipsoid is a sphere and 1 if it is a 2D disk:</p>
+<div class="math notranslate nohighlight">
+\[\text{plateness} = 1 - \frac{\lambda_1}{\sqrt{\lambda_2\lambda_3}}~.\]</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">scales</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]</span>
+
+<span class="n">pl</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">scales</span><span class="p">):</span>
+    <span class="n">moments</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">point_moments</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+    <span class="n">eigs</span> <span class="o">=</span> <span class="n">moments</span><span class="o">.</span><span class="n">covariance_eigenvalues</span>
+    <span class="n">shape</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;plateness_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mi">1</span> <span class="o">-</span> <span class="n">eigs</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="n">eigs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">eigs</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">i</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sks</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">display</span><span class="p">(</span>
+        <span class="n">plotter</span><span class="o">=</span><span class="n">pl</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+        <span class="n">scalars</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;plateness_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">scalar_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">smooth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Plateness at scale </span><span class="si">{</span><span class="n">scale</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_point_moments_003.png" srcset="../../_images/sphx_glr_plot_point_moments_003.png" alt="plot point moments" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/features/images/sphx_glr_plot_point_moments_003.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<p>Likewise, we can compute the tubeness, which is equal to 0 if the local ellipsoid is
+a sphere or a disk, and 1 if it is a 1D segment:</p>
+<div class="math notranslate nohighlight">
+\[\text{tubeness} = 1 - \frac{\lambda_2}{\lambda_3}~.\]</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">pl</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">scale</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">scales</span><span class="p">):</span>
+    <span class="n">moments</span> <span class="o">=</span> <span class="n">shape</span><span class="o">.</span><span class="n">point_moments</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
+    <span class="n">eigs</span> <span class="o">=</span> <span class="n">moments</span><span class="o">.</span><span class="n">covariance_eigenvalues</span>
+    <span class="n">shape</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;tubeness_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">eigs</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">eigs</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+    <span class="n">pl</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="n">i</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">sks</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">display</span><span class="p">(</span>
+        <span class="n">plotter</span><span class="o">=</span><span class="n">pl</span><span class="p">,</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span>
+        <span class="n">scalars</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tubeness_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">scalar_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">smooth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">clim</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Tubeness at scale </span><span class="si">{</span><span class="n">scale</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="n">pl</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_point_moments_004.png" srcset="../../_images/sphx_glr_plot_point_moments_004.png" alt="plot point moments" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/features/images/sphx_glr_plot_point_moments_004.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 29.110 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-features-plot-point-moments-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/643a87a292521febaecf9cb90573d0db/plot_point_moments.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_point_moments.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e5859ea5252ddc2fc121f86779675157/plot_point_moments.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_point_moments.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_point_normals.html" class="btn btn-neutral float-left" title="How to compute local point normals" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../registration/index.html" class="btn btn-neutral float-right" title="Registering and aligning shapes with each other" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

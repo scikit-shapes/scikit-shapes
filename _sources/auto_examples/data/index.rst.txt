@@ -1,0 +1,63 @@
+
+
+.. _sphx_glr_auto_examples_data:
+
+.. _data_examples:
+
+Loading and manipulating data
+------------------------------
+
+How to load, manipulate and save shape data.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="PyVista is a Python library for 3D visualization and mesh manipulation. It is a python wrapper ...">
+
+.. only:: html
+
+  .. image:: /auto_examples/data/images/thumb/sphx_glr_plot_pyvista_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_data_plot_pyvista.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">PolyData conversion from and to PyVista or Vedo</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This notebook describes the skshapes.PolyData class, the common class for point clouds, wirefra...">
+
+.. only:: html
+
+  .. image:: /auto_examples/data/images/thumb/sphx_glr_plot_polydata_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_data_plot_polydata.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">The PolyData class: point cloud, wireframe and triangle meshes</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/data/plot_pyvista
+   /auto_examples/data/plot_polydata
+

@@ -1,0 +1,6 @@
+skshapes.convolutions.squared\_distances.squared\_distances
+===========================================================
+
+.. currentmodule:: skshapes.convolutions.squared_distances
+
+.. autofunction:: squared_distances

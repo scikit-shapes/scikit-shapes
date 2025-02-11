@@ -1,0 +1,6 @@
+skshapes.input\_validation.notnone\_rules.rule\_one\_and\_only\_one
+===================================================================
+
+.. currentmodule:: skshapes.input_validation.notnone_rules
+
+.. autofunction:: rule_one_and_only_one

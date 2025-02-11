@@ -1,0 +1,36 @@
+skshapes.morphing
+=================
+
+.. automodule:: skshapes.morphing
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   basemodel
+   extrinsic_deformation
+   intrinsic_deformation
+   rigid_motion
+   validation
+

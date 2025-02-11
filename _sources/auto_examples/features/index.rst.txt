@@ -1,0 +1,81 @@
+
+
+.. _sphx_glr_auto_examples_features:
+
+.. _features_examples:
+
+Computing shape features
+-------------------------
+
+Scikit-shapes provides fast and robust methods to compute point normals, curvatures and other shape descriptors.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="We use the point_curvatures method to compute local curvature values.">
+
+.. only:: html
+
+  .. image:: /auto_examples/features/images/thumb/sphx_glr_plot_point_curvatures_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_features_plot_point_curvatures.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">How to compute local curvatures</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="We use the point_normals method to compute normal vectors at each vertex of a triangle mesh. Th...">
+
+.. only:: html
+
+  .. image:: /auto_examples/features/images/thumb/sphx_glr_plot_point_normals_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_features_plot_point_normals.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">How to compute local point normals</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="We use the point_moments method to compute local averages and covariance matrices. This is usef...">
+
+.. only:: html
+
+  .. image:: /auto_examples/features/images/thumb/sphx_glr_plot_point_moments_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_features_plot_point_moments.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">How to compute local geometric moments</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/features/plot_point_curvatures
+   /auto_examples/features/plot_point_normals
+   /auto_examples/features/plot_point_moments
+

@@ -1,0 +1,286 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>skshapes.tasks.registration.Registration &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="skshapes.input_validation" href="skshapes.input_validation.html" />
+    <link rel="prev" title="skshapes.tasks.registration" href="skshapes.tasks.registration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skshapes.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Sphere.html">skshapes.Sphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Circle.html">skshapes.Circle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.PolyData.html">skshapes.PolyData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.types.html">skshapes.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.features.html">skshapes.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.convolutions.html">skshapes.convolutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.applications.html">skshapes.applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.triangle_mesh.html">skshapes.triangle_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.loss.html">skshapes.loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.morphing.html">skshapes.morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.optimization.html">skshapes.optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.multiscaling.html">skshapes.multiscaling</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="skshapes.tasks.html">skshapes.tasks</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="skshapes.tasks.registration.html">skshapes.tasks.registration</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">skshapes.tasks.registration.Registration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.input_validation.html">skshapes.input_validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="skshapes.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.tasks.html">skshapes.tasks</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.tasks.registration.html">skshapes.tasks.registration</a></li>
+      <li class="breadcrumb-item active">skshapes.tasks.registration.Registration</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/stubs/skshapes.tasks.registration.Registration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="skshapes-tasks-registration-registration">
+<h1>skshapes.tasks.registration.Registration<a class="headerlink" href="#skshapes-tasks-registration-registration" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="skshapes.tasks.registration.Registration">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skshapes.tasks.registration.</span></span><span class="sig-name descname"><span class="pre">Registration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularization_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.tasks.registration.Registration" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Registration class.</p>
+<p>This class implements the registration between two shapes. It must be
+initialized with a model, a loss and an optimizer. The registration is
+performed by calling the fit method with the source and target shapes as
+arguments. The transform method can then be used to transform a new shape
+using the learned registration’s parameter.</p>
+<p>It must be initialized with a model, a loss and an optimizer. The
+registration is performed by calling the fit method with the source and
+target shapes as arguments. The transform method can then be used to
+transform the source shape using the learned registration’s parameter.</p>
+<p>The optimization criterion is the sum of the fidelity and the regularization
+term, weighted by the regularization_weight parameter:</p>
+<p>$$ text{loss}(theta) = text{fid}(text{Morph}(theta, text{source}), text{target}) + text{regularization_weight} times text{reg}(theta)$$</p>
+<p>The fidelity term <span class="math notranslate nohighlight">\(\text{fid}\)</span> is given by the loss object, the
+regularization term <span class="math notranslate nohighlight">\(\text{reg}\)</span> and the morphing <span class="math notranslate nohighlight">\(\text{Morph}\)</span> are
+given by the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.morphing.basemodel.BaseModel.html#skshapes.morphing.basemodel.BaseModel" title="skshapes.morphing.basemodel.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></span>) – a model object (from skshapes.morphing)</p></li>
+<li><p><strong>loss</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.loss.baseloss.BaseLoss.html#skshapes.loss.baseloss.BaseLoss" title="skshapes.loss.baseloss.BaseLoss"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseLoss</span></code></a></span>) – a loss object (from skshapes.loss)</p></li>
+<li><p><strong>optimizer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.optimization.LBFGS.html#skshapes.optimization.LBFGS" title="skshapes.optimization.LBFGS"><code class="xref py py-class docutils literal notranslate"><span class="pre">LBFGS</span></code></a> | <a class="reference internal" href="skshapes.optimization.Adam.html#skshapes.optimization.Adam" title="skshapes.optimization.Adam"><code class="xref py py-class docutils literal notranslate"><span class="pre">Adam</span></code></a> | <a class="reference internal" href="skshapes.optimization.Adagrad.html#skshapes.optimization.Adagrad" title="skshapes.optimization.Adagrad"><code class="xref py py-class docutils literal notranslate"><span class="pre">Adagrad</span></code></a> | <a class="reference internal" href="skshapes.optimization.SGD.html#skshapes.optimization.SGD" title="skshapes.optimization.SGD"><code class="xref py py-class docutils literal notranslate"><span class="pre">SGD</span></code></a> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – an optimizer object (from skshapes.optimization)</p></li>
+<li><p><strong>regularization_weight</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – the regularization_weight parameter for the criterion :
+fidelity + regularization_weight * regularization.</p></li>
+<li><p><strong>n_iter</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – number of iteration for optimization loop.</p></li>
+<li><p><strong>verbose</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – positive to print the losses after each optimization loop iteration</p></li>
+<li><p><strong>gpu</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – do intensive numerical computations on a nvidia gpu with a cuda
+backend if available.</p></li>
+<li><p><strong>debug</strong> – if True, information will be stored during the optimization process</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">RigidMotion</span><span class="p">()</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">OptimalTransportLoss</span><span class="p">()</span>
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">lr</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">)</span>
+<span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+<span class="n">transformed_source</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+<span class="c1"># Access the parameter</span>
+<span class="n">parameter</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">parameter_</span>
+<span class="c1"># Access the loss</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">loss_</span>
+<span class="c1"># Access the fidelity term</span>
+<span class="n">fidelity</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">fidelity_</span>
+<span class="c1"># Access the regularization term</span>
+<span class="n">regularization</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">regularization_</span>
+</pre></div>
+</div>
+<p>More examples can be found in the
+[gallery](../../../generated/gallery/#registration).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.tasks.registration.Registration.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularization_weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.tasks.registration.Registration.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.tasks.registration.Registration.__init__" title="skshapes.tasks.registration.Registration.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*, model, loss[, optimizer, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.tasks.registration.Registration.fit" title="skshapes.tasks.registration.Registration.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(*, source, target[, initial_parameter])</p></td>
+<td><p>Fit the registration between the source and target shapes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.tasks.registration.Registration.fit_transform" title="skshapes.tasks.registration.Registration.fit_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code></a>(*, source, target[, ...])</p></td>
+<td><p>Fit the registration and apply it to the source shape.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.tasks.registration.Registration.transform" title="skshapes.tasks.registration.Registration.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(*, source)</p></td>
+<td><p>Apply the registration to a new shape.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.tasks.registration.Registration.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_parameter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.tasks.registration.Registration.fit" title="Link to this definition"></a></dt>
+<dd><p>Fit the registration between the source and target shapes.</p>
+<p>After calling this method, the registration’s parameter can be accessed
+with the <code class="docutils literal notranslate"><span class="pre">parameter_</span></code> attribute, the transformed shape with the
+<code class="docutils literal notranslate"><span class="pre">transformed_shape_</span></code> attribute and the list of successives shapes during
+the registration process with the <code class="docutils literal notranslate"><span class="pre">path_</span></code> attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source</strong> (<em>shape_object</em>) – a shape object (from skshapes.shapes)</p></li>
+<li><p><strong>target</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a> | <a class="reference internal" href="skshapes.types.image_type.html#skshapes.types.image_type" title="skshapes.types.image_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">image_type</span></code></a></span>) – a shape object (from skshapes.shapes)</p></li>
+<li><p><strong>initial_parameter</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'*_']</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – an initial parameter tensor for the optimization process. If None,
+the parameter is initialized with zeros. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>DeviceError</strong> – if the source and target shapes are not on the same device.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#skshapes.tasks.registration.Registration" title="skshapes.tasks.registration.Registration">Registration</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.tasks.registration.Registration.fit_transform">
+<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_parameter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.tasks.registration.Registration.fit_transform" title="Link to this definition"></a></dt>
+<dd><p>Fit the registration and apply it to the source shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a> | <a class="reference internal" href="skshapes.types.image_type.html#skshapes.types.image_type" title="skshapes.types.image_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">image_type</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.tasks.registration.Registration.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.tasks.registration.Registration.transform" title="Link to this definition"></a></dt>
+<dd><p>Apply the registration to a new shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>source</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a> | <a class="reference internal" href="skshapes.types.image_type.html#skshapes.types.image_type" title="skshapes.types.image_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">image_type</span></code></a></span>) – the shape to transform.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the transformed shape.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>shape_type</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skshapes.tasks.registration.html" class="btn btn-neutral float-left" title="skshapes.tasks.registration" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="skshapes.input_validation.html" class="btn btn-neutral float-right" title="skshapes.input_validation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

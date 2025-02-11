@@ -1,0 +1,25 @@
+skshapes.applications.browser.Browser
+=====================================
+
+.. currentmodule:: skshapes.applications.browser
+
+.. autoclass:: Browser
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Browser.__init__
+      ~Browser.show
+   
+   
+
+   
+   
+   

@@ -1,0 +1,6 @@
+skshapes.input\_validation.typechecking.typecheck
+=================================================
+
+.. currentmodule:: skshapes.input_validation.typechecking
+
+.. autofunction:: typecheck

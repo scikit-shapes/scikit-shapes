@@ -1,0 +1,435 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>skshapes.multiscaling.multiscale.Multiscale &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="skshapes.tasks" href="skshapes.tasks.html" />
+    <link rel="prev" title="skshapes.multiscaling.multiscale" href="skshapes.multiscaling.multiscale.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skshapes.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Sphere.html">skshapes.Sphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Circle.html">skshapes.Circle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.PolyData.html">skshapes.PolyData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.types.html">skshapes.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.features.html">skshapes.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.convolutions.html">skshapes.convolutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.applications.html">skshapes.applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.triangle_mesh.html">skshapes.triangle_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.loss.html">skshapes.loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.morphing.html">skshapes.morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.optimization.html">skshapes.optimization</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="skshapes.multiscaling.html">skshapes.multiscaling</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="skshapes.multiscaling.decimation.html">skshapes.multiscaling.decimation</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="skshapes.multiscaling.multiscale.html">skshapes.multiscaling.multiscale</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">skshapes.multiscaling.multiscale.Multiscale</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.tasks.html">skshapes.tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.input_validation.html">skshapes.input_validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="skshapes.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.multiscaling.html">skshapes.multiscaling</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.multiscaling.multiscale.html">skshapes.multiscaling.multiscale</a></li>
+      <li class="breadcrumb-item active">skshapes.multiscaling.multiscale.Multiscale</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/stubs/skshapes.multiscaling.multiscale.Multiscale.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="skshapes-multiscaling-multiscale-multiscale">
+<h1>skshapes.multiscaling.multiscale.Multiscale<a class="headerlink" href="#skshapes-multiscaling-multiscale-multiscale" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="skshapes.multiscaling.multiscale.Multiscale">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skshapes.multiscaling.multiscale.</span></span><span class="sig-name descname"><span class="pre">Multiscale</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratios</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.multiscale.Multiscale" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Multiscale representation of a shape.</p>
+<p>This class represents a shape using multiple levels of details,
+from coarse to fine scales.
+This is useful to speed-up computations such as multigrid simulations or level-of-detail rendering.
+This class takes as input a high-resolution shape and accepts three types of parameters to define the coarser representations in the hierarchy:</p>
+<ul class="simple">
+<li><p>The number of points <code class="docutils literal notranslate"><span class="pre">n_points</span></code> of each coarser scale.</p></li>
+<li><p>The typical <code class="docutils literal notranslate"><span class="pre">scale</span></code> or distance between two neighboring samples at each coarser scale.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">ratio</span></code> of the number of points between the origin scale and each coarser scale. A ratio of 1.0 corresponds to the original high-resolution shape, whereas a ratio of 0.2 corresponds to a coarse representation that only uses 20% of the original point count.</p></li>
+</ul>
+<p>Most of the methods of this class can be called with one of the <code class="docutils literal notranslate"><span class="pre">n_points</span></code>, <code class="docutils literal notranslate"><span class="pre">scale</span></code> or <code class="docutils literal notranslate"><span class="pre">ratio</span></code> parameters.</p>
+<p>We can retrieve existing coarse models at different scales using the
+<a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.at" title="skshapes.multiscaling.multiscale.Multiscale.at"><code class="xref py py-meth docutils literal notranslate"><span class="pre">at</span></code></a> method and add models at new sampling resolutions using the
+<a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.append" title="skshapes.multiscaling.multiscale.Multiscale.append"><code class="xref py py-meth docutils literal notranslate"><span class="pre">append</span></code></a> method.</p>
+<p>Signals (<code class="xref py py-attr docutils literal notranslate"><span class="pre">point_data</span></code>) defined at one scale can be propagated to the other scales using the <a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.propagate" title="skshapes.multiscaling.multiscale.Multiscale.propagate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">propagate()</span></code></a> method.
+This is illustrated in <a class="reference internal" href="../auto_examples/multiscaling/plot_signal_multiscale.html#multiscale-signal-propagation-example"><span class="std std-ref">this tutorial</span></a>.</p>
+<p>Likewise, if landmarks are defined on the original shape, they are propagated to the coarser scales as illustrated in <a class="reference internal" href="../auto_examples/multiscaling/plot_multiscaling_landmarks.html#multiscale-landmarks-example"><span class="std std-ref">this tutorial</span></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a> | <a class="reference internal" href="skshapes.types.image_type.html#skshapes.types.image_type" title="skshapes.types.image_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">image_type</span></code></a></span>) – The shape at the original, finest scale.</p></li>
+<li><p><strong>ratios</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[ndarray,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">Int[Tensor,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Int[ndarray,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The sampling ratios that describe the coarser scales.</p></li>
+<li><p><strong>n_points</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Int[Tensor,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Int[ndarray,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The target numbers of points for each coarser scale.</p></li>
+<li><p><strong>scales</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float[Tensor,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float[ndarray,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>] | <code class="xref py py-class docutils literal notranslate"><span class="pre">Int[Tensor,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Int[ndarray,</span> <span class="pre">'_']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>] | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The sampling scales that describe the coarser scales.</p></li>
+<li><p><strong>decimation_module</strong> – The decimation module that should be used to compute the coarser representations of the shape. If not provided, it is defined automatically.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>NotImplementedError</strong> – If the shape is not a triangle mesh.</p></li>
+<li><p><strong>ValueError</strong> – If none of the <code class="docutils literal notranslate"><span class="pre">ratios</span></code>, <code class="docutils literal notranslate"><span class="pre">n_points</span></code> or <code class="docutils literal notranslate"><span class="pre">scales</span></code> parameters are
+    provided or if more than one of these parameters are provided.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">multiscale</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Multiscale</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">ratios</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+<span class="c1"># Note that the original shape is always included in the multiscale representation</span>
+<span class="c1"># for a sampling ratio = 1.0</span>
+<span class="k">for</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="n">multiscale</span><span class="o">.</span><span class="n">ratios</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;at ratio=</span><span class="si">{</span><span class="n">ratio</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">multiscale</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">ratio</span><span class="o">=</span><span class="n">ratio</span><span class="p">)</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>at ratio=1.0, 842 points
+at ratio=0.5, 421 points
+at ratio=0.25, 210 points
+</pre></div>
+</div>
+<p>See the <a class="reference internal" href="../auto_examples/multiscaling/index.html#multiscale-examples"><span class="std std-ref">gallery</span></a> for more examples.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.multiscale.Multiscale.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratios</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scales</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.multiscale.Multiscale.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.__init__" title="skshapes.multiscaling.multiscale.Multiscale.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(shape[, ratios, n_points, scales, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.append" title="skshapes.multiscaling.multiscale.Multiscale.append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">append</span></code></a>(*[, ratio, n_points, scale])</p></td>
+<td><p>Appends a new shape to the list of sub-sampled representations of the base shape.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.at" title="skshapes.multiscaling.multiscale.Multiscale.at"><code class="xref py py-obj docutils literal notranslate"><span class="pre">at</span></code></a>(*[, ratio, n_points, scale])</p></td>
+<td><p>Returns the shape at a given ratio, number of points or scale.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.best_key" title="skshapes.multiscaling.multiscale.Multiscale.best_key"><code class="xref py py-obj docutils literal notranslate"><span class="pre">best_key</span></code></a>(*, ratio)</p></td>
+<td><p>Return the best key in the shapes dictionary for a given, arbitrary ratio.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.index_mapping" title="skshapes.multiscaling.multiscale.Multiscale.index_mapping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index_mapping</span></code></a>(fine_ratio, coarse_ratio)</p></td>
+<td><p>Returns the index mapping from a fine to a coarse resolution.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.propagate" title="skshapes.multiscaling.multiscale.Multiscale.propagate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">propagate</span></code></a>(signal_name[, from_scale, ...])</p></td>
+<td><p>Propagate a signal to the other scales.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.multiscaling.multiscale.Multiscale.ratios" title="skshapes.multiscaling.multiscale.Multiscale.ratios"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ratios</span></code></a></p></td>
+<td><p>Return the available ratios of the shapes in the multiscale representation.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.multiscale.Multiscale.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.multiscale.Multiscale.append" title="Link to this definition"></a></dt>
+<dd><p>Appends a new shape to the list of sub-sampled representations of the base shape.</p>
+<p>This function can be called with one of the <cite>ratio</cite>, <cite>n_points</cite> or
+<cite>scale</cite> parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The target ratio from the initial number of points.</p></li>
+<li><p><strong>n_points</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The target number of points.</p></li>
+<li><p><strong>scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The target scale.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">multiscale</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Multiscale</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">ratios</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="n">multiscale</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<span class="c1"># N.B.: the original shape is always included in the multiscale representation</span>
+<span class="c1">#       for a sampling ratio = 1.0</span>
+<span class="k">for</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="n">multiscale</span><span class="o">.</span><span class="n">ratios</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;at ratio=</span><span class="si">{</span><span class="n">ratio</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">multiscale</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">ratio</span><span class="o">=</span><span class="n">ratio</span><span class="p">)</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> points&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>at ratio=1.000, 842 points
+at ratio=0.500, 421 points
+at ratio=0.119, 100 points
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.multiscale.Multiscale.at">
+<span class="sig-name descname"><span class="pre">at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.multiscale.Multiscale.at" title="Link to this definition"></a></dt>
+<dd><p>Returns the shape at a given ratio, number of points or scale.</p>
+<p>If the shape at the given ratio, number of points or scale does not exist,
+returns most compact (= coarsest) shape that is at least as precise.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a> | <a class="reference internal" href="skshapes.types.image_type.html#skshapes.types.image_type" title="skshapes.types.image_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">image_type</span></code></a></span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>  <span class="c1"># The sphere has 842 points</span>
+<span class="n">multiscale</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Multiscale</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="p">[</span><span class="mi">300</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">multiscale</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span><span class="o">.</span><span class="n">n_points</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>300
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.multiscale.Multiscale.best_key">
+<span class="sig-name descname"><span class="pre">best_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.multiscale.Multiscale.best_key" title="Link to this definition"></a></dt>
+<dd><p>Return the best key in the shapes dictionary for a given, arbitrary ratio.</p>
+<p>This returns the smallest ratio (= most compact shape) which is still larger
+(= at least as precise) as the required sampling ratio.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">multiscale</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Multiscale</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">ratios</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">multiscale</span><span class="o">.</span><span class="n">best_key</span><span class="p">(</span><span class="n">ratio</span><span class="o">=</span><span class="mf">0.6</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">multiscale</span><span class="o">.</span><span class="n">best_key</span><span class="p">(</span><span class="n">ratio</span><span class="o">=</span><span class="mf">0.3</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>1.0
+0.5
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.multiscale.Multiscale.index_mapping">
+<span class="sig-name descname"><span class="pre">index_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fine_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarse_ratio</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.multiscale.Multiscale.index_mapping" title="Link to this definition"></a></dt>
+<dd><p>Returns the index mapping from a fine to a coarse resolution.</p>
+<p>The index mapping is a 1d tensor of integers whose length is equal to the
+number of points at the fine resolution ratio. Each element of the
+tensor is the index of the corresponding point at the coarse resolution
+ratio. This method is used internally to propagate signals from one
+scale to another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fine_ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The ratio of the high resolution shape.</p></li>
+<li><p><strong>coarse_ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></span>) – The ratio of the low resolution shape.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index mapping from a fine to a coarse resolution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Int1dTensor</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">multiscale</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Multiscale</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">ratios</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+<span class="n">im</span> <span class="o">=</span> <span class="n">multiscale</span><span class="o">.</span><span class="n">index_mapping</span><span class="p">(</span><span class="n">fine_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">coarse_ratio</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">multiscale</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">im</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span> <span class="n">im</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>421 = torch.Size([421]), torch.int64
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">multiscale</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">ratio</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">im</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2"> + 1&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>210 = 209 + 1
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">im</span><span class="p">[:</span><span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>tensor([53,  0,  0,  7,  1,  2,  2,  3,  4,  4])
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.multiscale.Multiscale.propagate">
+<span class="sig-name descname"><span class="pre">propagate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fine_to_coarse_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coarse_to_fine_policy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.multiscale.Multiscale.propagate" title="Link to this definition"></a></dt>
+<dd><p>Propagate a signal to the other scales.</p>
+<p>The signal must be defined at the origin scale. The propagation is
+performed in both directions from the origin to the coarser scales and
+from the origin to the finer scales.</p>
+<p>The propagation is parametrized by two policies: one for the fine to
+coarse propagation and one for the coarse to fine propagation. These
+policies are defined by the <cite>fine_to_coarse_policy</cite> and
+<cite>coarse_to_fine_policy</cite> parameters. If not provided, default policies
+are used. See the documentation of the
+[<cite>FineToCoarsePolicy</cite>][skshapes.types.FineToCoarsePolicy] and
+[<cite>CoarseToFinePolicy</cite>][skshapes.types.CoarseToFinePolicy] classes
+for more details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>signal_name</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></span>) – The name of the signal to propagate.</p></li>
+<li><p><strong>from_scale</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The scale of the origin shape.</p></li>
+<li><p><strong>from_ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The ratio of the origin shape.</p></li>
+<li><p><strong>from_n_points</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The number of points of the origin shape.</p></li>
+<li><p><strong>fine_to_coarse_policy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.FineToCoarsePolicy.html#skshapes.types.FineToCoarsePolicy" title="skshapes.types.FineToCoarsePolicy"><code class="xref py py-class docutils literal notranslate"><span class="pre">FineToCoarsePolicy</span></code></a> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The policy for the fine to coarse propagation.</p></li>
+<li><p><strong>coarse_to_fine_policy</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.CoarseToFinePolicy.html#skshapes.types.CoarseToFinePolicy" title="skshapes.types.CoarseToFinePolicy"><code class="xref py py-class docutils literal notranslate"><span class="pre">CoarseToFinePolicy</span></code></a> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The policy for the coarse to fine propagation.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>See the <a class="reference internal" href="../auto_examples/multiscaling/plot_signal_multiscale.html#multiscale-signal-propagation-example"><span class="std std-ref">Multiscaling and signal propagation</span></a> tutorial for an example.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.multiscaling.multiscale.Multiscale.ratios">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ratios</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Float</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Float</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Int</span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Int</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'_'</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#skshapes.multiscaling.multiscale.Multiscale.ratios" title="Link to this definition"></a></dt>
+<dd><p>Return the available ratios of the shapes in the multiscale representation.</p>
+<p>The ratios are sorted in decreasing order.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>  <span class="c1"># The sphere has 842 points</span>
+<span class="n">multiscale</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Multiscale</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="p">[</span><span class="mi">400</span><span class="p">,</span> <span class="mi">100</span><span class="p">])</span>
+<span class="c1"># N.B.: the original shape is always included in the multiscale representation</span>
+<span class="c1">#       for a sampling ratio = 1.0</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">multiscale</span><span class="o">.</span><span class="n">ratios</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>[1.0, 0.4750593824228028, 0.1187648456057007]
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skshapes.multiscaling.multiscale.html" class="btn btn-neutral float-left" title="skshapes.multiscaling.multiscale" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="skshapes.tasks.html" class="btn btn-neutral float-right" title="skshapes.tasks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intrinsic vs Extrinsic deformation &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Rigid alignment in 2D" href="plot_rigid_0_2d.html" />
+    <link rel="prev" title="Registering and aligning shapes with each other" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gallery of examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-and-manipulating-data">Loading and manipulating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#working-at-multiple-scales">Working at multiple scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#computing-shape-features">Computing shape features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registering-and-aligning-shapes-with-each-other">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#using-one-of-our-interactive-applications">Using one of our interactive applications</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#defining-a-custom-model-or-loss-function">Defining a custom model or loss function</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../data/index.html">Loading and manipulating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multiscaling/index.html">Working at multiple scales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../features/index.html">Computing shape features</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Registering and aligning shapes with each other</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Intrinsic vs Extrinsic deformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_rigid_0_2d.html">Rigid alignment in 2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_rigid_1_3d.html">Rigid alignment in 3D with landmarks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_lddmm_0_skulls.html">Registration with LDDMM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_lddmm_1_normalization.html">LDDMM with normalized kernel</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_multiscale_elastic.html">Elastic metric and multiscale strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../applications/index.html">Using one of our interactive applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../customization/index.html">Defining a custom model or loss function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Gallery of examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Registering and aligning shapes with each other</a></li>
+      <li class="breadcrumb-item active">Intrinsic vs Extrinsic deformation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/registration/plot_karateka.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-registration-plot-karateka-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="intrinsic-vs-extrinsic-deformation">
+<span id="sphx-glr-auto-examples-registration-plot-karateka-py"></span><h1>Intrinsic vs Extrinsic deformation<a class="headerlink" href="#intrinsic-vs-extrinsic-deformation" title="Link to this heading"></a></h1>
+<p>Intrinsic and extrinsic deformations are two different approaches to non-rigid
+deformation.</p>
+<p>This example shows how both approaches differ on a simple 2D example.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pykeops</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils_karateka</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">load_data</span><span class="p">,</span>
+    <span class="n">plot_extrinsic_deformation</span><span class="p">,</span>
+    <span class="n">plot_intrinsic_deformation</span><span class="p">,</span>
+    <span class="n">plot_karatekas</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pykeops</span><span class="o">.</span><span class="n">get_build_folder</span><span class="p">())</span>
+
+<span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">L2Loss</span><span class="p">(),</span>
+    <span class="s2">&quot;optimizer&quot;</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">LBFGS</span><span class="p">(),</span>
+    <span class="s2">&quot;n_iter&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="s2">&quot;gpu&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;verbose&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Load the data</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="n">load_data</span><span class="p">()</span>
+<span class="n">plot_karatekas</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_karateka_001.png" srcset="../../_images/sphx_glr_plot_karateka_001.png" alt="plot karateka" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_karateka_001.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<section id="extrinsic-deformation">
+<h2>Extrinsic deformation<a class="headerlink" href="#extrinsic-deformation" title="Link to this heading"></a></h2>
+<p>Extrinsic deformation is a kind of deformation that relies on the deformation
+of the ambient space, which is transferred to the shape.
+Intituively, you can think that you are twisting a sheet of paper on which
+the shape is drawn.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">source</span><span class="o">.</span><span class="n">control_points</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">bounding_grid</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">ExtrinsicDeformation</span><span class="p">(</span>
+    <span class="n">n_steps</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+    <span class="n">kernel</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">,</span>
+    <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+    <span class="n">control_points</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span>
+
+<span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Initial loss : 5.37e+01
+  = 5.37e+01 + 0.1 * 0.00e+00 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 3.42e+00
+  = 7.02e-01 + 0.1 * 2.72e+01 (fidelity + regularization_weight * regularization)
+Loss after 2 iteration(s) : 2.72e+00
+  = 1.30e-01 + 0.1 * 2.59e+01 (fidelity + regularization_weight * regularization)
+Loss after 3 iteration(s) : 2.44e+00
+  = 8.35e-02 + 0.1 * 2.36e+01 (fidelity + regularization_weight * regularization)
+Loss after 4 iteration(s) : 2.23e+00
+  = 6.60e-02 + 0.1 * 2.16e+01 (fidelity + regularization_weight * regularization)
+Loss after 5 iteration(s) : 2.09e+00
+  = 4.59e-02 + 0.1 * 2.05e+01 (fidelity + regularization_weight * regularization)
+
+&lt;skshapes.tasks.registration.Registration object at 0x7fa88f4ebc90&gt;
+</pre></div>
+</div>
+<p>Visualize the deformation</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_extrinsic_deformation</span><span class="p">(</span>
+    <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">registration</span><span class="o">=</span><span class="n">registration</span><span class="p">,</span> <span class="n">animation</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_karateka_002.gif" srcset="../../_images/sphx_glr_plot_karateka_002.gif" alt="plot karateka" class = "sphx-glr-single-img"/></section>
+<section id="intrinsic-deformation">
+<h2>Intrinsic deformation<a class="headerlink" href="#intrinsic-deformation" title="Link to this heading"></a></h2>
+<p>An intrinsic deformation is a deformation that is not transferable from one
+shape to another. It is defined as a sequence of small displacements of the
+points of the shape. In this setting, you can think of the shape as a puppet
+that you can deform thanks to a set of strings attached to its vertices.</p>
+<p>In this example, we use the “as isometric as possible” metric, which tries to
+preserve the lengths of the edges of the shape.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">IntrinsicDeformation</span><span class="p">(</span>
+    <span class="n">n_steps</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+    <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;as_isometric_as_possible&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">regularization_weight</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span>
+
+<span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Initial loss : 5.37e+01
+  = 5.37e+01 + 500 * 0.00e+00 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 6.99e+00
+  = 4.08e+00 + 500 * 5.81e-03 (fidelity + regularization_weight * regularization)
+Loss after 2 iteration(s) : 6.26e+00
+  = 2.43e+00 + 500 * 7.65e-03 (fidelity + regularization_weight * regularization)
+Loss after 3 iteration(s) : 6.02e+00
+  = 2.12e+00 + 500 * 7.81e-03 (fidelity + regularization_weight * regularization)
+Loss after 4 iteration(s) : 6.02e+00
+  = 2.10e+00 + 500 * 7.84e-03 (fidelity + regularization_weight * regularization)
+Loss after 5 iteration(s) : 6.02e+00
+  = 2.10e+00 + 500 * 7.83e-03 (fidelity + regularization_weight * regularization)
+
+&lt;skshapes.tasks.registration.Registration object at 0x7fa89091af90&gt;
+</pre></div>
+</div>
+<p>Visualize the deformation</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">plot_intrinsic_deformation</span><span class="p">(</span>
+    <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">registration</span><span class="o">=</span><span class="n">registration</span><span class="p">,</span> <span class="n">animation</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_karateka_003.gif" srcset="../../_images/sphx_glr_plot_karateka_003.gif" alt="plot karateka" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 16.547 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-registration-plot-karateka-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e7a1167d1a8a8989a5841c36ceb4c83f/plot_karateka.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_karateka.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/dc80c3ec3a0e67f91bd02c951f7c4f8b/plot_karateka.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_karateka.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Registering and aligning shapes with each other" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_rigid_0_2d.html" class="btn btn-neutral float-right" title="Rigid alignment in 2D" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

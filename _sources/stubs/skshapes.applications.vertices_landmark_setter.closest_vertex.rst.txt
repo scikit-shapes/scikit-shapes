@@ -1,0 +1,6 @@
+skshapes.applications.vertices\_landmark\_setter.closest\_vertex
+================================================================
+
+.. currentmodule:: skshapes.applications.vertices_landmark_setter
+
+.. autofunction:: closest_vertex

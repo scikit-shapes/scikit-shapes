@@ -1,0 +1,205 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Why Scikit-Shapes? &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=56c72f64" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=4621528c"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Getting started" href="installation.html" />
+    <link rel="prev" title="Scikit-Shapes: Shape analysis in Python" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Why Scikit-Shapes?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#context">Context</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#our-core-principles">Our core principles</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Why Scikit-Shapes?</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/motivation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="why-scikit-shapes">
+<span id="motivation"></span><h1>Why Scikit-Shapes?<a class="headerlink" href="#why-scikit-shapes" title="Link to this heading"></a></h1>
+<p><strong>Purpose.</strong> Scikit-Shapes is a Python library for statistical shape analysis. It provides tools for the analysis of shapes in 2D and 3D that may be encoded as point clouds, Gaussian splats, curves, surfaces or segmented images. It is especially suited to:</p>
+<ul class="simple">
+<li><p><strong>Registration</strong> with both rigid and non-rigid models.</p></li>
+<li><p><strong>Atlas</strong> construction from a collection of raw or annotated shapes.</p></li>
+<li><p><strong>Dimensionality reduction</strong> for visualization and statistical analysis.</p></li>
+</ul>
+<p>Scikit-Shapes provides fast and differentiable methods that fit well
+in data processing pipelines based on <a class="reference external" href="https://scikit-learn.org/stable/">Scikit-Learn</a>
+or <a class="reference external" href="https://pytorch.org/">PyTorch</a>.
+We provide a transparent interface with <a class="reference external" href="https://docs.pyvista.org/">PyVista</a>
+and the <a class="reference external" href="https://vtk.org/">VTK</a> software suite for visualization.</p>
+<section id="context">
+<h2>Context<a class="headerlink" href="#context" title="Link to this heading"></a></h2>
+<p><strong>The geometer’s dilemma.</strong>
+Scikit-Shapes intends to bring modern geometric methods to the Python ecosystem.
+Historically, this has been a challenge: while linear algebra has always benefitted
+from first-class support by the <a class="reference external" href="https://scipy.org/">SciPy</a> or
+<a class="reference external" href="https://pytorch.org/">PyTorch</a> ecosystems, key numerical routines
+for point cloud and mesh processing have long remained C++ exclusives.
+This has slowed down progress in the field, with researchers having to choose between:</p>
+<ul class="simple">
+<li><p>Developing <strong>C++</strong> codebases, which can fully leverage modern hardware or data structures
+but are hard to install, maintain and extend.</p></li>
+<li><p>Developing <strong>Python</strong> codebases, which are readable and modular but orders of magnitude
+slower than their C++ counterparts.</p></li>
+</ul>
+<p><strong>Solution.</strong>
+Fortunately, a collection of open source packages has just solved this issue.
+Modern libraries such as <a class="reference external" href="https://pytorch.org/">PyTorch</a>,
+<a class="reference external" href="https://www.kernel-operations.io/">KeOps</a>,
+<a class="reference external" href="https://github.com/nmwsharp/potpourri3d">PotPourri3D</a> and
+<a class="reference external" href="https://www.taichi-lang.org/">Taichi</a>
+now let geometers implement their methods in Python with near-optimal performance.
+Scikit-Shapes is about leveraging these advances to finally bridge the gap
+between “showcase” and “production” codebases in geometric data analysis.</p>
+</section>
+<section id="our-core-principles">
+<h2>Our core principles<a class="headerlink" href="#our-core-principles" title="Link to this heading"></a></h2>
+<p><strong>Target audience.</strong> Statistical shape analysis has major applications in:</p>
+<ul class="simple">
+<li><p><strong>Computational anatomy</strong> and geometric morphometry, the study of bones, brains and other organs for medicine and biology.</p></li>
+<li><p><strong>Computer graphics</strong>, the design of authorable assets for video games and movies.</p></li>
+<li><p><strong>Computer vision</strong>, the analysis of environments and human poses for scene understanding.</p></li>
+<li><p><strong>Computer-aided design</strong>, the creation of objects under constraints for engineering and architecture.</p></li>
+</ul>
+<p>Scikit-shapes is meant to be used in these fields, both as a reference implementation
+of standard methods and as a stepping stone for cutting-edge research projects.</p>
+<p><strong>Design philosophy.</strong> Scikit-Shapes is designed to be:</p>
+<ul class="simple">
+<li><p><strong>User-centric.</strong> Our interface is structured around data processing steps
+instead of mathematical theories and concepts.
+We favor plain descriptive names over cryptic acronyms.</p></li>
+<li><p><strong>Modular.</strong> Our methods are meant to be used as utility functions in larger codebases.
+For instance, our deformation models can all be used as layers in a neural network
+or combined with user-defined loss functions.</p></li>
+<li><p><strong>Fully tested and documented.</strong> we provide extensive unit tests and tutorials
+to ensure that our code is both reliable and easy to use.</p></li>
+<li><p><strong>Fast.</strong> While ease-of-use and modularity are our top priorities, we believe
+that keeping run-times comparable to those of optimized C++ implementations
+is a key requirement for credibility.
+Scikit-Shapes scales to high-resolution data and fully leverages
+the GPU if it is available.</p></li>
+<li><p><strong>Portable.</strong> Our long-term goal is to have Scikit-Shapes run on mobile devices.
+As of 2025, this is still a stretch too far so we focus on
+supporting standard laptops and workstations.
+We keep our codebase modular and intend to provide a
+<a class="reference external" href="https://www.w3.org/TR/webgpu/">WebGPU</a> backend as early as reasonably possible.</p></li>
+</ul>
+<p>Scikit-Shapes is named after
+<a class="reference external" href="https://scikit-image.org/">Scikit-Image</a>
+and
+<a class="reference external" href="https://scikit-learn.org/stable/">Scikit-Learn</a>:
+whenever possible, we follow their conventions and design principles.
+While the infrastructure of the library is still under construction,
+we hope to release a first usable version and open our code to contributions
+by the end of 2025.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Scikit-Shapes: Shape analysis in Python" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Getting started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

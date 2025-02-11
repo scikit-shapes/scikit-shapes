@@ -1,0 +1,36 @@
+skshapes.loss
+=============
+
+.. automodule:: skshapes.loss
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   baseloss
+   lp
+   nearest_neighbors
+   optimal_transport
+   varifold
+

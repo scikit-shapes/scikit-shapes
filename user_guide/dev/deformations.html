@@ -1,0 +1,223 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Writing a deformation model &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Loss functions" href="loss.html" />
+    <link rel="prev" title="Rigid Deformation" href="../models/rigid_motion.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#polygonal-data">Polygonal data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registration">Registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#morphing-models">Morphing models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#add-your-own-models-losses">Add your own models/losses</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Writing a deformation model</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#structure">Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#usage">Usage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#access-to-shape-properties">Access to shape properties</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#custom-attributes">Custom attributes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="loss.html">Loss functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">User guide</a></li>
+      <li class="breadcrumb-item active">Writing a deformation model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/dev/deformations.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="writing-a-deformation-model">
+<h1>Writing a deformation model<a class="headerlink" href="#writing-a-deformation-model" title="Link to this heading"></a></h1>
+<p>A deformation model specifies the type of deformation to apply to a shape. Examples include</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../stubs/skshapes.morphing.rigid_motion.RigidMotion.html#skshapes.morphing.rigid_motion.RigidMotion" title="skshapes.morphing.rigid_motion.RigidMotion"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">Rigidmotion</span></code></span></a></p></li>
+<li><p><a class="reference internal" href="../../stubs/skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation.html#skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation" title="skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">ExtrinsicDeformation</span></code></span></a></p></li>
+<li><p><a class="reference internal" href="../../stubs/skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.html#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation" title="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">IntrinsicDeformation</span></code></span></a></p></li>
+</ul>
+<p>This document is intended to explain how deformation models must be implemented to be integrated into scikit-shapes pipelines.</p>
+<section id="structure">
+<h2>Structure<a class="headerlink" href="#structure" title="Link to this heading"></a></h2>
+<p>A deformation model must inherits from <a class="reference internal" href="../../stubs/skshapes.morphing.basemodel.BaseModel.html#skshapes.morphing.basemodel.BaseModel" title="skshapes.morphing.basemodel.BaseModel"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">sks.morphing.BaseModel</span></code></span></a> and following methods are required :</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__init__</span></code> : class constructor used to define some hyperparameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">morph</span></code> : method to apply the deformation to the shape given a parameter. It returns a <a class="reference internal" href="../../stubs/skshapes.types.MorphingOutput.html#skshapes.types.MorphingOutput" title="skshapes.types.MorphingOutput"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">MorphingOutput</span></code></span></a> objects.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parameter_shape(shape=...)</span></code>: method that output a tuple corresponding to the shape of the parameter that must be passed to <code class="docutils literal notranslate"><span class="pre">morph</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">initial_parameter(shape=...)</span></code>: method that returns a default parameter. For now it is a zero <code class="docutils literal notranslate"><span class="pre">torch.tensor</span></code> defined on the right device and with the right shape.</p></li>
+</ul>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<p>Deformation objects are accessed by two ways : by the end-user of scikit-shapes and internally by a task objects (such as <a class="reference internal" href="../../stubs/skshapes.tasks.registration.Registration.html#skshapes.tasks.registration.Registration" title="skshapes.tasks.registration.Registration"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">Registration</span></code></span></a>).</p>
+<p>End-user interacts with <code class="docutils literal notranslate"><span class="pre">deformation</span></code>:</p>
+<ul class="simple">
+<li><p>at initialization, by setting hyperparameters</p></li>
+<li><p>inderectly by accessing MorphingOuput after fitting <code class="docutils literal notranslate"><span class="pre">task</span></code></p></li>
+</ul>
+<p>Task interact with <code class="docutils literal notranslate"><span class="pre">deformation</span></code>:</p>
+<ul class="simple">
+<li><p>by calling <code class="docutils literal notranslate"><span class="pre">initial_parameter</span></code></p></li>
+<li><p>by calling <code class="docutils literal notranslate"><span class="pre">morph(shape,</span> <span class="pre">parameter)</span></code></p></li>
+<li><p>by copying the content of <code class="docutils literal notranslate"><span class="pre">MorphingOutput</span></code></p></li>
+</ul>
+<p>Tasks relies on optimization schemes and <code class="docutils literal notranslate"><span class="pre">morph</span></code> must be compatible with <code class="docutils literal notranslate"><span class="pre">autograd</span></code> the following test must tun without error (it is actually in the test suite)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># Any shapes</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="o">...</span>  <span class="c1"># Any loss</span>
+<span class="c1"># Initialize the deformation model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">deformation_model</span><span class="p">()</span>
+<span class="c1"># Get an initial parameter</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">inital_parameter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">morphed_shape</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">morphed_shape</span>
+<span class="n">L</span> <span class="o">=</span> <span class="n">loss</span><span class="p">(</span><span class="n">morphed_shape</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+<span class="n">L</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+<span class="k">assert</span> <span class="n">p</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+<span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">():</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">cuda</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">morphed_shape</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s2">&quot;Expected ValueError as parameter and shape not on the same device&quot;</span>
+        <span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="access-to-shape-properties">
+<h2>Access to shape properties<a class="headerlink" href="#access-to-shape-properties" title="Link to this heading"></a></h2>
+<p>Some deformation models require some attributes to be available for morphed shape. An example is <code class="docutils literal notranslate"><span class="pre">shape.control_points</span></code> in <a class="reference internal" href="../../stubs/skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation.html#skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation" title="skshapes.morphing.extrinsic_deformation.ExtrinsicDeformation"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">ExtrinsicDeformation</span></code></span></a>. These attributes should not be added to the arguments of <code class="docutils literal notranslate"><span class="pre">morph</span></code>, but instead accessed inside <code class="docutils literal notranslate"><span class="pre">morph</span></code> with a clear error message if the attribute cannot be reached and if no default behavior can be defined in this case.</p>
+</section>
+<section id="custom-attributes">
+<h2>Custom attributes<a class="headerlink" href="#custom-attributes" title="Link to this heading"></a></h2>
+<p>The output of <code class="docutils literal notranslate"><span class="pre">morph</span></code> is a [<code class="docutils literal notranslate"><span class="pre">MorphingOutput</span></code>]. It is simply a class with no method and containing by default the following attributes :</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">morphed_shape</span></code> : the shape morphed by the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">path</span></code> : a list of shapes, from <code class="docutils literal notranslate"><span class="pre">source</span></code> to <code class="docutils literal notranslate"><span class="pre">morphed_shape</span></code> of length <code class="docutils literal notranslate"><span class="pre">n_steps</span> <span class="pre">+</span> <span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">regularization</span></code> : the regularization corresponding to the model and the parameter</p></li>
+</ul>
+<p>Other attributes can be written inside <code class="docutils literal notranslate"><span class="pre">.morph()</span></code>, for example for <a class="reference internal" href="../../stubs/skshapes.morphing.rigid_motion.RigidMotion.html#skshapes.morphing.rigid_motion.RigidMotion" title="skshapes.morphing.rigid_motion.RigidMotion"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">RigidMotion</span></code></span></a>, you can access <code class="docutils literal notranslate"><span class="pre">rotation_matrix</span></code> or <code class="docutils literal notranslate"><span class="pre">translation_vector</span></code></p>
+<p>After fitting, all the attributes of the fitted deformation model are accessible in the registration with the same name as in <a class="reference internal" href="../../stubs/skshapes.types.MorphingOutput.html#skshapes.types.MorphingOutput" title="skshapes.types.MorphingOutput"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">MorphingOutput</span></code></span></a> plus an extra “_”:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">RigidMotion</span><span class="p">()</span>
+<span class="n">r</span> <span class="o">=</span> <span class="n">Registration</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">los</span><span class="o">=...</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="n">r</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+
+<span class="n">rotation_matrix</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">rotation_matrix_</span>
+<span class="n">translation</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">translation_vector_</span>
+<span class="n">output</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">morphed_shape_</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../models/rigid_motion.html" class="btn btn-neutral float-left" title="Rigid Deformation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="loss.html" class="btn btn-neutral float-right" title="Loss functions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

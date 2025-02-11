@@ -1,0 +1,38 @@
+skshapes.applications.barycentric\_landmark\_setter
+===================================================
+
+.. automodule:: skshapes.applications.barycentric_landmark_setter
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      barycentric_coordinates
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      BarycentricLandmarkSetter
+   
+   
+
+   
+   
+   
+
+
+

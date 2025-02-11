@@ -1,0 +1,6 @@
+skshapes.morphing.intrinsic\_deformation.metric\_validation
+===========================================================
+
+.. currentmodule:: skshapes.morphing.intrinsic_deformation
+
+.. autofunction:: metric_validation

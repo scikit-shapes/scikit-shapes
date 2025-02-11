@@ -1,0 +1,265 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PolyData conversion from and to PyVista or Vedo &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="The PolyData class: point cloud, wireframe and triangle meshes" href="plot_polydata.html" />
+    <link rel="prev" title="Loading and manipulating data" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gallery of examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-and-manipulating-data">Loading and manipulating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#working-at-multiple-scales">Working at multiple scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#computing-shape-features">Computing shape features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registering-and-aligning-shapes-with-each-other">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#using-one-of-our-interactive-applications">Using one of our interactive applications</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#defining-a-custom-model-or-loss-function">Defining a custom model or loss function</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Loading and manipulating data</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">PolyData conversion from and to PyVista or Vedo</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_polydata.html">The <cite>PolyData</cite> class: point cloud, wireframe and triangle meshes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../multiscaling/index.html">Working at multiple scales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../features/index.html">Computing shape features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../registration/index.html">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../applications/index.html">Using one of our interactive applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../customization/index.html">Defining a custom model or loss function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Gallery of examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Loading and manipulating data</a></li>
+      <li class="breadcrumb-item active">PolyData conversion from and to PyVista or Vedo</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/data/plot_pyvista.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-data-plot-pyvista-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="polydata-conversion-from-and-to-pyvista-or-vedo">
+<span id="sphx-glr-auto-examples-data-plot-pyvista-py"></span><h1>PolyData conversion from and to PyVista or Vedo<a class="headerlink" href="#polydata-conversion-from-and-to-pyvista-or-vedo" title="Link to this heading"></a></h1>
+<p><a class="reference external" href="https://docs.pyvista.org/version/stable/">PyVista</a> is a Python library for
+3D visualization and mesh manipulation. It is a python wrapper of the
+<a class="reference external" href="https://vtk.org/">VTK</a> library. PyVista is used in scikit-shapes as a backend
+to load and save meshes in various formats.</p>
+<p><a class="reference external" href="https://vedo.embl.es/">Vedo</a> is another Python library for 3D visualization.
+It is also a python wrapper of the VTK library. It is used in scikit-shapes for
+interactive visualization.</p>
+<p>Scikit-shapes [PolyData](skshsapes.data.polydata.PolyData) can be exported to
+PyVista PolyData or Vedo Mesh, and vice versa. This allows to leverage the
+visualization and mesh manipulation capabilities of both libraries.</p>
+<p>In addition to the mesh geometry, the signals and landmarks are encoded in the
+PyVista or Vedo mesh, and are preserved when the mesh is loaded back from PyVista.</p>
+<section id="load-a-mesh-from-pyvista-s-examples">
+<h2>Load a mesh from PyVista’s examples<a class="headerlink" href="#load-a-mesh-from-pyvista-s-examples" title="Link to this heading"></a></h2>
+<p>We load a quadrangulated cow mesh from PyVista. As scikit-shapes meshes are
+triangular, an automatic triangulation is performed when importing the mesh.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="kn">import</span> <span class="n">examples</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">mesh_pyvista</span> <span class="o">=</span> <span class="n">examples</span><span class="o">.</span><span class="n">download_cow</span><span class="p">()</span>
+<span class="n">mesh_sks</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">mesh_pyvista</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">mesh_pyvista</span><span class="o">.</span><span class="n">n_points</span> <span class="o">==</span> <span class="n">mesh_sks</span><span class="o">.</span><span class="n">n_points</span>
+</pre></div>
+</div>
+</section>
+<section id="preservation-of-signals-and-landmarks">
+<h2>Preservation of signals and landmarks<a class="headerlink" href="#preservation-of-signals-and-landmarks" title="Link to this heading"></a></h2>
+<p>The methods <cite>.to_pyvista()</cite> and <cite>.to_vedo()</cite> allow to convert a <cite>PolyData</cite> object
+to a PyVista or Vedo mesh. The point data and landmarks are preserved during
+the conversion: if the mesh is loaded back from PyVista or Vedo, the signals
+and landmarks are still there.</p>
+<p>The following illustrates the preservation of signals and landmarks when
+converting a <cite>PolyData</cite> object to PyVista and back.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mesh_sks</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="s2">&quot;signal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mesh_sks</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="c1"># Now, export the mesh to PyVista</span>
+<span class="n">mesh_pv2</span> <span class="o">=</span> <span class="n">mesh_sks</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">()</span>
+<span class="c1"># The signal is transferred to the PyVista mesh as a point data array</span>
+<span class="c1"># with the same name and can be plotted</span>
+<span class="n">mesh_pv2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;signal&quot;</span><span class="p">,</span> <span class="n">cpos</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">)</span>
+
+<span class="c1"># Back to scikit-shapes, the signal is preserved</span>
+<span class="n">mesh_sks_back</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">mesh_pv2</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+    <span class="n">mesh_sks_back</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="s2">&quot;signal&quot;</span><span class="p">],</span> <span class="n">mesh_sks</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="s2">&quot;signal&quot;</span><span class="p">]</span>
+<span class="p">)</span>
+
+
+<span class="c1"># Set some landmarks</span>
+<span class="n">landmarks_indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">154</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span> <span class="mi">1544</span><span class="p">,</span> <span class="mi">187</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">252</span><span class="p">,</span> <span class="mi">1214</span><span class="p">]</span>
+<span class="n">mesh_sks</span><span class="o">.</span><span class="n">landmark_indices</span> <span class="o">=</span> <span class="n">landmarks_indices</span>
+
+<span class="c1"># Export to PyVista</span>
+<span class="n">mesh_pv3</span> <span class="o">=</span> <span class="n">mesh_sks</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">()</span>
+
+<span class="c1"># The landmarks are stored in the field data of the PyVista mesh</span>
+<span class="c1"># there can ba accessed as a 3D point cloud with the name &quot;landmark_points&quot;</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">mesh_pv3</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span>
+    <span class="n">mesh_pv3</span><span class="o">.</span><span class="n">field_data</span><span class="p">[</span><span class="s2">&quot;landmark_points&quot;</span><span class="p">],</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span>
+    <span class="n">point_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;landmarks&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_legend</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">view_xy</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Back to scikit-shapes, the landmarks are preserved</span>
+<span class="n">mesh_sks_back</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">mesh_pv3</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span>
+    <span class="n">mesh_sks_back</span><span class="o">.</span><span class="n">landmark_indices</span><span class="p">,</span> <span class="n">mesh_sks</span><span class="o">.</span><span class="n">landmark_indices</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_pyvista_001.png" srcset="../../_images/sphx_glr_plot_pyvista_001.png" alt="plot pyvista" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/data/images/sphx_glr_plot_pyvista_001.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_pyvista_002.png" srcset="../../_images/sphx_glr_plot_pyvista_002.png" alt="plot pyvista" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/data/images/sphx_glr_plot_pyvista_002.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 3.707 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-data-plot-pyvista-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/17296d3c633342629777dddcefed68fc/plot_pyvista.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_pyvista.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/de3c84409eb8d15329e2bbafb54776d3/plot_pyvista.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_pyvista.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Loading and manipulating data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="plot_polydata.html" class="btn btn-neutral float-right" title="The PolyData class: point cloud, wireframe and triangle meshes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

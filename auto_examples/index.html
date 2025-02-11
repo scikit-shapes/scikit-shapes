@@ -1,0 +1,232 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gallery of examples &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Loading and manipulating data" href="data/index.html" />
+    <link rel="prev" title="Loss functions" href="../user_guide/dev/loss.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Gallery of examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#loading-and-manipulating-data">Loading and manipulating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-at-multiple-scales">Working at multiple scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#computing-shape-features">Computing shape features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#registering-and-aligning-shapes-with-each-other">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-one-of-our-interactive-applications">Using one of our interactive applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#defining-a-custom-model-or-loss-function">Defining a custom model or loss function</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="data/index.html">Loading and manipulating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiscaling/index.html">Working at multiple scales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="features/index.html">Computing shape features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registration/index.html">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="applications/index.html">Using one of our interactive applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="customization/index.html">Defining a custom model or loss function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Gallery of examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/auto_examples/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="gallery-of-examples">
+<span id="examples-gallery"></span><h1>Gallery of examples<a class="headerlink" href="#gallery-of-examples" title="Link to this heading"></a></h1>
+<p>The examples below showcase the main features of scikit-shapes in self-contained guides.</p>
+<div class="sphx-glr-thumbnails"></div><section id="loading-and-manipulating-data">
+<h2>Loading and manipulating data<a class="headerlink" href="#loading-and-manipulating-data" title="Link to this heading"></a></h2>
+<p>How to load, manipulate and save shape data.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="PyVista is a Python library for 3D visualization and mesh manipulation. It is a python wrapper ..."><img alt="" src="../_images/sphx_glr_plot_pyvista_thumb.png" />
+<p><a class="reference internal" href="data/plot_pyvista.html#sphx-glr-auto-examples-data-plot-pyvista-py"><span class="std std-ref">PolyData conversion from and to PyVista or Vedo</span></a></p>
+  <div class="sphx-glr-thumbnail-title">PolyData conversion from and to PyVista or Vedo</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This notebook describes the skshapes.PolyData class, the common class for point clouds, wirefra..."><img alt="" src="../_images/sphx_glr_plot_polydata_thumb.png" />
+<p><a class="reference internal" href="data/plot_polydata.html#sphx-glr-auto-examples-data-plot-polydata-py"><span class="std std-ref">The PolyData class: point cloud, wireframe and triangle meshes</span></a></p>
+  <div class="sphx-glr-thumbnail-title">The PolyData class: point cloud, wireframe and triangle meshes</div>
+</div></div></section>
+<section id="working-at-multiple-scales">
+<h2>Working at multiple scales<a class="headerlink" href="#working-at-multiple-scales" title="Link to this heading"></a></h2>
+<p>Representing data efficiently at different scales is a core feature of scikit-shapes. In addition to data compression, we provide tools to preserve features across scales and implement multi-grid or level-of-detail methods.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="The skshapes.multiscaling.multiscale.Multiscale class preserves landmarks across scales."><img alt="" src="../_images/sphx_glr_plot_multiscaling_landmarks_thumb.gif" />
+<p><a class="reference internal" href="multiscaling/plot_multiscaling_landmarks.html#sphx-glr-auto-examples-multiscaling-plot-multiscaling-landmarks-py"><span class="std std-ref">Multiscaling and landmarks</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Multiscaling and landmarks</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="We use the skshapes.multiscaling.multiscale.Multiscale class to create a multiscale decompositi..."><img alt="" src="../_images/sphx_glr_plot_multiscaling_thumb.png" />
+<p><a class="reference internal" href="multiscaling/plot_multiscaling.html#sphx-glr-auto-examples-multiscaling-plot-multiscaling-py"><span class="std std-ref">Multiscaling with triangle meshes</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Multiscaling with triangle meshes</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="We propagate a signal across the different shapes of a multiscale representation, using rules t..."><img alt="" src="../_images/sphx_glr_plot_signal_multiscale_thumb.png" />
+<p><a class="reference internal" href="multiscaling/plot_signal_multiscale.html#sphx-glr-auto-examples-multiscaling-plot-signal-multiscale-py"><span class="std std-ref">Multiscaling and signal propagation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Multiscaling and signal propagation</div>
+</div></div></section>
+<section id="computing-shape-features">
+<h2>Computing shape features<a class="headerlink" href="#computing-shape-features" title="Link to this heading"></a></h2>
+<p>Scikit-shapes provides fast and robust methods to compute point normals, curvatures and other shape descriptors.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="We use the point_curvatures method to compute local curvature values."><img alt="" src="../_images/sphx_glr_plot_point_curvatures_thumb.png" />
+<p><a class="reference internal" href="features/plot_point_curvatures.html#sphx-glr-auto-examples-features-plot-point-curvatures-py"><span class="std std-ref">How to compute local curvatures</span></a></p>
+  <div class="sphx-glr-thumbnail-title">How to compute local curvatures</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="We use the point_normals method to compute normal vectors at each vertex of a triangle mesh. Th..."><img alt="" src="../_images/sphx_glr_plot_point_normals_thumb.png" />
+<p><a class="reference internal" href="features/plot_point_normals.html#sphx-glr-auto-examples-features-plot-point-normals-py"><span class="std std-ref">How to compute local point normals</span></a></p>
+  <div class="sphx-glr-thumbnail-title">How to compute local point normals</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="We use the point_moments method to compute local averages and covariance matrices. This is usef..."><img alt="" src="../_images/sphx_glr_plot_point_moments_thumb.png" />
+<p><a class="reference internal" href="features/plot_point_moments.html#sphx-glr-auto-examples-features-plot-point-moments-py"><span class="std std-ref">How to compute local geometric moments</span></a></p>
+  <div class="sphx-glr-thumbnail-title">How to compute local geometric moments</div>
+</div></div></section>
+<section id="registering-and-aligning-shapes-with-each-other">
+<h2>Registering and aligning shapes with each other<a class="headerlink" href="#registering-and-aligning-shapes-with-each-other" title="Link to this heading"></a></h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The API shown below is a draft, and will soon be completely revamped.</p>
+</div>
+<p>The registration class allows to express various registration algorithm within the same framework.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="Intrinsic and extrinsic deformations are two different approaches to non-rigid deformation."><img alt="" src="../_images/sphx_glr_plot_karateka_thumb.png" />
+<p><a class="reference internal" href="registration/plot_karateka.html#sphx-glr-auto-examples-registration-plot-karateka-py"><span class="std std-ref">Intrinsic vs Extrinsic deformation</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Intrinsic vs Extrinsic deformation</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=" This is an example of rigid alignment in 2D for meshes with points in dense correspondence."><img alt="" src="../_images/sphx_glr_plot_rigid_0_2d_thumb.png" />
+<p><a class="reference internal" href="registration/plot_rigid_0_2d.html#sphx-glr-auto-examples-registration-plot-rigid-0-2d-py"><span class="std std-ref">Rigid alignment in 2D</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Rigid alignment in 2D</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="In this example, we demonstrate how to perform rigid registration (also known alignment) of two..."><img alt="" src="../_images/sphx_glr_plot_rigid_1_3d_thumb.png" />
+<p><a class="reference internal" href="registration/plot_rigid_1_3d.html#sphx-glr-auto-examples-registration-plot-rigid-1-3d-py"><span class="std std-ref">Rigid alignment in 3D with landmarks</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Rigid alignment in 3D with landmarks</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="LDDMM is a deformation method based on geodesic shooting in the space of diffeomorphisms. In sc..."><img alt="" src="../_images/sphx_glr_plot_lddmm_0_skulls_thumb.png" />
+<p><a class="reference internal" href="registration/plot_lddmm_0_skulls.html#sphx-glr-auto-examples-registration-plot-lddmm-0-skulls-py"><span class="std std-ref">Registration with LDDMM</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Registration with LDDMM</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="This notebook illustrates the interest of normalizing the cometric in the LDDMM model. We consi..."><img alt="" src="../_images/sphx_glr_plot_lddmm_1_normalization_thumb.png" />
+<p><a class="reference internal" href="registration/plot_lddmm_1_normalization.html#sphx-glr-auto-examples-registration-plot-lddmm-1-normalization-py"><span class="std std-ref">LDDMM with normalized kernel</span></a></p>
+  <div class="sphx-glr-thumbnail-title">LDDMM with normalized kernel</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip=" This examples is an implementation of the paper &quot;Geometric Modeling in Shape Space&quot; by Kilian,..."><img alt="" src="../_images/sphx_glr_plot_multiscale_elastic_thumb.png" />
+<p><a class="reference internal" href="registration/plot_multiscale_elastic.html#sphx-glr-auto-examples-registration-plot-multiscale-elastic-py"><span class="std std-ref">Elastic metric and multiscale strategy</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Elastic metric and multiscale strategy</div>
+</div></div></section>
+<section id="using-one-of-our-interactive-applications">
+<h2>Using one of our interactive applications<a class="headerlink" href="#using-one-of-our-interactive-applications" title="Link to this heading"></a></h2>
+<p>The application module contains small applications, written with <a class="reference external" href="https://vedo.embl.es/">Vedo</a> that can be helpful for geometric data processing.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="A Browser can be used to visualize a sequence of shapes. The user can navigate through the sequ..."><img alt="" src="../_images/sphx_glr_plot_0_browser_thumb.png" />
+<p><a class="reference internal" href="applications/plot_0_browser.html#sphx-glr-auto-examples-applications-plot-0-browser-py"><span class="std std-ref">Browse a sequence of shapes</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Browse a sequence of shapes</div>
+</div><div class="sphx-glr-thumbcontainer" tooltip="Landmarks can be set manually or using the landmark setter."><img alt="" src="../_images/sphx_glr_plot_1_landmarksetter_thumb.png" />
+<p><a class="reference internal" href="applications/plot_1_landmarksetter.html#sphx-glr-auto-examples-applications-plot-1-landmarksetter-py"><span class="std std-ref">Set landmarks</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Set landmarks</div>
+</div></div></section>
+<section id="defining-a-custom-model-or-loss-function">
+<h2>Defining a custom model or loss function<a class="headerlink" href="#defining-a-custom-model-or-loss-function" title="Link to this heading"></a></h2>
+<p>In addition to the built-in models and loss functions, you can write custom ones.</p>
+<div class="sphx-glr-thumbnails"><div class="sphx-glr-thumbcontainer" tooltip="This notebooks shows how to write a class to define a deformation model."><img alt="" src="../_images/sphx_glr_plot_custom_model_polydata_thumb.png" />
+<p><a class="reference internal" href="customization/plot_custom_model_polydata.html#sphx-glr-auto-examples-customization-plot-custom-model-polydata-py"><span class="std std-ref">Write a custom deformation model for PolyData.</span></a></p>
+  <div class="sphx-glr-thumbnail-title">Write a custom deformation model for PolyData.</div>
+</div></div><div class="toctree-wrapper compound">
+</div>
+<div class="sphx-glr-footer sphx-glr-footer-gallery docutils container">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/07fcc19ba03226cd3d83d4e40ec44385/auto_examples_python.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">auto_examples_python.zip</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../_downloads/6f1e7a639e0699d6164445b55e6c116d/auto_examples_jupyter.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">all</span> <span class="pre">examples</span> <span class="pre">in</span> <span class="pre">Jupyter</span> <span class="pre">notebooks:</span> <span class="pre">auto_examples_jupyter.zip</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../user_guide/dev/loss.html" class="btn btn-neutral float-left" title="Loss functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data/index.html" class="btn btn-neutral float-right" title="Loading and manipulating data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

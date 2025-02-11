@@ -1,0 +1,43 @@
+
+
+.. _sphx_glr_auto_examples_customization:
+
+Defining a custom model or loss function
+-----------------------------------------
+
+In addition to the built-in models and loss functions, you can write custom ones.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This notebooks shows how to write a class to define a deformation model.">
+
+.. only:: html
+
+  .. image:: /auto_examples/customization/images/thumb/sphx_glr_plot_custom_model_polydata_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_customization_plot_custom_model_polydata.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Write a custom deformation model for PolyData.</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/customization/plot_custom_model_polydata
+

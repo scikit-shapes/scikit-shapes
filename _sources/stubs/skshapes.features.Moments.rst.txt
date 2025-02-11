@@ -1,0 +1,32 @@
+skshapes.features.Moments
+=========================
+
+.. currentmodule:: skshapes.features
+
+.. autoclass:: Moments
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Moments.__init__
+      ~Moments.covariance_axes
+      ~Moments.covariance_eigenvalues
+      ~Moments.covariance_eigenvalues_eigenvectors
+      ~Moments.covariance_eigenvectors
+      ~Moments.covariances
+      ~Moments.masses
+      ~Moments.means
+      ~Moments.tensors
+   
+   
+
+   
+   
+   

@@ -1,0 +1,32 @@
+skshapes.input\_validation.converters
+=====================================
+
+.. automodule:: skshapes.input_validation.converters
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      closest_dtype
+      convert_inputs
+      detect_array_dtypes
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

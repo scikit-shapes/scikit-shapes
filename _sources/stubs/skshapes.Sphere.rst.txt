@@ -1,0 +1,6 @@
+skshapes.Sphere
+===============
+
+.. currentmodule:: skshapes
+
+.. autofunction:: Sphere

@@ -1,0 +1,36 @@
+skshapes.convolutions
+=====================
+
+.. automodule:: skshapes.convolutions
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   constant_kernel
+   linear_operator
+   mesh_convolution
+   point_convolution
+   squared_distances
+

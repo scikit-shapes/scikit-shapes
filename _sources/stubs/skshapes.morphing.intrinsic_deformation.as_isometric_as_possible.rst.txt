@@ -1,0 +1,6 @@
+skshapes.morphing.intrinsic\_deformation.as\_isometric\_as\_possible
+====================================================================
+
+.. currentmodule:: skshapes.morphing.intrinsic_deformation
+
+.. autofunction:: as_isometric_as_possible

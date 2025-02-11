@@ -1,0 +1,263 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>skshapes.morphing.intrinsic_deformation.IntrinsicDeformation &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="skshapes.morphing.rigid_motion" href="skshapes.morphing.rigid_motion.html" />
+    <link rel="prev" title="skshapes.morphing.intrinsic_deformation.shell_energy_metric" href="skshapes.morphing.intrinsic_deformation.shell_energy_metric.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skshapes.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Sphere.html">skshapes.Sphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Circle.html">skshapes.Circle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.PolyData.html">skshapes.PolyData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.types.html">skshapes.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.features.html">skshapes.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.convolutions.html">skshapes.convolutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.applications.html">skshapes.applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.triangle_mesh.html">skshapes.triangle_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.loss.html">skshapes.loss</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="skshapes.morphing.html">skshapes.morphing</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="skshapes.morphing.basemodel.html">skshapes.morphing.basemodel</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skshapes.morphing.extrinsic_deformation.html">skshapes.morphing.extrinsic_deformation</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="skshapes.morphing.intrinsic_deformation.html">skshapes.morphing.intrinsic_deformation</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="skshapes.morphing.intrinsic_deformation.as_isometric_as_possible.html">skshapes.morphing.intrinsic_deformation.as_isometric_as_possible</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skshapes.morphing.intrinsic_deformation.metric_validation.html">skshapes.morphing.intrinsic_deformation.metric_validation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skshapes.morphing.intrinsic_deformation.shell_energy_metric.html">skshapes.morphing.intrinsic_deformation.shell_energy_metric</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">skshapes.morphing.intrinsic_deformation.IntrinsicDeformation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="skshapes.morphing.rigid_motion.html">skshapes.morphing.rigid_motion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skshapes.morphing.validation.html">skshapes.morphing.validation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.optimization.html">skshapes.optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.multiscaling.html">skshapes.multiscaling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.tasks.html">skshapes.tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.input_validation.html">skshapes.input_validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="skshapes.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.morphing.html">skshapes.morphing</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.morphing.intrinsic_deformation.html">skshapes.morphing.intrinsic_deformation</a></li>
+      <li class="breadcrumb-item active">skshapes.morphing.intrinsic_deformation.IntrinsicDeformation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/stubs/skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="skshapes-morphing-intrinsic-deformation-intrinsicdeformation">
+<h1>skshapes.morphing.intrinsic_deformation.IntrinsicDeformation<a class="headerlink" href="#skshapes-morphing-intrinsic-deformation-intrinsicdeformation" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skshapes.morphing.intrinsic_deformation.</span></span><span class="sig-name descname"><span class="pre">IntrinsicDeformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'as_isometric_as_possible'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stiff_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="skshapes.morphing.basemodel.BaseModel.html#skshapes.morphing.basemodel.BaseModel" title="skshapes.morphing.basemodel.BaseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></a></p>
+<p>Vector field deformation model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_steps</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></span>) – Number of integration steps.</p></li>
+<li><p><strong>metric</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code>[<code class="docutils literal notranslate"><span class="pre">'as_isometric_as_possible'</span></code>, <code class="docutils literal notranslate"><span class="pre">'shell_energy'</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code>]</span>) – Riemannian metric used to regularize the morphing.</p></li>
+<li><p><strong>endpoints</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_</span> <span class="pre">2']</span></code> | <code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_</span> <span class="pre">3']</span></code></span>) – The endpoints of the morphing. If None, the endpoints are not fixed and
+the morphed shape is free to move. If not None, the morphed shape is
+constrained to be at the endpoints and the only free steps are the
+intermediate steps. Providing endpoints is useful to minimize the
+energy of the morphing while keeping the endpoints fixed.</p></li>
+<li><p><strong>use_stiff_edges</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If the source PolyData has a <cite>stiff_edges</cite> property and this argument
+is <cite>True</cite>, the <cite>stiff_edges</cite> are passed to the metric. If the source
+PolyData has no <cite>stiff_edges</cite>, <cite>edges are passed by default.</cite></p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'as_isometric_as_possible'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">endpoints</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_stiff_edges</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.__init__" title="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>([n_steps, metric, endpoints, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code>()</p></td>
+<td><p>Return a copy of the model.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">inital_parameter</span></code>(shape)</p></td>
+<td><p>Return the initial parameters of the model.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.morph" title="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.morph"><code class="xref py py-obj docutils literal notranslate"><span class="pre">morph</span></code></a>(shape, parameter[, return_path, ...])</p></td>
+<td><p>Morph a shape.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.parameter_shape" title="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.parameter_shape"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parameter_shape</span></code></a>(shape)</p></td>
+<td><p>Return the shape of the parameter.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.n_free_steps" title="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.n_free_steps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">n_free_steps</span></code></a></p></td>
+<td><p>Number of integration steps.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.morph">
+<span class="sig-name descname"><span class="pre">morph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_regularization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.morph" title="Link to this definition"></a></dt>
+<dd><p>Morph a shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a></span>) – The shape to morph.</p></li>
+<li><p><strong>parameter</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Float32[Tensor,</span> <span class="pre">'_</span> <span class="pre">_</span> <span class="pre">_']</span></code></span>) – Sequence of velocity vectors.</p></li>
+<li><p><strong>return_path</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – True if you want to have access to the morphing’s sequence of
+polydatas.</p></li>
+<li><p><strong>return_regularization</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – True to have access to the regularization.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A named tuple containing the morphed shape, the regularization and
+the path if requested.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="skshapes.types.MorphingOutput.html#skshapes.types.MorphingOutput" title="skshapes.types.MorphingOutput">MorphingOutput</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.n_free_steps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_free_steps</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.n_free_steps" title="Link to this definition"></a></dt>
+<dd><p>Number of integration steps.</p>
+<p>If the endpoints are fixed, the number of free steps is n_steps - 1 as
+the last step is fixed by the endpoints. Otherwise, the number of free
+steps is n_steps.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.parameter_shape">
+<span class="sig-name descname"><span class="pre">parameter_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.morphing.intrinsic_deformation.IntrinsicDeformation.parameter_shape" title="Link to this definition"></a></dt>
+<dd><p>Return the shape of the parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shape</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a></span>) – The shape to morph.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The shape of the parameter.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skshapes.morphing.intrinsic_deformation.shell_energy_metric.html" class="btn btn-neutral float-left" title="skshapes.morphing.intrinsic_deformation.shell_energy_metric" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="skshapes.morphing.rigid_motion.html" class="btn btn-neutral float-right" title="skshapes.morphing.rigid_motion" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

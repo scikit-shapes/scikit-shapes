@@ -1,0 +1,422 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The PolyData class: point cloud, wireframe and triangle meshes &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Working at multiple scales" href="../multiscaling/index.html" />
+    <link rel="prev" title="PolyData conversion from and to PyVista or Vedo" href="plot_pyvista.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gallery of examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-and-manipulating-data">Loading and manipulating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#working-at-multiple-scales">Working at multiple scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#computing-shape-features">Computing shape features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registering-and-aligning-shapes-with-each-other">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#using-one-of-our-interactive-applications">Using one of our interactive applications</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#defining-a-custom-model-or-loss-function">Defining a custom model or loss function</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Loading and manipulating data</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_pyvista.html">PolyData conversion from and to PyVista or Vedo</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">The <cite>PolyData</cite> class: point cloud, wireframe and triangle meshes</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../multiscaling/index.html">Working at multiple scales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../features/index.html">Computing shape features</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../registration/index.html">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../applications/index.html">Using one of our interactive applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../customization/index.html">Defining a custom model or loss function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Gallery of examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Loading and manipulating data</a></li>
+      <li class="breadcrumb-item active">The <cite>PolyData</cite> class: point cloud, wireframe and triangle meshes</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/data/plot_polydata.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-data-plot-polydata-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="the-polydata-class-point-cloud-wireframe-and-triangle-meshes">
+<span id="sphx-glr-auto-examples-data-plot-polydata-py"></span><h1>The <cite>PolyData</cite> class: point cloud, wireframe and triangle meshes<a class="headerlink" href="#the-polydata-class-point-cloud-wireframe-and-triangle-meshes" title="Link to this heading"></a></h1>
+<p>This notebook describes the <a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData" title="skshapes.PolyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">skshapes.PolyData</span></code></a> class,
+the common class for point clouds, wireframe and triangle meshes.</p>
+<ul class="simple">
+<li><p>Load and create <cite>PolyData</cite></p></li>
+<li><p>Plot <cite>PolyData</cite> with PyVista</p></li>
+<li><p>Add a signal</p></li>
+<li><p>Add landmarks</p></li>
+<li><p>Add control points</p></li>
+<li><p>Save the object and load it back</p></li>
+</ul>
+<p>There are two ways to create a <cite>PolyData</cite> object:</p>
+<ul class="simple">
+<li><p>from a file</p></li>
+<li><p>explicitly with <cite>points</cite>, <cite>edges</cite> (optional), <cite>triangles</cite> (optional)</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">cpos</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="o">-</span><span class="mf">1.6657788922829617</span><span class="p">,</span> <span class="mf">7.472045340108491</span><span class="p">,</span> <span class="mf">3.9439767221656665</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">0.8380894707515836</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.003572508692741394</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.002311795949935913</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">0.9587598899863243</span><span class="p">,</span> <span class="mf">0.2457800580099367</span><span class="p">,</span> <span class="mf">0.14272924170625823</span><span class="p">),</span>
+<span class="p">]</span>
+
+
+<span class="c1"># Load a mesh from a .ply file</span>
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="s2">&quot;../test_data/human/human.ply&quot;</span><span class="p">)</span>
+
+<span class="c1"># Extract the points, edges and triangles from the mesh</span>
+<span class="n">points</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">triangles</span> <span class="o">=</span> <span class="n">mesh</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">triangles</span>
+
+<span class="c1"># Create a point cloud, a wireframe and a surface mesh from the points, edges and triangles</span>
+<span class="n">points_cloud</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">)</span>
+<span class="n">wireframe_mesh</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">,</span> <span class="n">edges</span><span class="o">=</span><span class="n">edges</span><span class="p">)</span>
+<span class="n">surface_mesh</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">points</span><span class="p">,</span> <span class="n">triangles</span><span class="o">=</span><span class="n">triangles</span><span class="p">)</span>
+
+<span class="c1"># Create a plotter with 3 subplots and display the point cloud, wireframe and surface mesh</span>
+<span class="c1"># PolyData objects can be converted to pyvista objects with the to_pyvista method</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="s2">&quot;Points cloud&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">points_cloud</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="s2">&quot;Wireframe&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">wireframe_mesh</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">line_width</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_text</span><span class="p">(</span><span class="s2">&quot;Triangle mesh&quot;</span><span class="p">,</span> <span class="n">font_size</span><span class="o">=</span><span class="mi">24</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">surface_mesh</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_polydata_001.png" srcset="../../_images/sphx_glr_plot_polydata_001.png" alt="plot polydata" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/data/images/sphx_glr_plot_polydata_001.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<section id="add-signals">
+<h2>Add signals<a class="headerlink" href="#add-signals" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Signals can be added to the PolyData object through <cite>point_data</cite>, <cite>edge_data</cite> or <cite>triangle_data</cite>.</p></li>
+<li><p>The size of the array in the first dimension is expected to match <cite>n_points</cite>, <cite>n_edges</cite> or`n_triangles`.</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="c1"># Add some user-defined data to the mesh</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">triangle_data</span><span class="p">[</span><span class="s2">&quot;signal_triangles&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span>
+    <span class="n">surface_mesh</span><span class="o">.</span><span class="n">n_triangles</span><span class="p">,</span> <span class="mi">3</span>
+<span class="p">)</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">edge_data</span><span class="p">[</span><span class="s2">&quot;signal_edges&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">surface_mesh</span><span class="o">.</span><span class="n">n_edges</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">point_data</span><span class="p">[</span><span class="s2">&quot;signal_points&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">surface_mesh</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+<span class="c1"># Some features are already available in the mesh object</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">triangle_data</span><span class="p">[</span><span class="s2">&quot;centers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">surface_mesh</span><span class="o">.</span><span class="n">triangle_centroids</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">triangle_data</span><span class="p">[</span><span class="s2">&quot;areas&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">surface_mesh</span><span class="o">.</span><span class="n">triangle_areas</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">edge_data</span><span class="p">[</span><span class="s2">&quot;centers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">surface_mesh</span><span class="o">.</span><span class="n">edge_midpoints</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">edge_data</span><span class="p">[</span><span class="s2">&quot;lengths&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">surface_mesh</span><span class="o">.</span><span class="n">edge_lengths</span>
+
+<span class="c1"># Call the plot method display information about the signal data (size, type, device)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Triangle_data:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">surface_mesh</span><span class="o">.</span><span class="n">triangle_data</span><span class="p">)</span>
+
+<span class="c1"># Point_data can be used in the plot method to color the surface mesh</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;signal_points&quot;</span><span class="p">,</span> <span class="n">cpos</span><span class="o">=</span><span class="n">cpos</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_polydata_002.png" srcset="../../_images/sphx_glr_plot_polydata_002.png" alt="plot polydata" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/data/images/sphx_glr_plot_polydata_002.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Triangle_data:
+DataAttributes Object with attributes:
+- signal_triangles: torch.Size([250, 3]), torch.float32
+- centers: torch.Size([250, 3]), torch.float32
+- areas: torch.Size([250]), torch.float32
+Number of elements: 250
+Device: cpu
+</pre></div>
+</div>
+</section>
+<section id="add-landmarks">
+<h2>Add landmarks<a class="headerlink" href="#add-landmarks" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Landmarks are distinguished points of the <cite>PolyData</cite></p></li>
+<li><p>They can be selected via an interactive application (using vedo)</p></li>
+<li><p>Landmarks can be accessed as <cite>(n_landmarks, 3)</cite> tensors or list of indices</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">pv</span><span class="o">.</span><span class="n">BUILDING_GALLERY</span><span class="p">:</span>
+    <span class="c1"># If not in the gallery, we can use vedo to open the landmark setter</span>
+    <span class="c1"># Setting the default backend to vtk is necessary when running in a notebook</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">vedo</span>
+
+    <span class="n">vedo</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">default_backend</span> <span class="o">=</span> <span class="s2">&quot;vtk&quot;</span>
+    <span class="n">sks</span><span class="o">.</span><span class="n">LandmarkSetter</span><span class="p">(</span><span class="n">surface_mesh</span><span class="p">)</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Set the landmarks manually</span>
+    <span class="n">surface_mesh</span><span class="o">.</span><span class="n">landmark_indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">122</span><span class="p">,</span> <span class="mi">82</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">27</span><span class="p">]</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">surface_mesh</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span>
+    <span class="n">surface_mesh</span><span class="o">.</span><span class="n">landmark_points</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">point_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Landmarks : </span><span class="si">{</span><span class="n">surface_mesh</span><span class="o">.</span><span class="n">landmark_indices</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-4" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-4">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_polydata_003.png" srcset="../../_images/sphx_glr_plot_polydata_003.png" alt="plot polydata" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-5" name="sd-tab-set-2" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-5">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/data/images/sphx_glr_plot_polydata_003.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+</section>
+<section id="add-control-points">
+<h2>Add control points<a class="headerlink" href="#add-control-points" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Control points are represented by another <cite>PolyData</cite>, attached to the first</p></li>
+<li><p>The <cite>bounding_grid</cite> method offers a standard way to define control points as regular grids</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">surface_mesh</span><span class="o">.</span><span class="n">control_points</span> <span class="o">=</span> <span class="n">surface_mesh</span><span class="o">.</span><span class="n">bounding_grid</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">surface_mesh</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;tan&quot;</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">surface_mesh</span><span class="o">.</span><span class="n">control_points</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.9</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-6" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-6">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_polydata_004.png" srcset="../../_images/sphx_glr_plot_polydata_004.png" alt="plot polydata" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-7" name="sd-tab-set-3" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-7">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/data/images/sphx_glr_plot_polydata_004.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+</section>
+<section id="save-and-load">
+<h2>Save and load<a class="headerlink" href="#save-and-load" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><cite>PolyData</cite> can be saved to the disk</p></li>
+<li><p>If the file format is <cite>.vtk</cite>, signals and landmarks persist when loaded back</p></li>
+<li><p>it is also possible to save in <cite>.stl</cite> or <cite>.obj</cite> but signals/landmarks will be lost</p></li>
+<li><p>Control points must be saved separately</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">extension</span> <span class="o">=</span> <span class="s2">&quot;.vtk&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">filename_mesh</span> <span class="o">=</span> <span class="s2">&quot;tmp&quot;</span> <span class="o">+</span> <span class="n">extension</span>
+<span class="n">filename_control_points</span> <span class="o">=</span> <span class="s2">&quot;tmp_control_points&quot;</span> <span class="o">+</span> <span class="n">extension</span>
+
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename_mesh</span><span class="p">)</span>
+<span class="n">surface_mesh</span><span class="o">.</span><span class="n">control_points</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">filename_control_points</span><span class="p">)</span>
+
+<span class="n">loaded_mesh</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">filename_mesh</span><span class="p">)</span>
+<span class="n">loaded_mesh</span><span class="o">.</span><span class="n">control_points</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="n">filename_control_points</span><span class="p">)</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">loaded_mesh</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;signal_points&quot;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;viridis&quot;</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_points</span><span class="p">(</span>
+    <span class="n">loaded_mesh</span><span class="o">.</span><span class="n">landmark_points</span><span class="o">.</span><span class="n">numpy</span><span class="p">(),</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+    <span class="n">point_size</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">render_points_as_spheres</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">loaded_mesh</span><span class="o">.</span><span class="n">control_points</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.9</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Landmarks : </span><span class="si">{</span><span class="n">loaded_mesh</span><span class="o">.</span><span class="n">landmark_indices</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Triangle_data:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">loaded_mesh</span><span class="o">.</span><span class="n">triangle_data</span><span class="p">)</span>
+
+<span class="n">Path</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">filename_mesh</span><span class="p">))</span>
+<span class="n">Path</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">filename_control_points</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-8" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-8">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_polydata_005.png" srcset="../../_images/sphx_glr_plot_polydata_005.png" alt="plot polydata" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-9" name="sd-tab-set-4" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-9">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/data/images/sphx_glr_plot_polydata_005.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Triangle_data:
+DataAttributes Object with attributes:
+- signal_triangles: torch.Size([250, 3]), torch.float32
+- centers: torch.Size([250, 3]), torch.float32
+- areas: torch.Size([250]), torch.float32
+Number of elements: 250
+Device: cpu
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (0 minutes 1.625 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-data-plot-polydata-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/9badce631c087d7ceea562814ce89d8f/plot_polydata.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_polydata.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/533ed523e0230a15a115d1553db6031a/plot_polydata.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_polydata.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_pyvista.html" class="btn btn-neutral float-left" title="PolyData conversion from and to PyVista or Vedo" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../multiscaling/index.html" class="btn btn-neutral float-right" title="Working at multiple scales" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

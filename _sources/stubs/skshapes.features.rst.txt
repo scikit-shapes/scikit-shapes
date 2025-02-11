@@ -1,0 +1,38 @@
+skshapes.features
+=================
+
+.. automodule:: skshapes.features
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      implicit_quadrics
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Moments
+   
+   
+
+   
+   
+   
+
+
+

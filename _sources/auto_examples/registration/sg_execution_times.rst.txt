@@ -1,0 +1,52 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_registration_sg_execution_times:
+
+
+Computation times
+=================
+**07:04.996** total execution time for 6 files **from auto_examples/registration**:
+
+.. container::
+
+  .. raw:: html
+
+    <style scoped>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet" />
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script type="text/javascript" class="init">
+    $(document).ready( function () {
+        $('table.sg-datatable').DataTable({order: [[1, 'desc']]});
+    } );
+    </script>
+
+  .. list-table::
+   :header-rows: 1
+   :class: table table-striped sg-datatable
+
+   * - Example
+     - Time
+     - Mem (MB)
+   * - :ref:`sphx_glr_auto_examples_registration_plot_lddmm_1_normalization.py` (``plot_lddmm_1_normalization.py``)
+     - 03:27.775
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_registration_plot_karateka.py` (``plot_karateka.py``)
+     - 01:16.547
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_registration_plot_multiscale_elastic.py` (``plot_multiscale_elastic.py``)
+     - 01:08.663
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_registration_plot_rigid_1_3d.py` (``plot_rigid_1_3d.py``)
+     - 01:02.176
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_registration_plot_lddmm_0_skulls.py` (``plot_lddmm_0_skulls.py``)
+     - 00:05.213
+     - 0.0
+   * - :ref:`sphx_glr_auto_examples_registration_plot_rigid_0_2d.py` (``plot_rigid_0_2d.py``)
+     - 00:04.622
+     - 0.0

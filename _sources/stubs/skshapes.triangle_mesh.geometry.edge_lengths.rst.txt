@@ -1,0 +1,6 @@
+skshapes.triangle\_mesh.geometry.edge\_lengths
+==============================================
+
+.. currentmodule:: skshapes.triangle_mesh.geometry
+
+.. autofunction:: edge_lengths

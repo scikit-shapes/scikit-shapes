@@ -1,0 +1,6 @@
+skshapes.triangle\_mesh.geometry.triangle\_areas
+================================================
+
+.. currentmodule:: skshapes.triangle_mesh.geometry
+
+.. autofunction:: triangle_areas

@@ -1,0 +1,452 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="skshapes.applications.window_generator" href="skshapes.applications.window_generator.html" />
+    <link rel="prev" title="skshapes.applications.vertices_landmark_setter.LandmarkSetterMultipleMeshes" href="skshapes.applications.vertices_landmark_setter.LandmarkSetterMultipleMeshes.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skshapes.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Sphere.html">skshapes.Sphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Circle.html">skshapes.Circle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.PolyData.html">skshapes.PolyData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.types.html">skshapes.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.features.html">skshapes.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.convolutions.html">skshapes.convolutions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="skshapes.applications.html">skshapes.applications</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="skshapes.applications.barycentric_landmark_setter.html">skshapes.applications.barycentric_landmark_setter</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skshapes.applications.browser.html">skshapes.applications.browser</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="skshapes.applications.vertices_landmark_setter.html">skshapes.applications.vertices_landmark_setter</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="skshapes.applications.vertices_landmark_setter.closest_vertex.html">skshapes.applications.vertices_landmark_setter.closest_vertex</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skshapes.applications.vertices_landmark_setter.LandmarkSetter.html">skshapes.applications.vertices_landmark_setter.LandmarkSetter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="skshapes.applications.vertices_landmark_setter.LandmarkSetterMultipleMeshes.html">skshapes.applications.vertices_landmark_setter.LandmarkSetterMultipleMeshes</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="skshapes.applications.window_generator.html">skshapes.applications.window_generator</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.triangle_mesh.html">skshapes.triangle_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.loss.html">skshapes.loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.morphing.html">skshapes.morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.optimization.html">skshapes.optimization</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.multiscaling.html">skshapes.multiscaling</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.tasks.html">skshapes.tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.input_validation.html">skshapes.input_validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="skshapes.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.applications.html">skshapes.applications</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.applications.vertices_landmark_setter.html">skshapes.applications.vertices_landmark_setter</a></li>
+      <li class="breadcrumb-item active">skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/stubs/skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="skshapes-applications-vertices-landmark-setter-landmarksettersinglemesh">
+<h1>skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh<a class="headerlink" href="#skshapes-applications-vertices-landmark-setter-landmarksettersinglemesh" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skshapes.applications.vertices_landmark_setter.</span></span><span class="sig-name descname"><span class="pre">LandmarkSetterSingleMesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Plotter</span></code></p>
+<p>Single PolyData landmark setter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>shape</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a></span>) – The PolyData on which the landmarks are selected.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.__init__" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>shape</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a></span>) – (str, list)
+shape of the grid of renderers in format (rows, columns). Ignored if N is specified.</p></li>
+<li><p><strong>N</strong> – (int)
+number of desired renderers arranged in a grid automatically.</p></li>
+<li><p><strong>pos</strong> – (list)
+(x,y) position in pixels of top-left corner of the rendering window on the screen</p></li>
+<li><p><strong>size</strong> – (str, list)
+size of the rendering window. If ‘auto’, guess it based on screensize.</p></li>
+<li><p><strong>screensize</strong> – (list)
+physical size of the monitor screen in pixels</p></li>
+<li><p><strong>bg</strong> – (color, str)
+background color or specify jpg image file name with path</p></li>
+<li><p><strong>bg2</strong> – (color)
+background color of a gradient towards the top</p></li>
+<li><p><strong>title</strong> – (str)
+window title</p></li>
+<li><p><strong>axes</strong> – <p>(int)</p>
+<p>Note that Axes type-1 can be fully customized by passing a dictionary <cite>axes=dict()</cite>.
+Check out <cite>vedo.addons.Axes()</cite> for the available options.</p>
+<blockquote>
+<div><ul>
+<li><p>0,  no axes</p></li>
+<li><p>1,  draw three gray grid walls</p></li>
+<li><p>2,  show cartesian axes from (0,0,0)</p></li>
+<li><p>3,  show positive range of cartesian axes from (0,0,0)</p></li>
+<li><p>4,  show a triad at bottom left</p></li>
+<li><p>5,  show a cube at bottom left</p></li>
+<li><p>6,  mark the corners of the bounding box</p></li>
+<li><p>7,  draw a 3D ruler at each side of the cartesian axes</p></li>
+<li><p>8,  show the VTK CubeAxesActor object</p></li>
+<li><p>9,  show the bounding box outLine</p></li>
+<li><p>10, show three circles representing the maximum bounding box</p></li>
+<li><p>11, show a large grid on the x-y plane (use with zoom=8)</p></li>
+<li><p>12, show polar axes</p></li>
+<li><p>13, draw a simple ruler at the bottom of the window</p></li>
+<li><p>14: draw a camera orientation widget</p></li>
+</ul>
+</div></blockquote>
+</p></li>
+<li><p><strong>sharecam</strong> – (bool)
+if False each renderer will have an independent camera</p></li>
+<li><p><strong>interactive</strong> – (bool)
+if True will stop after show() to allow interaction with the 3d scene</p></li>
+<li><p><strong>offscreen</strong> – (bool)
+if True will not show the rendering window</p></li>
+<li><p><strong>qt_widget</strong> – (QVTKRenderWindowInteractor)
+render in a Qt-Widget using an QVTKRenderWindowInteractor.
+See examples <cite>qt_windows[1,2,3].py</cite> and <cite>qt_cutter.py</cite>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.__init__" title="skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(shape)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add</span></code>(*objs[, at])</p></td>
+<td><p>Append the input objects to the internal list of objects to be shown.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_ambient_occlusion</span></code>(radius[, bias, blur, ...])</p></td>
+<td><p>Screen Space Ambient Occlusion.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_button</span></code>([fnc, states, c, bc, pos, size, ...])</p></td>
+<td><p>Add a button to the renderer window.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_callback</span></code>(event_name, func[, priority, ...])</p></td>
+<td><p>Add a function to be executed while show() is active.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_depth_of_field</span></code>([autofocus])</p></td>
+<td><p>Add a depth of field effect in the scene.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_global_axes</span></code>([axtype, c])</p></td>
+<td><p>Draw axes on scene.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hint</span></code>(obj[, text, c, bg, font, size, ...])</p></td>
+<td><p>Create a pop-up hint style message when hovering an object.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_hover_legend</span></code>([at, c, pos, font, s, bg, ...])</p></td>
+<td><p>Add a legend with 2D text which is triggered by hovering the mouse on an object.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_icon</span></code>(icon[, pos, size])</p></td>
+<td><p>Add an inset icon mesh into the same renderer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_inset</span></code>(*objects, **options)</p></td>
+<td><p>Add a draggable inset space into a renderer.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_legend_box</span></code>(**kwargs)</p></td>
+<td><p>Add a legend to the top right.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_observer</span></code>(event_name, func[, priority])</p></td>
+<td><p>Add a callback function that will be called when an event occurs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_renderer_frame</span></code>([c, alpha, lw, padding])</p></td>
+<td><p>Add a frame to the renderer subwindow.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_scale_indicator</span></code>([pos, s, length, lw, c, ...])</p></td>
+<td><p>Add a Scale Indicator.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_shadows</span></code>()</p></td>
+<td><p>Add shadows at the current renderer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_slider</span></code>(sliderfunc, xmin, xmax[, value, ...])</p></td>
+<td><p>Add a <cite>vedo.addons.Slider2D</cite> which can call an external custom function.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_slider3d</span></code>(sliderfunc, pos1, pos2, xmin, xmax)</p></td>
+<td><p>Add a 3D slider widget which can call an external custom function.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_spline_tool</span></code>(points[, pc, ps, lc, ac, ...])</p></td>
+<td><p>Add a spline tool to the current plotter.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">at</span></code>(nren[, yren])</p></td>
+<td><p>Select the current renderer number as an int.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">azimuth</span></code>(angle)</p></td>
+<td><p>Rotate camera around the view up vector.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">background</span></code>([c1, c2, at, mode])</p></td>
+<td><p>Set the color of the background for the current renderer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">break_interaction</span></code>()</p></td>
+<td><p>Break window interaction and return to the python execution flow</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_actors_trasform</span></code>([at])</p></td>
+<td><p>Reset the transformation matrix of all actors at specified renderer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>([at, deep])</p></td>
+<td><p>Clear the scene from all meshes and volumes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">close</span></code>()</p></td>
+<td><p>Close the plotter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">color_picker</span></code>(xy[, verbose])</p></td>
+<td><p>Pick color of specific (x,y) pixel on the screen.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_screen_coordinates</span></code>(obj[, full_window])</p></td>
+<td><p>Given a 3D points in the current renderer (or full window), find the screen pixel coordinates.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">compute_world_coordinate</span></code>(pos2d[, at, objs, ...])</p></td>
+<td><p>Transform a 2D point on the screen into a 3D point inside the rendering scene.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">dolly</span></code>(value)</p></td>
+<td><p>Move the camera towards (value&gt;0) or away from (value&lt;0) the focal point.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">elevation</span></code>(angle)</p></td>
+<td><p>Rotate the camera around the cross product of the negative of the direction of projection and the view up vector.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">export</span></code>([filename, binary])</p></td>
+<td><p>Export scene to file to HTML, X3D or Numpy file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fill_event</span></code>([ename, pos, enable_picking])</p></td>
+<td><p>Create an Event object with information of what was clicked.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fly_to</span></code>(point)</p></td>
+<td><p>Fly camera to the specified point.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">fov</span></code>(angle)</p></td>
+<td><p>Set the field of view angle for the camera.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">freeze</span></code>([value])</p></td>
+<td><p>Freeze the current renderer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_actors</span></code>([at, include_non_pickables])</p></td>
+<td><p>Return a list of Volumes from the specified renderer.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_meshes</span></code>([at, include_non_pickables, ...])</p></td>
+<td><p>Return a list of Meshes from the specified renderer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_volumes</span></code>([at, include_non_pickables])</p></td>
+<td><p>Return a list of Volumes from the specified renderer.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_interactor</span></code>()</p></td>
+<td><p>Initialize the interactor if not already initialized.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">interactive</span></code>()</p></td>
+<td><p>Start window interaction.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">look_at</span></code>([plane])</p></td>
+<td><p>Move the camera so that it looks at the specified cartesian plane</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">move_camera</span></code>(cameras[, t, times, smooth, ...])</p></td>
+<td><p>Takes as input two cameras set camera at an interpolated position:</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">parallel_projection</span></code>([value, at])</p></td>
+<td><p>Use parallel projection <cite>at</cite> a specified renderer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pick_area</span></code>(pos1, pos2[, at])</p></td>
+<td><p>Pick all objects within a box defined by two corner points in 2D screen coordinates.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">play</span></code>([recorded_events, repeats])</p></td>
+<td><p>Play camera, mouse, keystrokes and all other events.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code>([at])</p></td>
+<td><p>Remove the last added object from the rendering window.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">print</span></code>()</p></td>
+<td><p>Print information about the current instance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">process_events</span></code>()</p></td>
+<td><p>Process all pending events.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">record</span></code>([filename])</p></td>
+<td><p>Record camera, mouse, keystrokes and all other events.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove</span></code>(*objs[, at])</p></td>
+<td><p>Remove input object to the internal list of objects to be shown.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_all_observers</span></code>()</p></td>
+<td><p>Remove all observers.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_callback</span></code>(cid)</p></td>
+<td><p>Remove a callback function by its id or a whole category of callbacks by their name.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_lights</span></code>()</p></td>
+<td><p>Remove all the present lights in the current renderer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">render</span></code>([resetcam])</p></td>
+<td><p>Render the scene.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">render_hidden_lines</span></code>([value])</p></td>
+<td><p>Remove hidden lines when in wireframe mode.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_camera</span></code>([tight])</p></td>
+<td><p>Reset the camera position and zooming.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_clipping_range</span></code>([bounds])</p></td>
+<td><p>Reset the camera clipping range to include all visible actors.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_viewup</span></code>([smooth])</p></td>
+<td><p>Reset the orientation of the camera to the closest orthogonal direction and view-up.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">roll</span></code>(angle)</p></td>
+<td><p>Roll the camera about the direction of projection.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">screenshot</span></code>([filename, scale, asarray])</p></td>
+<td><p>Take a screenshot of the Plotter window.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code>(*objects[, at, axes, resetcam, zoom, ...])</p></td>
+<td><p>Render a list of objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.start" title="skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.start"><code class="xref py py-obj docutils literal notranslate"><span class="pre">start</span></code></a>()</p></td>
+<td><p>Start the landmark setter.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">timer_callback</span></code>(action[, timer_id, dt, one_shot])</p></td>
+<td><p>Start or stop an existing timer.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">toimage</span></code>([scale])</p></td>
+<td><p>Generate a <cite>Image</cite> object from the current rendering window.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">use_depth_peeling</span></code>([at, value])</p></td>
+<td><p>Specify whether use depth peeling algorithm at this specific renderer Call this method before the first rendering.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">user_mode</span></code>(mode)</p></td>
+<td><p>Modify the user interaction mode.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">zoom</span></code>(zoom)</p></td>
+<td><p>Apply a zooming factor for the current camera view</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">actors</span></code></p></td>
+<td><p>Return the list of actors.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">camera</span></code></p></td>
+<td><p>Return the current active camera.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.start">
+<span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.applications.vertices_landmark_setter.LandmarkSetterSingleMesh.start" title="Link to this definition"></a></dt>
+<dd><p>Start the landmark setter.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skshapes.applications.vertices_landmark_setter.LandmarkSetterMultipleMeshes.html" class="btn btn-neutral float-left" title="skshapes.applications.vertices_landmark_setter.LandmarkSetterMultipleMeshes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="skshapes.applications.window_generator.html" class="btn btn-neutral float-right" title="skshapes.applications.window_generator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

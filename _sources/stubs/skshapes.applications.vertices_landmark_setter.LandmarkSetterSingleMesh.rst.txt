@@ -1,0 +1,98 @@
+skshapes.applications.vertices\_landmark\_setter.LandmarkSetterSingleMesh
+=========================================================================
+
+.. currentmodule:: skshapes.applications.vertices_landmark_setter
+
+.. autoclass:: LandmarkSetterSingleMesh
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LandmarkSetterSingleMesh.__init__
+      ~LandmarkSetterSingleMesh.add
+      ~LandmarkSetterSingleMesh.add_ambient_occlusion
+      ~LandmarkSetterSingleMesh.add_button
+      ~LandmarkSetterSingleMesh.add_callback
+      ~LandmarkSetterSingleMesh.add_depth_of_field
+      ~LandmarkSetterSingleMesh.add_global_axes
+      ~LandmarkSetterSingleMesh.add_hint
+      ~LandmarkSetterSingleMesh.add_hover_legend
+      ~LandmarkSetterSingleMesh.add_icon
+      ~LandmarkSetterSingleMesh.add_inset
+      ~LandmarkSetterSingleMesh.add_legend_box
+      ~LandmarkSetterSingleMesh.add_observer
+      ~LandmarkSetterSingleMesh.add_renderer_frame
+      ~LandmarkSetterSingleMesh.add_scale_indicator
+      ~LandmarkSetterSingleMesh.add_shadows
+      ~LandmarkSetterSingleMesh.add_slider
+      ~LandmarkSetterSingleMesh.add_slider3d
+      ~LandmarkSetterSingleMesh.add_spline_tool
+      ~LandmarkSetterSingleMesh.at
+      ~LandmarkSetterSingleMesh.azimuth
+      ~LandmarkSetterSingleMesh.background
+      ~LandmarkSetterSingleMesh.break_interaction
+      ~LandmarkSetterSingleMesh.check_actors_trasform
+      ~LandmarkSetterSingleMesh.clear
+      ~LandmarkSetterSingleMesh.close
+      ~LandmarkSetterSingleMesh.color_picker
+      ~LandmarkSetterSingleMesh.compute_screen_coordinates
+      ~LandmarkSetterSingleMesh.compute_world_coordinate
+      ~LandmarkSetterSingleMesh.dolly
+      ~LandmarkSetterSingleMesh.elevation
+      ~LandmarkSetterSingleMesh.export
+      ~LandmarkSetterSingleMesh.fill_event
+      ~LandmarkSetterSingleMesh.fly_to
+      ~LandmarkSetterSingleMesh.fov
+      ~LandmarkSetterSingleMesh.freeze
+      ~LandmarkSetterSingleMesh.get_actors
+      ~LandmarkSetterSingleMesh.get_meshes
+      ~LandmarkSetterSingleMesh.get_volumes
+      ~LandmarkSetterSingleMesh.initialize_interactor
+      ~LandmarkSetterSingleMesh.interactive
+      ~LandmarkSetterSingleMesh.look_at
+      ~LandmarkSetterSingleMesh.move_camera
+      ~LandmarkSetterSingleMesh.parallel_projection
+      ~LandmarkSetterSingleMesh.pick_area
+      ~LandmarkSetterSingleMesh.play
+      ~LandmarkSetterSingleMesh.pop
+      ~LandmarkSetterSingleMesh.print
+      ~LandmarkSetterSingleMesh.process_events
+      ~LandmarkSetterSingleMesh.record
+      ~LandmarkSetterSingleMesh.remove
+      ~LandmarkSetterSingleMesh.remove_all_observers
+      ~LandmarkSetterSingleMesh.remove_callback
+      ~LandmarkSetterSingleMesh.remove_lights
+      ~LandmarkSetterSingleMesh.render
+      ~LandmarkSetterSingleMesh.render_hidden_lines
+      ~LandmarkSetterSingleMesh.reset_camera
+      ~LandmarkSetterSingleMesh.reset_clipping_range
+      ~LandmarkSetterSingleMesh.reset_viewup
+      ~LandmarkSetterSingleMesh.roll
+      ~LandmarkSetterSingleMesh.screenshot
+      ~LandmarkSetterSingleMesh.show
+      ~LandmarkSetterSingleMesh.start
+      ~LandmarkSetterSingleMesh.timer_callback
+      ~LandmarkSetterSingleMesh.toimage
+      ~LandmarkSetterSingleMesh.use_depth_peeling
+      ~LandmarkSetterSingleMesh.user_mode
+      ~LandmarkSetterSingleMesh.zoom
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LandmarkSetterSingleMesh.actors
+      ~LandmarkSetterSingleMesh.camera
+   
+   

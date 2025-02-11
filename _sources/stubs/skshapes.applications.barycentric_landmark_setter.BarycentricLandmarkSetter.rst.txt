@@ -1,0 +1,100 @@
+skshapes.applications.barycentric\_landmark\_setter.BarycentricLandmarkSetter
+=============================================================================
+
+.. currentmodule:: skshapes.applications.barycentric_landmark_setter
+
+.. autoclass:: BarycentricLandmarkSetter
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~BarycentricLandmarkSetter.__init__
+      ~BarycentricLandmarkSetter.add
+      ~BarycentricLandmarkSetter.add_ambient_occlusion
+      ~BarycentricLandmarkSetter.add_button
+      ~BarycentricLandmarkSetter.add_callback
+      ~BarycentricLandmarkSetter.add_depth_of_field
+      ~BarycentricLandmarkSetter.add_global_axes
+      ~BarycentricLandmarkSetter.add_hint
+      ~BarycentricLandmarkSetter.add_hover_legend
+      ~BarycentricLandmarkSetter.add_icon
+      ~BarycentricLandmarkSetter.add_inset
+      ~BarycentricLandmarkSetter.add_legend_box
+      ~BarycentricLandmarkSetter.add_observer
+      ~BarycentricLandmarkSetter.add_renderer_frame
+      ~BarycentricLandmarkSetter.add_scale_indicator
+      ~BarycentricLandmarkSetter.add_shadows
+      ~BarycentricLandmarkSetter.add_slider
+      ~BarycentricLandmarkSetter.add_slider3d
+      ~BarycentricLandmarkSetter.add_spline_tool
+      ~BarycentricLandmarkSetter.at
+      ~BarycentricLandmarkSetter.azimuth
+      ~BarycentricLandmarkSetter.background
+      ~BarycentricLandmarkSetter.break_interaction
+      ~BarycentricLandmarkSetter.check_actors_trasform
+      ~BarycentricLandmarkSetter.clear
+      ~BarycentricLandmarkSetter.close
+      ~BarycentricLandmarkSetter.color_picker
+      ~BarycentricLandmarkSetter.compute_screen_coordinates
+      ~BarycentricLandmarkSetter.compute_world_coordinate
+      ~BarycentricLandmarkSetter.dolly
+      ~BarycentricLandmarkSetter.elevation
+      ~BarycentricLandmarkSetter.export
+      ~BarycentricLandmarkSetter.fill_event
+      ~BarycentricLandmarkSetter.fly_to
+      ~BarycentricLandmarkSetter.fov
+      ~BarycentricLandmarkSetter.freeze
+      ~BarycentricLandmarkSetter.get_actors
+      ~BarycentricLandmarkSetter.get_meshes
+      ~BarycentricLandmarkSetter.get_volumes
+      ~BarycentricLandmarkSetter.initialize_interactor
+      ~BarycentricLandmarkSetter.interactive
+      ~BarycentricLandmarkSetter.look_at
+      ~BarycentricLandmarkSetter.move_camera
+      ~BarycentricLandmarkSetter.parallel_projection
+      ~BarycentricLandmarkSetter.pick_area
+      ~BarycentricLandmarkSetter.play
+      ~BarycentricLandmarkSetter.pop
+      ~BarycentricLandmarkSetter.print
+      ~BarycentricLandmarkSetter.process_events
+      ~BarycentricLandmarkSetter.record
+      ~BarycentricLandmarkSetter.remove
+      ~BarycentricLandmarkSetter.remove_all_observers
+      ~BarycentricLandmarkSetter.remove_callback
+      ~BarycentricLandmarkSetter.remove_lights
+      ~BarycentricLandmarkSetter.render
+      ~BarycentricLandmarkSetter.render_hidden_lines
+      ~BarycentricLandmarkSetter.reset_camera
+      ~BarycentricLandmarkSetter.reset_clipping_range
+      ~BarycentricLandmarkSetter.reset_viewup
+      ~BarycentricLandmarkSetter.roll
+      ~BarycentricLandmarkSetter.screenshot
+      ~BarycentricLandmarkSetter.show
+      ~BarycentricLandmarkSetter.start
+      ~BarycentricLandmarkSetter.timer_callback
+      ~BarycentricLandmarkSetter.toimage
+      ~BarycentricLandmarkSetter.use_depth_peeling
+      ~BarycentricLandmarkSetter.user_mode
+      ~BarycentricLandmarkSetter.zoom
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~BarycentricLandmarkSetter.actors
+      ~BarycentricLandmarkSetter.camera
+      ~BarycentricLandmarkSetter.landmarks
+      ~BarycentricLandmarkSetter.landmarks_as_3d_point_cloud
+   
+   

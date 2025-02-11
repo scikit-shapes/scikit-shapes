@@ -1,0 +1,35 @@
+skshapes.multiscaling.multiscale.Multiscale
+===========================================
+
+.. currentmodule:: skshapes.multiscaling.multiscale
+
+.. autoclass:: Multiscale
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Multiscale.__init__
+      ~Multiscale.append
+      ~Multiscale.at
+      ~Multiscale.best_key
+      ~Multiscale.index_mapping
+      ~Multiscale.propagate
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Multiscale.ratios
+   
+   

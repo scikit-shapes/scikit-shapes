@@ -1,0 +1,329 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>skshapes.multiscaling.decimation.Decimation &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="skshapes.multiscaling.multiscale" href="skshapes.multiscaling.multiscale.html" />
+    <link rel="prev" title="skshapes.multiscaling.decimation" href="skshapes.multiscaling.decimation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skshapes.html">API reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Sphere.html">skshapes.Sphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.Circle.html">skshapes.Circle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.PolyData.html">skshapes.PolyData</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.types.html">skshapes.types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.features.html">skshapes.features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.convolutions.html">skshapes.convolutions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.applications.html">skshapes.applications</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.triangle_mesh.html">skshapes.triangle_mesh</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.loss.html">skshapes.loss</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.morphing.html">skshapes.morphing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.optimization.html">skshapes.optimization</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="skshapes.multiscaling.html">skshapes.multiscaling</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="skshapes.multiscaling.decimation.html">skshapes.multiscaling.decimation</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">skshapes.multiscaling.decimation.Decimation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="skshapes.multiscaling.multiscale.html">skshapes.multiscaling.multiscale</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.tasks.html">skshapes.tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skshapes.input_validation.html">skshapes.input_validation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="skshapes.html">API reference</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.multiscaling.html">skshapes.multiscaling</a></li>
+          <li class="breadcrumb-item"><a href="skshapes.multiscaling.decimation.html">skshapes.multiscaling.decimation</a></li>
+      <li class="breadcrumb-item active">skshapes.multiscaling.decimation.Decimation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/stubs/skshapes.multiscaling.decimation.Decimation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="skshapes-multiscaling-decimation-decimation">
+<h1>skshapes.multiscaling.decimation.Decimation<a class="headerlink" href="#skshapes-multiscaling-decimation-decimation" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="skshapes.multiscaling.decimation.Decimation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skshapes.multiscaling.decimation.</span></span><span class="sig-name descname"><span class="pre">Decimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.decimation.Decimation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Decimation class.</p>
+<p>This class implements the quadric decimation algorithm. The goal of
+decimation is to reduce the number of points of a triangular mesh while
+preserving the global aspect of the shape.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_reduction</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The target rate of triangles to delete during decimation. Must
+be between 0 and 1.</p></li>
+<li><p><strong>n_points</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The desired number of points in the decimated mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>InputStructureError</strong> – If both target_reduction and n_points are provided or
+    if none of them is provided.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Decimate a mesh with a target reduction:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">mesh</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Sphere</span><span class="p">()</span>
+<span class="n">decimator</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Decimation</span><span class="p">(</span><span class="n">target_reduction</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">decimated_mesh</span> <span class="o">=</span> <span class="n">decimator</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">mesh</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Decimate two meshes with the same connectivity (same triangles):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># assume that pose1 and pose2 are two meshes with the same connectivity:</span>
+
+<span class="n">pose1</span><span class="p">,</span> <span class="n">pose2</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="s2">&quot;data/pose1.vtk&quot;</span><span class="p">,</span> <span class="s2">&quot;data/pose2.vtk&quot;</span><span class="p">)</span>
+<span class="n">decimator</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Decimation</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">decimator</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cat1</span><span class="p">)</span>
+<span class="n">pose1_decimated</span> <span class="o">=</span> <span class="n">decimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">cat1</span><span class="p">)</span>
+<span class="n">pose2_decimated</span> <span class="o">=</span> <span class="n">decimator</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">cat2</span><span class="p">)</span>
+
+<span class="c1"># pose1_decimated and pose2_decimated have the same connectivity</span>
+<span class="k">assert</span> <span class="n">torch</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">pose1_decimated</span><span class="o">.</span><span class="n">triangles</span><span class="p">,</span> <span class="n">pose2_decimated</span><span class="o">.</span><span class="n">triangles</span><span class="p">)</span>
+
+<span class="c1"># if landmarks are present in the meshes, they are kept after the</span>
+<span class="c1"># decimation</span>
+<span class="k">if</span> <span class="n">pose1</span><span class="o">.</span><span class="n">landmarks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="n">pose1_decimated</span><span class="o">.</span><span class="n">landmarks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+<span class="k">if</span> <span class="n">pose2</span><span class="o">.</span><span class="n">landmarks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="n">pose2_decimated</span><span class="o">.</span><span class="n">landmarks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</pre></div>
+</div>
+<p>Decimation is often used through the Multiscale interface.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.decimation.Decimation.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.decimation.Decimation.__init__" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.multiscaling.decimation.Decimation.__init__" title="skshapes.multiscaling.decimation.Decimation.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(*[, target_reduction, n_points, ratio])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.multiscaling.decimation.Decimation.fit" title="skshapes.multiscaling.decimation.Decimation.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(mesh)</p></td>
+<td><p>Fit the decimation algorithm to a mesh.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.multiscaling.decimation.Decimation.fit_transform" title="skshapes.multiscaling.decimation.Decimation.fit_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code></a>(mesh, *[, target_reduction, ...])</p></td>
+<td><p>Decimate and return decimated mesh.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.multiscaling.decimation.Decimation.transform" title="skshapes.multiscaling.decimation.Decimation.transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">transform</span></code></a>(mesh, *[, target_reduction, ...])</p></td>
+<td><p>Transform a mesh using the decimation algorithm.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.multiscaling.decimation.Decimation.actual_reduction" title="skshapes.multiscaling.decimation.Decimation.actual_reduction"><code class="xref py py-obj docutils literal notranslate"><span class="pre">actual_reduction</span></code></a></p></td>
+<td><p>Returns the actual reduction of the decimation algorithm.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skshapes.multiscaling.decimation.Decimation.collapses" title="skshapes.multiscaling.decimation.Decimation.collapses"><code class="xref py py-obj docutils literal notranslate"><span class="pre">collapses</span></code></a></p></td>
+<td><p>Returns the collapses of the decimation algorithm.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skshapes.multiscaling.decimation.Decimation.ref_mesh" title="skshapes.multiscaling.decimation.Decimation.ref_mesh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ref_mesh</span></code></a></p></td>
+<td><p>Returns the reference mesh of the decimation algorithm.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.multiscaling.decimation.Decimation.actual_reduction">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">actual_reduction</span></span><a class="headerlink" href="#skshapes.multiscaling.decimation.Decimation.actual_reduction" title="Link to this definition"></a></dt>
+<dd><p>Returns the actual reduction of the decimation algorithm.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.multiscaling.decimation.Decimation.collapses">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">collapses</span></span><a class="headerlink" href="#skshapes.multiscaling.decimation.Decimation.collapses" title="Link to this definition"></a></dt>
+<dd><p>Returns the collapses of the decimation algorithm.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.decimation.Decimation.fit">
+<span class="sig-name descname"><span class="pre">fit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.decimation.Decimation.fit" title="Link to this definition"></a></dt>
+<dd><p>Fit the decimation algorithm to a mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>mesh</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a></span>) – The mesh to fit the decimation object to.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the mesh is not triangular.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>self</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#skshapes.multiscaling.decimation.Decimation" title="skshapes.multiscaling.decimation.Decimation">Decimation</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.decimation.Decimation.fit_transform">
+<span class="sig-name descname"><span class="pre">fit_transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_index_mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.decimation.Decimation.fit_transform" title="Link to this definition"></a></dt>
+<dd><p>Decimate and return decimated mesh.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Int64[Tensor,</span> <span class="pre">'_']</span></code>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="skshapes.multiscaling.decimation.Decimation.ref_mesh">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ref_mesh</span></span><a class="headerlink" href="#skshapes.multiscaling.decimation.Decimation.ref_mesh" title="Link to this definition"></a></dt>
+<dd><p>Returns the reference mesh of the decimation algorithm.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="skshapes.multiscaling.decimation.Decimation.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mesh</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_points_strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_index_mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skshapes.multiscaling.decimation.Decimation.transform" title="Link to this definition"></a></dt>
+<dd><p>Transform a mesh using the decimation algorithm.</p>
+<p>The decimation must have been fitted to a mesh before calling this
+method. The mesh to decimate could be:
+- the same mesh as the one used to fit the decimation object
+- a mesh with the same connectivity as the one used to fit the decimation
+object (same number of points and same triangles)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mesh</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="skshapes.types.polydata_type.html#skshapes.types.polydata_type" title="skshapes.types.polydata_type"><code class="xref py py-class docutils literal notranslate"><span class="pre">polydata_type</span></code></a></span>) – The mesh to transform.</p></li>
+<li><p><strong>target_reduction</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The target reduction to apply to the mesh.</p></li>
+<li><p><strong>n_points</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The targeted number of points. Fast but it is not guaranteed that
+the decimation algorithm will exactly reach this number of points.
+If you want to be sure that the decimation algorithm will reach
+this number of points, use n_points_strict instead.</p></li>
+<li><p><strong>n_points_strict</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The targeted number of points. This parameter can lead to a slower
+decimation algorithm because the algorithm will try to reach this
+number of points exactly, and this may require many iterations.</p></li>
+<li><p><strong>ratio</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code> | <code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span>) – The ratio of the number of points of the mesh to decimate over the
+number of points of the mesh used to fit the decimation object.</p></li>
+<li><p><strong>return_index_mapping</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></span>) – If True, the indice mapping is returned as well as the decimated
+mesh.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the decimation object has not been fitted yet.
+    If the number of points or the triangles structure of the mesh to
+    decimate is not the same as the mesh using to fit.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The decimated mesh.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="skshapes.PolyData.html#skshapes.PolyData" title="skshapes.PolyData">PolyData</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="skshapes.multiscaling.decimation.html" class="btn btn-neutral float-left" title="skshapes.multiscaling.decimation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="skshapes.multiscaling.multiscale.html" class="btn btn-neutral float-right" title="skshapes.multiscaling.multiscale" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

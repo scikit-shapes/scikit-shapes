@@ -1,0 +1,6 @@
+skshapes.morphing.validation.validate\_polydata\_morphing\_model
+================================================================
+
+.. currentmodule:: skshapes.morphing.validation
+
+.. autofunction:: validate_polydata_morphing_model

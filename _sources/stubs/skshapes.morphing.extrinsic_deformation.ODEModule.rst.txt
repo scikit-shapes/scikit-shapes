@@ -1,0 +1,83 @@
+skshapes.morphing.extrinsic\_deformation.ODEModule
+==================================================
+
+.. currentmodule:: skshapes.morphing.extrinsic_deformation
+
+.. autoclass:: ODEModule
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ODEModule.__init__
+      ~ODEModule.add_module
+      ~ODEModule.apply
+      ~ODEModule.bfloat16
+      ~ODEModule.buffers
+      ~ODEModule.children
+      ~ODEModule.compile
+      ~ODEModule.cpu
+      ~ODEModule.cuda
+      ~ODEModule.double
+      ~ODEModule.eval
+      ~ODEModule.extra_repr
+      ~ODEModule.float
+      ~ODEModule.forward
+      ~ODEModule.get_buffer
+      ~ODEModule.get_extra_state
+      ~ODEModule.get_parameter
+      ~ODEModule.get_submodule
+      ~ODEModule.half
+      ~ODEModule.ipu
+      ~ODEModule.load_state_dict
+      ~ODEModule.modules
+      ~ODEModule.mtia
+      ~ODEModule.named_buffers
+      ~ODEModule.named_children
+      ~ODEModule.named_modules
+      ~ODEModule.named_parameters
+      ~ODEModule.parameters
+      ~ODEModule.register_backward_hook
+      ~ODEModule.register_buffer
+      ~ODEModule.register_forward_hook
+      ~ODEModule.register_forward_pre_hook
+      ~ODEModule.register_full_backward_hook
+      ~ODEModule.register_full_backward_pre_hook
+      ~ODEModule.register_load_state_dict_post_hook
+      ~ODEModule.register_load_state_dict_pre_hook
+      ~ODEModule.register_module
+      ~ODEModule.register_parameter
+      ~ODEModule.register_state_dict_post_hook
+      ~ODEModule.register_state_dict_pre_hook
+      ~ODEModule.requires_grad_
+      ~ODEModule.set_extra_state
+      ~ODEModule.set_submodule
+      ~ODEModule.share_memory
+      ~ODEModule.state_dict
+      ~ODEModule.to
+      ~ODEModule.to_empty
+      ~ODEModule.train
+      ~ODEModule.type
+      ~ODEModule.xpu
+      ~ODEModule.zero_grad
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ODEModule.T_destination
+      ~ODEModule.call_super_init
+      ~ODEModule.dump_patches
+      ~ODEModule.training
+   
+   

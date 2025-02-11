@@ -1,0 +1,192 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loss functions &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Gallery of examples" href="../../auto_examples/index.html" />
+    <link rel="prev" title="Writing a deformation model" href="deformations.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">User guide</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#polygonal-data">Polygonal data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registration">Registration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#morphing-models">Morphing models</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#add-your-own-models-losses">Add your own models/losses</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="deformations.html">Writing a deformation model</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Loss functions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#structure">Structure</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#access-to-shape-properties">Access to shape properties</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#indication-about-restriction-for-actually-implemented-losses">Indication about restriction for actually implemented losses</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">User guide</a></li>
+      <li class="breadcrumb-item active">Loss functions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/user_guide/dev/loss.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="loss-functions">
+<h1>Loss functions<a class="headerlink" href="#loss-functions" title="Link to this heading"></a></h1>
+<p>Losses function represent discrepancy between two shapes</p>
+<section id="structure">
+<h2>Structure<a class="headerlink" href="#structure" title="Link to this heading"></a></h2>
+<p>Losses contain two methods</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">__init__()</span></code> which can be called with or without arguments</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">__call__()</span></code> which must be called with a pair of shapes</p></li>
+</ul>
+</section>
+<section id="access-to-shape-properties">
+<h2>Access to shape properties<a class="headerlink" href="#access-to-shape-properties" title="Link to this heading"></a></h2>
+<p>Some loss functions require some attributes to be available for shapes. An example is <code class="docutils literal notranslate"><span class="pre">shape.landmarks</span></code> in <code class="docutils literal notranslate"><span class="pre">LandmarkLoss()</span></code>. These attributes should not be added to the arguments of <code class="docutils literal notranslate"><span class="pre">__call__</span></code>, but instead accessed inside <code class="docutils literal notranslate"><span class="pre">__call__</span></code> with a clear error message if the attribute cannot be reached and if no default behavior can be defined in this case.</p>
+</section>
+<section id="indication-about-restriction-for-actually-implemented-losses">
+<h2>Indication about restriction for actually implemented losses<a class="headerlink" href="#indication-about-restriction-for-actually-implemented-losses" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>for polydatas</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Loss function</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Restrictions</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">L2Loss</span></code></p></td>
+<td><p>L2 loss for vertices</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">target</span></code> must be in correspondence</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">LandmarkLoss</span></code></p></td>
+<td><p>L2 loss for landmarks</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">source</span></code> and <code class="docutils literal notranslate"><span class="pre">target</span></code> must have corresponding landmarks</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NearestNeighborsLoss</span></code></p></td>
+<td><p>Nearest neighbors distance</p></td>
+<td><p>NA</p></td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li><p>for images</p></li>
+</ul>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Loss function</p></th>
+<th class="head"><p>Description</p></th>
+<th class="head"><p>Restrictions</p></th>
+</tr>
+</thead>
+</table>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="deformations.html" class="btn btn-neutral float-left" title="Writing a deformation model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../auto_examples/index.html" class="btn btn-neutral float-right" title="Gallery of examples" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

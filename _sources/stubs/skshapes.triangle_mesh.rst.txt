@@ -1,0 +1,34 @@
+skshapes.triangle\_mesh
+=======================
+
+.. automodule:: skshapes.triangle_mesh
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   edge_topology
+   geometry
+   shell_energy
+

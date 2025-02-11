@@ -1,0 +1,35 @@
+skshapes.multiscaling.decimation.Decimation
+===========================================
+
+.. currentmodule:: skshapes.multiscaling.decimation
+
+.. autoclass:: Decimation
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Decimation.__init__
+      ~Decimation.fit
+      ~Decimation.fit_transform
+      ~Decimation.transform
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Decimation.actual_reduction
+      ~Decimation.collapses
+      ~Decimation.ref_mesh
+   
+   

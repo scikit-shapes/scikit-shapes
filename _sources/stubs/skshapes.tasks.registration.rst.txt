@@ -1,0 +1,31 @@
+skshapes.tasks.registration
+===========================
+
+.. automodule:: skshapes.tasks.registration
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Registration
+   
+   
+
+   
+   
+   
+
+
+

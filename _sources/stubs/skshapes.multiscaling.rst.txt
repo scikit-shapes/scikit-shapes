@@ -1,0 +1,33 @@
+skshapes.multiscaling
+=====================
+
+.. automodule:: skshapes.multiscaling
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   decimation
+   multiscale
+

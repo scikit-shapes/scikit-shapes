@@ -1,0 +1,876 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elastic metric and multiscale strategy &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Using one of our interactive applications" href="../applications/index.html" />
+    <link rel="prev" title="LDDMM with normalized kernel" href="plot_lddmm_1_normalization.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Gallery of examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loading-and-manipulating-data">Loading and manipulating data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#working-at-multiple-scales">Working at multiple scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#computing-shape-features">Computing shape features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#registering-and-aligning-shapes-with-each-other">Registering and aligning shapes with each other</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#using-one-of-our-interactive-applications">Using one of our interactive applications</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#defining-a-custom-model-or-loss-function">Defining a custom model or loss function</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../data/index.html">Loading and manipulating data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../multiscaling/index.html">Working at multiple scales</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../features/index.html">Computing shape features</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Registering and aligning shapes with each other</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="plot_karateka.html">Intrinsic vs Extrinsic deformation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_rigid_0_2d.html">Rigid alignment in 2D</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_rigid_1_3d.html">Rigid alignment in 3D with landmarks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_lddmm_0_skulls.html">Registration with LDDMM</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot_lddmm_1_normalization.html">LDDMM with normalized kernel</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Elastic metric and multiscale strategy</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../applications/index.html">Using one of our interactive applications</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../customization/index.html">Defining a custom model or loss function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../explanation/index.html">How Scikit-Shapes works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Gallery of examples</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Registering and aligning shapes with each other</a></li>
+      <li class="breadcrumb-item active">Elastic metric and multiscale strategy</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/registration/plot_multiscale_elastic.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-auto-examples-registration-plot-multiscale-elastic-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="elastic-metric-and-multiscale-strategy">
+<span id="sphx-glr-auto-examples-registration-plot-multiscale-elastic-py"></span><h1>Elastic metric and multiscale strategy<a class="headerlink" href="#elastic-metric-and-multiscale-strategy" title="Link to this heading"></a></h1>
+<p>This examples is an implementation of the paper “Geometric Modeling in Shape Space”
+by Kilian, Mitra and Pottmann. More precisely, we implement the algorithm for the
+Boundary Value Problem, which is a registration between two shapes.</p>
+<p>The framework proposed in the paper allows to find a deformation between two shapes
+that minimizes an elastic metric. Optimizing directly the deformation in full
+resolution and with a large number of steps usually leads to bad local minima.
+To avoid this, the authors propose a multiscale strategy, where the optimization
+is first performed in a coarse resolution and with a small number of steps. Then,
+refinement can be done by increasing the resolution (space refinement) or the number
+of steps (time refinement).</p>
+<p>In this example, we provide an implementation of the “Boundary Value Problem”
+algorithm describe in section 3, using the as isometric as possible metric, defined
+at the end of section 2. The algorithm is applied to the registration of two elephant
+poses.</p>
+<section id="load-the-data">
+<h2>Load the data<a class="headerlink" href="#load-the-data" title="Link to this heading"></a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pyvista</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pv</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">skshapes</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sks</span>
+
+<span class="n">source_color</span> <span class="o">=</span> <span class="s2">&quot;teal&quot;</span>
+<span class="n">target_color</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
+
+<span class="n">source</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="s2">&quot;../test_data/elephants/pose_B.obj&quot;</span><span class="p">)</span>
+<span class="n">target</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">(</span><span class="s2">&quot;../test_data/elephants/pose_A.obj&quot;</span><span class="p">)</span>
+
+<span class="c1"># Make sure that underlying simplicial complex are the same</span>
+<span class="n">triangles</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">triangles</span>
+<span class="n">target</span><span class="o">.</span><span class="n">triangles</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">triangles</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">source_color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;source&quot;</span><span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">()</span><span class="o">.</span><span class="n">translate</span><span class="p">([</span><span class="mi">250</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">target_color</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;target&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mf">107.13691493781944</span><span class="p">,</span> <span class="o">-</span><span class="mf">436.8511227598446</span><span class="p">,</span> <span class="mf">929.44474582162</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">138.38692092895508</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.646553039550781</span><span class="p">,</span> <span class="mf">2.4097938537597656</span><span class="p">),</span>
+    <span class="p">(</span><span class="o">-</span><span class="mf">0.07742352421458944</span><span class="p">,</span> <span class="mf">0.9049853883599757</span><span class="p">,</span> <span class="mf">0.41833843327279513</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_legend</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-0">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_multiscale_elastic_001.png" srcset="../../_images/sphx_glr_plot_multiscale_elastic_001.png" alt="plot multiscale elastic" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-1" name="sd-tab-set-0" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-1">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_multiscale_elastic_001.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+</section>
+<section id="define-function-for-time-refinement">
+<h2>Define function for time refinement<a class="headerlink" href="#define-function-for-time-refinement" title="Link to this heading"></a></h2>
+<p>Time refinement is the process of doubling the number of steps of the model.
+First, parameter is augmented by linear interpolation between all the steps.
+Then, the registration model is refitted with the new parameter to minimize
+the energy.</p>
+<p>It is described in the section 3, paragraph “The Boundary Value Problem” of the paper.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">lbfgs</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">LBFGS</span><span class="p">()</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">time_refinement</span><span class="p">(</span>
+    <span class="n">parameter</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">,</span>
+    <span class="n">loss</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">BaseLoss</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">BaseOptimizer</span> <span class="o">=</span> <span class="n">lbfgs</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">gpu</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">,</span> <span class="n">sks</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Double the number of steps by linear interpolation and refit the registration model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    parameter</span>
+<span class="sd">        The parameter to refine.</span>
+<span class="sd">    model</span>
+<span class="sd">        The model used for the registration.</span>
+<span class="sd">    loss</span>
+<span class="sd">        The loss function.</span>
+<span class="sd">    source</span>
+<span class="sd">        The source shape.</span>
+<span class="sd">    target</span>
+<span class="sd">        The target shape.</span>
+<span class="sd">    regularization_weight</span>
+<span class="sd">        The regularization weight.</span>
+<span class="sd">    optimizer</span>
+<span class="sd">        The optimizer.</span>
+<span class="sd">    n_iter</span>
+<span class="sd">        The number of iterations.</span>
+<span class="sd">    gpu</span>
+<span class="sd">        Whether to use the GPU (if available).</span>
+<span class="sd">    verbose</span>
+<span class="sd">        Whether to print information during the process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Copy the model</span>
+    <span class="n">refined_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Double the number of steps by linear interpolation</span>
+    <span class="c1"># for the refined parameter</span>
+    <span class="n">n_steps</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Doubling the number of steps by linear interpolation...&quot;</span><span class="p">)</span>
+    <span class="n">n_steps</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_steps</span>
+    <span class="n">new_parameter</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_steps</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="n">new_parameter</span><span class="p">[:,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">parameter</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">new_parameter</span><span class="p">[:,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">parameter</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">/</span> <span class="mi">2</span>
+
+    <span class="c1"># Update the model&#39;s n_steps and the regularization weight of the registration.</span>
+    <span class="c1"># note that the number of steps depends on the presence of fix endpoints</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">endpoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">refined_model</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">new_parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">refined_model</span><span class="o">.</span><span class="n">n_steps</span> <span class="o">=</span> <span class="n">new_parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Now, we can fit the refined parameter to minimize the energy</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Optimizing the refined path wrt the metric...&quot;</span><span class="p">)</span>
+
+    <span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">refined_model</span><span class="p">,</span>
+        <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+        <span class="n">regularization_weight</span><span class="o">=</span><span class="n">regularization_weight</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span>
+        <span class="n">gpu</span><span class="o">=</span><span class="n">gpu</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Fit the refined parameter</span>
+    <span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">initial_parameter</span><span class="o">=</span><span class="n">new_parameter</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">registration</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span> <span class="n">refined_model</span>
+</pre></div>
+</div>
+</section>
+<section id="define-function-for-space-refinement">
+<h2>Define function for Space refinement<a class="headerlink" href="#define-function-for-space-refinement" title="Link to this heading"></a></h2>
+<p>Space refinement is the process of refining the path by projecting the points
+of the fine mesh on the coarse mesh.</p>
+<p>Each fine mesh can be projected to a coarse mesh,resulting in a system of
+coordinates. The coordinates consist of (for each point of the fine mesh):</p>
+<ul class="simple">
+<li><p>the id of the closer triangle in the coarse mesh</p></li>
+<li><p>the barycentric coordinates of the point in the triangle (2 coordinates)</p></li>
+<li><p>the orthogonal coordinate of the point with respect to the triangle normal</p></li>
+</ul>
+<p>With this system of coordinate, a coarse mesh with the same triangles as the
+one used to define the coordinates can be refined to a finer mesh. It is done
+by positioning points in the triangle of the coarse mesh and adding the orthogonal
+coordinate to the position.</p>
+<p>The space refinement process consists in:</p>
+<ul class="simple">
+<li><p>projecting the fine source and target on the coarse source and target</p></li>
+<li><p>refining the coarse sequence of poses to a fine sequence of poses for both systems of coordinates</p></li>
+<li><p>defining the fine sequence as a linear combination of the two refined sequences</p></li>
+</ul>
+<p>This step lead to a fine sequence of poses in at the fine resolution. The
+registration model can then be refitted to minimize the energy.</p>
+<p>This process is described in the section 3, paragraph “The Boundary Value Problem”.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">trimesh</span><span class="w"> </span><span class="kn">import</span> <span class="n">Trimesh</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trimesh.proximity</span><span class="w"> </span><span class="kn">import</span> <span class="n">closest_point</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">trimesh.triangles</span><span class="w"> </span><span class="kn">import</span> <span class="n">barycentric_to_points</span><span class="p">,</span> <span class="n">points_to_barycentric</span>
+
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_coordinates</span><span class="p">(</span>
+    <span class="n">fine</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">,</span> <span class="n">coarse</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">sks</span><span class="o">.</span><span class="n">Int1dTensor</span><span class="p">,</span> <span class="n">sks</span><span class="o">.</span><span class="n">Float2dTensor</span><span class="p">,</span> <span class="n">sks</span><span class="o">.</span><span class="n">Float1dTensor</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute coordinates of the fine points in the coarse mesh.</span>
+
+<span class="sd">    We follow the approach of &quot;Geometric Modeling in Shape Space&quot;, the coordinates</span>
+<span class="sd">    are the id of the triangle, the 2D barycentric coordinates in the triangle</span>
+<span class="sd">    and the distance between the point and his projection in the normal direction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fine</span>
+<span class="sd">        The PolyData object of the fine mesh</span>
+<span class="sd">    coarse</span>
+<span class="sd">        The PolyData object of the coarse mesh</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        The id of the triangle, the barycentric coordinates and the orthogonal coordinate</span>
+<span class="sd">        for each fine point.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fine</span><span class="o">.</span><span class="n">n_points</span> <span class="o">&gt;=</span> <span class="n">coarse</span><span class="o">.</span><span class="n">n_points</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;The fine mesh should have more points than the coarse mesh, got </span><span class="si">{</span><span class="n">fine</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">coarse</span><span class="o">.</span><span class="n">n_points</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="n">faces</span> <span class="o">=</span> <span class="n">coarse</span><span class="o">.</span><span class="n">triangles</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+    <span class="n">vertices</span> <span class="o">=</span> <span class="n">coarse</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="n">fine_points</span> <span class="o">=</span> <span class="n">fine</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+
+    <span class="n">mesh</span> <span class="o">=</span> <span class="n">Trimesh</span><span class="p">(</span><span class="n">vertices</span><span class="o">=</span><span class="n">vertices</span><span class="p">,</span> <span class="n">faces</span><span class="o">=</span><span class="n">faces</span><span class="p">)</span>
+
+    <span class="n">closest</span><span class="p">,</span> <span class="n">distance</span><span class="p">,</span> <span class="n">triangle_id</span> <span class="o">=</span> <span class="n">closest_point</span><span class="p">(</span>
+        <span class="n">mesh</span><span class="o">=</span><span class="n">mesh</span><span class="p">,</span> <span class="n">points</span><span class="o">=</span><span class="n">fine_points</span>
+    <span class="p">)</span>
+
+    <span class="n">triangle_id</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">triangle_id</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">int_dtype</span><span class="p">)</span>
+    <span class="n">closest</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">closest</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">float_dtype</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="n">triangle_id</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">fine</span><span class="o">.</span><span class="n">n_points</span><span class="p">,)</span>
+    <span class="k">assert</span> <span class="n">closest</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">fine</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">t</span> <span class="o">=</span> <span class="n">coarse</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">coarse</span><span class="o">.</span><span class="n">triangles</span><span class="p">[</span><span class="n">triangle_id</span><span class="p">]]</span>
+
+    <span class="n">barycentric</span> <span class="o">=</span> <span class="n">points_to_barycentric</span><span class="p">(</span><span class="n">points</span><span class="o">=</span><span class="n">closest</span><span class="p">,</span> <span class="n">triangles</span><span class="o">=</span><span class="n">t</span><span class="p">)</span>
+
+    <span class="c1"># descr = (triangle_id, barycentric, product with normal)</span>
+
+    <span class="n">normals</span> <span class="o">=</span> <span class="n">coarse</span><span class="o">.</span><span class="n">triangle_normals</span> <span class="o">/</span> <span class="n">coarse</span><span class="o">.</span><span class="n">triangle_normals</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+        <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="c1"># p - p&#39; = fine_points - closest</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">fine</span><span class="o">.</span><span class="n">points</span> <span class="o">-</span> <span class="n">closest</span>
+
+    <span class="n">Ns</span> <span class="o">=</span> <span class="n">normals</span><span class="p">[</span><span class="n">triangle_id</span><span class="p">]</span>
+
+    <span class="k">assert</span> <span class="n">a</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">Ns</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c1"># scalar product</span>
+    <span class="n">orthogonal_coordinate</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">Ns</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">triangle_id</span><span class="p">,</span> <span class="n">barycentric</span><span class="p">,</span> <span class="n">orthogonal_coordinate</span>
+
+
+<span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">refine</span><span class="p">(</span><span class="n">coarse_mesh</span><span class="p">,</span> <span class="n">coord_barycentric</span><span class="p">,</span> <span class="n">triangle_id</span><span class="p">,</span> <span class="n">orthogonal_coordinate</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a system of coordinates, refine the points in the origin mesh.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coarse_mesh</span>
+<span class="sd">        The mesh to refine</span>
+<span class="sd">    coord_barycentric</span>
+<span class="sd">        The barycentric coordinates of the fine points</span>
+<span class="sd">    triangle_id</span>
+<span class="sd">        The id of the triangle in the coarse mesh for each fine point</span>
+<span class="sd">    orthogonal_coordinate</span>
+<span class="sd">        The orthogonal coordinate of the fine points with respect to the triangle normal</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    sks.Points</span>
+<span class="sd">        The fine points</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">Ns</span> <span class="o">=</span> <span class="n">coarse_mesh</span><span class="o">.</span><span class="n">triangle_normals</span><span class="p">[</span>
+        <span class="n">triangle_id</span>
+    <span class="p">]</span> <span class="o">/</span> <span class="n">coarse_mesh</span><span class="o">.</span><span class="n">triangle_normals</span><span class="p">[</span><span class="n">triangle_id</span><span class="p">]</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Get the triangle</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">coarse_mesh</span><span class="o">.</span><span class="n">points</span><span class="p">[</span><span class="n">coarse_mesh</span><span class="o">.</span><span class="n">triangles</span><span class="p">[</span><span class="n">triangle_id</span><span class="p">]]</span>
+
+    <span class="c1"># Compute the orthogonal coordinate</span>
+    <span class="n">orthogonal</span> <span class="o">=</span> <span class="n">orthogonal_coordinate</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">Ns</span>
+
+    <span class="c1"># Compute the projection on the triangles</span>
+    <span class="n">projections</span> <span class="o">=</span> <span class="n">barycentric_to_points</span><span class="p">(</span>
+        <span class="n">barycentric</span><span class="o">=</span><span class="n">coord_barycentric</span><span class="p">,</span> <span class="n">triangles</span><span class="o">=</span><span class="n">t</span>
+    <span class="p">)</span>
+    <span class="n">projections</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">projections</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">float_dtype</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">projections</span> <span class="o">+</span> <span class="n">orthogonal</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">space_refinement</span><span class="p">(</span>
+    <span class="n">coarse_source</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">,</span>
+    <span class="n">coarse_target</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">,</span>
+    <span class="n">fine_source</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">,</span>
+    <span class="n">fine_target</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">PolyData</span><span class="p">,</span>
+    <span class="n">coarse_model</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">,</span>
+    <span class="n">coarse_parameter</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="n">loss</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">BaseLoss</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="p">:</span> <span class="n">sks</span><span class="o">.</span><span class="n">BaseOptimizer</span> <span class="o">=</span> <span class="n">lbfgs</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">gpu</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">sks</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Refine the path following the space refinement strategy.</span>
+
+<span class="sd">    We start by refining the path from coarse to high resolution and then</span>
+<span class="sd">    optimize it with respect to the Riemannian metric (this optimization can</span>
+<span class="sd">    be disabled by setting n_iter=0)</span>
+
+<span class="sd">    The output is the parameter in the fine scale and the new model that can</span>
+<span class="sd">    be used later on for registration.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    coarse_source</span>
+<span class="sd">        The source shape in coarse resolution.</span>
+<span class="sd">    coarse_target</span>
+<span class="sd">        The target shape in coarse resolution.</span>
+<span class="sd">    fine_source</span>
+<span class="sd">        The source shape in fine resolution.</span>
+<span class="sd">    fine_target</span>
+<span class="sd">        The target shape in fine resolution.</span>
+<span class="sd">    coarse_model</span>
+<span class="sd">        The model in coarse resolution.</span>
+<span class="sd">    coarse_parameter</span>
+<span class="sd">        The parameter in coarse resolution.</span>
+<span class="sd">    loss</span>
+<span class="sd">        The loss object for the registration.</span>
+<span class="sd">    regularization_weight</span>
+<span class="sd">        The regularization weight.</span>
+<span class="sd">    optimizer</span>
+<span class="sd">        The optimizer.</span>
+<span class="sd">    n_iter</span>
+<span class="sd">        The number of iterations.</span>
+<span class="sd">    gpu</span>
+<span class="sd">        Whether to use the GPU (if available).</span>
+<span class="sd">    verbose</span>
+<span class="sd">        Whether to print information during the process.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">        The parameter and the model in fine resolution.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Compute the path at coarse level</span>
+    <span class="n">coarse_path</span> <span class="o">=</span> <span class="n">coarse_model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+        <span class="n">shape</span><span class="o">=</span><span class="n">coarse_source</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">coarse_parameter</span><span class="p">,</span> <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+    <span class="c1"># Copy the model</span>
+    <span class="n">fine_model</span> <span class="o">=</span> <span class="n">coarse_model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">coarse_model</span><span class="o">.</span><span class="n">endpoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fine_model</span><span class="o">.</span><span class="n">endpoints</span> <span class="o">=</span> <span class="n">fine_target</span><span class="o">.</span><span class="n">points</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Projecting the fine meshes on the coarse meshes...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Compute the coordinates of the fine points in the coarse meshes</span>
+    <span class="p">(</span>
+        <span class="n">triangle_id_source</span><span class="p">,</span>
+        <span class="n">barycentric_coord_source</span><span class="p">,</span>
+        <span class="n">orthogonal_coordinate_source</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">compute_coordinates</span><span class="p">(</span><span class="n">fine_source</span><span class="p">,</span> <span class="n">coarse_source</span><span class="p">)</span>
+    <span class="p">(</span>
+        <span class="n">triangle_id_target</span><span class="p">,</span>
+        <span class="n">barycentric_coord_target</span><span class="p">,</span>
+        <span class="n">orthogonal_coordinate_target</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">=</span> <span class="n">compute_coordinates</span><span class="p">(</span><span class="n">fine_target</span><span class="p">,</span> <span class="n">coarse_target</span><span class="p">)</span>
+
+    <span class="n">fine_parameter</span> <span class="o">=</span> <span class="n">fine_model</span><span class="o">.</span><span class="n">inital_parameter</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">fine_source</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">fine_parameter</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1"># fine_parameter = torch.zeros(size=(fine_source.n_points, fine_model.n_free_steps, 3), dtype=sks.float_dtype)</span>
+
+    <span class="n">new_points</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">fine_source</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">float_dtype</span><span class="p">)</span>
+    <span class="n">previous_points</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span>
+        <span class="n">fine_source</span><span class="o">.</span><span class="n">points</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">float_dtype</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Refining the path from coarse to fine...&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coarse_path</span><span class="p">):</span>
+
+        <span class="n">previous_points</span> <span class="o">=</span> <span class="n">new_points</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Force the first point to be the source</span>
+            <span class="n">new_points</span> <span class="o">=</span> <span class="n">fine_source</span><span class="o">.</span><span class="n">points</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">coarse_path</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">coarse_model</span><span class="o">.</span><span class="n">endpoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Force the last point to be the target</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ok&quot;</span><span class="p">)</span>
+            <span class="n">new_points</span> <span class="o">=</span> <span class="n">fine_target</span><span class="o">.</span><span class="n">points</span>
+            <span class="n">coarse_model</span><span class="o">.</span><span class="n">endpoints</span> <span class="o">=</span> <span class="n">fine_target</span><span class="o">.</span><span class="n">points</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newpoints_source</span> <span class="o">=</span> <span class="n">refine</span><span class="p">(</span>
+                <span class="n">coarse_mesh</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+                <span class="n">coord_barycentric</span><span class="o">=</span><span class="n">barycentric_coord_source</span><span class="p">,</span>
+                <span class="n">triangle_id</span><span class="o">=</span><span class="n">triangle_id_source</span><span class="p">,</span>
+                <span class="n">orthogonal_coordinate</span><span class="o">=</span><span class="n">orthogonal_coordinate_source</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">newpoints_target</span> <span class="o">=</span> <span class="n">refine</span><span class="p">(</span>
+                <span class="n">coarse_mesh</span><span class="o">=</span><span class="n">p</span><span class="p">,</span>
+                <span class="n">coord_barycentric</span><span class="o">=</span><span class="n">barycentric_coord_target</span><span class="p">,</span>
+                <span class="n">triangle_id</span><span class="o">=</span><span class="n">triangle_id_target</span><span class="p">,</span>
+                <span class="n">orthogonal_coordinate</span><span class="o">=</span><span class="n">orthogonal_coordinate_target</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">new_points</span> <span class="o">=</span> <span class="p">((</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">coarse_path</span><span class="p">))</span> <span class="o">*</span> <span class="n">newpoints_source</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">coarse_path</span><span class="p">)</span>
+            <span class="p">)</span> <span class="o">*</span> <span class="n">newpoints_target</span>
+
+            <span class="n">fine_parameter</span><span class="p">[:,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">new_points</span> <span class="o">-</span> <span class="n">previous_points</span>
+
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Optimizing the fine path wrt the metric...&quot;</span><span class="p">)</span>
+
+    <span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">=</span><span class="n">fine_model</span><span class="p">,</span>
+        <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+        <span class="n">n_iter</span><span class="o">=</span><span class="n">n_iter</span><span class="p">,</span>
+        <span class="n">regularization_weight</span><span class="o">=</span><span class="n">regularization_weight</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
+        <span class="n">gpu</span><span class="o">=</span><span class="n">gpu</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">registration</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">fine_model</span>
+    <span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+        <span class="n">source</span><span class="o">=</span><span class="n">fine_source</span><span class="p">,</span>
+        <span class="n">target</span><span class="o">=</span><span class="n">fine_target</span><span class="p">,</span>
+        <span class="n">initial_parameter</span><span class="o">=</span><span class="n">fine_parameter</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">registration</span><span class="o">.</span><span class="n">parameter_</span><span class="p">,</span> <span class="n">fine_model</span>
+</pre></div>
+</div>
+</section>
+<section id="multiscale-representation">
+<h2>Multiscale representation<a class="headerlink" href="#multiscale-representation" title="Link to this heading"></a></h2>
+<p>Back to our example, we first decimate the source and target shapes to
+a coarseer resolution. The decimation is done in parallel for both shapes to
+keep the correspondence between the points.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">n_points_coarse</span> <span class="o">=</span> <span class="mi">650</span>
+
+<span class="c1"># Parallel decimation of source and target</span>
+<span class="c1"># the same decimation module is used for creating the multiscale representation</span>
+<span class="c1"># of the source and target</span>
+<span class="n">decimation_module</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Decimation</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="mi">650</span><span class="p">)</span>
+<span class="n">decimation_module</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+<span class="n">n_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">n_points_coarse</span><span class="p">]</span>
+
+<span class="n">multisource</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Multiscale</span><span class="p">(</span>
+    <span class="n">source</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="n">n_points</span><span class="p">,</span> <span class="n">decimation_module</span><span class="o">=</span><span class="n">decimation_module</span>
+<span class="p">)</span>
+<span class="n">multitarget</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Multiscale</span><span class="p">(</span>
+    <span class="n">target</span><span class="p">,</span> <span class="n">n_points</span><span class="o">=</span><span class="n">n_points</span><span class="p">,</span> <span class="n">decimation_module</span><span class="o">=</span><span class="n">decimation_module</span>
+<span class="p">)</span>
+
+<span class="n">coarse_source</span> <span class="o">=</span> <span class="n">multisource</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="n">n_points_coarse</span><span class="p">)</span>
+<span class="n">coarse_target</span> <span class="o">=</span> <span class="n">multitarget</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="n">n_points_coarse</span><span class="p">)</span>
+<span class="n">fine_source</span> <span class="o">=</span> <span class="n">multisource</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="n">source</span><span class="o">.</span><span class="n">n_points</span><span class="p">)</span>
+<span class="n">fine_target</span> <span class="o">=</span> <span class="n">multitarget</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">n_points</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">n_points</span><span class="p">)</span>
+
+<span class="c1"># Plot the coarse source and target</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">coarse_source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">source_color</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;coarse source&quot;</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span>
+    <span class="n">coarse_target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">()</span><span class="o">.</span><span class="n">translate</span><span class="p">([</span><span class="mi">250</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+    <span class="n">color</span><span class="o">=</span><span class="n">target_color</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;coarse target&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="mf">107.13691493781944</span><span class="p">,</span> <span class="o">-</span><span class="mf">436.8511227598446</span><span class="p">,</span> <span class="mf">929.44474582162</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">138.38692092895508</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.646553039550781</span><span class="p">,</span> <span class="mf">2.4097938537597656</span><span class="p">),</span>
+    <span class="p">(</span><span class="o">-</span><span class="mf">0.07742352421458944</span><span class="p">,</span> <span class="mf">0.9049853883599757</span><span class="p">,</span> <span class="mf">0.41833843327279513</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">add_legend</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sd-tab-set docutils">
+<input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-2">
+Static Scene</label><div class="sd-tab-content docutils">
+<img src="../../_images/sphx_glr_plot_multiscale_elastic_002.png" srcset="../../_images/sphx_glr_plot_multiscale_elastic_002.png" alt="plot multiscale elastic" class = "sphx-glr-single-img"/></div>
+<input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
+<label class="sd-tab-label" for="sd-tab-item-3">
+Interactive Scene</label><div class="sd-tab-content docutils">
+
+    <iframe src='../../_static/static_viewer.html?fileURL=../_images/auto_examples/registration/images/sphx_glr_plot_multiscale_elastic_002.vtksz' width='100%%' height='400px' frameborder='0'></iframe>
+</div>
+</div>
+</section>
+<section id="linear-blending-in-coarse-resolution">
+<h2>Linear blending in coarse resolution<a class="headerlink" href="#linear-blending-in-coarse-resolution" title="Link to this heading"></a></h2>
+<p>The first path is obtained by a linear blending between the source and target
+shapes. The linear blending can be directly computed from the difference between
+the source and target points. Here we use a registration with <cite>IntrinsicDeformation</cite>
+model and <cite>L2Loss</cite> loss with a regularization weight of 0.0. In this context, the
+optimal parameter is the linear blending between the source and target shapes.</p>
+<p>As illustrated by the animation below, the linear blending is not satisfactory
+as the trunk of the elephant is shrunk in the middle of the path.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">IntrinsicDeformation</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">L2Loss</span><span class="p">(),</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">LBFGS</span><span class="p">(),</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">coarse_source</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">coarse_target</span><span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">path_</span>
+<span class="n">linear_parameter</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">parameter_</span>
+
+<span class="n">cpos</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="o">-</span><span class="mf">180.28077332975926</span><span class="p">,</span> <span class="o">-</span><span class="mf">359.5814717933118</span><span class="p">,</span> <span class="mf">468.17714455864336</span><span class="p">),</span>
+    <span class="p">(</span><span class="mf">23.941261291503906</span><span class="p">,</span> <span class="o">-</span><span class="mf">56.907809257507324</span><span class="p">,</span> <span class="mf">2.4097938537597656</span><span class="p">),</span>
+    <span class="p">(</span><span class="o">-</span><span class="mf">0.06479680268614828</span><span class="p">,</span> <span class="mf">0.8494856829410709</span><span class="p">,</span> <span class="mf">0.5236176552025292</span><span class="p">),</span>
+<span class="p">]</span>
+
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="s2">&quot;coarse_linear.gif&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">clear_actors</span><span class="p">()</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">source_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">target_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">())</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_multiscale_elastic_003.gif" srcset="../../_images/sphx_glr_plot_multiscale_elastic_003.gif" alt="plot multiscale elastic" class = "sphx-glr-single-img"/></section>
+<section id="as-isometric-as-possible-registration-in-coarse-resolution">
+<h2>As isometric as possible registration in coarse resolution<a class="headerlink" href="#as-isometric-as-possible-registration-in-coarse-resolution" title="Link to this heading"></a></h2>
+<p>Following the remark at the end of section 2, we add additional edges to the source
+shape to make it stiffer. The choice of stiffener here is a k-ring graph with k=8.
+A k-ring graph is a graph where each vertex is connected to its k-nearest neighbors
+in the graph.</p>
+<p>This additional rigidity helps to avoid the shrinkage of the trunk during the
+deformation. As illustrated by the animation below, the registration is much
+more satisfactory than the linear blending as the length of the trunk seems to
+be preserved.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">IntrinsicDeformation</span><span class="p">(</span><span class="n">n_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">metric</span><span class="o">=</span><span class="s2">&quot;as_isometric_as_possible&quot;</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">L2Loss</span><span class="p">()</span>
+
+
+<span class="n">coarse_source</span><span class="o">.</span><span class="n">stiff_edges</span> <span class="o">=</span> <span class="n">coarse_source</span><span class="o">.</span><span class="n">k_ring_graph</span><span class="p">(</span><span class="n">k</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+<span class="n">registration</span> <span class="o">=</span> <span class="n">sks</span><span class="o">.</span><span class="n">Registration</span><span class="p">(</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+    <span class="n">optimizer</span><span class="o">=</span><span class="n">sks</span><span class="o">.</span><span class="n">LBFGS</span><span class="p">(),</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">registration</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
+    <span class="n">source</span><span class="o">=</span><span class="n">coarse_source</span><span class="p">,</span>
+    <span class="n">target</span><span class="o">=</span><span class="n">coarse_target</span><span class="p">,</span>
+    <span class="n">initial_parameter</span><span class="o">=</span><span class="n">linear_parameter</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">path_</span>
+<span class="n">parameter</span> <span class="o">=</span> <span class="n">registration</span><span class="o">.</span><span class="n">parameter_</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="s2">&quot;coarse_isometric.gif&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">clear_actors</span><span class="p">()</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">source_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">target_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">())</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_multiscale_elastic_004.gif" srcset="../../_images/sphx_glr_plot_multiscale_elastic_004.gif" alt="plot multiscale elastic" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Initial loss : 5.99e+05
+  = 7.48e-09 + 0.0001 * 5.99e+09 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 1.17e+05
+  = 2.12e+04 + 0.0001 * 9.60e+08 (fidelity + regularization_weight * regularization)
+Loss after 2 iteration(s) : 1.12e+05
+  = 1.94e+04 + 0.0001 * 9.30e+08 (fidelity + regularization_weight * regularization)
+</pre></div>
+</div>
+</section>
+<section id="time-refinement">
+<h2>Time refinement<a class="headerlink" href="#time-refinement" title="Link to this heading"></a></h2>
+<p>Although better than the linear blending, the registration is not perfect. The
+movement of the trunk is still not realistic. To improve the registration, we
+apply a time refinement. Doubling the number of time steps increases flexibility
+at the price of a higher computational cost. However, the metric evaluation
+are typically not linear with the number of steps as we use pyTorch parallel
+computation as much as possible.</p>
+<p>After the time refinement, the deformation is much more realistic. The trunk
+is not shrunk anymore and the deformation is more natural. We can now move
+on to the space refinement to obtain a deformation in full resolution.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">parameter</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">time_refinement</span><span class="p">(</span>
+    <span class="n">parameter</span><span class="o">=</span><span class="n">parameter</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+    <span class="n">source</span><span class="o">=</span><span class="n">coarse_source</span><span class="p">,</span>
+    <span class="n">target</span><span class="o">=</span><span class="n">coarse_target</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">coarse_source</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">parameter</span><span class="p">,</span> <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="s2">&quot;coarse_isometric_refined.gif&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">clear_actors</span><span class="p">()</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">source_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">target_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">())</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_multiscale_elastic_005.gif" srcset="../../_images/sphx_glr_plot_multiscale_elastic_005.gif" alt="plot multiscale elastic" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Doubling the number of steps by linear interpolation...
+Optimizing the refined path wrt the metric...
+Initial loss : 3.84e+04
+  = 1.94e+04 + 0.0001 * 1.90e+08 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 2.50e+04
+  = 2.45e+03 + 0.0001 * 2.26e+08 (fidelity + regularization_weight * regularization)
+Loss after 2 iteration(s) : 2.44e+04
+  = 2.40e+03 + 0.0001 * 2.20e+08 (fidelity + regularization_weight * regularization)
+Loss after 3 iteration(s) : 2.43e+04
+  = 2.40e+03 + 0.0001 * 2.19e+08 (fidelity + regularization_weight * regularization)
+</pre></div>
+</div>
+</section>
+<section id="space-refinement">
+<h2>Space refinement<a class="headerlink" href="#space-refinement" title="Link to this heading"></a></h2>
+<p>The space refinement is the last step of our multiscale strategy. The path
+is refined from a coarse resolution where each mesh has 650 points to a fine
+resolution where each mesh has approximately 40k points.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">parameter</span><span class="p">,</span> <span class="n">model</span> <span class="o">=</span> <span class="n">space_refinement</span><span class="p">(</span>
+    <span class="n">coarse_source</span><span class="o">=</span><span class="n">coarse_source</span><span class="p">,</span>
+    <span class="n">coarse_target</span><span class="o">=</span><span class="n">coarse_target</span><span class="p">,</span>
+    <span class="n">fine_source</span><span class="o">=</span><span class="n">fine_source</span><span class="p">,</span>
+    <span class="n">fine_target</span><span class="o">=</span><span class="n">fine_target</span><span class="p">,</span>
+    <span class="n">coarse_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span>
+    <span class="n">coarse_parameter</span><span class="o">=</span><span class="n">parameter</span><span class="p">,</span>
+    <span class="n">regularization_weight</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">morph</span><span class="p">(</span>
+    <span class="n">shape</span><span class="o">=</span><span class="n">fine_source</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">parameter</span><span class="p">,</span> <span class="n">return_path</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span><span class="o">.</span><span class="n">path</span>
+
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">pv</span><span class="o">.</span><span class="n">Plotter</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">open_gif</span><span class="p">(</span><span class="s2">&quot;fine_registration.gif&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">path</span><span class="p">)):</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">clear_actors</span><span class="p">()</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">source_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="n">target_color</span><span class="p">,</span> <span class="n">opacity</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">add_mesh</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">to_pyvista</span><span class="p">())</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">camera_position</span> <span class="o">=</span> <span class="n">cpos</span>
+    <span class="n">plotter</span><span class="o">.</span><span class="n">write_frame</span><span class="p">()</span>
+<span class="n">plotter</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_multiscale_elastic_006.gif" srcset="../../_images/sphx_glr_plot_multiscale_elastic_006.gif" alt="plot multiscale elastic" class = "sphx-glr-single-img"/><div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Projecting the fine meshes on the coarse meshes...
+torch.Size([39969, 20, 3])
+Refining the path from coarse to fine...
+Optimizing the fine path wrt the metric...
+Initial loss : 2.31e+05
+  = 2.31e+05 + 0.0001 * 5.72e+02 (fidelity + regularization_weight * regularization)
+Loss after 1 iteration(s) : 1.69e-02
+  = 3.68e-07 + 0.0001 * 1.69e+02 (fidelity + regularization_weight * regularization)
+</pre></div>
+</div>
+</section>
+<section id="remarks">
+<h2>Remarks<a class="headerlink" href="#remarks" title="Link to this heading"></a></h2>
+<p>This example illustrates the multiscale strategy proposed by Kilian, Mitra and
+Pottmann. In the paper, the authors suggest strategies with more than two
+scales. The code written here can be easily adapted to deal with more intricate
+multiscale strategies.</p>
+<p>As a take-home message:</p>
+<ul class="simple">
+<li><p>Register directly the shapes in full resolution is usually not a good idea</p></li>
+<li><p>Coarse representation can be used to find a good initialization for the registration by adding stiffness to the shapes (e.g. with a k-ring graph)</p></li>
+<li><p>Time refinement can be used to add flexibility to the deformation</p></li>
+<li><p>When the coarse deformation is satisfactory, space refinement can be used to obtain a deformation in full resolution.</p></li>
+</ul>
+<p>For future work, this strategy can be applied to more intricate problems such as
+the registration of 3D shapes with different topologies (with varifold loss for
+instance) or other metrics. The projection step in the space refinement can also
+be improved by using a intrinsic metric to compute the coordinates of the fine
+points in the coarse mesh instead of the Euclidean metric.</p>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 8.663 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-registration-plot-multiscale-elastic-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/75cd61b20c663d09cd6134b38e113f59/plot_multiscale_elastic.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_multiscale_elastic.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e17b46913a8ba7285ea4c7db632864f2/plot_multiscale_elastic.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_multiscale_elastic.py</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_lddmm_1_normalization.html" class="btn btn-neutral float-left" title="LDDMM with normalized kernel" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../applications/index.html" class="btn btn-neutral float-right" title="Using one of our interactive applications" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

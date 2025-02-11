@@ -1,0 +1,38 @@
+skshapes.convolutions.squared\_distances
+========================================
+
+.. automodule:: skshapes.convolutions.squared_distances
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      squared_distances
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      KeOpsSquaredDistances
+   
+   
+
+   
+   
+   
+
+
+
