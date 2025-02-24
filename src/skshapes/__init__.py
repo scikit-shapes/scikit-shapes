@@ -22,18 +22,18 @@ from .types import *
 __version__ = "0.3.1"
 
 __all__ = [
+    "Circle",
     "PolyData",
     "Sphere",
-    "Circle",
-    "types",
-    "features",
-    "convolutions",
     "applications",
-    "triangle_mesh",
+    "convolutions",
+    "features",
+    "input_validation",
     "loss",
     "morphing",
-    "optimization",
     "multiscaling",
+    "optimization",
     "tasks",
-    "input_validation",
+    "triangle_mesh",
+    "types",
 ]
