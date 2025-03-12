@@ -110,7 +110,16 @@ exclude_patterns = [
     ".venv",
 ]
 
-
+mathjax3_config = {
+    "tex": {
+        "macros": {
+            "RR": '{\\bf R}',
+            "bold": ['{\\bf #1}',1],
+            "t": ["{#1}^\intercal", 1],
+            "target": ["\widehat{#1}", 1],
+            }
+        }
+    }
 
 if True:
     html_theme = "sphinx_rtd_theme"
