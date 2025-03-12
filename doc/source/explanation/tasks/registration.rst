@@ -37,8 +37,8 @@ In the equation above:
     Common examples include the **closest point** ("Hausdorff") or
     **optimal transport** ("Wasserstein") distances.
 
-  - $\text{Constraints}(\theta) = E$ is a set of equality constraints that must be satisfied
-    by the parameter vector $\theta$.
+  - $\text{Constraints}(\theta) = E$ is a set of C equality constraints that
+    the parameter vector $\theta$ must satisfy.
     For instance, it could be a set of **landmark constraints** that pinpoint
     the location of specific anatomical landmarks between
     the source and target shapes.
@@ -207,16 +207,120 @@ with the linear equation:
 The constraint matrix $C_t$ usually has **few columns**:
 for instance, one for each landmark that must be preserved.
 
+.. note::
+
+    For the sake of simplicity, we now drop the $t$ indices
+    from the matrices and vectors $\target{\theta}_t$, $M_t$, etc.
 
 
 Closed-form solutions
 ~~~~~~~~~~~~~~~~~~~~~
 
-In full generality, the solution of :eq:`quadratic_proxy_update`
+As discussed in standard references on
+`quadratic programming <https://en.wikipedia.org/wiki/Quadratic_programming#Equality_constraints>`_,
+the solution $\theta_{t+1}$ of the optimization problem :eq:`quadratic_proxy_update`
+is such that:
+
+.. math::
+    :label: quadratic_solution_general_case
+    :nowrap:
+
+    \begin{align}
+    \begin{bmatrix}
+      O & C \\
+      \t{C} & 0
+    \end{bmatrix}
+    \begin{bmatrix}
+      \theta_{t+1} \\
+      \lambda
+      \end{bmatrix}
+      ~=~
+    \begin{bmatrix}
+      T \\
+      \target{E}
+    \end{bmatrix}
+    \end{align}
+
+where:
+
+  - $O := R + \t{M} L M$ is a P-by-P positive definite matrix: the **objective** operator.
+  - $T := R \target{\theta} + \t{M} L \target{X}$ is a vector of length P: the **target** values.
+  - $C = C_t$ is the P-by-C matrix of constraints.
+  - $\target{E} = \target{E}_t$ is the vector of C constraint values.
+  - $\lambda$ is the vector of Lagrange multipliers, of length C.
+
+When the P-by-P objective operator $O$ and the C-by-C restriction
+$(\t{C}O^{-1}C)$ are invertible, the solution simplifies to:
+
+.. math::
+    :label: quadratic_solution_invertible
+    :nowrap:
+
+    \begin{align}
+    \theta_{t+1} ~\gets~
+    O^{-1}~ \big(~
+      T
+      -
+      C (\t{C}O^{-1}C)^{-1}
+      (
+        \t{C}O^{-1}T
+        - \target{E}
+      )~
+    \big)
+    \end{align}
+
+When there is no constraint, we can simply compute:
+
+
+.. math::
+    :label: quadratic_solution_no_constraint
+    :nowrap:
+
+    \begin{align}
+    \theta_{t+1} ~\gets~
+    O^{-1}T~
+    ~=~(R + \t{M} L M)^{-1} (R \target{\theta} + \t{M} L \target{X})~.
+    \end{align}
+
+
+If the target parameter $\target{\theta}$ is equal to a vector of zeroes,
+this simplifies further to:
+
+.. math::
+    :label: quadratic_solution_no_constraint_zero_target
+    :nowrap:
+
+    \begin{align}
+    \theta_{t+1} ~\gets~
+    (R + \t{M} L M)^{-1} \t{M} L \target{X}~.
+    \end{align}
+
+Assuming that the model differential $M$ and the
+loss metric $L$ are invertible, we write:
+
+.. math::
+    :label: quadratic_solution_no_constraint_zero_target_invertible
+    :nowrap:
+
+    \begin{align}
+    \theta_{t+1} ~\gets~
+    (L^{-1} M^{-\intercal} R + M)^{-1} \target{X}~,
+    \end{align}
+
+where $\target{X} = \widetilde{X} - X$ is the difference between the target
+$\widetilde{X}_t$ and the current guess $X_t$ for the vector of features
+that characterizes the deformed shape $A_{\theta_t}$.
+
 
 
 Practical implementations
 ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Efficient shape registration is about **implementing these equations
+with optimum speed and memory footprint** for different choices
+of the operators $R$ (regularization), $M$ (model), $L$ (loss) and $C$ (constraints).
+
+In scikit-shapes,
 
 Deformation models
 -------------------

@@ -9,13 +9,27 @@ Features
 
    features/moments
 
-Registration
+Tasks
 ------------
-
 
 .. toctree::
    :maxdepth: 1
 
-   registration/registration
-   registration/thin_plate_splines
-   registration/xpbd
+   tasks/registration
+
+Loss functions
+--------------
+
+.. toctree::
+   :maxdepth: 1
+
+   loss_functions/landmarks
+
+Deformation models
+-------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   deformation_models/thin_plate_splines
+   deformation_models/xpbd
