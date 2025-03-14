@@ -1,4 +1,4 @@
-.. _explanation_loss_landmarks:
+.. _explanation_loss_landmark:
 
 Landmarks
 ===============

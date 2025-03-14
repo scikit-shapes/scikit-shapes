@@ -3,4 +3,10 @@
 Extended Position-Based Dynamics (XPBD)
 ========================================
 
-Blabla
+We inherit from :ref:`multi-affine models <explanation_multi_affine>`.
+
+Regularization
+~~~~~~~~~~~~~~~
+
+Optimization step
+~~~~~~~~~~~~~~~~~
