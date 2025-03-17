@@ -1,4 +1,4 @@
-.. _explanation_thin_plate_splines:
+.. _explanation_deformation_thin_plate_splines:
 
 Thin plate splines
 =====================================

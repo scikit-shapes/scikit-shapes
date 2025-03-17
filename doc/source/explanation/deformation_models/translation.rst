@@ -1,6 +1,6 @@
-.. _explanation_deformation_multi_affine:
+.. _explanation_deformation_translation:
 
-Multi-affine deformations
+Translations
 ============================
 
 Parameters

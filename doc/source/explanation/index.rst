@@ -32,9 +32,29 @@ Loss functions
 Deformation models
 -------------------
 
+**Affine transformations:**
+
+.. toctree::
+   :maxdepth: 1
+
+   deformation_models/translation
+   deformation_models/rigid
+   deformation_models/similarity
+   deformation_models/affine
+
+
+**Free-form deformations:**
+
 .. toctree::
    :maxdepth: 1
 
    deformation_models/thin_plate_splines
+
+**Multi-affine "elastic" models:**
+
+.. toctree::
+   :maxdepth: 1
+
    deformation_models/multi_affine
-   deformation_models/xpbd
+   deformation_models/hookean_xpbd
+   deformation_models/neo_hookean_xpbd

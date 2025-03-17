@@ -477,13 +477,17 @@ a deformation model is a Python class that provides:
 We provide a set of standard deformation models in the :mod:`~skshapes.model` module:
 
 - The :class:`~skshapes.model.AffineDeformation` model provides access to
-  all methods that are parameterized by an affine transformation matrix.
+  all methods that are parameterized by an
+  :ref:`affine transformation matrix <explanation_deformation_affine>`.
   This includes:
 
-  - **Pure translations**,
-  - **Rigid transformations** (rotation and translation),
-  - **Similarity transformations** (rotation, translation and isotropic scaling),
-  - **Affine transformations** (rotation, translation, scaling and shearing).
+  - :ref:`Pure translations <explanation_deformation_translation>`, which are parameterized by a single vector.
+  - :ref:`Rigid transformations <explanation_deformation_rigid>`, which are parameterized by
+    a translation vector and a rotation matrix.
+  - :ref:`Similarity transformations <explanation_deformation_similarity>`, which are parameterized by
+    a translation vector, a rotation matrix and an isotropic scaling factor.
+  - :ref:`Affine transformations <explanation_deformation_affine>`, which are parameterized by
+    a translation vector and a full transformation matrix.
 
 - The :class:`~skshapes.model.FreeFormDeformation` model provides access to
   all methods that rely on control points.
