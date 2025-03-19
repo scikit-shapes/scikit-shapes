@@ -822,3 +822,5 @@ def _point_curvature_colors(
 
     # Output the colors as expected by Vedo:
     return [(255 * a, 255 * b, 255 * c, 255) for a, b, c in colors]
+
+
