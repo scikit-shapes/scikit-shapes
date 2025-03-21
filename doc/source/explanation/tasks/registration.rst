@@ -72,7 +72,7 @@ we **iterate until convergence** the update:
     ~+~
     \tfrac{1}{2}\| M_t \theta - \target{X}_t\|^2_{L_t}
     \\
-    &\text{subject to}~~~ \t{C}_t \theta = \target{E}_t~. \nonumber
+    &\text{subject to}~~~ \t{C}_t \T \theta = \target{E}_t~. \nonumber
     \end{align}
 
 
@@ -82,7 +82,7 @@ The notation:
 
 .. math::
 
-    \| x \|^2_{A} ~:=~ \text{trace}(\t{x} A x)
+    \| x \|^2_{A} ~:=~ \text{trace}(\t{x}\T A x)
 
 refers to the squared norm of the vector $x$ with respect to the positive (semi-)definite matrix $A$.
 We now introduce every term of this equation.
@@ -175,7 +175,6 @@ while the deformation **Model** provides
 the current guess $X_t$ and the differential $M_t$.
 
 
-
 Constraints
 -------------
 
@@ -187,7 +186,7 @@ Finally, we linearize the constraints around the current estimate $\theta_t$:
     \text{Constraints}(\theta_t) +
     \underbrace{\text{d}_\theta\text{Constraints}(\theta_t)}_{\t{C}_t} \cdot (\theta - \theta_t) \\
     &=~
-    \text{Constraints}(\theta_t) - \t{C}_t \theta_t + \t{C}_t \theta ~.
+    \text{Constraints}(\theta_t) - \t{C}_t \T \theta_t + \t{C}_t \T \theta ~.
 
 We then approximate the constraint:
 
@@ -199,10 +198,10 @@ with the linear equation:
 
 .. math::
 
-    E &= \text{Constraints}(\theta_t) - \t{C}_t \theta_t + \t{C}_t \theta \\
+    E &= \text{Constraints}(\theta_t) - \t{C}_t \T \theta_t + \t{C}_t \T \theta \\
     \Longleftrightarrow~~
-    \t{C}_t \theta &=
-    \underbrace{E + \t{C}_t \theta_t - \text{Constraints}(\theta_t)}_{\target{E}_t}~.
+    \t{C}_t \T \theta &=
+    \underbrace{E + \t{C}_t \T \theta_t - \text{Constraints}(\theta_t)}_{\target{E}_t}~.
 
 The constraint matrix $C_t$ usually has **few columns**:
 for instance, one for each landmark that must be preserved.
@@ -243,14 +242,14 @@ is such that:
 
 where:
 
-- $O := R + \t{M} L M$ is a P-by-P positive definite matrix: the **objective** operator.
-- $T := R \target{\theta} + \t{M} L \target{X}$ is a vector of length P: the **target** values.
+- $O := R + \t{M} \T L M$ is a P-by-P positive definite matrix: the **objective** operator.
+- $T := R \target{\theta} + \t{M} \T L \target{X}$ is a vector of length P: the **target** values.
 - $C = C_t$ is the P-by-C matrix of constraints.
 - $\target{E} = \target{E}_t$ is the vector of C constraint values.
 - $\lambda$ is the vector of Lagrange multipliers, of length C.
 
 When the P-by-P objective operator $O$ and the C-by-C restriction
-$(\t{C}O^{-1}C)$ are invertible, the solution simplifies to:
+$(\t{C}\T O^{-1}C)$ are invertible, the solution simplifies to:
 
 .. math::
     :label: quadratic_solution_invertible
@@ -261,9 +260,9 @@ $(\t{C}O^{-1}C)$ are invertible, the solution simplifies to:
     O^{-1}~ \big(~
       T
       -
-      C (\t{C}O^{-1}C)^{-1}
+      C (\t{C}\T O^{-1}C)^{-1}
       (
-        \t{C}O^{-1}T
+        \t{C}\T O^{-1}T
         - \target{E}
       )~
     \big)
@@ -279,7 +278,7 @@ When there is no constraint, we can simply compute:
     \begin{align}
     \theta_{t+1} ~\gets~
     O^{-1}T~
-    ~=~(R + \t{M} L M)^{-1} (R \target{\theta} + \t{M} L \target{X})~.
+    ~=~(R + \t{M} \T L M)^{-1} (R \target{\theta} + \t{M} \T L \target{X})~.
     \end{align}
 
 
@@ -292,7 +291,7 @@ this simplifies further to:
 
     \begin{align}
     \theta_{t+1} ~\gets~
-    (R + \t{M} L M)^{-1} \t{M} L \target{X}~.
+    (R + \t{M} \T L M)^{-1} \t{M} \T L \target{X}~.
     \end{align}
 
 Assuming that the model differential $M$ and the
@@ -304,7 +303,7 @@ loss metric $L$ are invertible, we write:
 
     \begin{align}
     \theta_{t+1} ~\gets~
-    (L^{-1} M^{-\intercal} R + M)^{-1} \target{X}~,
+    (L^{-1} M^{-\mathsf{T}} \T R + M)^{-1} \target{X}~,
     \end{align}
 
 where $\target{X} = \widetilde{X} - X$ is the difference between the target
@@ -420,14 +419,14 @@ then the target vector $T$ and the objective operator $O$ become:
 
 .. math::
 
-    O ~&:=~ R +  \t{M}
+    O ~&:=~ R +  \t{M}\T
     \underbrace{\big(\sum_i w_i L_i\big)}_{L_\text{sum}}
     M~,\\
-    T ~&:=~ R \target{\theta} + \t{M} \big(\sum_i w_i  L_i \target{X}_i\big) \\
+    T ~&:=~ R \target{\theta} + \t{M} \T \big(\sum_i w_i  L_i \target{X}_i\big) \\
     &=~
-    R \target{\theta} + \t{M} \big(\sum_i w_i  L_i (\widetilde{X}_i + M \theta - X)\big) \\
+    R \target{\theta} + \t{M}\T \big(\sum_i w_i  L_i (\widetilde{X}_i + M \theta - X)\big) \\
     &=~
-    R \target{\theta} + \t{M} \big[
+    R \target{\theta} + \t{M}\T \big[
       \underbrace{\big(\sum_i w_i  L_i \widetilde{X}_i\big)}_{(L\widetilde{X})_\text{sum}}
       +
       L_\text{sum} (M \theta - X)

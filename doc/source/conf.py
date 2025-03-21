@@ -115,7 +115,8 @@ mathjax3_config = {
         "macros": {
             "RR": '{\\bf R}',
             "bold": ['{\\bf #1}',1],
-            "t": [r"{#1}^\intercal", 1],
+            "t": [r"{#1}^{\mathsf{T}}", 1],
+            "T": r"\mkern-3mu",
             "target": [r"\widehat{#1}", 1],
             },
         "tags": 'ams',

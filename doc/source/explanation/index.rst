@@ -48,6 +48,10 @@ Deformation models
 .. toctree::
    :maxdepth: 1
 
+   deformation_models/linear_general
+   deformation_models/linear_displacement
+   deformation_models/linear_momentum
+   deformation_models/linear_code
    deformation_models/thin_plate_splines
 
 **Multi-affine "elastic" models:**
