@@ -48,7 +48,7 @@ where:
 - :math:`\nabla \mathcal{C}_j(\mathbf{x}^{t})` denotes the gradient of the constraint :math:`\mathcal{C}_j`.
 
 XPBD
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----
 
 XPBD extends the classical Position-Based Dynamics by incorporating a compliance parameter :math:`\alpha_j \geq 0` for each constraint, introducing elasticity into constraints. Constraints can thus behave elastically, allowing minor violations to improve numerical stability and physical realism:
 
@@ -88,7 +88,7 @@ The corresponding position update is computed as:
     \Delta \mathbf{x} = \Delta \lambda_j \mathbf{M}^{-1}\nabla \mathcal{C}_j(\mathbf{x}^{t}).
 
 Hookean elastic model
----------------------
+~~~~~~~~~~~~~~~~~~~~~
 
 The **Hookean elastic model** describes linear elastic behavior of materials through a direct proportionality between stress and strain. Hooke's law states:
 
@@ -102,11 +102,13 @@ where:
 - :math:`\mathbf{C}` is the fourth-order elasticity tensor encoding material stiffness.
 - :math:`\boldsymbol{\varepsilon}` is the Green-Lagrange strain tensor defined as:
 
+This only states as long as the deformation is small, i.e., the material is not too far from its rest state (:math:`\Vert\boldsymbol{\varepsilon}\Vert \ll 1`). This is often called Hooke's regime.
+
 .. math::
 
     \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I})
 
-where :math:`\mathbf{F}` is the deformation gradient and :math:`\mathbf{I}` is the identity matrix.
+where :math:`\mathbf{F}` is the deformation gradient and :math:`\mathbf{I}` is the identity matrix, measures how much the material is deformed.
 
 The Hookean model corresponds to a quadratic energy potential given by:
 
@@ -115,13 +117,90 @@ The Hookean model corresponds to a quadratic energy potential given by:
     :nowrap:
 
     \begin{align}
-    W(\mathbf{F}) = \frac{1}{2}\boldsymbol{\varepsilon}:\mathbf{C}\boldsymbol{\varepsilon}
+    W(\mathbf{F}) = \frac{1}{2}\boldsymbol{\varepsilon}:\mathbf{C}\boldsymbol{\varepsilon} = \frac{1}{2}\boldsymbol{\varepsilon}:\mathbf{S}
     \end{align}
 
 where ":" denotes the double inner product, or tensor contraction.
 
+Its gradient is given as expected by:
+
+.. math::
+
+    \frac{\partial W}{\partial \varepsilon} = \mathbf{C}\boldsymbol{\varepsilon} = \mathbf{S},
+
+meaning :math:`W(\mathbf{F})` is the energy potential associated with the stresses :math:`\mathbf{S}`.
+
+Small perturbations of identity
+-------------------------------
+
+Let's assume we are in the case of Hooke's regime where :math:`\mathbf{F}` is a small perturbation of the identity matrix, i.e., :math:`x^{t+1} = F x^t` where :math:`\mathbf{F} = \mathbf{I} + \nabla \mathbf{u}`. In this case, we can approximate the strain tensor as:
+
+.. math::
+
+    \boldsymbol{\varepsilon} = \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T + \nabla \mathbf{u}^T\nabla \mathbf{u}) \approx \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T)
+
+because \nabla \mathbf{u}^T\nabla \mathbf{u} is negligible (:math:`\Vert\nabla u\Vert \ll 1`) for small perturbations (linear model).
+
+But, in Euclidean coordinates, and for an isotropic material, :math:`\mathbf{C}` is defined as
+
+.. math::
+
+    C_{ijkl} = \lambda \delta_{ij}\delta_{kl} + \mu (\delta_{ik}\delta_{jl} + \delta_{il}\delta_{jk})
+where :math:`\delta_{ij}` is the Kronecker delta, and :math:`\lambda` and :math:`\mu` are the Lamé parameters.
+
+We then have
+
+.. math::
+
+    \mathbf{C}\boldsymbol{\varepsilon} = \lambda \mathrm{tr}(\boldsymbol{\varepsilon})\mathbf{I} + 2\mu \boldsymbol{\varepsilon}
+
+Substituting this into the energy potential, we obtain:
+
+.. math::
+
+    W(\mathbf{F}) = \frac{\lambda}{2} (\mathrm{tr}(\boldsymbol{\varepsilon}))^2 + \mu \boldsymbol{\varepsilon}:\boldsymbol{\varepsilon}
+
+where :math:`\mathrm{tr}(\boldsymbol{\varepsilon})` is the trace of the strain tensor, and :math:`\|\boldsymbol{\varepsilon}\|^2` is the Frobenius norm of the strain tensor.
+
+The first term of the equation simplifies to :
+
+.. math::
+
+    \frac{\lambda}{2}(\mathrm{tr}(\boldsymbol{\varepsilon}))^2 = \frac{\lambda}{2}(\varepsilon_{xx} + \varepsilon_{yy} + \varepsilon_{zz})^2
+
+and the second term simplifies to:
+
+.. math::
+
+    \mu \boldsymbol{\varepsilon}:\boldsymbol{\varepsilon} = \mu (\varepsilon_{xx}^2 + \varepsilon_{yy}^2 + \varepsilon_{zz}^2 + 2\varepsilon_{xy}^2 + 2\varepsilon_{xz}^2 + 2\varepsilon_{yz}^2)
+
+This means that the energy potential is a quadratic function of the deformation gradient :math:`\nabla \mathbf{u}`, and can be expressed as:
+
+.. math::
+
+    W(\mathbf{F}) = \left(\frac{\lambda}{2} +\mu\right)(\varepsilon_{xx}^2 + \varepsilon_{yy}^2 + \varepsilon_{zz}^2) + \lambda(\varepsilon_{xx} + \varepsilon_{yy} + \varepsilon_{xx} \varepsilon_{zz} + \varepsilon_{yy}\varepsilon_{zz}) + 2\mu (\varepsilon_{xy}^2 + \varepsilon_{xz}^2 + \varepsilon_{yz}^2)
+
+where :math:`\varepsilon_{ij} = \frac{1}{2}(\partial_i u_j + \partial_j u_i)`.
+
+Here,
+
+- the terms :math:`\varepsilon_{ii}` represent the energy contribution from normal (axial) strain along the coordinate axes,
+- the mixed terms :math:`\varepsilon_{ii} \varepsilon_{jj}` represent the coupling between normal strains along different axes, contributing to the energy associated with volumetric deformation,
+- the terms :math:`\varepsilon_{ij}^2` represent the energy contribution from shear strain in the :math:`(i, j)` plane, penalizing angular distortions between coordinate directions.
+
+Rigid rotations and rigid translations
+--------------------------------------
+
+Let's now see what happens in the other cases of Hooke's regime, i.e., when the deformation is a rigid rotation or a rigid translation.
+
+For a rigid translation, :math:`x^{t+1} = x^t + \mathbf{u}`. In this case, the deformation gradient is simply the identity matrix, and the strain tensor is zero.
+
+For a rigid rotation, :math:`x^{t+1} = R x^t` where :math:`R` is a rotation matrix. In this case, the deformation gradient is :math:`R`, and the strain tensor is again zero.
+
+These deformations are called zero-energy modes because they do not contribute to the energy potential. This means that the energy potential is invariant under rigid translations and rotations, and does not penalize these deformations.
+
 Constraint function and compliance for the Hookean model
---------------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Using :eq:`eq:potential_energy_xpbd`, we obtain the constraint function for the Hookean model:
 
