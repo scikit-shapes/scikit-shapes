@@ -10,7 +10,7 @@ Extended Position-Based Dynamics (XPBD) is an optimization method designed to it
 Mathematical Background
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-XPBD extends classical Position-Based Dynamics (PBD) by incorporating a compliance term to constraints, introducing elasticity into constraints. It has a direct correspondence to well-known energy potential and allows to solve constraints in a time step and iteration count independent manner.
+XPBD extends classical Position-Based Dynamics (PBD) by introducing a compliance parameter :math:`alpha_j \geq 0`, allowing constraints to behave elastically.
 
 Classical Position-Based Dynamics (PBD)
 ---------------------------------------
@@ -90,7 +90,7 @@ The corresponding position update is computed as:
 Hookean elastic model
 ~~~~~~~~~~~~~~~~~~~~~
 
-The **Hookean elastic model** describes linear elastic behavior of materials through a direct proportionality between stress and strain. Hooke's law states:
+The Hookean elastic model describes linear elastic behavior of materials through a direct proportionality between stress and strain. Hooke's law states:
 
 .. math::
 
@@ -102,7 +102,7 @@ where:
 - :math:`\mathbf{C}` is the fourth-order elasticity tensor encoding material stiffness.
 - :math:`\boldsymbol{\varepsilon}` is the Green-Lagrange strain tensor defined as:
 
-This only states as long as the deformation is small, i.e., the material is not too far from its rest state (:math:`\Vert\boldsymbol{\varepsilon}\Vert \ll 1`). This is often called Hooke's regime.
+This relation holds as long as the deformation remains small, meaning the material stays near its rest configuration (:math:\|\boldsymbol{\varepsilon}\| \ll 1). This small-strain assumption defines what is often referred to as the Hookean regime.
 
 .. math::
 
@@ -178,7 +178,10 @@ This means that the energy potential is a quadratic function of the deformation 
 
 .. math::
 
-    W(\mathbf{F}) = \left(\frac{\lambda}{2} +\mu\right)(\varepsilon_{xx}^2 + \varepsilon_{yy}^2 + \varepsilon_{zz}^2) + \lambda(\varepsilon_{xx} + \varepsilon_{yy} + \varepsilon_{xx} \varepsilon_{zz} + \varepsilon_{yy}\varepsilon_{zz}) + 2\mu (\varepsilon_{xy}^2 + \varepsilon_{xz}^2 + \varepsilon_{yz}^2)
+    W(\mathbf{F}) =
+    \left(\mu + \frac{\lambda}{2}\right)(\varepsilon_{xx}^2 + \varepsilon_{yy}^2 + \varepsilon_{zz}^2)
+    + \lambda (\varepsilon_{xx} \varepsilon_{yy} + \varepsilon_{xx} \varepsilon_{zz} + \varepsilon_{yy} \varepsilon_{zz})
+    + 2\mu (\varepsilon_{xy}^2 + \varepsilon_{xz}^2 + \varepsilon_{yz}^2)
 
 where :math:`\varepsilon_{ij} = \frac{1}{2}(\partial_i u_j + \partial_j u_i)`.
 
@@ -187,6 +190,93 @@ Here,
 - the terms :math:`\varepsilon_{ii}` represent the energy contribution from normal (axial) strain along the coordinate axes,
 - the mixed terms :math:`\varepsilon_{ii} \varepsilon_{jj}` represent the coupling between normal strains along different axes, contributing to the energy associated with volumetric deformation,
 - the terms :math:`\varepsilon_{ij}^2` represent the energy contribution from shear strain in the :math:`(i, j)` plane, penalizing angular distortions between coordinate directions.
+
+Examples of Hookean energy responses
+------------------------------------
+
+The Hookean model predicts a quadratic energy response for small deformations, as the energy potential is of the form:
+
+.. math::
+
+    W(\mathbf{F}) = \frac{1}{2} \boldsymbol{\varepsilon} : \mathbf{C} \boldsymbol{\varepsilon}
+
+To validate this behavior in practice, we simulate several canonical deformations and plot the total elastic energy as a function of the deformation parameter.
+
+These experiments confirm the quadratic nature of Hookean energy in the small-deformation regime.
+
+.. figure:: images/deformations/hookean_energy_stretch_shear_scale.jpg
+    :align: center
+    :width: 100%
+    :alt: Hookean energy under stretch, shear, and isotropic scaling
+    :name: fig-hookean-canonical-2d
+
+    Hookean energy under isotropic scaling (left), uniaxial stretch/compression (middle), and pure shear (right).
+    Top row: deformed shapes, color-coded per deformation intensity.
+    Bottom row: energy vs deformation parameter. All curves are quadratic.
+
+We also investigate 3D deformation modes that cannot be expressed as simple affine transformations, such as torsion and bending. These deformations are nonuniform but can still be analyzed under the Hookean regime by computing the Green–Lagrange strain pointwise.
+
+.. figure:: images/deformations/hookean_energy_torsion_bending.jpg
+    :align: center
+    :width: 100%
+    :alt: Hookean energy under torsion and bending
+    :name: fig-hookean-canonical-3d
+
+    Top row: Original beam (left), bent beam (middle), and total energy vs curvature (right).
+    Bottom row: Original cylinder (left), twisted cylinder (middle), and corresponding total energy vs twist angle (right)
+
+The plots show that:
+
+- Both torsion and bending yield quadratic energy responses.
+- The zero-deformation state (centered on the plots) corresponds to the minimum energy, as expected.
+
+These results visually and quantitatively confirm the quadratic energy model predicted by the Hookean formulation, even under complex 3D deformation fields.
+
+.. list-table:: Deformation gradients for the canonical cases used in our experiments
+   :widths: 15 25 35
+   :header-rows: 1
+
+   * - Deformation type
+     - Deformation description
+     - Deformation gradient :math:`\mathbf{F}`
+
+   * - **Isotropic scaling**
+     - Uniform expansion or compression in all directions
+     - .. math:: \mathbf{F} = s \cdot \mathbf{I} = \begin{bmatrix} s & 0 \\ 0 & s \end{bmatrix}
+
+   * - **Uniaxial stretch / compression**
+     - Stretch or compress along the X axis
+     - .. math:: \mathbf{F} = \begin{bmatrix} 1 + \varepsilon & 0 \\ 0 & 1 \end{bmatrix}
+
+   * - **Pure shear**
+     - Shear in the X direction along the Y axis
+     - .. math:: \mathbf{F} = \begin{bmatrix} 1 & \gamma \\ 0 & 1 \end{bmatrix}
+
+   * - **Bending (3D)**
+     - Beam bent along XZ plane (nonuniform curvature)
+     - .. math::
+        \mathbf{F}(x) =
+        \begin{bmatrix}
+        \cos(x/R) & 0 & 0 \\
+        0 & 1 & 0 \\
+        \sin(x/R) & 0 & 1
+        \end{bmatrix}
+
+   * - **Torsion (3D)**
+     - Twisting cylinder around its central axis (nonuniform field)
+     - .. math::
+          \mathbf{F}(\theta(z)) =
+          \begin{bmatrix}
+          \cos\theta(z) & -\sin\theta(z) & 0 \\
+          \sin\theta(z) & \cos\theta(z) & 0 \\
+          0 & 0 & 1
+          \end{bmatrix}
+
+       .. line-block::
+
+          where :math:`\theta(z) = \frac{z}{L}\theta_{\text{twist}}` is the angle of twist at position :math:`z` along the cylinder's axis,
+          :math:`L` is the length of the cylinder, and :math:`\theta_{\text{twist}}` is the maximum twist angle (in radians), corresponding
+          to the twist angle at the top of the cylinder (:math:`z = L`).
 
 Rigid rotations and rigid translations
 --------------------------------------
@@ -197,7 +287,14 @@ For a rigid translation, :math:`x^{t+1} = x^t + \mathbf{u}`. In this case, the d
 
 For a rigid rotation, :math:`x^{t+1} = R x^t` where :math:`R` is a rotation matrix. In this case, the deformation gradient is :math:`R`, and the strain tensor is again zero.
 
-These deformations are called zero-energy modes because they do not contribute to the energy potential. This means that the energy potential is invariant under rigid translations and rotations, and does not penalize these deformations.
+These deformations are called zero-energy modes because they do not contribute to the energy potential.
+
+Zero Energy Modes
+-----------------
+
+Rigid translations and rotations do not produce strain and therefore store no elastic energy.
+
+They form the set of deformation modes that lie entirely within the nullspace of the elastic energy. A well-defined Hookean model must be invariant under these transformations.
 
 Constraint function and compliance for the Hookean model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
