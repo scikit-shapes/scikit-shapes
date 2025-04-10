@@ -194,13 +194,33 @@ Here,
 Examples of Hookean energy responses
 ------------------------------------
 
-The Hookean model predicts a quadratic energy response for small deformations, as the energy potential is of the form:
+The Hookean model predicts a quadratic energy response with respect to the strain tensor :math:`\boldsymbol{\varepsilon}` for small deformations, as the energy potential is of the form:
 
 .. math::
 
     W(\mathbf{F}) = \frac{1}{2} \boldsymbol{\varepsilon} : \mathbf{C} \boldsymbol{\varepsilon}
 
 To validate this behavior in practice, we simulate several canonical deformations and plot the total elastic energy as a function of the deformation parameter.
+
+We first start with the most simple deformation non-zero energy mode that can be expressed as an affine transformation, i.e., isotropic scaling.
+
+The isotropic scaling deformation is defined as:
+.. math::
+
+    \mathbf{F} = s \cdot \mathbf{I} = \begin{bmatrix} s & 0 \\ 0 & s \end{bmatrix}
+
+where :math:`s` is the scaling factor. The strain tensor is then given by:
+.. math::
+
+    \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I}) = \frac{1}{2}(s^2 - 1)\mathbf{I}.
+
+We can then give an expression of the elastic energy potential as:
+.. math::
+
+    W(s) = \frac{\lambda + \mu}{2}(s^2 - 1)^2
+where :math:`\lambda` and :math:`\mu` are the Lamé parameters.
+
+This means that the energy potential is a quadratic function of the scaling factor :math:`s`.
 
 These experiments confirm the quadratic nature of Hookean energy in the small-deformation regime.
 
@@ -233,7 +253,7 @@ The plots show that:
 These results visually and quantitatively confirm the quadratic energy model predicted by the Hookean formulation, even under complex 3D deformation fields.
 
 .. list-table:: Deformation gradients for the canonical cases used in our experiments
-   :widths: 15 25 35
+   :widths: 15 25 35 45
    :header-rows: 1
 
    * - Deformation type
@@ -243,14 +263,17 @@ These results visually and quantitatively confirm the quadratic energy model pre
    * - **Isotropic scaling**
      - Uniform expansion or compression in all directions
      - .. math:: \mathbf{F} = s \cdot \mathbf{I} = \begin{bmatrix} s & 0 \\ 0 & s \end{bmatrix}
+     - .. math:: W(s) = \frac{\lambda + \mu}{2}(s^2 - 1)^2
 
    * - **Uniaxial stretch / compression**
      - Stretch or compress along the X axis
      - .. math:: \mathbf{F} = \begin{bmatrix} 1 + \varepsilon & 0 \\ 0 & 1 \end{bmatrix}
+     - .. math:: W(\varepsilon) = \frac{\lambda + 2\mu}{8}(\varepsilon^2 - 1)^2
 
    * - **Pure shear**
      - Shear in the X direction along the Y axis
      - .. math:: \mathbf{F} = \begin{bmatrix} 1 & \gamma \\ 0 & 1 \end{bmatrix}
+     - .. math:: W(\gamma) = \frac{\lambda + 2\mu}{8}\gamma^4 + \frac{\mu}{2}\gamma^2
 
    * - **Bending (3D)**
      - Beam bent along XZ plane (nonuniform curvature)
