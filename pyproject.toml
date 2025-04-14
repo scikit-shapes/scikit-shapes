@@ -57,7 +57,8 @@ xfail_strict = true
 # for dtails about filterwarnings configuration
 filterwarnings = [
   "error",
-  "ignore:'locale.getdefaultlocale' is deprecated*:DeprecationWarning"
+  "ignore:'locale.getdefaultlocale' is deprecated*:DeprecationWarning",
+  "ignore:support for supplying keyword arguments to pathlib.PurePath is deprecated*:DeprecationWarning"
 ]
 
 
