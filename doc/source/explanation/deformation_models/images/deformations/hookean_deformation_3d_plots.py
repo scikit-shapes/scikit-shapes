@@ -2,8 +2,6 @@
 3D figures for the doc of hookean deformation models.
 """
 
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
@@ -49,6 +47,7 @@ DEFORMATION_CONFIG = {
     },
 }
 
+DPI = 300
 
 def generate_cylinder_3d(
     length: float = DEFORMATION_CONFIG["twisting"]["length_cylinder"],
@@ -223,7 +222,13 @@ def visualize_original_cylinder():
     n_height = DEFORMATION_CONFIG["twisting"]["n_height_cylinder"]
     length = DEFORMATION_CONFIG["twisting"]["length_cylinder"]
 
-    Xc, Yc, Zc = generate_cylinder_3d(length=length, radius=radius, n_radius=n_radius, n_theta=n_theta, n_height=n_height)
+    Xc, Yc, Zc = generate_cylinder_3d(
+        length=length,
+        radius=radius,
+        n_radius=n_radius,
+        n_theta=n_theta,
+        n_height=n_height,
+    )
     grid = pv.StructuredGrid(Xc, Yc, Zc)
     surface = grid.extract_surface()
 
@@ -259,19 +264,22 @@ def visualize_original_cylinder():
 
         lines = []
         for j in range(n_height):
-            lines.append([2, j, j+1])
+            lines.append([2, j, j + 1])
 
         line_poly = pv.PolyData(np.array(points))
         line_poly.lines = np.hstack(lines)
         p.add_mesh(line_poly, color="blue", line_width=8)
 
-    p.view_isometric()
+    p.enable_parallel_projection()
     p.set_background("white")
     p.show_grid()
     p.camera.position = (2.7, 2.7, 5)
     p.camera.focal_point = (0.0, 0.0, 1.0)
     p.camera.zoom(1.0)
-    p.show()
+    p.camera.parallel_projection = True
+    p.camera_set = True
+
+    return p
 
 
 def visualize_twisted_cylinder():
@@ -283,7 +291,13 @@ def visualize_twisted_cylinder():
     length = DEFORMATION_CONFIG["twisting"]["length_cylinder"]
     twist_strength = DEFORMATION_CONFIG["twisting"]["twist_strength"]
 
-    Xc, Yc, Zc = generate_cylinder_3d(length=length, radius=radius, n_radius=n_radius, n_theta=n_theta, n_height=n_height)
+    Xc, Yc, Zc = generate_cylinder_3d(
+        length=length,
+        radius=radius,
+        n_radius=n_radius,
+        n_theta=n_theta,
+        n_height=n_height,
+    )
     Xt, Yt, Zt = apply_torsion_3d(Xc, Yc, Zc, twist_strength=twist_strength)
     grid = pv.StructuredGrid(Xt, Yt, Zt)
     surface = grid.extract_surface()
@@ -316,20 +330,95 @@ def visualize_twisted_cylinder():
 
         lines = []
         for j in range(n_height):
-            lines.append([2, j, j+1])
+            lines.append([2, j, j + 1])
 
         line_poly = pv.PolyData(np.array(points))
         line_poly.lines = np.hstack(lines)
         p.add_mesh(line_poly, color="red", line_width=8)
 
-    p.view_isometric()
+    p.enable_parallel_projection()
     p.set_background("white")
     p.show_grid()
     p.camera.position = (2.7, 2.7, 5)
     p.camera.focal_point = (0.0, 0.0, 1.0)
     p.camera.zoom(1.0)
-    p.show()
+    p.camera.parallel_projection = True
+    p.camera_set = True
 
+    return p
+
+def side_by_side_twisting():
+    """
+    Returns a PyVista plotter with side-by-side subplots:
+    - Left: Original cylinder
+    - Right: Twisted cylinder
+    """
+    radius = DEFORMATION_CONFIG["twisting"]["radius_cylinder"]
+    n_radius = DEFORMATION_CONFIG["twisting"]["n_radius_cylinder"]
+    n_theta = DEFORMATION_CONFIG["twisting"]["n_theta_cylinder"]
+    n_height = DEFORMATION_CONFIG["twisting"]["n_height_cylinder"]
+    length = DEFORMATION_CONFIG["twisting"]["length_cylinder"]
+    twist_strength = DEFORMATION_CONFIG["twisting"]["twist_strength"]
+
+    Xc, Yc, Zc = generate_cylinder_3d(
+        length=length,
+        radius=radius,
+        n_radius=n_radius,
+        n_theta=n_theta,
+        n_height=n_height,
+    )
+    Xt, Yt, Zt = apply_torsion_3d(Xc, Yc, Zc, twist_strength=twist_strength)
+
+    grid_original = pv.StructuredGrid(Xc, Yc, Zc)
+    surface_original = grid_original.extract_surface()
+    grid_twisted = pv.StructuredGrid(Xt, Yt, Zt)
+    surface_twisted = grid_twisted.extract_surface()
+
+    p = pv.Plotter(shape=(1, 2), window_size=(2400, 1200))
+
+    # Original cylinder on the left
+    p.subplot(0, 0)
+    p.add_text("Original", font_size=14)
+    p.add_mesh(
+        surface_original,
+        color=DEFORMATION_CONFIG["twisting"]["color_surface"],
+        smooth_shading=True,
+        show_edges=True,
+        edge_color=DEFORMATION_CONFIG["twisting"]["color_edges"],
+        opacity=0.5,
+    )
+    p.enable_parallel_projection()
+    p.set_background("white")
+    p.camera.position = (2.7, 2.7, 5)
+    p.camera.focal_point = (0.0, 0.0, 1.0)
+    p.camera.zoom(1.0)
+    p.camera.parallel_projection = True
+    p.camera_set = True
+    p.show_grid()
+
+    # Twisted cylinder on the right
+    p.subplot(0, 1)
+    p.add_text("Twisted", font_size=14)
+    p.add_mesh(
+        surface_twisted,
+        color=DEFORMATION_CONFIG["twisting"]["color_surface_twisted"],
+        smooth_shading=True,
+        show_edges=True,
+        edge_color=DEFORMATION_CONFIG["twisting"]["color_edges_twisted"],
+        opacity=0.5,
+    )
+    p.enable_parallel_projection()
+    p.set_background("white")
+    p.camera.position = (2.7, 2.7, 5)
+    p.camera.focal_point = (0.0, 0.0, 1.0)
+    p.camera.zoom(1.0)
+    p.camera.parallel_projection = True
+    p.camera_set = True
+    p.show_grid()
+
+    p.link_views()
+
+    return p
 
 def visualize_original_beam():
 
@@ -340,7 +429,14 @@ def visualize_original_beam():
     n_width = DEFORMATION_CONFIG["bending"]["n_width_beam"]
     n_height = DEFORMATION_CONFIG["bending"]["n_height_beam"]
 
-    Xb, Yb, Zb = generate_beam(length=length, width=width, height=height, n_length=n_length, n_width=n_width, n_height=n_height)
+    Xb, Yb, Zb = generate_beam(
+        length=length,
+        width=width,
+        height=height,
+        n_length=n_length,
+        n_width=n_width,
+        n_height=n_height,
+    )
     grid = pv.StructuredGrid(Xb, Yb, Zb)
     surface = grid.extract_surface()
 
@@ -355,13 +451,16 @@ def visualize_original_beam():
         edge_color="navy",
         opacity=0.9,
     )
-    p.view_isometric()
+    p.enable_parallel_projection()
     p.set_background("white")
     p.show_grid()
     p.camera.position = (1.0, 1.0, 1.2)
     p.camera.focal_point = (1.0, 0.0, 0.5)
     p.camera.zoom(0.4)
-    p.show()
+    p.camera.parallel_projection = True
+    p.camera_set = True
+
+    return p
 
 
 def visualize_euler_bernoulli_bent_beam():
@@ -377,7 +476,14 @@ def visualize_euler_bernoulli_bent_beam():
     n_height = DEFORMATION_CONFIG["bending"]["n_height_beam"]
     force = DEFORMATION_CONFIG["bending"]["param_value_for_visualization"]
 
-    Xb, Yb, Zb = generate_beam(length=length, width=width, height=height, n_length=n_length, n_width=n_width, n_height=n_height)
+    Xb, Yb, Zb = generate_beam(
+        length=length,
+        width=width,
+        height=height,
+        n_length=n_length,
+        n_width=n_width,
+        n_height=n_height,
+    )
     grid_original = pv.StructuredGrid(Xb, Yb, Zb)
 
     I_val = (width * height**3) / 12.0
@@ -411,16 +517,19 @@ def visualize_euler_bernoulli_bent_beam():
         opacity=0.9,
         show_scalar_bar=True,
     )
-    p.view_isometric()
+    p.enable_parallel_projection()
     p.set_background("white")
     p.show_grid()
     p.camera.position = (1.1, 1.0, 1.2)
     p.camera.focal_point = (1.1, 0.0, 0.5)
     p.camera.zoom(0.32)
-    p.show()
+    p.camera.parallel_projection = True
+    p.camera_set = True
+
+    return p
 
 
-def plot_energy_graphs():
+def plot_energy_graphs(deformation_type: str):
     radius_cylinder = DEFORMATION_CONFIG["twisting"]["radius_cylinder"]
     n_radius_cylinder = DEFORMATION_CONFIG["twisting"]["n_radius_cylinder"]
     n_theta_cylinder = DEFORMATION_CONFIG["twisting"]["n_theta_cylinder"]
@@ -434,8 +543,21 @@ def plot_energy_graphs():
     n_width_beam = DEFORMATION_CONFIG["bending"]["n_width_beam"]
     n_height_beam = DEFORMATION_CONFIG["bending"]["n_height_beam"]
 
-    Xc, Yc, Zc = generate_cylinder_3d(length=length_cylinder, radius=radius_cylinder, n_radius=n_radius_cylinder, n_theta=n_theta_cylinder, n_height=n_height_cylinder)
-    Xb, Yb, Zb = generate_beam(length=length_beam, width=width_beam, height=height_beam, n_length=n_length_beam, n_width=n_width_beam, n_height=n_height_beam)
+    Xc, Yc, Zc = generate_cylinder_3d(
+        length=length_cylinder,
+        radius=radius_cylinder,
+        n_radius=n_radius_cylinder,
+        n_theta=n_theta_cylinder,
+        n_height=n_height_cylinder,
+    )
+    Xb, Yb, Zb = generate_beam(
+        length=length_beam,
+        width=width_beam,
+        height=height_beam,
+        n_length=n_length_beam,
+        n_width=n_width_beam,
+        n_height=n_height_beam,
+    )
 
     twist_vals = DEFORMATION_CONFIG["twisting"]["param_range_for_energy"]
     energy_torsion = []
@@ -450,9 +572,18 @@ def plot_energy_graphs():
     ]
     energy_bending = []
 
-    dx = DEFORMATION_CONFIG["bending"]["length_beam"] / DEFORMATION_CONFIG["bending"]["n_length_beam"]
-    dy = DEFORMATION_CONFIG["bending"]["width_beam"] / DEFORMATION_CONFIG["bending"]["n_width_beam"]
-    dz = DEFORMATION_CONFIG["bending"]["height_beam"] / DEFORMATION_CONFIG["bending"]["n_height_beam"]
+    dx = (
+        DEFORMATION_CONFIG["bending"]["length_beam"]
+        / DEFORMATION_CONFIG["bending"]["n_length_beam"]
+    )
+    dy = (
+        DEFORMATION_CONFIG["bending"]["width_beam"]
+        / DEFORMATION_CONFIG["bending"]["n_width_beam"]
+    )
+    dz = (
+        DEFORMATION_CONFIG["bending"]["height_beam"]
+        / DEFORMATION_CONFIG["bending"]["n_height_beam"]
+    )
 
     for force in bending_force_vals:
         Xbb, Ybb, Zbb = euler_bernoulli_bend_beam(
@@ -462,54 +593,33 @@ def plot_energy_graphs():
             L=length_beam,
             F=force,
             E=E,
-            I_val=(width_beam * height_beam**3
-            )
-            / 12.0,
+            I_val=(width_beam * height_beam**3) / 12.0,
         )
         Wb = compute_total_energy(Xbb, Ybb, Zbb, dx, dy, dz)
         energy_bending.append(Wb)
 
-    # Plot torsion energy
-    plt.figure(figsize=(10, 6))
-    plt.plot(twist_vals, energy_torsion, color="purple", linewidth=3)
-    plt.title("Total Energy vs Twist (Torsion)", fontsize=16)
-    plt.xlabel("Twist angle (rad)", fontsize=14)
-    plt.ylabel("Hookean Energy", fontsize=14)
-    plt.grid(True)
-    plt.tight_layout()
-    # Save as SVG
-    deformation_type = "twisting"
-    output_dir = Path(__file__).parent.absolute()
-    filename = f"{deformation_type}_deformation.svg"
-    output_path = output_dir / filename
-    plt.savefig(output_path)
-    plt.close()
-
-    # Plot bending energy
-    plt.figure(figsize=(10, 6))
-    plt.plot(
-        bending_force_vals, energy_bending, color="darkgreen", linewidth=3
-    )
-    plt.title("Total Energy vs Force (Bending)", fontsize=16)
-    plt.xlabel("Force", fontsize=14)
-    plt.ylabel("Hookean Energy", fontsize=14)
-    plt.grid(True)
-    plt.tight_layout()
-    # Save as SVG
-    deformation_type = "bending"
-    output_dir = Path(__file__).parent.absolute()
-    filename = f"{deformation_type}_deformation.svg"
-    output_path = output_dir / filename
-    plt.savefig(output_path)
-    plt.close()
-
-
-if __name__ == "__main__":
-    # Visualizations of the original and deformed configurations:
-    visualize_original_cylinder()
-    visualize_twisted_cylinder()
-    visualize_original_beam()
-    visualize_euler_bernoulli_bent_beam()  # Euler-Bernoulli beam theory (cantilever beam with point load F at the free end)
-
-    # Plot energy graphs (based on the original Hookean energy computations)
-    plot_energy_graphs()
+    if deformation_type == "twisting":
+        # Plot torsion energy
+        fig1 = plt.figure(figsize=(10, 6), dpi=DPI)
+        plt.plot(twist_vals, energy_torsion, color="purple", linewidth=3)
+        plt.title("Total Energy vs Twist (Torsion)", fontsize=16)
+        plt.xlabel("Twist angle (rad)", fontsize=14)
+        plt.ylabel("Hookean Energy", fontsize=14)
+        plt.grid(True)
+        plt.tight_layout()
+        return fig1
+    elif deformation_type == "bending":
+        # Plot bending energy
+        fig2 = plt.figure(figsize=(10, 6), dpi=DPI)
+        plt.plot(
+            bending_force_vals, energy_bending, color="darkgreen", linewidth=3
+        )
+        plt.title("Total Energy vs Force (Bending)", fontsize=16)
+        plt.xlabel("Force", fontsize=14)
+        plt.ylabel("Hookean Energy", fontsize=14)
+        plt.grid(True)
+        plt.tight_layout()
+        return fig2
+    else:
+        msg = "Invalid deformation type. Choose 'twisting' or 'bending'."
+        raise ValueError(msg)

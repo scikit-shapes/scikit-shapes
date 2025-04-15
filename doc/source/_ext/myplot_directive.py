@@ -299,7 +299,7 @@ def setup(app):
     app.add_config_value('myplot_pre_code', None, True)
     app.add_config_value('myplot_include_source', False, True)
     app.add_config_value('myplot_html_show_source_link', True, True)
-    app.add_config_value('myplot_formats', ['png', 'hires.png', 'pdf'], True)
+    app.add_config_value('myplot_formats', ['svg', 'png', 'hires.png', 'pdf'], True)
     app.add_config_value('myplot_basedir', None, True)
     app.add_config_value('myplot_html_show_formats', True, True)
     app.add_config_value('myplot_rcparams', {}, True)

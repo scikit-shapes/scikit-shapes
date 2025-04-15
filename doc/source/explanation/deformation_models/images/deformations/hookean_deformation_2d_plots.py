@@ -49,6 +49,7 @@ DEFORMATION_CONFIG = {
     },
 }
 
+DPI = 300
 
 def green_lagrange_strain(F: np.ndarray) -> np.ndarray:
     """Compute Green-Lagrange strain tensor ε = 0.5(F^T F - I)"""
@@ -142,7 +143,7 @@ def setup_clean_figure(
     ylim: tuple[float, float] = (-0.7, 0.7),
 ) -> tuple[plt.Figure, plt.Axes]:
     """Setup a clean figure without axes for deformation plots"""
-    fig = plt.figure(figsize=figsize, facecolor=bg_color)
+    fig = plt.figure(figsize=figsize, facecolor=bg_color, dpi=DPI)
     ax = fig.add_subplot(111)
     ax.set_xlim(xlim)
     ax.set_ylim(ylim)
@@ -315,7 +316,7 @@ def create_energy_plot(
     config = DEFORMATION_CONFIG[deformation_type]
     x_range = config["param_range_for_energy"]
 
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=(6, 4), dpi=DPI)
 
     ax.plot(x_range, energy_values, color=config["energy_color"])
     ax.set_title(config["title"])
@@ -396,7 +397,7 @@ def create_animation(deformation_type: str) -> None:
     # anim = FuncAnimation(fig, update, frames=frames, blit=True)
     # Path(output_dir).mkdir(parents=True, exist_ok=True)
     # output_path = Path(output_dir) / f"{deformation_type}_deformation.gif"
-    # anim.save(output_path, writer="pillow", fps=fps)
+    # anim.save(output_path, writer="pillow", fps=fps, dpi=DPI)
     # # print(f"Saved animation to {output_path}")
     # plt.close(fig)
 
@@ -407,7 +408,7 @@ def plot_combined(deformation_type: str) -> plt.Figure:
     config = DEFORMATION_CONFIG[deformation_type]
 
     fig, (ax_deformation, ax_energy) = plt.subplots(
-        1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [1.2, 1]}
+        1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [1.2, 1]}, dpi=DPI
     )
 
     xmin, xmax, ymin, ymax = calculate_adaptive_limits(
