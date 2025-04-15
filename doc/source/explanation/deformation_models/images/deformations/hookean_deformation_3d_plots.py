@@ -2,6 +2,8 @@
 3D figures for the doc of hookean deformation models.
 """
 
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
@@ -448,6 +450,10 @@ def plot_energy_graphs():
     ]
     energy_bending = []
 
+    dx = DEFORMATION_CONFIG["bending"]["length_beam"] / DEFORMATION_CONFIG["bending"]["n_length_beam"]
+    dy = DEFORMATION_CONFIG["bending"]["width_beam"] / DEFORMATION_CONFIG["bending"]["n_width_beam"]
+    dz = DEFORMATION_CONFIG["bending"]["height_beam"] / DEFORMATION_CONFIG["bending"]["n_height_beam"]
+
     for force in bending_force_vals:
         Xbb, Ybb, Zbb = euler_bernoulli_bend_beam(
             Xb,
@@ -460,7 +466,7 @@ def plot_energy_graphs():
             )
             / 12.0,
         )
-        Wb = compute_total_energy(Xbb, Ybb, Zbb)
+        Wb = compute_total_energy(Xbb, Ybb, Zbb, dx, dy, dz)
         energy_bending.append(Wb)
 
     # Plot torsion energy
@@ -471,7 +477,13 @@ def plot_energy_graphs():
     plt.ylabel("Hookean Energy", fontsize=14)
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    # Save as SVG
+    deformation_type = "twisting"
+    output_dir = Path(__file__).parent.absolute()
+    filename = f"{deformation_type}_deformation.svg"
+    output_path = output_dir / filename
+    plt.savefig(output_path)
+    plt.close()
 
     # Plot bending energy
     plt.figure(figsize=(10, 6))
@@ -483,7 +495,13 @@ def plot_energy_graphs():
     plt.ylabel("Hookean Energy", fontsize=14)
     plt.grid(True)
     plt.tight_layout()
-    plt.show()
+    # Save as SVG
+    deformation_type = "bending"
+    output_dir = Path(__file__).parent.absolute()
+    filename = f"{deformation_type}_deformation.svg"
+    output_path = output_dir / filename
+    plt.savefig(output_path)
+    plt.close()
 
 
 if __name__ == "__main__":

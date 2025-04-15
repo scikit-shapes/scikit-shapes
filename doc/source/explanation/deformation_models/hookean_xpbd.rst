@@ -61,7 +61,6 @@ where :math:`\lambda^{t+1}` is a Lagrange multiplier at iteration :math:`t+1`. N
 The compliance parameter is also directly correlated to the elastic energy potential derived from a constraint :math:`\mathcal{C}` by:
 
 .. math::
-    :label: potential_energy_xpbd
     :nowrap:
 
     \begin{align}
@@ -146,6 +145,7 @@ But, in Euclidean coordinates, and for an isotropic material, :math:`\mathbf{C}`
 .. math::
 
     C_{ijkl} = \lambda \delta_{ij}\delta_{kl} + \mu (\delta_{ik}\delta_{jl} + \delta_{il}\delta_{jk})
+
 where :math:`\delta_{ij}` is the Kronecker delta, and :math:`\lambda` and :math:`\mu` are the Lamé parameters.
 
 We then have
@@ -205,52 +205,59 @@ To validate this behavior in practice, we simulate several canonical deformation
 We first start with the most simple deformation non-zero energy mode that can be expressed as an affine transformation, i.e., isotropic scaling.
 
 The isotropic scaling deformation is defined as:
+
 .. math::
 
     \mathbf{F} = s \cdot \mathbf{I} = \begin{bmatrix} s & 0 \\ 0 & s \end{bmatrix}
 
-where :math:`s` is the scaling factor. The strain tensor is then given by:
+where :math:`s` is the scaling factor.
+
+.. myplot::
+   :include-source: False
+
+   from explanation.deformation_models.images.deformations.hookean_deformation_2d_plots import create_static_deformation_plot
+   fig = create_static_deformation_plot('isotropic_scaling')
+
+The strain tensor is then given by:
+
 .. math::
 
     \boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I}) = \frac{1}{2}(s^2 - 1)\mathbf{I}.
 
-We can then give an expression of the elastic energy potential as:
+As we can see, the components of the strain tensor are quadratic in the scaling factor :math:`s`. We can then give an expression of the elastic energy potential as:
+
 .. math::
 
     W(s) = \frac{\lambda + \mu}{2}(s^2 - 1)^2
+
 where :math:`\lambda` and :math:`\mu` are the Lamé parameters.
 
-This means that the energy potential is a quadratic function of the scaling factor :math:`s`.
+This means that the energy potential is a quartic function of the scaling factor :math:`s`, and a quadratic function of the strain tensor :math:`\boldsymbol{\varepsilon}`.
 
-These experiments confirm the quadratic nature of Hookean energy in the small-deformation regime.
+.. myplot::
+   :include-source: False
 
-.. figure:: images/deformations/hookean_energy_stretch_shear_scale.jpg
-    :align: center
-    :width: 100%
-    :alt: Hookean energy under stretch, shear, and isotropic scaling
-    :name: fig-hookean-canonical-2d
-
-    Hookean energy under isotropic scaling (left), uniaxial stretch/compression (middle), and pure shear (right).
-    Top row: deformed shapes, color-coded per deformation intensity.
-    Bottom row: energy vs deformation parameter. All curves are quadratic.
+   from explanation.deformation_models.images.deformations.hookean_deformation_2d_plots import compute_energy_values, create_energy_plot
+   energy_values = compute_energy_values()[2]
+   fig = create_energy_plot('isotropic_scaling', energy_values)
 
 We also investigate 3D deformation modes that cannot be expressed as simple affine transformations, such as torsion and bending. These deformations are nonuniform but can still be analyzed under the Hookean regime by computing the Green–Lagrange strain pointwise.
 
-.. figure:: images/deformations/hookean_energy_torsion_bending.jpg
-    :align: center
-    :width: 100%
-    :alt: Hookean energy under torsion and bending
-    :name: fig-hookean-canonical-3d
+We define the twisting deformation around the Z axis with its deformation gradient as:
 
-    Top row: Original beam (left), bent beam (middle), and total energy vs curvature (right).
-    Bottom row: Original cylinder (left), twisted cylinder (middle), and corresponding total energy vs twist angle (right)
+.. math::
+    \mathbf{F}(x, y, z) =
+    \begin{bmatrix}
+    \cos\theta(z) & -\sin\theta(z) & -\frac{\theta_{\text{twist}}}{L}(x\sin\theta(z) + y\cos\theta(z)) \\
+    \sin\theta(z) & \cos\theta(z) & \frac{\theta_{\text{twist}}}{L}(x\cos\theta(z) - y\sin\theta(z)) \\
+    0 & 0 & 1
+    \end{bmatrix}
 
-The plots show that:
+.. line-block::
 
-- Both torsion and bending yield quadratic energy responses.
-- The zero-deformation state (centered on the plots) corresponds to the minimum energy, as expected.
-
-These results visually and quantitatively confirm the quadratic energy model predicted by the Hookean formulation, even under complex 3D deformation fields.
+    where :math:`\theta(z) = \frac{z}{L}\theta_{\text{twist}}` is the angle of twist at position :math:`z` along the cylinder's axis,
+    :math:`L` is the length of the cylinder, and :math:`\theta_{\text{twist}}` is the maximum twist angle (in radians), corresponding
+    to the twist angle at the top of the cylinder (:math:`z = L`).
 
 .. list-table:: Deformation gradients for the canonical cases used in our experiments
    :widths: 15 25 35 45
@@ -259,6 +266,7 @@ These results visually and quantitatively confirm the quadratic energy model pre
    * - Deformation type
      - Deformation description
      - Deformation gradient :math:`\mathbf{F}`
+     - Elastic energy potential :math:`W`
 
    * - **Isotropic scaling**
      - Uniform expansion or compression in all directions
@@ -276,22 +284,27 @@ These results visually and quantitatively confirm the quadratic energy model pre
      - .. math:: W(\gamma) = \frac{\lambda + 2\mu}{8}\gamma^4 + \frac{\mu}{2}\gamma^2
 
    * - **Bending (3D)**
-     - Beam bent along XZ plane (nonuniform curvature)
+     - Beam bent along XZ plane (Euler-Bernouilli model for a cantilever beam)
      - .. math::
-        \mathbf{F}(x) =
+        \mathbf{F}(x, z) =
         \begin{bmatrix}
-        \cos(x/R) & 0 & 0 \\
+        1 - z\theta_x'\cos\theta_x & 0 & -\sin\theta_x \\
         0 & 1 & 0 \\
-        \sin(x/R) & 0 & 1
+        w'(x) - z\theta_x'\sin\theta_x & 0 & \cos\theta_x
         \end{bmatrix}
+       .. line-block::
+
+          where :math:`w(x) = \frac{F}{6EI}x^2(3L - x)` is the deflection of the beam at position :math:`x`, :math:`F` is the force applied at the end of the beam, :math:`\theta_x=\arctan w'(x)` is the angle of rotation of the beam at position :math:`x`, and :math:`\theta_x' = \frac{d\theta_x}{dx}` is the derivative of the angle of rotation with respect to :math:`x`.
+     - .. math::
+        W(F, x, z) = \frac{\lambda}{8}\left(z^2\theta_x'^2 + w'(x)^2 - 2z\theta_x'(\cos\theta_x + w'(x)\sin\theta_x)\right) + \frac{\mu}{4}\left((z^2\theta_x'^2 + w'(x)^2 - 2z\theta_x'(\cos\theta_x + w'(x)\sin\theta_x))^2 + 2(w'(x)\cos\theta_x - \sin\theta_x)^2\right)
 
    * - **Torsion (3D)**
-     - Twisting cylinder around its central axis (nonuniform field)
+     - Twisting cylinder around the Z axis
      - .. math::
-          \mathbf{F}(\theta(z)) =
+          \mathbf{F}(x, y, z) =
           \begin{bmatrix}
-          \cos\theta(z) & -\sin\theta(z) & 0 \\
-          \sin\theta(z) & \cos\theta(z) & 0 \\
+          \cos\theta(z) & -\sin\theta(z) & -\frac{\theta_{\text{twist}}}{L}(x\sin\theta(z) + y\cos\theta(z)) \\
+          \sin\theta(z) & \cos\theta(z) & \frac{\theta_{\text{twist}}}{L}(x\cos\theta(z) - y\sin\theta(z)) \\
           0 & 0 & 1
           \end{bmatrix}
 
@@ -299,7 +312,9 @@ These results visually and quantitatively confirm the quadratic energy model pre
 
           where :math:`\theta(z) = \frac{z}{L}\theta_{\text{twist}}` is the angle of twist at position :math:`z` along the cylinder's axis,
           :math:`L` is the length of the cylinder, and :math:`\theta_{\text{twist}}` is the maximum twist angle (in radians), corresponding
-          to the twist angle at the top of the cylinder (:math:`z = L`).
+          to the twist angle at the top of the cylinder (:math:`z = L`)
+     - .. math::
+        W(\theta_{\text{twist}}, x, y) = \frac{\lambda}{8}\frac{\theta_{\text{twist}}^4}{L^4}(x^2 + y^2)^2 + \frac{\mu}{4}\frac{\theta_{\text{twist}}^2}{L^2}\left(2x^2 + 2y^2 + \frac{\theta_{\text{twist}}^2}{L^2}(x^2 + y^2)^2\right)
 
 Rigid rotations and rigid translations
 --------------------------------------
@@ -322,7 +337,7 @@ They form the set of deformation modes that lie entirely within the nullspace of
 Constraint function and compliance for the Hookean model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Using :eq:`eq:potential_energy_xpbd`, we obtain the constraint function for the Hookean model:
+Using, we obtain the constraint function for the Hookean model:
 
 .. math::
 

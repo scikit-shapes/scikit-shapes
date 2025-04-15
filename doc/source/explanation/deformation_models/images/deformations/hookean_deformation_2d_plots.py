@@ -1,10 +1,7 @@
 """2D figures for the doc of hookean deformation models."""
 
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Polygon
 
 # Young's modulus and Poisson's ratio for the material
@@ -301,49 +298,46 @@ def create_static_deformation_plot(deformation_type: str) -> None:
     )
     plt.tight_layout(pad=1.5)
 
+    return fig
+
     # Save as SVG
-    output_dir = Path(__file__).parent.absolute()
-    filename = f"{deformation_type}_deformation.svg"
-    output_path = output_dir / filename
-    plt.savefig(output_path)
+    # output_dir = Path(__file__).parent.absolute()
+    # filename = f"{deformation_type}_deformation.svg"
+    # output_path = output_dir / filename
+    # plt.savefig(output_path)
     # print(f"Saved figure to {output_path}")
-    plt.close()
 
 
 def create_energy_plot(
     deformation_type: str, energy_values: list[float]
-) -> None:
-    """Create energy plot for a specific deformation type"""
+) -> plt.Figure:
+    """Create energy plot for a specific deformation type and return the figure."""
     config = DEFORMATION_CONFIG[deformation_type]
-
     x_range = config["param_range_for_energy"]
 
-    plt.figure(figsize=(6, 4))
-    plt.plot(x_range, energy_values, color=config["energy_color"])
-    plt.title(config["title"])
-    plt.xlabel(config["x_label"])
-    plt.ylabel("Energy $W(\\mathbf{F})$")
+    fig, ax = plt.subplots(figsize=(6, 4))
 
-    plt.axvline(config["rest_value"], color="gray", linestyle="--", alpha=0.5)
+    ax.plot(x_range, energy_values, color=config["energy_color"])
+    ax.set_title(config["title"])
+    ax.set_xlabel(config["x_label"])
+    ax.set_ylabel("Energy $W(\\mathbf{F})$")
+    ax.axvline(config["rest_value"], color="gray", linestyle="--", alpha=0.5)
+    ax.grid(True)
 
-    plt.grid(True)
-    plt.tight_layout()
+    fig.tight_layout()
+
+    return fig
 
     # Save as SVG
-    output_dir = Path(__file__).parent.absolute()
-    filename = f"{deformation_type}_energy.svg"
-    output_path = output_dir / filename
-    plt.savefig(output_path)
+    # output_dir = Path(__file__).parent.absolute()
+    # filename = f"{deformation_type}_energy.svg"
+    # output_path = output_dir / filename
+    # plt.savefig(output_path)
     # print(f"Saved figure to {output_path}")
-    plt.close()
+    # plt.close()
 
 
-def create_animation(
-    deformation_type: str,
-    frames: int = 60,
-    fps: int = 24,
-    output_dir: str = ".",
-) -> None:
+def create_animation(deformation_type: str) -> None:
     """Create animation of the deformation"""
     config = DEFORMATION_CONFIG[deformation_type]
     parameter_range = config["param_range_for_anim"]
@@ -399,35 +393,100 @@ def create_animation(
         return []
 
     # Create and save animation
-    anim = FuncAnimation(fig, update, frames=frames, blit=True)
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    output_path = Path(output_dir) / f"{deformation_type}_deformation.gif"
-    anim.save(output_path, writer="pillow", fps=fps)
-    # print(f"Saved animation to {output_path}")
-    plt.close(fig)
+    # anim = FuncAnimation(fig, update, frames=frames, blit=True)
+    # Path(output_dir).mkdir(parents=True, exist_ok=True)
+    # output_path = Path(output_dir) / f"{deformation_type}_deformation.gif"
+    # anim.save(output_path, writer="pillow", fps=fps)
+    # # print(f"Saved animation to {output_path}")
+    # plt.close(fig)
 
 
-def main() -> None:
-    """Main function to generate all visualizations"""
-    # Compute energy values
-    W_stretch, W_shear, W_iso = compute_energy_values()
+def plot_combined(deformation_type: str) -> plt.Figure:
+    """Return a figure combining static deformation (left) and energy (right) for a given deformation type."""
 
-    # Create static deformation visualizations
-    for deformation_type in DEFORMATION_CONFIG:
-        create_static_deformation_plot(deformation_type)
+    config = DEFORMATION_CONFIG[deformation_type]
 
-    # Create energy plots
-    create_energy_plot("uniaxial_stretch", W_stretch)
-    create_energy_plot("shear", W_shear)
-    create_energy_plot("isotropic_scaling", W_iso)
+    fig, (ax_deformation, ax_energy) = plt.subplots(
+        1, 2, figsize=(12, 5), gridspec_kw={"width_ratios": [1.2, 1]}
+    )
 
-    # Create animations
-    animation_dir = Path(__file__).parent.absolute() / "animations"
-    for deformation_type in DEFORMATION_CONFIG:
-        create_animation(
-            deformation_type, frames=60, fps=24, output_dir=animation_dir
+    xmin, xmax, ymin, ymax = calculate_adaptive_limits(
+        deformation_type, config["param_static_values"], padding=0.15
+    )
+    ax_deformation.set_xlim(xmin, xmax)
+    ax_deformation.set_ylim(ymin, ymax)
+    ax_deformation.set_aspect("equal")
+    ax_deformation.set_axis_off()
+
+    draw_square(
+        ax_deformation,
+        color="black",
+        alpha=0.7,
+        linewidth=1.2,
+        label="Rest state",
+    )
+
+    colors = plt.cm.get_cmap(config["colormap_deformation"])(
+        np.linspace(0.15, 0.85, len(config["param_static_values"]))
+    )
+    for value, color in zip(
+        config["param_static_values"], colors, strict=True
+    ):
+        F = compute_deformation_matrix(deformation_type, value)
+        label = f"{config['param_name']} = {value:.2f}"
+        draw_deformed_square(ax_deformation, F, color=color, label=label)
+        draw_grid(ax_deformation, F, n=4, color=color)
+
+    legend_y = -0.05 if deformation_type == "isotropic_scaling" else 0.08
+    ax_deformation.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, legend_y),
+        fontsize="medium",
+        frameon=True,
+        fancybox=True,
+        framealpha=0.7,
+        ncol=4,
+    )
+
+    energy_values = [
+        hookean_energy(
+            compute_deformation_matrix(deformation_type, param), MU, LAMBDA
         )
+        for param in config["param_range_for_energy"]
+    ]
+    ax_energy.plot(
+        config["param_range_for_energy"],
+        energy_values,
+        color=config["energy_color"],
+    )
+    ax_energy.set_title(config["title"])
+    ax_energy.set_xlabel(config["x_label"])
+    ax_energy.set_ylabel("Energy $W(\\mathbf{F})$")
+    ax_energy.axvline(
+        config["rest_value"], color="gray", linestyle="--", alpha=0.5
+    )
+    ax_energy.grid(True)
+
+    fig.suptitle(
+        f"{config['title']}: Deformation and Energy",
+        fontsize=14,
+        fontweight="bold",
+    )
+    fig.tight_layout(pad=2.0)
+
+    return fig
 
 
-if __name__ == "__main__":
-    main()
+def plot_isotropic_scaling_animation() -> None:
+    """Create isotropic scaling animation"""
+    create_animation("isotropic_scaling", frames=60, fps=24)
+
+
+def plot_uniaxial_stretch_animation() -> None:
+    """Create uniaxial stretch animation"""
+    create_animation("uniaxial_stretch", frames=60, fps=24)
+
+
+def plot_shear_animation() -> None:
+    """Create shear animation"""
+    create_animation("shear", frames=60, fps=24)
