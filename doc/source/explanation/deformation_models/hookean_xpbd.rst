@@ -255,19 +255,19 @@ We define the twisting deformation around the Z-axis with its deformation gradie
 
 .. line-block::
 
-    where :math:`\theta(z) = \frac{z}{L}\theta_{\text{twist}}` is the angle of twist at position :math:`z` along the cylinder's axis,
-    :math:`L` is the length of the cylinder, and :math:`\theta_{\text{twist}}` is the maximum twist angle (in radians), corresponding
-    to the twist angle at the top of the cylinder (:math:`z = L`).
+    where :math:`\theta(z) = \frac{z}{L}\theta_{\text{twist}}` is the angle of twist at position :math:`z` along the column's axis,
+    :math:`L` is the length of the column, and :math:`\theta_{\text{twist}}` is the maximum twist angle (in radians), corresponding
+    to the twist angle at the top of the column (:math:`z = L`).
 
 This deformation gradient is given pointwise, as the deformation is nonuniform.
 
-Let's consider a cylinder of length :math:`L`:
+Let's consider a column of length :math:`L`:
 
 .. pyvista-plot::
     :include-source: False
 
-    from explanation.deformation_models.images.deformations.hookean_deformation_3d_plots import visualize_original_cylinder
-    p = visualize_original_cylinder()
+    from explanation.deformation_models.images.deformations.hookean_deformation_3d_plots import visualize_original_column
+    p = visualize_original_column()
     p.enable_parallel_projection()
     p.show()
 
@@ -276,8 +276,8 @@ that is twisted around the Z-axis with a maximum twist angle of :math:`\theta_{\
 .. pyvista-plot::
     :include-source: False
 
-    from explanation.deformation_models.images.deformations.hookean_deformation_3d_plots import visualize_twisted_cylinder
-    p = visualize_twisted_cylinder()
+    from explanation.deformation_models.images.deformations.hookean_deformation_3d_plots import visualize_twisted_column
+    p = visualize_twisted_column()
     p.enable_parallel_projection()
     p.show()
 
@@ -297,7 +297,7 @@ We can then give a pointwise expression of the elastic energy potential as:
 
 As expected, the energy potential is a quartic function of the twist angle :math:`\theta_{\text{twist}}`, and a quadratic function of the strain tensor :math:`\boldsymbol{\varepsilon}`.
 
-If we compute the sum of the elastic energy potential over the whole cylinder with finite elements, we obtain the total elastic energy profile:
+If we compute the sum of the elastic energy potential over the whole column with finite elements, we obtain the total elastic energy profile:
 
 .. myplot::
    :include-source: False
@@ -417,7 +417,7 @@ that looks quadratic.
 
 **Torsion (3D)**
 
-  - **Description**: Twisting cylinder around the Z axis
+  - **Description**: Twisting column around the Z axis
 
     .. pyvista-plot::
         :include-source: False
@@ -438,9 +438,9 @@ that looks quadratic.
        \end{bmatrix}
 
     .. line-block::
-       where :math:`\theta(z) = \frac{z}{L}\theta_{\text{twist}}` is the angle of twist at position :math:`z` along the cylinder's axis,
-       :math:`L` is the length of the cylinder,
-       and :math:`\theta_{\text{twist}}` is the maximum twist angle (in radians), corresponding to the twist angle at the top of the cylinder (:math:`z = L`)
+       where :math:`\theta(z) = \frac{z}{L}\theta_{\text{twist}}` is the angle of twist at position :math:`z` along the column's axis,
+       :math:`L` is the length of the column,
+       and :math:`\theta_{\text{twist}}` is the maximum twist angle (in radians), corresponding to the twist angle at the top of the column (:math:`z = L`)
 
   - **Elastic energy potential**:
 
