@@ -2,12 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 
-# ... (Keep E, NU, LAMBDA, MU, DEFORMATION_CONFIG, DPI definitions as they are) ...
 E = 1e7
 NU = 0.3
 LAMBDA = E * NU / ((1 + NU) * (1 - 2 * NU))
 MU = E / (2 * (1 + NU))
-DEFORMATION_CONFIG = {  # Keep your config
+DEFORMATION_CONFIG = {
     "twisting": {
         "title": "Twisting",
         "param_name": "s",
@@ -18,7 +17,7 @@ DEFORMATION_CONFIG = {  # Keep your config
         "height_base_ratio": 0.1,
         "height_capital_ratio": 0.15,
         "n_radius": 10,
-        "n_theta": 150,  # Note: This still conceptually represents resolution for a full circle
+        "n_theta": 150,
         "n_height": 50,
         "n_flutes": 75,
         "flute_depth_factor": 0.05,
@@ -340,9 +339,7 @@ def compute_total_energy(
 pv.set_plot_theme("document")
 
 
-def _setup_column_visualization(
-    surface, color, window_size, subtitle=None
-):
+def _setup_column_visualization(surface, color, window_size, subtitle=None):
     surface = surface.compute_normals(
         point_normals=True, cell_normals=False, split_vertices=True
     )
@@ -453,7 +450,9 @@ def visualize_original_column(generate_half: bool = True):
     surface = surface.triangulate()
 
     return _setup_column_visualization(
-        surface, window_size=[1000, 800], color=DEFORMATION_CONFIG["twisting"]["color_surface"]
+        surface,
+        window_size=[1000, 800],
+        color=DEFORMATION_CONFIG["twisting"]["color_surface"],
     )
 
 
@@ -492,7 +491,9 @@ def visualize_twisted_column(generate_half: bool = True):
     surface = surface.triangulate()
 
     return _setup_column_visualization(
-        surface, window_size=[1000, 800], color=DEFORMATION_CONFIG["twisting"]["color_surface_twisted"]
+        surface,
+        window_size=[1000, 800],
+        color=DEFORMATION_CONFIG["twisting"]["color_surface_twisted"],
     )
 
 
@@ -731,9 +732,6 @@ def plot_energy_graphs(deformation_type: str):
         raise ValueError(msg)
 
 
-# --- Example Usage ---
-
-# Visualize just the original half-column
 # p_original_half = visualize_original_column(generate_half=True)
 # p_original_half_twisted = visualize_twisted_column(generate_half=True)
 # p_side_by_side = side_by_side_twisting(generate_half=True)
