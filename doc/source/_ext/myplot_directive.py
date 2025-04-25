@@ -297,11 +297,11 @@ def setup(app):
     setup.confdir = app.confdir
     app.add_directive('myplot', PlotDirective)
     app.add_config_value('myplot_pre_code', None, True)
-    app.add_config_value('myplot_include_source', False, True)
-    app.add_config_value('myplot_html_show_source_link', True, True)
+    app.add_config_value('myplot_include_source', False, False)
+    app.add_config_value('myplot_html_show_source_link', False, False)
     app.add_config_value('myplot_formats', ['svg', 'png', 'hires.png', 'pdf'], True)
     app.add_config_value('myplot_basedir', None, True)
-    app.add_config_value('myplot_html_show_formats', True, True)
+    app.add_config_value('myplot_html_show_formats', False, False)
     app.add_config_value('myplot_rcparams', {}, True)
     app.add_config_value('myplot_apply_rcparams', False, True)
     app.add_config_value('myplot_working_directory', None, True)
@@ -359,24 +359,6 @@ def _split_code_at_show(text, function_name):
 
 _SOURCECODE = """
 {{ source_code }}
-
-.. only:: html
-
-   {% if src_name or (html_show_formats and not multi_image) %}
-   (
-   {%- if src_name -%}
-   :download:`Source code <{{ build_dir }}/{{ src_name }}>`
-   {%- endif -%}
-   {%- if html_show_formats and not multi_image -%}
-     {%- for img in images -%}
-       {%- for fmt in img.formats -%}
-         {%- if src_name or not loop.first -%}, {% endif -%}
-         :download:`{{ fmt }} <{{ build_dir }}/{{ img.basename }}.{{ fmt }}>`
-       {%- endfor -%}
-     {%- endfor -%}
-   {%- endif -%}
-   )
-   {% endif %}
 """
 
 TEMPLATE_SRCSET = _SOURCECODE + """
