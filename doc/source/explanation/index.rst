@@ -39,9 +39,9 @@ Deformation models
 
    deformation_models/translation
    deformation_models/rigid
+   deformation_models/piecewise_rigid
    deformation_models/similarity
    deformation_models/affine
-
 
 **Free-form deformations:**
 
