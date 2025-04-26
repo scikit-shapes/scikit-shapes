@@ -39,7 +39,6 @@ Deformation models
 
    deformation_models/translation
    deformation_models/rigid
-   deformation_models/piecewise_rigid
    deformation_models/similarity
    deformation_models/affine
 
@@ -60,5 +59,6 @@ Deformation models
    :maxdepth: 1
 
    deformation_models/multi_affine
+   deformation_models/piecewise_rigid
    deformation_models/hookean_xpbd
    deformation_models/neo_hookean_xpbd
