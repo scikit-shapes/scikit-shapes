@@ -74,12 +74,6 @@ The parameters of a rigid transformation are decomposed in the rotation paramete
    * - Unit quaternion
      - $q=(w,x,y,z)\in\mathbb S^3$
      - Robust interpolation, requires normalization, double-cover $q$ and $-q$
-   * - Modified Rodrigues parameters
-     - $\rho \in \mathbb R^3$
-     - Minimal, singular at full rotation ($2\pi$)
-   * - Euler angles (ZYX convention)
-     - $(\alpha,\beta,\gamma)\in (-\pi, \pi] \times \left(-\frac{\pi}{2}, \frac{\pi}{2}\right) \times (-\pi, \pi]$
-     - Minimal (3 parameters), intuitive, gimbal lock
 
 - **Translation parameter** -- it is always given by a vector $t\in\mathbb R^3$.
 
