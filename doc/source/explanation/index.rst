@@ -60,5 +60,6 @@ Deformation models
 
    deformation_models/multi_affine
    deformation_models/piecewise_rigid
+   deformation_models/arap
    deformation_models/hookean_xpbd
    deformation_models/neo_hookean_xpbd
