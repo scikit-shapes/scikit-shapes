@@ -67,6 +67,7 @@ Alternating minimization approach
       R_i = V_iU_i^{\top}.
 
    We implement the following details to ensure robustness:
+
    - If $\det(R_i) < 0$ after the SVD decomposition $S_i = U_i \Sigma_i V_i^\top$, flip the sign of the last column
    of $V_i$ before recomputing $R_i = V_i U_i^\top$, to ensure a proper rotation ($\det(R_i) > 0$).
    - When $S_i$ is near-singular (for example, if neighbors are nearly colinear or coplanar),
