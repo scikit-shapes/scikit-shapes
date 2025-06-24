@@ -3,7 +3,7 @@
 As-Rigid-As-Possible (ARAP) Deformations
 =========================================
 
-This page describes **As-Rigid-As-Possible (ARAP)** deformation models.
+This page describes **As-Rigid-As-Possible (ARAP)** ([SorkineAlexa07]_) deformation models.
 Piece-wise rigid models allow independent rigid transformations for each part,
 which can introduce discontinuities or blending artifacts at the transitions between parts.
 ARAP models relax piece-wise rigidity by seeking deformations that are locally as rigid as possible,
@@ -27,9 +27,9 @@ ARAP model finds new vertex positions $\mathbf{p}'=\{p'_i\}$ that satisfy the co
 
 where
 
-- the per-vertex rotations $R_i \in SO(3)$ act as latent variables: they are not prescribed in advance, but are instead optimized internally during the alternating minimization process.
-- $\mathcal{N}(i)$ denotes the neighbors of vertex $i$.
-- $w_{ij}$ are scalar weights, we want them to compensate for non-uniformly shaped cells and prevent discretization bias. For meshes, we typically take cotangent weights because they encode local geometry very well:
+* the per-vertex rotations $R_i \in SO(3)$ act as latent variables: they are not prescribed in advance, but are instead optimized internally during the alternating minimization process.
+* $\mathcal{N}(i)$ denotes the neighbors of vertex $i$.
+* $w_{ij}$ are scalar weights, we want them to compensate for non-uniformly shaped cells and prevent discretization bias. For meshes, we typically take cotangent weights because they encode local geometry very well:
 
    .. math::
 
@@ -52,7 +52,7 @@ Since both the vertex positions $\mathbf{p}'$ and the local rotations $R_i$ are 
 alternating minimization approach: at each iteration, we fix one set of variables and optimize over the other, in two steps.
 
 Alternating minimization approach
-~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. **Local step** – closed-form update of $R_i$.
    For fixed $\mathbf{p}'$, assemble the covariance
@@ -68,12 +68,8 @@ Alternating minimization approach
 
    We implement the following details to ensure robustness:
 
-   - If $\det(R_i) < 0$ after the SVD decomposition $S_i = U_i \Sigma_i V_i^\top$, flip the sign of the last column
-   of $V_i$ before recomputing $R_i = V_i U_i^\top$, to ensure a proper rotation ($\det(R_i) > 0$).
-   - When $S_i$ is near-singular (for example, if neighbors are nearly colinear or coplanar),
-   small numerical instabilities may occur during SVD. To improve robustness, it can help to regularize the
-   covariance by adding a small multiple of the identity matrix, $S_i \leftarrow S_i + \epsilon I$, with a tiny
-   $\epsilon > 0$.
+   * If $\det(R_i) < 0$ after the SVD decomposition $S_i = U_i \Sigma_i V_i^\top$, flip the sign of the last column of $V_i$ before recomputing $R_i = V_i U_i^\top$, to ensure a proper rotation ($\det(R_i) > 0$).
+   * When $S_i$ is near-singular (for example, if neighbors are nearly colinear or coplanar), small numerical instabilities may occur during SVD. To improve robustness, it can help to regularize the covariance by adding a small multiple of the identity matrix, $S_i \leftarrow S_i + \epsilon I$, with a tiny $\epsilon > 0$.
 
 2. **Global step** – solve a sparse SPD (symmetric positive definite, thus uniquely solvable) system for $\mathbf{p}'$.
    $\frac{\partial E}{\partial p'_i}=0$ gives the linear sparse system
@@ -95,8 +91,8 @@ Alternating minimization approach
 
 **Remarks:**
 
-- The local steps at each vertex $i$ are independent and can be parallelized across vertices for efficiency.
-- Each iteration (local step + global step) monotonically decreases the ARAP energy, typically leading to fast convergence to a local minimum in practice. In practice, for small deformations and good initializations, a few iterations are sufficient to converge to a good minimum.
+* The local steps at each vertex $i$ are independent and can be parallelized across vertices for efficiency.
+* Each iteration (local step + global step) monotonically decreases the ARAP energy, typically leading to fast convergence to a local minimum in practice. In practice, for small deformations and good initializations, a few iterations are sufficient to converge to a good minimum.
 
 References
 ~~~~~~~~~~
