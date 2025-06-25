@@ -478,11 +478,10 @@ def _compute_local_covariance(
 def closest_point_coupling(
     source_points: torch.Tensor,
     tree: KDTree,
-    k: int = 10,
     device: torch.device | None = None,
 ) -> torch.Tensor:
     # find correspondences in Euclidean space
-    _, idxs = tree.query(source_points, k=k)
+    _, idxs = tree.query(source_points, k=1)
     return (
         torch.from_numpy(idxs[:, 0]).long().to(device)
     )  # corr is defined as indices in target
@@ -550,7 +549,6 @@ def rigid_icp(
     prev_cost = float("inf")
     costs = []
     converged = False
-    k = kwargs.get("k_candidates", 10)
     trans_tol = kwargs.get("trans_tol", 1e-2)
     angle_tol = kwargs.get("angle_tol", 1e-2)
     alpha = kwargs.get("alpha", 100.0)
@@ -562,7 +560,6 @@ def rigid_icp(
         corr = closest_point_coupling(
             pts_trans,
             tree,
-            k=k,
             device=device,
         )
 
