@@ -79,10 +79,6 @@ def _solve_sparse_system(
     Nd: int,
     b: torch.Tensor,
 ) -> torch.Tensor:
-    """
-    Solve A x = b with sparse LU (spsolve).  Fall back to very-tight CG if LU
-    fails (e.g. on a singular matrix).
-    """
     A = sp.csr_matrix(
         (vals.cpu().numpy(), (rows.cpu().numpy(), cols.cpu().numpy())),
         shape=(Nd, Nd),
@@ -450,13 +446,415 @@ class ClosestPointCoupling:
         return self.target[self._corr].to(self.device)
 
 
-def closest_point_coupling(
-    source_points: torch.Tensor,
-    tree: KDTree,
-    device: torch.device | None = None,
-) -> torch.Tensor:
-    _, idxs = tree.query(source_points, k=1)
-    return torch.from_numpy(idxs[:, 0]).long().to(device)
+class NonRigidDeformation:
+    def __init__(
+        self,
+        robust_loss: str = "cauchy_mad",
+        metric_type: str = "point_to_point",
+        max_iterations: int = 50,
+        gamma: float = 1.0,
+        device: torch.device | None = None,
+        coupling: ClosestPointCoupling | None = None,
+        alpha_start: float = 1e5,
+        alpha_final: float = 1e1,
+        n_levels: int = 6,
+        **kwargs,
+    ):
+        self.robust_loss = robust_loss
+        self.metric_type = metric_type
+        self.max_iterations = max_iterations
+        self.gamma = gamma
+        self.device = device or torch.device("cpu")
+        self.kwargs = kwargs
+
+        self.alpha_start = alpha_start
+        self.alpha_final = alpha_final
+        self.n_levels = n_levels
+
+        self.trans_tol = kwargs.get("trans_tol", 1e-2)
+        self.angle_tol = kwargs.get("angle_tol", 1e-2)
+        self.param_tol = kwargs.get("param_tol", 5e-4)
+        self.cost_tol = kwargs.get("cost_tol", 1e-3)
+
+        self.coupling = coupling
+
+    def initialize(self, source_shape: Any, target_shape: Any):
+        """Initialize the deformation with source and target shapes."""
+        self.source_shape = source_shape
+        self.target_shape = target_shape
+
+        self.src_pts, self.src_nml = _extract_points_and_normals(source_shape)
+        self.tgt_pts, self.tgt_nml = _extract_points_and_normals(target_shape)
+
+        self.src = self.src_pts.to(self.device)
+        self.tgt = self.tgt_pts.to(self.device)
+        self.src_orig = self.src_pts.to(self.device)
+
+        if self.src_nml is not None:
+            self.src_nml = self.src_nml.to(self.device)
+            self.src_nml_orig = self.src_nml.clone()
+        else:
+            self.src_nml_orig = None
+
+        if self.tgt_nml is not None:
+            self.tgt_nml = self.tgt_nml.to(self.device)
+
+        if (
+            self.metric_type in ["point_to_plane", "plane_to_plane"]
+            and self.tgt_nml is None
+        ):
+            msg = f"Target normals are required for metric_type='{self.metric_type}' but not provided"
+            raise ValueError(msg)
+        if self.metric_type == "plane_to_plane" and self.src_nml is None:
+            msg = "Source normals are required for metric_type='plane_to_plane' but not provided"
+            raise ValueError(msg)
+
+        self.n = self.src_orig.shape[0]
+        self.d = 12
+
+        self.X_total = (
+            torch.eye(4, device=self.device).unsqueeze(0).repeat(self.n, 1, 1)
+        )
+
+        base = (torch.arange(self.n, device=self.device) * self.d).view(
+            -1, 1, 1
+        )
+        rr, cc = torch.meshgrid(
+            torch.arange(self.d, device=self.device),
+            torch.arange(self.d, device=self.device),
+            indexing="ij",
+        )
+        self.rows_data = (base + rr).reshape(-1)
+        self.cols_data = (base + cc).reshape(-1)
+
+        if self.coupling is None:
+            self.tree = KDTree(
+                self.tgt.cpu().numpy(), leaf_size=40, metric="euclidean"
+            )
+        else:
+            self.tree = None
+
+        if self.metric_type == "local_covariance":
+            k_neighbors = self.kwargs.get("k_neighbors", 20)
+            self.cov_src = _compute_local_covariance(self.src, k_neighbors)
+            self.cov_tgt = _compute_local_covariance(self.tgt, k_neighbors)
+        else:
+            self.cov_src = self.cov_tgt = None
+
+        self._setup_edges()
+
+        self.alpha_levels = torch.logspace(
+            torch.log10(torch.tensor(self.alpha_start)),
+            torch.log10(torch.tensor(self.alpha_final)),
+            steps=self.n_levels,
+            device=self.device,
+        )
+
+    def _setup_edges(self):
+        """Extract edges from the source mesh for stiffness regularization."""
+        if HAS_PYVISTA and hasattr(self.source_shape, "extract_all_edges"):
+            edge_mesh = self.source_shape.extract_all_edges()
+            lines = edge_mesh.lines.reshape(-1, 3)
+            edges_np = lines[:, 1:]
+
+            edges_unique = np.unique(np.sort(edges_np, axis=1), axis=0)
+            pts = self.src_orig.cpu().numpy()
+            v0, v1 = pts[edges_unique[:, 0]], pts[edges_unique[:, 1]]
+            lengths = np.linalg.norm(v0 - v1, axis=1, keepdims=True)
+
+            # Filter out degenerate edges
+            eps = 1e-6
+            valid = lengths[:, 0] > eps
+            edges_filtered = edges_unique[valid]
+            lengths_filtered = lengths[valid]
+
+            self.edges = torch.as_tensor(
+                edges_filtered, dtype=torch.long, device=self.device
+            )
+            self.edge_length = (
+                torch.from_numpy(lengths_filtered).float().to(self.device)
+            )
+        else:
+            logger.warning(
+                "No edge information available, using empty edge set"
+            )
+            self.edges = torch.empty(
+                (0, 2), dtype=torch.long, device=self.device
+            )
+            self.edge_length = torch.empty(
+                (0, 1), dtype=torch.float32, device=self.device
+            )
+
+    def _compute_correspondences(
+        self, pts_trans: torch.Tensor
+    ) -> torch.Tensor:
+        """Find closest point correspondences."""
+        if self.coupling is not None:
+            # Use provided coupling
+            return self.coupling.fit(pts_trans)._corr
+        else:
+            _, idxs = self.tree.query(pts_trans.cpu().numpy(), k=1)
+            return torch.from_numpy(idxs[:, 0]).long().to(self.device)
+
+    def _compute_metric(self, pts_trans: torch.Tensor, corr: torch.Tensor):
+        """Compute residuals and metric matrices based on metric type."""
+        alpha = self.kwargs.get("alpha", 100.0)
+        beta = self.kwargs.get("beta", 1.0)
+
+        if self.metric_type == "point_to_point":
+            tgt_corr = self.tgt[corr]
+            diff = pts_trans - tgt_corr
+            res2 = torch.sum(diff * diff, dim=1)
+            L_i = None
+
+        elif self.metric_type == "point_to_plane":
+            tgt_corr_nml = (
+                self.tgt_nml[corr] if self.tgt_nml is not None else None
+            )
+            L_i = _compute_local_metric(
+                self.tgt[corr],
+                tgt_corr_nml,
+                metric_type="point_to_plane",
+                alpha=alpha,
+                beta=beta,
+            )
+            tgt_corr = self.tgt[corr]
+            diff = pts_trans - tgt_corr
+            res2 = torch.einsum("ni,nij,nj->n", diff, L_i, diff)
+
+        elif self.metric_type == "plane_to_plane":
+            Rb = self.X_total[:, :3, :3]
+            src_nml_trans = (
+                torch.einsum("nij,nj->ni", Rb, self.src_nml_orig)
+                if self.src_nml_orig is not None
+                else None
+            )
+            tgt_corr_nml = (
+                self.tgt_nml[corr] if self.tgt_nml is not None else None
+            )
+            L_i = _compute_local_metric(
+                self.tgt[corr],
+                tgt_corr_nml,
+                metric_type="plane_to_plane",
+                alpha=alpha,
+                beta=beta,
+                source_normals=src_nml_trans,
+            )
+            tgt_corr = self.tgt[corr]
+            diff = pts_trans - tgt_corr
+            res2 = torch.einsum("ni,nij,nj->n", diff, L_i, diff)
+
+        elif self.metric_type == "local_covariance":
+            Rb = self.X_total[:, :3, :3]
+            rotcov = torch.bmm(Rb, torch.bmm(self.cov_src, Rb.transpose(1, 2)))
+            cov_sum = rotcov + self.cov_tgt[corr]
+            L_i = torch.linalg.inv(cov_sum)
+            tgt_corr = self.tgt[corr]
+            diff = pts_trans - tgt_corr
+            res2 = torch.einsum("ni,nij,nj->n", diff, L_i, diff)
+
+        return res2, L_i, diff
+
+    def optimization_step(
+        self, alpha_stiffness: float, stiffness_precomputed: tuple
+    ):
+        """Perform one optimization step."""
+        stiffness_rows, stiffness_cols, stiffness_vals = stiffness_precomputed
+
+        v_h = torch.cat(
+            [self.src_orig, torch.ones(self.n, 1, device=self.device)], 1
+        )
+        pts_trans = torch.einsum("nij,nj->ni", self.X_total, v_h)[:, :3]
+
+        corr = self._compute_correspondences(pts_trans)
+
+        res2, L_i, diff = self._compute_metric(pts_trans, corr)
+
+        residuals = torch.sqrt(res2)
+        weights = _robust_loss_weights(
+            residuals, self.robust_loss, **self.kwargs
+        )
+        wm = weights.mean()
+        logger.debug("mean robust weight = %.2e", wm)
+        weights /= torch.clamp(wm, min=1e-12)
+
+        if torch.isnan(weights).any():
+            msg = "NaN detected in robust weights"
+            raise RuntimeError(msg)
+
+        logger.debug(
+            "weights min/max = %.2e/%.2e", weights.min(), weights.max()
+        )
+
+        source_linear = pts_trans.detach()
+        X_delta = _solve(
+            source_linear,
+            self.tgt,
+            weights,
+            corr,
+            L_mats=L_i,
+            edges=self.edges,
+            alpha_stiffness=alpha_stiffness,
+            gamma=self.gamma,
+            rows_data=self.rows_data,
+            cols_data=self.cols_data,
+            stiffness_rows=stiffness_rows,
+            stiffness_cols=stiffness_cols,
+            stiffness_vals=stiffness_vals,
+            device=self.device,
+            residuals=diff,
+            metric_type=self.metric_type,
+        )
+
+        R_lin = X_delta[:, :, :3]
+        U, S, Vt = torch.linalg.svd(R_lin)
+        det = torch.linalg.det(U @ Vt)
+        U_fix = U.clone()
+        U_fix[det < 0, :, -1] *= -1
+        R_proj = U_fix @ Vt
+        X_delta[:, :, :3] = R_proj
+
+        X_d_h = torch.zeros(self.n, 4, 4, device=self.device)
+        X_d_h[:, :3, :4] = X_delta
+        X_d_h[:, 3, 3] = 1.0
+        X_total_prev = self.X_total.clone()
+
+        self.X_total = torch.bmm(X_d_h, self.X_total)
+
+        dets = torch.linalg.det(self.X_total[:, :3, :3])
+        logger.debug("dets min/max = %.4f/%.4f", dets.min(), dets.max())
+
+        Rb_new = self.X_total[:, :3, :3]
+        Rb_old = X_total_prev[:, :3, :3]
+        tb_new = self.X_total[:, :3, 3]
+        tb_old = X_total_prev[:, :3, 3]
+
+        dt = tb_new - tb_old
+        trans_deltas = torch.norm(dt, dim=1)
+        trans_delta = torch.max(trans_deltas)
+
+        R_rel = torch.matmul(Rb_new, Rb_old.transpose(1, 2))
+        traces = R_rel.diagonal(offset=0, dim1=1, dim2=2).sum(dim=1)
+        eps = 1e-7
+        angles = torch.acos(torch.clamp((traces - 1) / 2, -1 + eps, 1 - eps))
+        angle = torch.max(angles)
+
+        cost = (weights * res2).sum()
+        delta_X = torch.norm((self.X_total - X_total_prev).view(-1))
+        rel_par = delta_X / (torch.norm(X_total_prev.view(-1)) + 1e-12)
+
+        return cost, trans_delta, angle, rel_par, corr
+
+    def fit(self):
+        """Run the complete non-rigid ICP optimization."""
+        prev_cost = float("inf")
+        costs = []
+        converged = False
+
+        for level, alpha_stiffness in enumerate(self.alpha_levels, 1):
+            logger.debug(
+                "\n=== alpha-level %s/%s : alpha = %.1e ===",
+                level,
+                self.n_levels,
+                alpha_stiffness,
+            )
+
+            # Precompute stiffness matrix entries
+            stiffness_rows, stiffness_cols, stiffness_vals = (
+                _incidence_stiffness(
+                    self.edges,
+                    gamma=self.gamma,
+                    device=self.device,
+                    alpha=alpha_stiffness,
+                    edge_length=self.edge_length,
+                )
+            )
+            stiffness_precomputed = (
+                stiffness_rows,
+                stiffness_cols,
+                stiffness_vals,
+            )
+
+            for it in range(1, self.max_iterations + 1):
+                logger.debug("Iteration %s/%s...", it, self.max_iterations)
+
+                cost, trans_delta, angle, rel_par, corr = (
+                    self.optimization_step(
+                        alpha_stiffness, stiffness_precomputed
+                    )
+                )
+
+                rel_cost = torch.abs(prev_cost - cost) / (prev_cost + 1e-12)
+                prev_cost = cost
+                costs.append(cost.item())
+
+                # Check convergence
+                if (
+                    trans_delta < self.trans_tol
+                    and angle < self.angle_tol
+                    and rel_par < self.param_tol
+                    and rel_cost < self.cost_tol
+                ):
+                    converged = True
+                    break
+
+        return {
+            "final_cost": prev_cost,
+            "costs": costs,
+            "converged": converged,
+            "last_trans_delta": trans_delta,
+            "last_rot_angle": angle,
+        }
+
+    def transform(self):
+        """Transform the source shape using the computed deformation."""
+        # Transform points
+        v_h = torch.cat(
+            [self.src_orig, torch.ones(self.n, 1, device=self.device)], 1
+        )
+        final_pts_trans = torch.einsum("nij,nj->ni", self.X_total, v_h)[:, :3]
+
+        # Create transformed shape
+        if HAS_PYVISTA and isinstance(self.source_shape, pv.PolyData):
+            transformed_shape = self.source_shape.copy()
+            transformed_shape.points = final_pts_trans.cpu().numpy()
+        elif isinstance(self.source_shape, torch.Tensor | np.ndarray):
+            if isinstance(self.source_shape, torch.Tensor):
+                transformed_shape = final_pts_trans.to(
+                    self.source_shape.device
+                )
+            else:
+                transformed_shape = final_pts_trans.cpu().numpy()
+        elif (
+            isinstance(self.source_shape, tuple)
+            and len(self.source_shape) == 2
+        ):
+            transformed_points = final_pts_trans
+            if self.src_nml_orig is not None:
+                # Transform normals
+                Rb = self.X_total[:, :3, :3]
+                transformed_normals = torch.einsum(
+                    "nij,nj->ni", Rb, self.src_nml_orig
+                )
+            else:
+                transformed_normals = self.source_shape[1]
+
+            if isinstance(self.source_shape[0], torch.Tensor):
+                transformed_points = transformed_points.to(
+                    self.source_shape[0].device
+                )
+                if isinstance(
+                    self.source_shape[1], torch.Tensor
+                ) and isinstance(transformed_normals, torch.Tensor):
+                    transformed_normals = transformed_normals.to(
+                        self.source_shape[1].device
+                    )
+
+            transformed_shape = (transformed_points, transformed_normals)
+        else:
+            transformed_shape = final_pts_trans.cpu().numpy()
+
+        return transformed_shape, final_pts_trans
 
 
 def non_rigid_icp(
@@ -467,273 +865,38 @@ def non_rigid_icp(
     max_iterations: int = 50,
     device: torch.device | None = None,
     gamma=1.0,
+    alpha_start: float = 1e5,
+    alpha_final: float = 1e1,
+    n_levels: int = 6,
     **kwargs,
 ) -> tuple[np.ndarray, np.ndarray, dict[str, Any], np.ndarray, np.ndarray]:
     """
-    Non Rigid ICP
+    Non Rigid ICP using the NonRigidDeformation class.
     """
+    tgt_pts, _ = _extract_points_and_normals(target_shape)
+    if device is not None:
+        tgt_pts = tgt_pts.to(device)
 
-    src_pts, src_nml = _extract_points_and_normals(source_shape)
-    tgt_pts, tgt_nml = _extract_points_and_normals(target_shape)
-    device = device or src_pts.device
-    src = src_pts.to(device)
-    tgt = tgt_pts.to(device)
+    coupling = ClosestPointCoupling(device=device)
+    coupling.initialize(tgt_pts, leaf_size=40)
 
-    d = 12
-    N, _ = src.shape
-    base = (torch.arange(N) * d).view(-1, 1, 1)
-    rr, cc = torch.meshgrid(torch.arange(d), torch.arange(d), indexing="ij")
-    rows_data = (base + rr).reshape(-1)
-    cols_data = (base + cc).reshape(-1)
-
-    src_orig = src_pts.to(device)
-    n = src_orig.shape[0]
-    src_nml_orig = src_nml.clone() if src_nml is not None else None
-
-    if src_nml is not None:
-        src_nml = src_nml.to(device)
-    if tgt_nml is not None:
-        tgt_nml = tgt_nml.to(device)
-
-    if metric_type in ["point_to_plane", "plane_to_plane"] and tgt_nml is None:
-        msg = f"Target normals are required for metric_type='{metric_type}' but not provided"
-        raise ValueError(msg)
-    if metric_type == "plane_to_plane" and src_nml is None:
-        msg = "Source normals are required for metric_type='plane_to_plane' but not provided"
-        raise ValueError(msg)
-
-    tree = KDTree(tgt.cpu().numpy(), leaf_size=40, metric="euclidean")
-
-    X_total = torch.eye(4, device=device).unsqueeze(0).repeat(n, 1, 1)
-
-    if metric_type == "local_covariance":
-        k_neighbors = kwargs.get("k_neighbors", 20)
-        cov_src = _compute_local_covariance(src, k_neighbors)
-        cov_tgt = _compute_local_covariance(tgt, k_neighbors)
-    else:
-        cov_src = cov_tgt = None
-
-    prev_cost = float("inf")
-    cost = 0
-    costs = []
-    converged = False
-    trans_tol = kwargs.get("trans_tol", 1e-2)
-    angle_tol = kwargs.get("angle_tol", 1e-2)
-    alpha = kwargs.get("alpha", 100.0)
-    beta = kwargs.get("beta", 1.0)
-
-    edge_mesh = source_shape.extract_all_edges()
-    lines = edge_mesh.lines.reshape(-1, 3)
-    edges_np = lines[:, 1:]
-
-    edges_unique = np.unique(np.sort(edges_np, axis=1), axis=0)
-    pts = src_orig.cpu().numpy()
-    v0, v1 = pts[edges_unique[:, 0]], pts[edges_unique[:, 1]]
-    lengths = np.linalg.norm(v0 - v1, axis=1, keepdims=True)
-    eps = 1e-6
-    valid = lengths[:, 0] > eps
-    edges_filtered = edges_unique[valid]
-    lengths_filtered = lengths[valid]
-    edges = torch.as_tensor(edges_filtered, dtype=torch.long, device=device)
-    edge_length = torch.from_numpy(lengths_filtered).float().to(device)
-    d = 12
-
-    alpha_start = kwargs.get("alpha_start", 1e5)
-    alpha_final = kwargs.get("alpha_final", 1e1)
-    n_levels = kwargs.get("n_levels", 6)
-    alpha_levels = torch.logspace(
-        torch.log10(torch.tensor(alpha_start)),
-        torch.log10(torch.tensor(alpha_final)),
-        steps=n_levels,
+    model = NonRigidDeformation(
+        robust_loss=robust_loss,
+        metric_type=metric_type,
+        max_iterations=max_iterations,
+        gamma=gamma,
         device=device,
+        coupling=coupling,
+        alpha_start=alpha_start,
+        alpha_final=alpha_final,
+        n_levels=n_levels,
+        **kwargs,
     )
 
-    for level, alpha_stiffness in enumerate(alpha_levels, 1):
-        logger.debug(
-            "\n=== alpha-level %s/%s : alpha = %.1e ===",
-            level,
-            n_levels,
-            alpha_stiffness,
-        )
-        stiffness_rows, stiffness_cols, stiffness_vals = _incidence_stiffness(
-            edges,
-            gamma=gamma,
-            device=device,
-            alpha=alpha_stiffness,
-            edge_length=edge_length,
-        )
-        for it in range(1, max_iterations + 1):
-            logger.debug("Iteration %s/%s...", it, max_iterations)
-            v_h = torch.cat([src_orig, torch.ones(n, 1, device=device)], 1)
-            pts_trans = torch.einsum("nij,nj->ni", X_total, v_h)[:, :3]
+    model.initialize(source_shape, target_shape)
+    info = model.fit()
+    transformed_shape, final_pts_trans = model.transform()
 
-            corr = closest_point_coupling(
-                pts_trans,
-                tree,
-                device=device,
-            )
+    final_corr = model._compute_correspondences(final_pts_trans)
 
-            if metric_type == "point_to_point":
-                tgt_corr = tgt[corr]
-                diff = pts_trans - tgt_corr
-                res2 = torch.sum(diff * diff, dim=1)
-                L_i = None
-
-            elif metric_type == "point_to_plane":
-                tgt_corr_nml = tgt_nml[corr] if tgt_nml is not None else None
-                L_i = _compute_local_metric(
-                    tgt[corr],
-                    tgt_corr_nml,
-                    metric_type="point_to_plane",
-                    alpha=alpha,
-                    beta=beta,
-                )
-                tgt_corr = tgt[corr]
-                diff = pts_trans - tgt_corr
-                res2 = torch.einsum("ni,nij,nj->n", diff, L_i, diff)
-
-            elif metric_type == "plane_to_plane":
-                Rb = X_total[:, :3, :3]
-                src_nml_trans = (
-                    torch.einsum("nij,nj->ni", Rb, src_nml_orig)
-                    if src_nml_orig is not None
-                    else None
-                )
-                tgt_corr_nml = tgt_nml[corr] if tgt_nml is not None else None
-                L_i = _compute_local_metric(
-                    tgt[corr],
-                    tgt_corr_nml,
-                    metric_type="plane_to_plane",
-                    alpha=alpha,
-                    beta=beta,
-                    source_normals=src_nml_trans,
-                )
-                tgt_corr = tgt[corr]
-                diff = pts_trans - tgt_corr
-                res2 = torch.einsum("ni,nij,nj->n", diff, L_i, diff)
-
-            elif metric_type == "local_covariance":
-                Rb = X_total[:, :3, :3]
-                rotcov = torch.bmm(Rb, torch.bmm(cov_src, Rb.transpose(1, 2)))
-                cov_sum = rotcov + cov_tgt[corr]
-                L_i = torch.linalg.inv(cov_sum)
-                tgt_corr = tgt[corr]
-                diff = pts_trans - tgt_corr
-                res2 = torch.einsum("ni,nij,nj->n", diff, L_i, diff)
-
-            residuals = torch.sqrt(res2)
-            weights = _robust_loss_weights(residuals, robust_loss, **kwargs)
-            wm = weights.mean()
-            logger.debug("mean robust weight = %.2e", wm)
-            weights /= torch.clamp(wm, min=1e-12)
-            if torch.isnan(weights).any():
-                msg = "NaN detected in robust weights"
-                raise RuntimeError(msg)
-
-            logger.debug(
-                "weights min/max = %.2e/%.2e", weights.min(), weights.max()
-            )
-
-            source_linear = pts_trans.detach()
-
-            X_delta = _solve(
-                source_linear,
-                tgt,
-                weights,
-                corr,
-                L_mats=L_i,
-                edges=edges,
-                alpha_stiffness=alpha_stiffness,
-                gamma=gamma,
-                rows_data=rows_data,
-                cols_data=cols_data,
-                stiffness_rows=stiffness_rows,
-                stiffness_cols=stiffness_cols,
-                stiffness_vals=stiffness_vals,
-                device=device,
-                residuals=diff,
-                metric_type=metric_type,
-            )
-
-            R_lin = X_delta[:, :, :3]
-            U, S, Vt = torch.linalg.svd(R_lin)
-
-            det = torch.linalg.det(U @ Vt)
-            U_fix = U.clone()
-            U_fix[det < 0, :, -1] *= -1
-            R_proj = U_fix @ Vt
-
-            X_delta[:, :, :3] = R_proj
-
-            X_d_h = torch.zeros(n, 4, 4, device=device)
-            X_d_h[:, :3, :4] = X_delta
-            X_d_h[:, 3, 3] = 1.0
-            X_total_prev = X_total.clone()
-
-            X_total = torch.bmm(X_d_h, X_total)
-
-            dets = torch.linalg.det(X_total[:, :3, :3])
-            logger.debug("dets min/max = %.4f/%.4f", dets.min(), dets.max())
-
-            Rb_new = X_total[:, :3, :3]
-            Rb_old = X_total_prev[:, :3, :3]
-            tb_new = X_total[:, :3, 3]
-            tb_old = X_total_prev[:, :3, 3]
-
-            dt = tb_new - tb_old
-            trans_deltas = torch.norm(dt, dim=1)
-            trans_delta = torch.max(trans_deltas)
-
-            R_rel = torch.matmul(Rb_new, Rb_old.transpose(1, 2))
-            traces = R_rel.diagonal(offset=0, dim1=1, dim2=2).sum(dim=1)
-            eps = 1e-7
-            angles = torch.acos(
-                torch.clamp((traces - 1) / 2, -1 + eps, 1 - eps)
-            )
-            angle = torch.max(angles)
-
-            prev_cost = cost
-
-            cost = (weights * res2).sum()
-            delta_X = torch.norm((X_total - X_total_prev).view(-1))
-            rel_par = delta_X / (torch.norm(X_total_prev.view(-1)) + 1e-12)
-
-            rel_cost = torch.abs(prev_cost - cost) / (prev_cost + 1e-12)
-
-            prev_cost = cost
-            costs.append(cost.item())
-
-            param_tol = kwargs.get("param_tol", 5e-4)
-            cost_tol = kwargs.get("cost_tol", 1e-3)
-
-            if (
-                trans_delta < trans_tol
-                and angle < angle_tol
-                and rel_par < param_tol
-                and rel_cost < cost_tol
-            ):
-                converged = True
-                break
-
-    v_h = torch.cat([src_orig, torch.ones(n, 1, device=device)], 1)
-    final_pts_trans = torch.einsum("nij,nj->ni", X_total, v_h)[:, :3]
-
-    transformed_mesh = source_shape.copy() if HAS_PYVISTA else None
-    if HAS_PYVISTA:
-        transformed_mesh.points = final_pts_trans.cpu().numpy()
-
-    info = {
-        "final_cost": prev_cost,
-        "costs": costs,
-        "converged": converged,
-        "last_trans_delta": trans_delta,
-        "last_rot_angle": angle,
-    }
-
-    final_corr = closest_point_coupling(
-        final_pts_trans,
-        tree,
-        device=device,
-    )
-
-    return X_total, info, final_pts_trans, transformed_mesh, final_corr
+    return model.X_total, info, final_pts_trans, transformed_shape, final_corr
