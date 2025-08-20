@@ -902,7 +902,7 @@ class RigidDeformation:
         max_iterations: int = 50,
         tolerance: float = 1e-4,
         scale: bool = True,
-        optimization_method: str = "gauss_newton",
+        coupling: ClosestPointCoupling | None = None,
         R0: torch.Tensor | None = None,
         t0: torch.Tensor | None = None,
         s0: float | None = None,
@@ -915,7 +915,7 @@ class RigidDeformation:
         self.max_iterations = max_iterations
         self.tolerance = tolerance
         self.scale = scale
-        self.optimization_method = optimization_method
+        self.coupling = coupling
         self.R0 = R0
         self.t0 = t0
         self.s0 = s0
@@ -1203,6 +1203,78 @@ class RigidDeformation:
 
         return transformed_shape
 
+    def fit(self):
+        prev_cost = float("inf")
+        costs = []
+        converged = False
+        trans_tol = self.kwargs.get("trans_tol", 1e-2)
+        angle_tol = self.kwargs.get("angle_tol", 1e-2)
+
+        for _ in range(1, self.max_iterations + 1):
+            t = self.t
+            R = self.R
+            if self.scale:
+                s_global = self.s_global
+            else:
+                s_global = torch.tensor(1.0, device=self.src.device)
+
+            # find correspondences in Euclidean space
+            pts_trans = s_global * self.src @ R.T + t
+
+            self.coupling.fit(source=pts_trans)
+
+            self.optimization_step(self.coupling)
+
+            # convergence test
+            cost = (self.weights * self.res2).sum()
+            trans_delta = torch.norm(self.t - t)
+            R_rel = self.R @ R.T
+            angle = torch.acos(
+                torch.clamp((torch.trace(R_rel) - 1) / 2, -1 + 1e-7, 1 - 1e-7)
+            )
+            cost_delta = abs(prev_cost - cost.item())
+            s_delta = abs(self.s_global - s_global)
+
+            prev_cost = cost.item()
+            costs.append(prev_cost)
+
+            if (
+                trans_delta < trans_tol
+                and angle < angle_tol
+                and cost_delta < self.tolerance
+                and s_delta < self.kwargs.get("scale_tol", 1e-4)
+            ):
+                converged = True
+                break
+
+        info = {
+            "final_cost": prev_cost,
+            "costs": costs,
+            "converged": converged,
+            "last_trans_delta": trans_delta,
+            "last_rot_angle": angle,
+            "last_cost_delta": cost_delta,
+        }
+
+        if not self.scale:
+            return (
+                self.R,
+                self.t,
+                info,
+                self.R_init,
+                self.t_init,
+            )
+        else:
+            return (
+                self.R,
+                self.t,
+                self.s_global,
+                info,
+                self.R_init,
+                self.t_init,
+                self.s_init,
+            )
+
 
 def rigid_icp(
     source_shape: torch.Tensor | Any,
@@ -1216,7 +1288,6 @@ def rigid_icp(
     max_iterations: int = 50,
     tolerance: float = 1e-4,
     scale: bool = True,
-    optimization_method: str = "gauss_newton",
     device: torch.device | None = None,
     **kwargs,
 ) -> (
@@ -1243,6 +1314,12 @@ def rigid_icp(
     Rigid ICP
     """
 
+    tgt_pts, _ = _extract_points_and_normals(target_shape)
+
+    # build KD-tree once
+    coupling = ClosestPointCoupling(device=device)
+    coupling.initialize(target=tgt_pts, leaf_size=kwargs.get("leaf_size", 40))
+
     model = RigidDeformation(
         initialization=initialization,
         robust_loss=robust_loss,
@@ -1250,93 +1327,45 @@ def rigid_icp(
         max_iterations=max_iterations,
         tolerance=tolerance,
         scale=scale,
-        optimization_method=optimization_method,
+        coupling=coupling,
         R0=R0,
         t0=t0,
         s0=s0,
         device=device,
         **kwargs,
     )
+
     model.initialize(source_shape, target_shape)
 
-    # build KD-tree once
-    coupling = ClosestPointCoupling(device=device)
-    coupling.initialize(
-        target=model.tgt, leaf_size=kwargs.get("leaf_size", 40)
-    )
-
-    prev_cost = float("inf")
-    costs = []
-    converged = False
-    trans_tol = kwargs.get("trans_tol", 1e-2)
-    angle_tol = kwargs.get("angle_tol", 1e-2)
-
-    for _ in range(1, max_iterations + 1):
-        t = model.t
-        R = model.R
-        if scale:
-            s_global = model.s_global
-        else:
-            s_global = torch.tensor(1.0, device=model.src.device)
-
-        # find correspondences in Euclidean space
-        pts_trans = s_global * model.src @ R.T + t
-
-        coupling.fit(source=pts_trans)
-
-        model.optimization_step(coupling)
-
-        # convergence test
-        cost = (model.weights * model.res2).sum()
-        trans_delta = torch.norm(model.t - t)
-        R_rel = model.R @ R.T
-        angle = torch.acos(
-            torch.clamp((torch.trace(R_rel) - 1) / 2, -1 + 1e-7, 1 - 1e-7)
-        )
-        cost_delta = abs(prev_cost - cost.item())
-        s_delta = abs(model.s_global - s_global)
-
-        prev_cost = cost.item()
-        costs.append(prev_cost)
-
-        if (
-            trans_delta < trans_tol
-            and angle < angle_tol
-            and cost_delta < tolerance
-            and s_delta < kwargs.get("scale_tol", 1e-4)
-        ):
-            converged = True
-            break
-
-    info = {
-        "final_cost": prev_cost,
-        "costs": costs,
-        "converged": converged,
-        "last_trans_delta": trans_delta,
-        "last_rot_angle": angle,
-        "last_cost_delta": cost_delta,
-    }
-
-    # Transform the source shape
+    result = model.fit()
     transformed_shape = model.transform()
 
-    if not scale:
-        return (
-            model.R,
-            model.t,
+    if scale:
+        (
+            R,
+            t,
+            s_global,
             info,
-            model.R_init,
-            model.t_init,
+            R_init,
+            t_init,
+            s_init,
+        ) = result
+        return (
+            R,
+            t,
+            s_global,
+            info,
+            R_init,
+            t_init,
+            s_init,
             transformed_shape,
         )
     else:
-        return (
-            model.R,
-            model.t,
-            model.s_global,
+        (
+            R,
+            t,
             info,
-            model.R_init,
-            model.t_init,
-            model.s_init,
-            transformed_shape,
-        )
+            R_init,
+            t_init,
+        ) = result
+        return (R, t, info, R_init, t_init, transformed_shape)
