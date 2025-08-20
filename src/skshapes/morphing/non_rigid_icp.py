@@ -2,11 +2,12 @@ import logging
 from typing import Any
 
 import numpy as np
+import pyamg
 import pyvista as pv
 import scipy.sparse as sp
 import torch
+from scipy.sparse.linalg import cg, splu
 from sklearn.neighbors import KDTree
-from sksparse.cholmod import cholesky
 
 torch.set_default_dtype(torch.float32)
 logger = logging.getLogger(__name__)
@@ -375,17 +376,22 @@ class NonRigidDeformation:
         i = torch.arange(self.N, device=self.device)  # torch (N,)
         r = torch.arange(3, device=self.device)  # torch (3,)
         k = torch.arange(4, device=self.device)  # torch (4,)
-        Idx, R, K = torch.meshgrid(i, r, k, indexing="ij")
+        IndicesTensor, R, K = torch.meshgrid(i, r, k, indexing="ij")
 
-        self._I = Idx
+        self._I = IndicesTensor
         self._K = K
 
         # precompute the numpy motif of M
         self._M_rows_np = (
-            (3 * Idx + R).reshape(-1).detach().cpu().numpy().astype(np.int64)
+            (3 * IndicesTensor + R)
+            .reshape(-1)
+            .detach()
+            .cpu()
+            .numpy()
+            .astype(np.int64)
         )  # numpy (12N,)
         self._M_cols_np = (
-            (12 * Idx + 4 * R + K)
+            (12 * IndicesTensor + 4 * R + K)
             .reshape(-1)
             .detach()
             .cpu()
@@ -615,6 +621,8 @@ class NonRigidDeformation:
         mask = self._corr_mask(corr, max_angle_deg=60.0)
         weights = weights * mask.float()
 
+        # print("Weights max:", weights.max().item())
+
         cost = 0.5 * torch.sum(weights * res2)
 
         # fill M and L with the actual values
@@ -688,8 +696,17 @@ class NonRigidDeformation:
             A = (A + M_land_s.T @ M_land_s).tocsc()
             b = b + M_land_s.T @ r_land_s
 
-        self._chol = cholesky(A, ordering_method="amd")
-        delta_flat = self._chol(b)
+        # self._chol = cholesky(A, ordering_method='amd')
+        # delta_flat = self._chol(b)
+
+        A_csr = A.tocsr()
+        ml = pyamg.smoothed_aggregation_solver(
+            A_csr, symmetry="symmetric", max_levels=10, max_coarse=500
+        )
+        M = ml.aspreconditioner(cycle="V")
+        delta_flat, info = cg(A_csr, b, M=M, rtol=1e-8, atol=0.0, maxiter=200)
+        if info != 0:  # fallback
+            delta_flat = splu(A, permc_spec="COLAMD").solve(b)
 
         e = M_s @ delta_flat - r
         e_w = w_rep_np * e
