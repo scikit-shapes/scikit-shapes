@@ -21,6 +21,7 @@ dependencies = [
     "vedo",
     "fast-simplification",
     "fast-edges-extraction",
+    "scikit-learn",
     "pyamg",
 ]
 
