@@ -21,6 +21,7 @@ dependencies = [
     "vedo",
     "fast-simplification",
     "fast-edges-extraction",
+    "pyamg",
 ]
 
 # Optional dependencies: see https://github.com/scikit-shapes/scikit-shapes/pull/55

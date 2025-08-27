@@ -4,4 +4,4 @@ hypothesis
 pre-commit
 pytest
 pytest-cov
-pytest-sphinx
+pytest-sphinx @ git+https://github.com/jeanfeydy/pytest-sphinx.git
