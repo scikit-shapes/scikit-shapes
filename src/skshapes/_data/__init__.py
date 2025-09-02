@@ -10,6 +10,7 @@ from ..input_validation import typecheck
 from ..types import polydata_type
 from .data_attributes import DataAttributes
 from .image import Image
+from .mask import Mask
 from .polydata import PolyData
 
 Shape = PolyData | Image

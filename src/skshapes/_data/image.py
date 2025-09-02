@@ -1,10 +1,11 @@
 """Image shape class."""
+
 from __future__ import annotations
 
 import torch
 
 from ..input_validation import convert_inputs, typecheck
-from ..types import NumericalTensor, image_type, JaxInt
+from ..types import JaxInt, NumericalTensor, image_type
 
 
 class Image(image_type):
@@ -20,7 +21,6 @@ class Image(image_type):
         ``(X_1,...,X_D)``. For vector/matricial images (with multidimensional values at each pixel), the tensor should
         be of shape ``(X_1,...,X_D,V_1,...,V_K)`` such that ``values[x1,...,xD]`` gives the value of the image at voxel
         ``(x1,...,xD)``. In this case, the dimension of the image should be provided.
-        Alternatively, an :class:`Image` can be directly provided.
 
     dim
         The dimension of the image. It should be only provided when ``image`` is multivalued and values is a torch
@@ -87,33 +87,29 @@ class Image(image_type):
     @convert_inputs
     @typecheck
     def __init__(
-            self,
-            values: torch.Tensor | Image,
-            *,
-            dim: int | None = None,
-            dtype: torch.dtype | None = None,
-            device: str | torch.device | None = None
+        self,
+        values: torch.Tensor,
+        *,
+        dim: int | None = None,
+        dtype: torch.dtype | None = None,
+        device: str | torch.device | None = None,
     ):
         # Internally, the image values are stored in a flatten tensor. This make the dimension management easier, while
         # optimizing indices-related operations.
 
-        if isinstance(values, Image):
-            self._full_shape = values.full_shape
-            self._dim = values.dim
-
-            self._flat_values = values._flat_values
+        if dim is None:
+            self._full_shape = tuple(values.shape)
+            self._dim = len(values.shape)
         else:
-            if dim is None:
-                self._full_shape = tuple(values.shape)
-                self._dim = len(values.shape)
-            else:
-                self._full_shape = values.shape
-                self._dim = dim
+            self._full_shape = values.shape
+            self._dim = dim
 
-            self._flat_values = values.flatten(start_dim=0, end_dim=self._dim - 1)
+        self._flat_values = values.flatten(start_dim=0, end_dim=self._dim - 1)
 
-        if dtype is None: dtype = values.dtype
-        if device is None: device = values.device
+        if dtype is None:
+            dtype = values.dtype
+        if device is None:
+            device = values.device
 
         self._flat_values = self._flat_values.to(dtype=dtype, device=device)
 
@@ -123,12 +119,12 @@ class Image(image_type):
     @property
     @typecheck
     def shape(self) -> tuple[int, ...]:
-        return self._full_shape[:self.dim]
+        return self._full_shape[: self.dim]
 
     @property
     @typecheck
     def values_shape(self) -> tuple[int, ...]:
-        return self._full_shape[self.dim:]
+        return self._full_shape[self.dim :]
 
     @property
     @typecheck
@@ -144,6 +140,15 @@ class Image(image_type):
     @typecheck
     def values_dim(self) -> int:
         return len(self.full_shape) - self.dim
+
+    @property
+    @typecheck
+    def numel(self) -> int:
+        numel = 1
+        for d in range(self.dim):
+            numel *= self.shape[d]
+
+        return numel
 
     @property
     @typecheck
@@ -204,10 +209,12 @@ class Image(image_type):
 
         self._flat_values = self._flat_values.to(device=device)
 
-    #################################
-    #### Mathematical operations ####
-    #################################
-    def _apply_op(self, op: str, other: Image | torch.Tensor | JaxInt | None = None) -> Image:
+    ##########################
+    #### Image operations ####
+    ##########################
+    def _apply_op(
+        self, op: str, other: Image | torch.Tensor | JaxInt | None = None
+    ) -> Image:
         """
         Apply a generic tensor operation to the image.
 
@@ -228,45 +235,33 @@ class Image(image_type):
 
         if other is None:
             new_values = getattr(self.values, op)()
+        elif isinstance(other, Image):
+            new_values = getattr(self.values, op)(other.values)
         else:
-            if isinstance(other, Image):
-                new_values = getattr(self.values, op)(other.values)
-            else:
-                new_values = getattr(self.values, op)(other)
+            new_values = getattr(self.values, op)(other)
 
         return Image(values=new_values, dim=self.dim)
 
     def __add__(self, other) -> Image:
-        return self._apply_op('__add__', other)
+        return self._apply_op("__add__", other)
 
     def __gt__(self, other) -> Image:
-        return self._apply_op('__gt__', other)
-
-    def __iadd__(self, other) -> Image:
-        return self._apply_op('__iadd__', other)
-
-    def __imul__(self, other) -> Image:
-        return self._apply_op('__imul__', other)
-
-    def __isub__(self, other) -> Image:
-        return self._apply_op('__isub__', other)
+        return self._apply_op("__gt__", other)
 
     def __lt__(self, other) -> Image:
-        return self._apply_op('__lt__', other)
+        return self._apply_op("__lt__", other)
 
     def __mul__(self, other) -> Image:
-        return self._apply_op('__mul__', other)
+        return self._apply_op("__mul__", other)
 
     def __neg__(self) -> Image:
-        return self._apply_op('__neg__')
+        return self._apply_op("__neg__")
 
     def __ne__(self, other) -> Image:
-        return self._apply_op('__ne__', other)
+        return self._apply_op("__ne__", other)
 
     def __sub__(self, other) -> Image:
-        return self._apply_op('__sub__', other)
-
-
+        return self._apply_op("__sub__", other)
 
     def unique(self) -> torch.Tensor:
         """Return the unique values pf the image.
@@ -292,6 +287,8 @@ class Image(image_type):
             return str(dtype).split(".")[-1].split("'")[0]
 
         repr_str = f"skshapes.{self.__class__.__name__} (0x{id(self):x} on {self.device}, {suffix(self.dtype)}), a {self.dim}D image."
-        repr_str += f"- Image shape: {self.shape}, Values shape: {self.values_shape}"
+        repr_str += (
+            f"- Image shape: {self.shape}, Values shape: {self.values_shape}"
+        )
 
         return repr_str

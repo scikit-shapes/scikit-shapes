@@ -1,6 +1,6 @@
 """Scikit-Shapes: shape analysis in python."""
 
-from ._data import Circle, PolyData, Sphere, Image
+from ._data import Circle, Image, Mask, PolyData, Sphere
 from .applications import *
 from .convolutions import *
 from .doc import *
@@ -24,6 +24,7 @@ __version__ = "0.3.1"
 __all__ = [
     "PolyData",
     "Image",
+    "Mask",
     "Sphere",
     "Circle",
     "types",
