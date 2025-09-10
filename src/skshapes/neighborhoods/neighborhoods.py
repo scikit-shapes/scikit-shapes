@@ -1,467 +1,318 @@
-from dataclasses import dataclass
-from functools import reduce
-from operator import mul
-from typing import Literal
+from functools import partial
 
-import numpy as np
-import scipy
-import scipy.sparse
-import torch
+from pydantic import BaseModel
 
-from ..input_validation import convert_inputs, typecheck
+from ..input_validation import typecheck
+from ..linear_operators import InverseParameters, LinearOperator
 from ..types import (
-    Eigenvalues,
-    Number,
-    PointAnySignals,
-    PointEigenvectors,
-    PointMasses,
-    PointSymmetricTensors,
-    PointVectorSignals,
-    neighborhoods_type,
-    torch_to_np_dtypes,
+    Callable,
+    Function,
+    Literal,
+    Measure,
 )
-
-
-def symmetric_function_to_linear_operator(
-    *, function, n_points, dtype, device
-):
-    def wrapped_f(x):
-        x_torch = torch.tensor(x, dtype=dtype, device=device)
-        return function(x_torch).detach().cpu().numpy()
-
-    return scipy.sparse.linalg.LinearOperator(
-        shape=(n_points, n_points),
-        matvec=wrapped_f,
-        matmat=wrapped_f,
-        rmatvec=wrapped_f,
-        rmatmat=wrapped_f,
-        dtype=torch_to_np_dtypes[dtype],
-    )
+from .spectrum import Spectrum
 
 
 @typecheck
-@dataclass
-class Spectrum:
-    eigenvectors: PointEigenvectors
-    laplacian_eigenvalues: Eigenvalues
-    smoothing_eigenvalues: Eigenvalues
+class DiffusionParameters(BaseModel):
+    method: Literal["exponential", "implicit euler", "truncated"] = (
+        "implicit euler"
+    )
 
 
-class Neighborhoods(neighborhoods_type):
+class Neighborhoods:
+    r"""High-level abstraction for neighborhood structures on discrete domains.
+
+    This is the common interface for all computations that deal with **pairwise interactions**
+    and distances between points: Gaussian convolutions, Laplacians, etc.
+
+    We use the following notations:
+
+    - $X = (x_1, \dots, x_N)$ is a **discrete domain** sampled with $N$ points.
+    - $F$ is the dimension of the **feature vectors** associated to each point:
+      $F=1$ for scalar functions, $F=3$ for 3D vector fields, etc.
+    - $\mathcal{F} : X \rightarrow \mathbb{R}^F$ is the space of **functions** defined on
+      the domain $X$
+      with values of dimension $F$. We identify functions $f$ in $\mathcal{F}$
+      with collections of values $(f(x_1), \dots, f(x_N))$ in $\mathbb{R}^{N\times F}$.
+    - $\mathcal{F}^\star$ is the space of linear functionals on $\mathcal{F}$.
+      It should be understood as a space of **measures** on $X$
+      but in the discrete setting, we also identify $\mathcal{F}^\star$ with $\mathbb{R}^{N\times F}$.
+
+    .. warning::
+
+        Making a **clear distinction** between $\mathcal{F}$ and $\mathcal{F}^\star$
+        is important to avoid confusion between functions and measures, which play
+        different roles in shape analysis. However, in practice,
+        both **functions** $f$ in $\mathcal{F}$ and **measures** $\alpha$ in $\mathcal{F}^\star$
+        are encoded as $N$-by-$F$ arrays and the duality bracket
+        is implemented as a dot product:
+
+        .. math::
+
+            \alpha(f)
+            ~=~ \langle \alpha, f \rangle
+            ~=~ \langle f, \alpha \rangle
+            ~=~ \text{trace}(\alpha^\top f)
+            ~=~ \sum_{i=1}^N \alpha(x_i) \cdot f(x_i)~.
+
+    A **neighborhood structure** on the domain $X$ provides a collection of **linear operators**
+    that we use to manipulate functions defined on the domain.
+    The main operators are:
+
+    - The **mass** matrix :math:`M : \mathcal{F} \rightarrow \mathcal{F}^\star`.
+    - The **metric** :math:`G : \mathcal{F} \rightarrow \mathcal{F}^\star`.
+    - The **cometric** :math:`K = G^{-1}: \mathcal{F}^\star \rightarrow \mathcal{F}`.
+
+    Under the hood, these three operators are encoded as
+    **symmetric** $(NF)$-by-$(NF)$ matrices
+    or equivalent data structures that enable efficient matrix-vector products:
+
+    .. math::
+
+        M^\top = M~,~~ G^\top = G~~\text{and}~~ K^\top = K~.
+
+    They are also **positive semi-definite**. For all function $f$ in $\mathcal{F}$
+    and measure $\alpha$ in $\mathcal{F}^\star$:
+
+    .. math::
+
+        \langle f, Mf \rangle \geqslant 0~,~
+        \langle f, Gf \rangle \geqslant 0~\text{and}~
+        \langle \alpha, K\alpha \rangle \geqslant 0~.
+
+    Intuitively, the **mass matrix** $M$ encodes the volume associated to each point of the domain
+    and allows us to define the squared Euclidean norm of functions $f$ in $\mathcal{F}$ as:
+
+    .. math::
+
+        \|f\|^2_M ~=~ \langle f, Mf \rangle~.
+
+    The dot product between two functions $f$ and $g$ in $\mathcal{F}$ is then defined as:
+
+    .. math::
+
+        \langle f, g \rangle_M ~=~ \langle f, Mg \rangle~.
+
+    Meanwhile, the **metric** $G$ encodes the geometry of the domain via a
+    norm that should penalize large gradients:
+
+    .. math::
+
+        \|f\|^2_G ~=~ \langle f, Gf \rangle~.
+
+    A common choice is to use a Sobolev-type metric induced by a differential operator $\nabla$:
+
+    .. math::
+
+        \|f\|^2_G ~=~ \|f\|^2_M + \lambda \|\nabla f\|^2_M~,
+
+    but other formulas are possible. Finally, the **cometric** $K$ is simply the inverse of the metric $G$.
+
+    .. note::
+
+        Some classical algorithms define the metric $G$ as a sparse graph Laplacian
+        while others put the emphasis on the cometric $K$ encoded as a Gaussian kernel matrix.
+        Instances of :class:`Neighborhoods` provide both operators
+        and handle the choice of efficient linear algebra solvers internally.
+
+    Using the mass $M$, metric $G$ and cometric $K$, we can derive
+    two linear operators that act on functions $f$ in $\mathcal{F}$:
+
+    - The **Laplace-Beltrami** operator :math:`\Delta = M^{-1}G : \mathcal{F} \rightarrow \mathcal{F}`
+      is a high-pass filter.
+    - The **smoothing** operator :math:`S = \Delta^{-1} = KM : \mathcal{F} \rightarrow \mathcal{F}`
+      is a low-pass filter that corresponds to the resolution of
+      `Poisson's equation <https://en.wikipedia.org/wiki/Poisson%27s_equation>`__.
+
+    Finally, we also consider a **diffusion** operator :math:`Q : \mathcal{F} \rightarrow \mathcal{F}`.
+    It is often defined as:
+
+    - :math:`Q = \exp(-\Delta)`, for genuine heat diffusion.
+    - :math:`Q = (I + \Delta)^{-1}` for implicit Euler integration of the heat equation.
+
+    The Laplacian $\Delta$, smoothing $S$ and diffusion $Q$ are all symmmetric with respect to the mass matrix $M$.
+    This means that for all functions $f$ and $g$ in $\mathcal{F}$, we have:
+
+    .. math::
+
+        \langle \Delta f, g \rangle_M = \langle f, \Delta g \rangle_M~,~~
+        \langle Sf, g \rangle_M = \langle f, Sg \rangle_M~\text{ and }~
+        \langle Qf, g \rangle_M = \langle f, Qg \rangle_M~.
+
+    In matrix form, this translates to:
+
+    .. math::
+
+        \Delta^\top M = M \Delta~,~~ S^\top M = MS~\text{ and }~ Q^\top M = MQ~.
+
+
+    """
+
     @typecheck
     def __init__(
         self,
-        masses: PointMasses,
-        scale: Number | None = None,
-        n_normalization_iterations: int | None = None,
-        smoothing_method: Literal[
-            "auto", "exact", "exp(x)=1/(1-x)", "nystroem"
-        ] = "auto",
-        laplacian_method: Literal["auto", "exact", "log(x)=x-1"] = "auto",
+        *,
+        mass: LinearOperator[Function, Measure],
+        metric: LinearOperator[Function, Measure],
+        cometric: LinearOperator[Measure, Function],
+        diffusion: LinearOperator[Function, Function],
+        spectrum: Callable[[int], Spectrum],
     ):
-        self.masses = masses
-        self.n_points = self.masses.shape[0]
-        self.device = self.masses.device
-        self.dtype = self.masses.dtype
-        self.scale = scale
-        self.n_normalization_iterations = n_normalization_iterations
-        self.smoothing_method = smoothing_method
-        self.laplacian_method = laplacian_method
+        self._mass = mass
+        self._metric = metric
+        self._cometric = cometric
+        self._diffusion = diffusion
+        self._spectrum = spectrum
 
-    def _compute_scaling(self):
-        if self.n_normalization_iterations is None:
-            if hasattr(self, "_laplacian"):
-                self.n_normalization_iterations = 0
-            else:
-                self.n_normalization_iterations = 10
+    @staticmethod
+    def from_metric(
+        *,
+        mass: LinearOperator[Function, Measure],
+        metric: LinearOperator[Function, Measure],
+        cometric: InverseParameters,
+        diffusion: DiffusionParameters,
+    ):
 
-        assert self.masses.shape == (self.n_points,)
-        self.scaling = torch.ones_like(self.masses).view(-1, 1)
+        cometric_op = metric.inverse(**cometric)
 
-        # _smooth_without_scaling expects and returns signals with shape (n_points, 1)
-        for _ in range(self.n_normalization_iterations):
-            denom = self._smooth_without_scaling(
-                self.scaling * self.masses.view(-1, 1)
-            )
-            self.scaling = (self.scaling / denom).sqrt()
-
-        self.scaling = self.scaling.view(-1)
-        assert self.scaling.shape == (self.n_points,)
-
-        # self.smooth_1 should be close to a vector of ones
-        self.smooth_1 = self.smooth(
-            torch.ones_like(self.masses),
-            input_type="function",
-            output_type="function",
+        return Neighborhoods(
+            mass=mass,
+            metric=metric,
+            cometric=cometric_op,
+            diffusion=metric.diffusion(**diffusion),
+            spectrum=partial(
+                Spectrum.from_metric,
+                mass=mass,
+                metric=metric,
+                diffusion_method=diffusion.method,
+            ),
         )
-        assert self.smooth_1.shape == (self.n_points,)
 
+    @staticmethod
+    def from_cometric(
+        *,
+        mass: LinearOperator[Function, Measure],
+        metric: InverseParameters,
+        cometric: LinearOperator[Function, Measure],
+        diffusion: DiffusionParameters,
+    ):
+
+        return Neighborhoods(
+            mass=mass,
+            metric=cometric.inverse(**cometric),
+            cometric=cometric,
+            diffusion=metric.diffusion(**diffusion),
+            spectrum=partial(
+                Spectrum.from_cometric,
+                mass=mass,
+                cometric=cometric,
+                diffusion_method=diffusion.method,
+            ),
+        )
+
+    @property
     @typecheck
-    def spectrum(
-        self, n_modes: int, check_tolerance: Number = 1e-4
-    ) -> Spectrum:
-        # Wrap self.smooth as a SciPy LinearOperator
-        def smooth_function_to_measure(f):
-            return self.smooth(f, input_type="function", output_type="measure")
+    def mass(self) -> LinearOperator[Function, Measure]:
+        r"""mass(self)
+        The mass matrix :math:`M : \mathcal{F} \rightarrow \mathcal{F}^\star`.
 
-        smooth_operator = symmetric_function_to_linear_operator(
-            function=smooth_function_to_measure,
-            n_points=self.n_points,
-            dtype=self.dtype,
-            device=self.device,
-        )
-        # Compute the largest n_modes eigenmodes with mass matrix diag(masses):
-        eigenvalues, eigenvectors = scipy.sparse.linalg.eigsh(
-            smooth_operator,
-            k=n_modes,
-            which="LM",
-            M=scipy.sparse.diags(self.masses.detach().cpu().numpy()),
-            Minv=scipy.sparse.diags(1 / self.masses.detach().cpu().numpy()),
-        )
-        # Sort the eigenvalues and eigenvectors in ascending order
-        eigenvalues = np.ascontiguousarray(eigenvalues[::-1])
-        eigenvectors = np.ascontiguousarray(eigenvectors[:, ::-1])
+        It corresponds to a symmetric matrix, i.e. $M^\top = M$.
+        """
+        return self._mass
 
-        # Wrap eigenvalues and coordinates are torch tensors
-        eigenvalues = torch.tensor(
-            eigenvalues, dtype=self.dtype, device=self.device
-        )
-        eigenvectors = torch.tensor(
-            eigenvectors, dtype=self.dtype, device=self.device
-        )
-
-        assert eigenvalues.shape == (n_modes,)
-        assert eigenvectors.shape == (self.n_points, n_modes)
-
-        # Make sure that the eigenvalues of smooth are all in [0, 1]
-        assert (eigenvalues >= -check_tolerance).all(), eigenvalues
-        assert (eigenvalues <= 1 + check_tolerance).all(), eigenvalues
-
-        eigenvalues = eigenvalues.clamp(min=0, max=1)
-
-        # Compute the Laplacian eigenvalues.
-        # Note that we follow "mathematical" conventions, where the Laplacian
-        # eigenvalues are negative as in "-omega^2".
-        if self.laplacian_method in ["auto", "log(x)=x-1"]:
-            laplacian_eigenvalues = eigenvalues - 1
-        elif self.laplacian_method == "exact":
-            laplacian_eigenvalues = eigenvalues.log()
-        else:
-            msg = f"Unsupported laplacian method: {self.laplacian_method}"
-            raise NotImplementedError(msg)
-
-        assert laplacian_eigenvalues.shape == (n_modes,)
-        assert (
-            laplacian_eigenvalues <= check_tolerance
-        ).all(), laplacian_eigenvalues
-
-        return Spectrum(
-            eigenvectors=eigenvectors,
-            laplacian_eigenvalues=laplacian_eigenvalues,
-            smoothing_eigenvalues=eigenvalues,
-        )
-
-    @convert_inputs
+    @property
     @typecheck
-    def smooth(
-        self,
-        signal: PointAnySignals,
-        input_type: Literal["function", "measure"] = "function",
-        output_type: Literal["function", "measure"] = "function",
-    ) -> PointAnySignals:
-        if signal.shape[0] != self.n_points:
-            msg = f"Expected signal to have shape ({self.n_points}, *), but got {signal.shape}."
-            raise ValueError(msg)
+    def metric(self) -> LinearOperator[Function, Measure]:
+        r"""The metric :math:`G : \mathcal{F} \rightarrow \mathcal{F}^\star`.
 
-        signal_shape = signal.shape
-        signal = signal.to(self.device).view(self.n_points, -1)
+        It corresponds to a symmetric matrix, i.e. $G^\top = G$.
+        """
+        return self._metric
 
-        smooth_signal = self._smooth(
-            signal, input_type=input_type, output_type=output_type
-        )
-
-        smooth_signal = smooth_signal.view(signal_shape)
-        assert smooth_signal.shape == signal_shape
-        assert smooth_signal.device == signal.device
-        assert smooth_signal.dtype == signal.dtype
-
-        return smooth_signal
-
-    @convert_inputs
+    @property
     @typecheck
-    def smooth_symmetric(
-        self,
-        signal: PointSymmetricTensors,
-        input_type: Literal["function", "measure"] = "function",
-        output_type: Literal["function", "measure"] = "function",
-        skew_symmetric_channels: list[bool] | None = None,
-    ) -> PointSymmetricTensors:
-        """Faster implementation of :meth:`smooth` for smoothing a field of symmetric tensors.
+    def cometric(self) -> LinearOperator[Measure, Function]:
+        r"""The cometric :math:`K = G^{-1} : \mathcal{F}^\star \rightarrow \mathcal{F}`.
 
-        Parameters
-        ----------
+        It corresponds to a symmetric matrix, i.e. $K^\top = K$.
+        """
+        return self._cometric
 
-        signal
-            The signal to smooth. The shape of the tensor should be
-            ``(n_points, dim, dim, *)``, where ``dim`` is the dimension of the symmetric tensors
-            between 1 and 3, and ``*`` refers to an arbitrary number of channel dimensions.
-            This method assumes that for each pair of indices ``(i, j)``,
-            ``signal[:, i, j] == signal[:, j, i]``.
-        input_type
-            How to interpret the input signal. If \"function\", the signal is
-            understood as sampled values of a continuous function that is defined on
-            the shape. If \"measure\", the signal is understood as a distribution of mass
-            that should *not* be rescaled by the masses or densities of the points.
-        output_type
-            How to interpret the output signal.
-        skew_symmetric_channels
-            A list of booleans indicating whether each channel of the input signal is
-            skew-symmetric. If None, all channels are assumed to be symmetric.
-            If ``signal`` is a ``(n_points, D, D, C)`` tensor and ``skew_symmetric_channels``
-            is a list of booleans of length ``C``, then for every index ``c`` such that
-            ``skew_symmetric_channels[c] == True``, we expect that
-            ``signal[:, i, j, c] == -signal[:, j, i, c]`` for all pairs of indices ``(i, j)``.
+    @property
+    @typecheck
+    def diffusion(self) -> LinearOperator[Function, Function]:
+        r"""The diffusion operator :math:`Q : \mathcal{F} \rightarrow \mathcal{F}`.
 
-        Examples
-        --------
+        It is symmetric with respect to the mass matrix $M$, i.e. $Q^\top M = M Q$.
+        It is often defined as:
 
-        .. testcode::
-
-            import skshapes as sks
-
-            # Create three points in the plane R^2
-            shape = sks.PolyData([[0, 0], [1, 0], [2, 0]])
-            # Create a (n_points, 2, 2) collection of symmetric (2, 2) matrices
-            s = [
-                [[0, 2], [2, 2]],
-                [[3, 0], [0, 1]],
-                [[0, 0], [0, 5]],
-            ]
-            # Default smoothing of the 4 channels per point:
-            smooth_ref = shape.point_neighborhoods(scale=0.5).smooth(s)
-            # Faster smoothing that relies on the symmetry of the matrices:
-            smooth_sym = shape.point_neighborhoods(scale=0.5).smooth_symmetric(s)
-
-            print(smooth_sym.shape, smooth_sym.dtype)
-            print((smooth_ref == smooth_sym).all())
-
-        .. testoutput::
-
-            ...torch.Size([3, 2, 2]) torch.float32
-            tensor(True)
-
-        .. testcode::
-
-            import torch
-
-            # Generate a simple 3D shape
-            shape = sks.PolyData(torch.randn(10, 3))
-
-            # smooth_symmetric also works with trailing "channel" dimensions
-            s = torch.randn(10 * 3 * 3 * 5).view(10, 3, 3, 5)
-            # We just make sure that s is symmetric with respect to dims 1 and 2
-            s = 0.5 * (s + s.permute(0, 2, 1, 3))
-
-            # Default smoothing of the 3*3*5 channels per point:
-            smooth_ref = shape.point_neighborhoods(scale=0.2).smooth(s)
-            # Faster smoothing that relies on the symmetry of the matrices:
-            smooth_sym = shape.point_neighborhoods(scale=0.2).smooth_symmetric(s)
-
-            print(smooth_sym.shape, smooth_sym.dtype)
-            print((smooth_ref == smooth_sym).all())
-
-        .. testoutput::
-
-            ...torch.Size([10, 3, 3, 5]) torch.float32
-            tensor(True)
+        - :math:`Q = \exp(-\Delta)`, for genuine heat diffusion.
+        - :math:`Q = (I + \Delta)^{-1}` for implicit Euler integration of the heat equation.
 
         """
-        N = self.n_points
-        D = signal.shape[1]
-        T = (D * (D + 1)) // 2
-        trailing_dims = signal.shape[3:]
-        # The number of channels is the product of the trailing dimensions
-        C = reduce(mul, trailing_dims, 1)  # = 1 if trailing_dims is empty
+        return self._diffusion
 
-        if signal.shape[0] != self.n_points:
-            msg = f"Expected signal to have shape ({self.n_points}, ...), but got {signal.shape}."
-            raise ValueError(msg)
-
-        # @typecheck should handle ValueErrors for the assertion below
-        assert signal.shape == (N, D, D, *trailing_dims)
-
-        # For the sake of simplicity, reshape signal as a (N, D, D, C) tensor
-        input_shape = signal.shape  # Save this for the final assertion
-        signal = signal.view(N, D, D, C)
-
-        if skew_symmetric_channels is None:
-            skew_symmetric_channels = [False] * C
-
-        symmetric_channels = [not skew for skew in skew_symmetric_channels]
-
-        transpose_dims = [0, 2, 1, 3]
-        sym_signal = signal.permute(transpose_dims)
-        if not (
-            sym_signal[..., symmetric_channels]
-            == signal[..., symmetric_channels]
-        ).all():
-            msg = 'The input channels are not symmetric. Please consider using the "smooth()" method instead of "smooth_symmetric()".'
-            raise ValueError(msg)
-
-        if not (
-            sym_signal[..., skew_symmetric_channels]
-            == -signal[..., skew_symmetric_channels]
-        ).all():
-            msg = "The input channels are not skew-symmetric."
-            raise ValueError(msg)
-
-        if D == 1:
-            tri_upper_mask = torch.tensor([[True]])
-            sym_from_tri = torch.tensor([0])
-        elif D == 2:
-            tri_upper_mask = torch.tensor([[True, True], [False, True]])
-            # [0, 1]
-            # [1, 2]
-            sym_from_tri = torch.tensor([0, 1, 1, 2])
-        elif D == 3:
-            tri_upper_mask = torch.tensor(
-                [[True, True, True], [False, True, True], [False, False, True]]
-            )
-            # [0, 1, 2]
-            # [1, 3, 4]
-            # [2, 4, 5]
-            sym_from_tri = torch.tensor([0, 1, 2, 1, 3, 4, 2, 4, 5])
-        else:
-            msg = "Symmetric smoothing is not implemented beyond shape (3, 3)"
-            raise NotImplementedError(msg)
-
-        tri_upper_mask = tri_upper_mask.to(self.device)
-        sym_from_tri = sym_from_tri.to(self.device)
-        tri_lower_mask = ~tri_upper_mask
-
-        signal = signal.to(self.device)
-        signal = signal[:, tri_upper_mask, :]
-        assert signal.shape == (N, T, C)
-
-        smooth_signal = self.smooth(
-            signal, input_type=input_type, output_type=output_type
-        )
-        assert smooth_signal.shape == (N, T, C)
-
-        smooth_signal = smooth_signal[:, sym_from_tri].view(N, D, D, C)
-
-        # Apply a -1 factor to the skew-symmetric channels in the lower triangle.
-        # NB: *= -1 is a in-place, non-differentiable operation so we use "-1 *" instead.
-        if any(skew_symmetric_channels):
-            smooth_signal[..., tri_lower_mask, skew_symmetric_channels] = (
-                -smooth_signal[..., tri_lower_mask, skew_symmetric_channels]
-            )
-
-        # Check the (skew-)symmetry of the output
-        sym_signal = smooth_signal.permute(transpose_dims)
-        assert (
-            sym_signal[..., symmetric_channels]
-            == smooth_signal[..., symmetric_channels]
-        ).all()
-        assert (
-            sym_signal[..., skew_symmetric_channels]
-            == -smooth_signal[..., skew_symmetric_channels]
-        ).all()
-
-        smooth_signal = smooth_signal.view(N, D, D, *trailing_dims)
-        assert smooth_signal.device == signal.device
-        assert smooth_signal.dtype == signal.dtype
-        assert smooth_signal.shape == input_shape
-
-        return smooth_signal
-
-    def _smooth(
-        self,
-        signal: PointVectorSignals,
-        input_type: Literal["function", "measure"],
-        output_type: Literal["function", "measure"],
-    ) -> PointVectorSignals:
-        assert signal.shape[0] == self.n_points
-        assert signal.ndim == 2
-        assert self.scaling.shape == (self.n_points,)
-        assert self.masses.shape == (self.n_points,)
-
-        if input_type == "measure":
-            scaled_signal = self.scaling.view(-1, 1) * signal
-        elif input_type == "function":
-            scaled_signal = (self.scaling * self.masses).view(-1, 1) * signal
-
-        smooth_signal = self._smooth_without_scaling(scaled_signal)
-
-        if output_type == "measure":
-            smooth_signal = (self.scaling * self.masses).view(
-                -1, 1
-            ) * smooth_signal
-        elif output_type == "function":
-            smooth_signal = (self.scaling).view(-1, 1) * smooth_signal
-
-        assert smooth_signal.shape == signal.shape
-        assert smooth_signal.device == signal.device
-        assert smooth_signal.dtype == signal.dtype
-
-        return smooth_signal
-
-    def _smooth_without_scaling(
-        self, signal: PointVectorSignals
-    ) -> PointVectorSignals:
-        if self.smoothing_method in ["exp(x)=1/(1-x)"]:
-            # Implements a step of implicit Euler integration for the heat equation.
-            # This corresponds to applying a linear operator with the same
-            # eigenvectors as the Laplacian, but with eigenvalues lambda_i <= 0
-            # replaced by 1/(1 - lambda_i) (~= exp(lambda_i) for negative lambda_i).
-            msg = f"{signal.shape}"
-            raise NotImplementedError(msg)
-            # TODO: something like this, but with fast factorization for sparse
-            # laplacians
-            # smooth_signal = self._identity_minus_smooth_operator.solve(signal)
-
-        msg = f"Unsupported smoothing method: {self.smoothing_method}."
-        raise NotImplementedError(msg)
-
-    @convert_inputs
+    @property
     @typecheck
-    def laplacian(
-        self,
-        signal: PointAnySignals,
-        input_type: Literal["function", "measure"] = "function",
-        output_type: Literal["function", "measure"] = "function",
-    ) -> PointAnySignals:
-        if signal.shape[0] != self.n_points:
-            msg = f"Expected signal to have shape ({self.n_points}, *), but got {signal.shape}."
-            raise ValueError(msg)
+    def smoothing(self) -> LinearOperator[Function, Function]:
+        r"""The smoothing operator :math:`S = KM : \mathcal{F} \rightarrow \mathcal{F}`.
 
-        signal_shape = signal.shape
-        signal = signal.to(self.device).view(self.n_points, -1)
+        It is symmetric with respect to the mass matrix $M$, i.e. $S^\top M = M S$.
+        """
+        return self.cometric @ self.mass
 
-        if hasattr(self, "_laplacian"):
-            laplacian_signal = self._laplacian(signal)
-        elif self.laplacian_method in ["auto", "log(x)=x-1"]:
-            smooth_signal = self.smooth(
-                signal,
-                input_type=input_type,
-                output_type=output_type,
-            )
-            if input_type == output_type:
-                identity_signal = signal
-            elif input_type == "function" and output_type == "measure":
-                identity_signal = signal * self.masses.view(-1, 1)
-            elif input_type == "measure" and output_type == "function":
-                identity_signal = signal / self.masses.view(-1, 1)
-            else:
-                msg = f"Unsupported input -> output types: {input_type} -> {output_type}"
-                raise NotImplementedError(msg)
-            laplacian_signal = smooth_signal - identity_signal
-        else:
-            msg = f"Unsupported laplacian method: {self.laplacian_method}"
-            raise NotImplementedError(msg)
+    @property
+    @typecheck
+    def laplacian(self) -> LinearOperator[Function, Function]:
+        r"""The Laplace-Beltrami operator :math:`\Delta = M^{-1}G : \mathcal{F} \rightarrow \mathcal{F}`.
 
-        laplacian_signal = laplacian_signal.view(signal_shape)
-        assert laplacian_signal.shape == signal.shape
-        assert laplacian_signal.device == signal.device
-        assert laplacian_signal.dtype == signal.dtype
-        return laplacian_signal
+        It is symmetric with respect to the mass matrix $M$, i.e. $\Delta^\top M = M \Delta$.
+        """
+        # Currently, we only support (block-)diagonal mass matrices,
+        # whose inverses are easy to compute.
+        return self.mass.inverse() @ self.metric
+
+    @typecheck
+    def spectrum(self, n_components: int) -> Spectrum:
+        r"""The first :math:`R` eigenvectors and eigenvalues of the underlying operators.
+
+        We return a :class:`Spectrum<skshapes.neighborhoods.Spectrum>` object that contains a
+        collection of $R$ functions $\phi_1, \dots, \phi_R$
+        encoded as a $(N, R)$ Tensor $\Phi$.
+        This family is orthonormal for the dot product induced by the mass matrix $M$, so that:
+
+        .. math::
+
+            \Phi^\top M \Phi = I_R~.
+
+        The output also contains vectors of eigenvalues .
+
+        The vector of :attr:`laplacian_eigenvalues` $\Lambda^\Delta$
+        corresponds to the Laplacian $\Delta = M^{-1}G$
+        implemented by :attr:`laplacian`:
+
+        .. math::
+
+            \Delta \simeq \Phi \text{diag}(\Lambda^\Delta) \Phi~.
+
+        The vector of :attr:`smoothing_eigenvalues` $\Lambda^K$
+        corresponds to the smoothing operator $S = K M$
+        implemented by :attr:`smoothing`:
+
+        .. math::
+
+            K \simeq \Phi \text{diag}(\Lambda^K) \Phi~.
+
+
+        The vector of :attr:`diffusion_eigenvalues` $\Lambda^Q$
+        corresponds to the diffusion operator $Q \simeq \exp(-\Delta)$
+        implemented by :attr:`diffusion`:
+
+        .. math::
+
+            Q \simeq \Phi \text{diag}(\Lambda^Qs) \Phi~.
+
+
+        """
+        return self._spectrum(n_components=n_components)

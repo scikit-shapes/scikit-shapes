@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import importlib.metadata
 import os
 import sys
@@ -78,7 +76,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx_math_dollar",
-    "sphinx_autodoc_typehints",
+    #"sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "myplot_directive"
@@ -136,6 +134,8 @@ if True:
     # Apply some custom CSS to the RTD theme
     html_static_path = ["_static"]
     html_css_files = ["custom.css"]
+
+    autodoc_docstring_signature = True
 else:
     # I could not make this work. One day, maybe?
     html_theme = "sphinx_immaterial"
@@ -175,6 +175,14 @@ else:
         python_apigen_case_insensitive_filesystem = False
         python_apigen_show_base_classes = True
 
+if False:
+    autodoc_type_aliases = {
+        "Function": "Function",
+        "TypeAliasForwardRef('Function')": "Function",
+        "LinearOperator[TypeAliasForwardRef('Measure'), TypeAliasForwardRef('Function')]": "AA",
+        "LinearOperator[Measure, Function]": "BB",
+        "Measure": "Measure",
+    }
 
 myst_enable_extensions = [
     "colon_fence",

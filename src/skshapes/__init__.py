@@ -11,9 +11,11 @@ from .globals import (
     taichi_available,
 )
 from .input_validation import *
+from .linear_operators import *
 from .loss import *
 from .morphing import *
 from .multiscaling import *
+from .neighborhoods import *
 from .optimization import *
 from .tasks import *
 from .triangle_mesh import *
@@ -32,6 +34,8 @@ __all__ = [
     "triangle_mesh",
     "loss",
     "morphing",
+    "linear_operators",
+    "neighborhoods",
     "optimization",
     "multiscaling",
     "tasks",

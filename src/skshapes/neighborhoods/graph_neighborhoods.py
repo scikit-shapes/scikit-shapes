@@ -1,6 +1,6 @@
-from .neighborhoods import Neighborhoods
+from .old_neighborhoods import OldNeighborhoods
 
 
-class GraphNeighborhoods(Neighborhoods):
+class GraphNeighborhoods(OldNeighborhoods):
     def __init__(self, *, graph):
         pass
