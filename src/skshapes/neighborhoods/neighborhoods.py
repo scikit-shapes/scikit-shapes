@@ -279,40 +279,71 @@ class Neighborhoods:
 
         We return a :class:`Spectrum<skshapes.neighborhoods.Spectrum>` object that contains a
         collection of $R$ functions $\phi_1, \dots, \phi_R$
-        encoded as a $(N, R)$ Tensor $\Phi$.
-        This family is orthonormal for the dot product induced by the mass matrix $M$, so that:
+        encoded as a $(R, N, F)$ Tensor that we understand below
+        as a $R$-by-$NF$ matrix $\Phi = [\phi_1| \cdots | \phi_R]$,
+        where $N$ is the number of sampling points on the domain $X$
+        and $F$ is the dimension of the feature vectors handled by this
+        :class:`Neighborhoods` structure.
+        This family is orthonormal for the dot product induced by the symmetric mass matrix $M$, so that:
 
         .. math::
 
             \Phi^\top M \Phi = I_R~.
 
-        The output also contains vectors of eigenvalues .
+        The output also contains vectors of eigenvalues that correspond to
+        the functional operators $\Delta, S, Q : \mathcal{F} \rightarrow \mathcal{F}$.
 
-        The vector of :attr:`laplacian_eigenvalues` $\Lambda^\Delta$
+        The vector of :attr:`laplacian_eigenvalues` $\Lambda^\Delta = (\lambda^\Delta_1, \dots, \lambda^\Delta_R)$
         corresponds to the Laplacian $\Delta = M^{-1}G$
         implemented by :attr:`laplacian`:
 
         .. math::
 
-            \Delta \simeq \Phi \text{diag}(\Lambda^\Delta) \Phi~.
+            \Delta \phi_i = \lambda^\Delta_i \phi_i
 
-        The vector of :attr:`smoothing_eigenvalues` $\Lambda^K$
+        so that:
+
+        .. math::
+
+            \Delta \simeq  \Phi \, \text{diag}(\Lambda^\Delta) \,\Phi^\top M~.
+
+        Likewise, the vector of :attr:`smoothing_eigenvalues`
+        $\Lambda^S = (\lambda^S_1, \dots, \lambda^S_R)$
         corresponds to the smoothing operator $S = K M$
         implemented by :attr:`smoothing`:
 
         .. math::
 
-            K \simeq \Phi \text{diag}(\Lambda^K) \Phi~.
+            S \phi_i = \lambda^S_i \phi_i
+
+        so that:
+
+        .. math::
+
+            S \simeq \Phi \,\text{diag}(\Lambda^S) \,\Phi^\top M~.
 
 
-        The vector of :attr:`diffusion_eigenvalues` $\Lambda^Q$
-        corresponds to the diffusion operator $Q \simeq \exp(-\Delta)$
+        The vector of :attr:`diffusion_eigenvalues`
+        $\Lambda^Q = (\lambda^Q_1, \dots, \lambda^Q_R)$
+        corresponds to the diffusion operator $Q$
         implemented by :attr:`diffusion`:
 
         .. math::
 
-            Q \simeq \Phi \text{diag}(\Lambda^Qs) \Phi~.
+            Q \phi_i = \lambda^Q_i \phi_i
 
+        so that:
+
+        .. math::
+
+            Q \simeq \Phi \,\text{diag}(\Lambda^Q) \,\Phi^\top M~.
+
+        We typically have:
+
+        .. math::
+
+            \lambda^S_i = 1 / \lambda^\Delta_i~\text{ and }~ \lambda^Q_i = \exp(-\lambda^\Delta_i)~,
+            ~\text{ or }~ \lambda^Q_i = 1 / (1 + \lambda^\Delta_i)~.
 
         """
         return self._spectrum(n_components=n_components)
