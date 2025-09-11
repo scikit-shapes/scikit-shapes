@@ -434,14 +434,10 @@ class PolyData(polydata_type):
         "triangle_points",
     )
 
-    from .._neighborhoods import _point_neighborhoods
-    from ..cache import cache_clear
-    from ..convolutions import _mesh_convolution, _point_convolution
-
     # ----------------------------------------------------------------------------
     # End of the Python magic. Thanks StackOverflow and AnthonyExplains!
     # ----------------------------------------------------------------------------
-    from ..features import (
+    from .._features import (
         _edge_lengths,
         _edge_midpoints,
         _edge_points,
@@ -462,6 +458,9 @@ class PolyData(polydata_type):
         _triangle_normals,
         _triangle_points,
     )
+    from .._neighborhoods import _point_neighborhoods
+    from ..cache import cache_clear
+    from ..convolutions import _mesh_convolution, _point_convolution
     from ..topology import _k_ring_graph, _knn_graph
 
     @typecheck
