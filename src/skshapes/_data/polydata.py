@@ -49,7 +49,6 @@ class PolyData(polydata_type):
     - A `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
     - A `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
 
-
     .. warning::
 
         Internally, points are stored as **float32 torch Tensors** while indices for
@@ -69,7 +68,6 @@ class PolyData(polydata_type):
         (the output type of our methods should not surprise downstream functions)
         and support for both GPU computing and automatic differentiation
         (which are not supported by NumPy).
-
 
 
     Main features:
@@ -436,6 +434,7 @@ class PolyData(polydata_type):
         "triangle_points",
     )
 
+    from .._neighborhoods import _point_neighborhoods
     from ..cache import cache_clear
     from ..convolutions import _mesh_convolution, _point_convolution
 
@@ -463,7 +462,6 @@ class PolyData(polydata_type):
         _triangle_normals,
         _triangle_points,
     )
-    from ..neighborhoods import _point_neighborhoods
     from ..topology import _k_ring_graph, _knn_graph
 
     @typecheck

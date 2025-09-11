@@ -3,7 +3,7 @@ from functools import partial
 from pydantic import BaseModel
 
 from ..input_validation import typecheck
-from ..linear_operators import InverseParameters, LinearOperator
+from ..linear_operators import LinearOperator
 from ..types import (
     Callable,
     Function,
@@ -13,11 +13,8 @@ from ..types import (
 from .spectrum import Spectrum
 
 
-@typecheck
 class DiffusionParameters(BaseModel):
-    method: Literal["exponential", "implicit euler", "truncated"] = (
-        "implicit euler"
-    )
+    method: Literal["implicit euler", "exponential", "spectral"]
 
 
 class Neighborhoods:
@@ -129,7 +126,8 @@ class Neighborhoods:
     It is often defined as:
 
     - :math:`Q = \exp(-\Delta)`, for genuine heat diffusion.
-    - :math:`Q = (I + \Delta)^{-1}` for implicit Euler integration of the heat equation.
+    - :math:`Q = (I + \Delta)^{-1}` for implicit Euler integration of the heat equation,
+      where $I$ is the identity operator on $\mathcal{F}$.
 
     The Laplacian $\Delta$, smoothing $S$ and diffusion $Q$ are all symmmetric with respect to the mass matrix $M$.
     This means that for all functions $f$ and $g$ in $\mathcal{F}$, we have:
@@ -146,6 +144,30 @@ class Neighborhoods:
 
         \Delta^\top M = M \Delta~,~~ S^\top M = MS~\text{ and }~ Q^\top M = MQ~.
 
+    Parameters
+    ----------
+    mass
+        The mass matrix :math:`M : \mathcal{F} \rightarrow \mathcal{F}^\star`.
+        It should correspond to a symmetric matrix, i.e. $M^\top = M$.
+    metric
+        The metric :math:`G : \mathcal{F} \rightarrow \mathcal{F}^\star`.
+        It should correspond to a symmetric matrix, i.e. $G^\top = G$.
+    cometric
+        The cometric :math:`K = G^{-1} : \mathcal{F}^\star \rightarrow \mathcal{F}`.
+        It should correspond to a symmetric matrix, i.e. $K^\top = K$.
+    diffusion
+        The diffusion operator :math:`Q : \mathcal{F} \rightarrow \mathcal{F}`.
+        It should be symmetric with respect to the mass matrix $M$, i.e. $Q^\top M = M Q$.
+        It is often defined as:
+
+        - :math:`Q = \exp(-\Delta)`, for genuine heat diffusion.
+        - :math:`Q = (I + \Delta)^{-1}` for implicit Euler integration of the heat equation.
+
+    spectrum
+        A callable that takes an integer `n_modes` as input
+        and returns a :class:`Spectrum<skshapes.Spectrum>` object
+        that contains the first `n_modes` eigenvectors and eigenvalues
+        of the Laplacian, smoothing and diffusion operators.
 
     """
 
@@ -170,22 +192,52 @@ class Neighborhoods:
         *,
         mass: LinearOperator[Function, Measure],
         metric: LinearOperator[Function, Measure],
-        cometric: InverseParameters,
-        diffusion: DiffusionParameters,
+        diffusion_method: Literal["implicit euler", "exponential"],
     ):
+        r"""Alternate constructor of :class:`Neighborhoods` from a mass :math:`M` and metric :math:`G`.
 
-        cometric_op = metric.inverse(**cometric)
+        Parameters
+        ----------
+        mass
+            The mass matrix :math:`M : \mathcal{F} \rightarrow \mathcal{F}^\star`.
+            It should correspond to a symmetric matrix, i.e. $M^\top = M$.
+        metric
+            The metric :math:`G : \mathcal{F} \rightarrow \mathcal{F}^\star`.
+            It should correspond to a symmetric matrix, i.e. $G^\top = G$.
+        diffusion_method
+            The method used to define the diffusion operator :math:`Q`:
+
+            - ``"implicit euler"`` to define :math:`Q = (I + \Delta)^{-1} = (M + G)^{-1} M`.
+            - ``"exponential"`` to define :math:`Q = \exp(-\Delta) = \exp(-M^{-1}G)`.
+
+        """
+        M = mass
+        G = metric
+        K = G.inverse()
+
+        if diffusion_method == "implicit euler":
+            # Use the identity
+            # Q = (I + Delta)^(-1)
+            #   = (I + M^(-1) G)^(-1)
+            #   = (M + G)^(-1) M
+            # M + G is symmetric positive semi-definite, so this is easy to solve.
+            Q = (M + G).inverse() @ M
+
+        elif diffusion_method == "exponential":
+            # Use a routine such as scipy.sparse.linalg.expm_multiply,
+            # depending on the sparsity of M and G.
+            Q = (-M.inverse() @ G).matrix_exp()
 
         return Neighborhoods(
-            mass=mass,
-            metric=metric,
-            cometric=cometric_op,
-            diffusion=metric.diffusion(**diffusion),
+            mass=M,
+            metric=G,
+            cometric=K,
+            diffusion=Q,
             spectrum=partial(
                 Spectrum.from_metric,
-                mass=mass,
-                metric=metric,
-                diffusion_method=diffusion.method,
+                mass=M,
+                metric=G,
+                diffusion_method=diffusion_method,
             ),
         )
 
@@ -193,21 +245,56 @@ class Neighborhoods:
     def from_cometric(
         *,
         mass: LinearOperator[Function, Measure],
-        metric: InverseParameters,
         cometric: LinearOperator[Function, Measure],
-        diffusion: DiffusionParameters,
+        diffusion_method: Literal["implicit euler", "exponential"],
     ):
+        r"""Alternate constructor of :class:`Neighborhoods` from a mass :math:`M` and cometric :math:`K`.
+
+        Parameters
+        ----------
+        mass
+            The mass matrix :math:`M : \mathcal{F} \rightarrow \mathcal{F}^\star`.
+            It should correspond to a symmetric matrix, i.e. $M^\top = M$.
+        cometric
+            The cometric :math:`K : \mathcal{F}^\star \rightarrow \mathcal{F}`.
+            It should correspond to a symmetric matrix, i.e. $K^\top = K$.
+        diffusion_method
+            The method used to define the diffusion operator :math:`Q`:
+
+            - ``"implicit euler"`` to define :math:`Q = (I + \Delta)^{-1} = K (M^{-1} + K)^{-1}`.
+            - ``"exponential"`` to define :math:`Q = \exp(-\Delta) = \exp(-M^{-1}K^{-1})`.
+
+        """
+
+        M = mass
+        K = cometric
+        G = K.inverse()
+
+        if diffusion_method == "implicit euler":
+            # Use the identity
+            # Q = (I + Delta)^(-1)
+            #   = (I + M^(-1) K^(-1))^(-1)
+            #   = K (M^(-1) + K)^(-1)
+            # M^(-1) + K is symmetric positive semi-definite, so this is easy to solve.
+            Q = K @ (M.inverse() + K).inverse()
+
+        elif diffusion_method == "exponential":
+            # Use a routine such as scipy.sparse.linalg.expm_multiply,
+            # depending on the sparsity of M and G.
+            # Unlike what we have for implicit euler, there is no simple
+            # expression of Q in terms of K and M.
+            Q = (-M.inverse() @ G).matrix_exp()
 
         return Neighborhoods(
-            mass=mass,
-            metric=cometric.inverse(**cometric),
-            cometric=cometric,
-            diffusion=metric.diffusion(**diffusion),
+            mass=M,
+            metric=G,
+            cometric=K,
+            diffusion=Q,
             spectrum=partial(
                 Spectrum.from_cometric,
-                mass=mass,
-                cometric=cometric,
-                diffusion_method=diffusion.method,
+                mass=M,
+                cometric=K,
+                diffusion_method=diffusion_method,
             ),
         )
 
@@ -274,10 +361,10 @@ class Neighborhoods:
         return self.mass.inverse() @ self.metric
 
     @typecheck
-    def spectrum(self, n_components: int) -> Spectrum:
+    def spectrum(self, n_modes: int) -> Spectrum:
         r"""The first :math:`R` eigenvectors and eigenvalues of the underlying operators.
 
-        We return a :class:`Spectrum<skshapes.neighborhoods.Spectrum>` object that contains a
+        We return a :class:`Spectrum<skshapes.Spectrum>` object that contains a
         collection of $R$ functions $\phi_1, \dots, \phi_R$
         encoded as a $(R, N, F)$ Tensor that we understand below
         as a $R$-by-$NF$ matrix $\Phi = [\phi_1| \cdots | \phi_R]$,
@@ -314,12 +401,7 @@ class Neighborhoods:
 
         .. math::
 
-            S \phi_i = \lambda^S_i \phi_i
-
-        so that:
-
-        .. math::
-
+            S \phi_i = \lambda^S_i \phi_i~\text{ so that }~
             S \simeq \Phi \,\text{diag}(\Lambda^S) \,\Phi^\top M~.
 
 
@@ -345,5 +427,17 @@ class Neighborhoods:
             \lambda^S_i = 1 / \lambda^\Delta_i~\text{ and }~ \lambda^Q_i = \exp(-\lambda^\Delta_i)~,
             ~\text{ or }~ \lambda^Q_i = 1 / (1 + \lambda^\Delta_i)~.
 
+
+        Parameters
+        ----------
+        n_modes
+            The number of eigenmodes $R$ to compute.
+
+        Returns
+        -------
+        Spectrum
+            A :class:`Spectrum<skshapes.Spectrum>` object, as described above.
+
+
         """
-        return self._spectrum(n_components=n_components)
+        return self._spectrum(n_modes=n_modes)

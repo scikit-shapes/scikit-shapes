@@ -37,7 +37,7 @@ The complete parameter vector is
    We require that the rigid transformations are proper, i.e. $\det R_k = +1$, in order to keep orientation consistency and physical plausibility.
 
 Total deformation
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~
 If $X\sim A$ and $X_\theta\sim{}A_\theta$ denote the **vectors of features** of length F
 that represent the source and deformed shapes, and if $X^{(k)}\sim A_k$ and
 $X_\theta^{(k)}\sim{}A_k^\theta$ denote the vectors of features of the source and deformed $k^{th}$ sub-part,
@@ -54,7 +54,7 @@ The induced deformation for the whole shape is then
    X_\theta =\bigcup_{k=1}^{K}\bigl(R_k\,X^{(k)} + t_k\bigr).
 
 What happens at the intersection of two pieces?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 We've seen that the deformation of each piece is a rigid transformation.
 If the pieces are disjoint, the deformation is well defined. This is the usual setting, where each vertex belongs to a single piece.
 But if the pieces overlap, we need to define how to handle the deformation of the overlapping region.
@@ -78,7 +78,7 @@ when there are more than two overlapping pieces.
 
 
 Regularization
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 Unlike pure rigid deformations, piece-wise rigid deformations often require a regularization term to avoid
 overfitting and guarantee that the deformation is plausible in the context of the application.
 

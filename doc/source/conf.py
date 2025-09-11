@@ -136,6 +136,8 @@ if True:
     html_css_files = ["custom.css"]
 
     autodoc_docstring_signature = True
+    autodoc_typehints = "both"
+    autodoc_typehints_format = "short"
 else:
     # I could not make this work. One day, maybe?
     html_theme = "sphinx_immaterial"
@@ -175,13 +177,16 @@ else:
         python_apigen_case_insensitive_filesystem = False
         python_apigen_show_base_classes = True
 
-if False:
+if True:
     autodoc_type_aliases = {
-        "Function": "Function",
-        "TypeAliasForwardRef('Function')": "Function",
-        "LinearOperator[TypeAliasForwardRef('Measure'), TypeAliasForwardRef('Function')]": "AA",
-        "LinearOperator[Measure, Function]": "BB",
-        "Measure": "Measure",
+        "Function": "AA",
+        "TypeAliasForwardRef('Function')": "BB",
+        "LinearOperator[TypeAliasForwardRef('Measure'), TypeAliasForwardRef('Function')]": "CC",
+        "LinearOperator[Measure, Function]": "DD",
+        "Measure": "EE",
+        "Points": "FF",
+        "Points2d": "GG",
+        "Points3d": "HH",
     }
 
 myst_enable_extensions = [

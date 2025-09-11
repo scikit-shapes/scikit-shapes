@@ -101,6 +101,7 @@ Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 Points2d = JaxFloat[torch.Tensor, "_ 2"]
 Points3d = JaxFloat[torch.Tensor, "_ 3"]
 
+
 PointMasses = JaxFloat[torch.Tensor, "n_points"]
 PointDensities = JaxFloat[torch.Tensor, "n_points"]
 PointVectorSignals = JaxFloat[torch.Tensor, "n_points n_features"]
@@ -122,8 +123,8 @@ PointDisplacements = JaxFloat[torch.Tensor, "n_points dim"]
 PointCovariances = JaxFloat[torch.Tensor, "n_points dim dim"]
 PointSymmetricTensors = JaxFloat[torch.Tensor, "n_points dim dim *features"]
 
-PointEigenvectors = JaxFloat[torch.Tensor, "n_components n_points n_features"]
-Eigenvalues = JaxFloat[torch.Tensor, "n_components"]
+PointEigenvectors = JaxFloat[torch.Tensor, "n_modes n_points n_features"]
+Eigenvalues = JaxFloat[torch.Tensor, "n_modes"]
 
 EdgeLengths = JaxFloat[torch.Tensor, "n_edges"]
 EdgeMidpoints = JaxFloat[torch.Tensor, "n_edges dim"]
