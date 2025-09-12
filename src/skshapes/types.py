@@ -140,6 +140,15 @@ PointsSequence = PointsSequence2D | PointsSequence3D
 Edges = JaxInt[torch.Tensor, "_ 2"]
 Triangles = JaxInt[torch.Tensor, "_ 3"]
 
+# Alias for lists of lists, numpy arrays and tensors that will get converted
+# to Float32 or Int64 tensors by @convert_inputs, but get a more concise
+# documentation in conf.py, via the autodoc_type_aliases variable.
+PointsLike = Points
+EdgesLike = Edges
+TrianglesLike = Triangles
+PointDensitiesLike = PointDensities
+LandmarksSequence = IntSequence
+
 # Jaxtyping does not provide annotation for sparse tensors
 # Then we use the torch.Tensor type and checks are made at runtime
 # with assert statements

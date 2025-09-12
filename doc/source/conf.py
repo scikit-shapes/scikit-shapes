@@ -140,6 +140,8 @@ if True:
     autodoc_typehints_format = "short"
     always_use_bars_union = True
     typehints_defaults = "comma"
+    autodoc_typehints_description_target="documented"
+    typehints_document_rtype=False
 else:
     # I could not make this work. One day, maybe?
     html_theme = "sphinx_immaterial"
@@ -181,10 +183,20 @@ else:
 
 if True:
     autodoc_type_aliases = {
-        "Signal": "``(n_points, 3)`` float tensor",
-        "Points": "``(n_points, 2)`` or ``(n_points, 3)`` array-like",
-        "Points2d": "``(n_points, 2)`` float tensor",
-        "Points3d": "``(n_points, 3)`` float tensor",
+        # Types used in e.g. PolyData
+        "Points2d": "``(n_points, 2)`` float32 tensor",
+        "Points3d": "``(n_points, 3)`` float32 tensor",
+        "Points": "``(n_points, 2)`` or ``(n_points, 3)`` float32 tensor",
+        "PointsLike": "``(n_points, 2)`` or ``(n_points, 3)`` array-like",
+        "PointDensitiesLike": "``(n_points,)`` array-like",
+        "Edges": "``(n_edges, 2)`` int64 tensor",
+        "EdgesLike": "``(n_edges, 2)`` integer array-like",
+        "Triangles": "``(n_triangles, 3)`` int64 tensor",
+        "TrianglesLike": "``(n_triangles, 3)`` integer array-like",
+        "Landmarks": "``(n_landmarks, n_points)`` sparse float32 tensor",
+        "LandmarksSequence": "``(n_landmarks,)`` integer array-like",
+        # Types used in LinearOperator
+        "Signal": "``(n_points, n_features)`` float32 tensor",
     }
 
 myst_enable_extensions = [
