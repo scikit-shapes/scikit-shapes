@@ -21,6 +21,8 @@ dependencies = [
     "vedo",
     "fast-simplification",
     "fast-edges-extraction",
+    "scikit-learn",
+    "pyamg",
 ]
 
 # Optional dependencies: see https://github.com/scikit-shapes/scikit-shapes/pull/55
@@ -57,7 +59,8 @@ xfail_strict = true
 # for dtails about filterwarnings configuration
 filterwarnings = [
   "error",
-  "ignore:'locale.getdefaultlocale' is deprecated*:DeprecationWarning"
+  "ignore:'locale.getdefaultlocale' is deprecated*:DeprecationWarning",
+  "ignore:support for supplying keyword arguments to pathlib.PurePath is deprecated*:DeprecationWarning"
 ]
 
 

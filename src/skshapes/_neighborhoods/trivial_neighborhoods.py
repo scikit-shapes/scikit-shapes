@@ -3,10 +3,10 @@ from ..types import (
     PointMasses,
     PointVectorSignals,
 )
-from .neighborhoods import Neighborhoods
+from .old_neighborhoods import OldNeighborhoods
 
 
-class TrivialNeighborhoods(Neighborhoods):
+class TrivialNeighborhoods(OldNeighborhoods):
     def __init__(self, masses: PointMasses):
         super().__init__(
             masses=masses,

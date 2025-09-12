@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import importlib.metadata
 import os
 import sys
@@ -10,6 +8,9 @@ from sphinx_gallery.sorting import ExplicitOrder
 
 # Allow to import local modules
 sys.path.insert(0, str(Path().resolve()))
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.resolve()))
+sys.path.insert(0, str(Path(__file__).parent / "_ext"))
 # conf_module is where we define dynamic_scraper and reset_pyvista
 # pyvista configuration
 # See: https://github.com/pyvista/pyvista/blob/main/doc/source/conf.py
@@ -78,6 +79,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
+    "myplot_directive"
 ]
 
 
@@ -110,7 +112,18 @@ exclude_patterns = [
     ".venv",
 ]
 
-
+mathjax3_config = {
+    "tex": {
+        "macros": {
+            "RR": '{\\bf R}',
+            "bold": ['{\\bf #1}',1],
+            "t": [r"{#1}^{\mathsf{T}}", 1],
+            "T": r"\mkern-3mu",
+            "target": [r"\widehat{#1}", 1],
+            },
+        "tags": 'ams',
+        }
+    }
 
 if True:
     html_theme = "sphinx_rtd_theme"
@@ -121,6 +134,14 @@ if True:
     # Apply some custom CSS to the RTD theme
     html_static_path = ["_static"]
     html_css_files = ["custom.css"]
+
+    autodoc_docstring_signature = True
+    autodoc_typehints = "both"
+    autodoc_typehints_format = "short"
+    always_use_bars_union = True
+    typehints_defaults = "comma"
+    autodoc_typehints_description_target="documented"
+    typehints_document_rtype=False
 else:
     # I could not make this work. One day, maybe?
     html_theme = "sphinx_immaterial"
@@ -160,6 +181,23 @@ else:
         python_apigen_case_insensitive_filesystem = False
         python_apigen_show_base_classes = True
 
+if True:
+    autodoc_type_aliases = {
+        # Types used in e.g. PolyData
+        "Points2d": "``(n_points, 2)`` float32 tensor",
+        "Points3d": "``(n_points, 3)`` float32 tensor",
+        "Points": "``(n_points, 2)`` or ``(n_points, 3)`` float32 tensor",
+        "PointsLike": "``(n_points, 2)`` or ``(n_points, 3)`` array-like",
+        "PointDensitiesLike": "``(n_points,)`` array-like",
+        "Edges": "``(n_edges, 2)`` int64 tensor",
+        "EdgesLike": "``(n_edges, 2)`` integer array-like",
+        "Triangles": "``(n_triangles, 3)`` int64 tensor",
+        "TrianglesLike": "``(n_triangles, 3)`` integer array-like",
+        "Landmarks": "``(n_landmarks, n_points)`` sparse float32 tensor",
+        "LandmarksSequence": "``(n_landmarks,)`` integer array-like",
+        # Types used in LinearOperator
+        "Signal": "``(n_points, n_features)`` float32 tensor",
+    }
 
 myst_enable_extensions = [
     "colon_fence",

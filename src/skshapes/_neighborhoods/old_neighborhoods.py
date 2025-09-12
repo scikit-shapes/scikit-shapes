@@ -41,13 +41,13 @@ def symmetric_function_to_linear_operator(
 
 @typecheck
 @dataclass
-class Spectrum:
+class OldSpectrum:
     eigenvectors: PointEigenvectors
     laplacian_eigenvalues: Eigenvalues
     smoothing_eigenvalues: Eigenvalues
 
 
-class Neighborhoods(neighborhoods_type):
+class OldNeighborhoods(neighborhoods_type):
     @typecheck
     def __init__(
         self,
@@ -99,7 +99,7 @@ class Neighborhoods(neighborhoods_type):
     @typecheck
     def spectrum(
         self, n_modes: int, check_tolerance: Number = 1e-4
-    ) -> Spectrum:
+    ) -> OldSpectrum:
         # Wrap self.smooth as a SciPy LinearOperator
         def smooth_function_to_measure(f):
             return self.smooth(f, input_type="function", output_type="measure")
@@ -155,7 +155,7 @@ class Neighborhoods(neighborhoods_type):
             laplacian_eigenvalues <= check_tolerance
         ).all(), laplacian_eigenvalues
 
-        return Spectrum(
+        return OldSpectrum(
             eigenvectors=eigenvectors,
             laplacian_eigenvalues=laplacian_eigenvalues,
             smoothing_eigenvalues=eigenvalues,

@@ -20,15 +20,20 @@ from ..multiscaling import Decimation, Multiscale
 from ..triangle_mesh import EdgeTopology
 from ..types import (
     Edges,
+    EdgesLike,
     Float1dTensor,
     Int1dTensor,
     IntSequence,
     IntTensor,
     Landmarks,
+    LandmarksSequence,
     Number,
     PointDensities,
+    PointDensitiesLike,
     Points,
+    PointsLike,
     Triangles,
+    TrianglesLike,
     float_dtype,
     int_dtype,
     polydata_type,
@@ -49,7 +54,6 @@ class PolyData(polydata_type):
     - A `pyvista.PolyData <https://docs.pyvista.org/api/core/_autosummary/pyvista.polydata>`_ object.
     - A `vedo.Mesh <https://vedo.embl.es/docs/vedo/mesh.html#Mesh>`_ object.
 
-
     .. warning::
 
         Internally, points are stored as **float32 torch Tensors** while indices for
@@ -69,7 +73,6 @@ class PolyData(polydata_type):
         (the output type of our methods should not surprise downstream functions)
         and support for both GPU computing and automatic differentiation
         (which are not supported by NumPy).
-
 
 
     Main features:
@@ -107,7 +110,7 @@ class PolyData(polydata_type):
         automatically inferred.
     edges
         The edges of the shape, understood as a set of non-oriented curves
-        or as a wireframe mesh. The edges are encoded as a ``(n_points, 2)`` torch Tensor
+        or as a wireframe mesh. The edges are encoded as a ``(n_edges, 2)`` torch Tensor
         of integer values. Each row ``[a, b]`` corresponds to a
         non-oriented edge between points ``a`` and ``b``.
         If ``triangles`` is not None, the edges will be automatically
@@ -198,15 +201,15 @@ class PolyData(polydata_type):
     @typecheck
     def __init__(
         self,
-        points: Points | vedo.Mesh | pyvista.PolyData | Path | str,
+        points: PointsLike | vedo.Mesh | pyvista.PolyData | Path | str,
         *,
-        edges: Edges | None = None,
-        triangles: Triangles | None = None,
-        point_densities: PointDensities | None = None,
+        edges: EdgesLike | None = None,
+        triangles: TrianglesLike | None = None,
+        point_densities: PointDensitiesLike | None = None,
         device: str | torch.device | None = None,
-        landmarks: Landmarks | IntSequence | None = None,
-        control_points: polydata_type | None = None,
-        stiff_edges: Edges | None = None,
+        landmarks: Landmarks | LandmarksSequence | None = None,
+        control_points: PolyData | None = None,
+        stiff_edges: EdgesLike | None = None,
         point_data: DataAttributes | None = None,
         edge_data: DataAttributes | None = None,
         triangle_data: DataAttributes | None = None,
@@ -436,13 +439,10 @@ class PolyData(polydata_type):
         "triangle_points",
     )
 
-    from ..cache import cache_clear
-    from ..convolutions import _mesh_convolution, _point_convolution
-
     # ----------------------------------------------------------------------------
     # End of the Python magic. Thanks StackOverflow and AnthonyExplains!
     # ----------------------------------------------------------------------------
-    from ..features import (
+    from .._features import (
         _edge_lengths,
         _edge_midpoints,
         _edge_points,
@@ -463,7 +463,9 @@ class PolyData(polydata_type):
         _triangle_normals,
         _triangle_points,
     )
-    from ..neighborhoods import _point_neighborhoods
+    from .._neighborhoods import _point_neighborhoods
+    from ..cache import cache_clear
+    from ..convolutions import _mesh_convolution, _point_convolution
     from ..topology import _k_ring_graph, _knn_graph
 
     @typecheck
@@ -837,8 +839,9 @@ class PolyData(polydata_type):
         Available backends are ``"pyvista"`` and ``"vedo"``. See the documentation of
         the corresponding plot methods for possible arguments:
 
-        - https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html
-        - https://vedo.embl.es/docs/vedo/plotter.html#show
+        - `pyvista <https://docs.pyvista.org/version/stable/api/core/_autosummary/pyvista.PointSet.plot.html>`__
+        - `vedo <https://vedo.embl.es/docs/vedo/plotter.html#show>`__
+
 
         Parameters
         ----------
@@ -857,16 +860,13 @@ class PolyData(polydata_type):
     @property
     @typecheck
     def edges(self) -> Edges | None:
-        """Edges getter.
+        """The edges of the shape.
 
-        Returns
-        -------
-        Optional[Edges]
-            The edges of the shape. If the shape is a triangle mesh, the edges
-            are computed from the triangles. If the shape is not a triangle
-            mesh, the edges are directly returned.
-            If the shape is a point cloud without explicit topology information,
-            returns None.
+        If the shape is a triangle mesh, the edges
+        are computed from the triangles. If the shape is not a triangle
+        mesh, the edges are directly returned.
+        If the shape is a point cloud without explicit topology information,
+        returns ``None``.
         """
         if self._edges is not None:
             return self._edges
@@ -1567,7 +1567,7 @@ class PolyData(polydata_type):
 
     @property
     @typecheck
-    def control_points(self) -> polydata_type | None:
+    def control_points(self) -> PolyData | None:
         """Control points of the shape."""
         return self._control_points
 
