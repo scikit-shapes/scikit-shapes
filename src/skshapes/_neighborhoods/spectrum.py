@@ -1,12 +1,12 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from ..input_validation import typecheck
 from ..linear_operators import LinearOperator
 from ..types import (
     Eigenvalues,
-    Function,
     Literal,
-    Measure,
     PointEigenvectors,
 )
 
@@ -24,10 +24,10 @@ class Spectrum:
     def from_metric(
         *,
         n_modes: int,
-        mass: LinearOperator[Function, Measure],
-        metric: LinearOperator[Function, Measure],
+        mass: LinearOperator,
+        metric: LinearOperator,
         diffusion_method: Literal["exponential", "implicit euler"],
-    ) -> "Spectrum":
+    ) -> Spectrum:
         eigendecomposition = metric.eigendecomposition(
             mass=mass, mode="smallest magnitude", n_modes=n_modes
         )
@@ -68,10 +68,10 @@ class Spectrum:
     def from_cometric(
         *,
         n_modes: int,
-        mass: LinearOperator[Function, Measure],
-        cometric: LinearOperator[Measure, Function],
+        mass: LinearOperator,
+        cometric: LinearOperator,
         diffusion_method: Literal["exponential", "implicit euler"],
-    ) -> "Spectrum":
+    ) -> Spectrum:
         eigendecomposition = cometric.eigendecomposition(
             mass=mass, mode="largest magnitude", n_modes=n_modes
         )

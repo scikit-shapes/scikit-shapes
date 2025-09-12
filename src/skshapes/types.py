@@ -107,17 +107,7 @@ PointDensities = JaxFloat[torch.Tensor, "n_points"]
 PointVectorSignals = JaxFloat[torch.Tensor, "n_points n_features"]
 PointAnySignals = JaxFloat[torch.Tensor, "n_points *features"]
 
-# Portable:
-define_alias("Function", PointVectorSignals)
-define_alias("Measure", PointVectorSignals)
-# Python 3.10+
-# from typing_extensions import TypeAlias
-# Function: TypeAlias = PointVectorSignals
-# Measure: TypeAlias = PointVectorSignals
-# Python 3.12+
-# type Function = PointVectorSignals  # alias
-# type Measure = PointVectorSignals  # alias
-
+Signal = PointVectorSignals
 
 PointDisplacements = JaxFloat[torch.Tensor, "n_points dim"]
 PointCovariances = JaxFloat[torch.Tensor, "n_points dim dim"]

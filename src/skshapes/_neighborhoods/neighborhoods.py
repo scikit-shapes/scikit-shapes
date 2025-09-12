@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import partial
 
 from pydantic import BaseModel
@@ -6,9 +8,7 @@ from ..input_validation import typecheck
 from ..linear_operators import LinearOperator
 from ..types import (
     Callable,
-    Function,
     Literal,
-    Measure,
 )
 from .spectrum import Spectrum
 
@@ -175,10 +175,10 @@ class Neighborhoods:
     def __init__(
         self,
         *,
-        mass: LinearOperator[Function, Measure],
-        metric: LinearOperator[Function, Measure],
-        cometric: LinearOperator[Measure, Function],
-        diffusion: LinearOperator[Function, Function],
+        mass: LinearOperator,
+        metric: LinearOperator,
+        cometric: LinearOperator,
+        diffusion: LinearOperator,
         spectrum: Callable[[int], Spectrum],
     ):
         self._mass = mass
@@ -190,8 +190,8 @@ class Neighborhoods:
     @staticmethod
     def from_metric(
         *,
-        mass: LinearOperator[Function, Measure],
-        metric: LinearOperator[Function, Measure],
+        mass: LinearOperator,
+        metric: LinearOperator,
         diffusion_method: Literal["implicit euler", "exponential"],
     ):
         r"""Alternate constructor of :class:`Neighborhoods` from a mass :math:`M` and metric :math:`G`.
@@ -244,8 +244,8 @@ class Neighborhoods:
     @staticmethod
     def from_cometric(
         *,
-        mass: LinearOperator[Function, Measure],
-        cometric: LinearOperator[Function, Measure],
+        mass: LinearOperator,
+        cometric: LinearOperator,
         diffusion_method: Literal["implicit euler", "exponential"],
     ):
         r"""Alternate constructor of :class:`Neighborhoods` from a mass :math:`M` and cometric :math:`K`.
@@ -300,7 +300,7 @@ class Neighborhoods:
 
     @property
     @typecheck
-    def mass(self) -> LinearOperator[Function, Measure]:
+    def mass(self) -> LinearOperator:
         r"""mass(self)
         The mass matrix :math:`M : \mathcal{F} \rightarrow \mathcal{F}^\star`.
 
@@ -310,7 +310,7 @@ class Neighborhoods:
 
     @property
     @typecheck
-    def metric(self) -> LinearOperator[Function, Measure]:
+    def metric(self) -> LinearOperator:
         r"""The metric :math:`G : \mathcal{F} \rightarrow \mathcal{F}^\star`.
 
         It corresponds to a symmetric matrix, i.e. $G^\top = G$.
@@ -319,7 +319,7 @@ class Neighborhoods:
 
     @property
     @typecheck
-    def cometric(self) -> LinearOperator[Measure, Function]:
+    def cometric(self) -> LinearOperator:
         r"""The cometric :math:`K = G^{-1} : \mathcal{F}^\star \rightarrow \mathcal{F}`.
 
         It corresponds to a symmetric matrix, i.e. $K^\top = K$.
@@ -328,7 +328,7 @@ class Neighborhoods:
 
     @property
     @typecheck
-    def diffusion(self) -> LinearOperator[Function, Function]:
+    def diffusion(self) -> LinearOperator:
         r"""The diffusion operator :math:`Q : \mathcal{F} \rightarrow \mathcal{F}`.
 
         It is symmetric with respect to the mass matrix $M$, i.e. $Q^\top M = M Q$.
@@ -342,7 +342,7 @@ class Neighborhoods:
 
     @property
     @typecheck
-    def smoothing(self) -> LinearOperator[Function, Function]:
+    def smoothing(self) -> LinearOperator:
         r"""The smoothing operator :math:`S = KM : \mathcal{F} \rightarrow \mathcal{F}`.
 
         It is symmetric with respect to the mass matrix $M$, i.e. $S^\top M = M S$.
@@ -351,7 +351,7 @@ class Neighborhoods:
 
     @property
     @typecheck
-    def laplacian(self) -> LinearOperator[Function, Function]:
+    def laplacian(self) -> LinearOperator:
         r"""The Laplace-Beltrami operator :math:`\Delta = M^{-1}G : \mathcal{F} \rightarrow \mathcal{F}`.
 
         It is symmetric with respect to the mass matrix $M$, i.e. $\Delta^\top M = M \Delta$.

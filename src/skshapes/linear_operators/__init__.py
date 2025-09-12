@@ -1,1 +1,5 @@
-from .linear_operator import InverseParameters, LinearOperator
+from ._linear_operator import LinearOperator
+
+__all__ = [
+    "LinearOperator",
+]

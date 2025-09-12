@@ -76,7 +76,7 @@ extensions = [
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx_math_dollar",
-    #"sphinx_autodoc_typehints",
+    "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "myplot_directive"
@@ -138,6 +138,8 @@ if True:
     autodoc_docstring_signature = True
     autodoc_typehints = "both"
     autodoc_typehints_format = "short"
+    always_use_bars_union = True
+    typehints_defaults = "comma"
 else:
     # I could not make this work. One day, maybe?
     html_theme = "sphinx_immaterial"
@@ -179,14 +181,10 @@ else:
 
 if True:
     autodoc_type_aliases = {
-        "Function": "AA",
-        "TypeAliasForwardRef('Function')": "BB",
-        "LinearOperator[TypeAliasForwardRef('Measure'), TypeAliasForwardRef('Function')]": "CC",
-        "LinearOperator[Measure, Function]": "DD",
-        "Measure": "EE",
-        "Points": "FF",
-        "Points2d": "GG",
-        "Points3d": "HH",
+        "Signal": "``(n_points, 3)`` float tensor",
+        "Points": "``(n_points, 2)`` or ``(n_points, 3)`` array-like",
+        "Points2d": "``(n_points, 2)`` float tensor",
+        "Points3d": "``(n_points, 3)`` float tensor",
     }
 
 myst_enable_extensions = [
