@@ -10,6 +10,9 @@ from sphinx_gallery.sorting import ExplicitOrder
 
 # Allow to import local modules
 sys.path.insert(0, str(Path().resolve()))
+sys.path.insert(0, str(Path(__file__).parent.resolve()))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.resolve()))
+sys.path.insert(0, str(Path(__file__).parent / "_ext"))
 # conf_module is where we define dynamic_scraper and reset_pyvista
 # pyvista configuration
 # See: https://github.com/pyvista/pyvista/blob/main/doc/source/conf.py
@@ -78,6 +81,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
+    "myplot_directive"
 ]
 
 
@@ -110,7 +114,18 @@ exclude_patterns = [
     ".venv",
 ]
 
-
+mathjax3_config = {
+    "tex": {
+        "macros": {
+            "RR": '{\\bf R}',
+            "bold": ['{\\bf #1}',1],
+            "t": [r"{#1}^{\mathsf{T}}", 1],
+            "T": r"\mkern-3mu",
+            "target": [r"\widehat{#1}", 1],
+            },
+        "tags": 'ams',
+        }
+    }
 
 if True:
     html_theme = "sphinx_rtd_theme"

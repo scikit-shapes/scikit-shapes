@@ -1,0 +1,70 @@
+% pdflatex linear_parameters.tex
+% convert -density 600 linear_parameters.pdf linear_parameters.png
+
+\documentclass[tikz,convert={outfile=\jobname.png},margin=2mm]{standalone}
+%\usetikzlibrary{...}% tikz package already loaded by 'tikz' option
+
+\usepackage{amssymb,amsmath}
+\usepackage{bm}
+\DeclareMathSymbol{\shortminus}{\mathbin}{AMSa}{"39}
+\newcommand{\half}{\text{\textonehalf}}
+\renewcommand{\t}{\mathsf{T}}
+\newcommand{\T}{\mkern-3mu}
+
+\usetikzlibrary{angles,quotes}
+\begin{document}
+\begin{tikzpicture}
+
+    \def \n {3}
+    \def \radius {3cm}
+    \def \margin {8} % margin in angles, depends on the radius
+
+
+    \node[draw, circle] at ({30 + 360/3 * 0}:\radius) {$v$};
+    \node[draw, circle] at ({30 + 360/3 * 1}:\radius) {$p$};
+    \node[draw, circle] at ({30 + 360/3 * 2}:\radius) {$z$};
+    \node[draw, circle] at (0, 0) {$\theta$};
+
+    % p <-> v
+    \node at ({90 + 360/3 * 0}:1.15*\radius) {\footnotesize $~G^{\shortminus 1}$};
+    \node at ({90 + 360/3 * 0}:0.85*\radius) {\footnotesize $G$};
+
+    % p <-> z
+    \node at ({90 + 360/3 * 1}:1.2*\radius) {\footnotesize $G^{\half}$};
+    \node at ({90 + 360/3 * 1}:0.8*\radius) {\footnotesize $G^{\shortminus\half}$};
+
+    % z <-> v
+    \node at ({90 + 360/3 * 2}:1.2*\radius) {\footnotesize $G^{\half}$};
+    \node at ({90 + 360/3 * 2}:0.8*\radius) {\footnotesize $G^{\shortminus\half}$};
+
+
+    % theta <-> v
+    \node at ({30 + 15 + 360/3 * 0}:.5*\radius) {\footnotesize $\bm{I}$};
+    \node at ({30 - 15 + 360/3 * 0}:.55*\radius) {\footnotesize $I$};
+
+    % theta <-> p
+    \node at ({30 + 15 + 360/3 * 1}:.55*\radius) {\footnotesize $\bm{G}$};
+    \node at ({30 - 17 + 360/3 * 1}:.55*\radius) {\footnotesize $G^{\shortminus 1}$};
+
+    % theta <-> z
+    \node at ({30 + 20 + 360/3 * 2}:.5*\radius) {\footnotesize $\bm{G^{\half}}$};
+    \node at ({30 - 20 + 360/3 * 2}:.5*\radius) {\footnotesize $G^{\shortminus \half}$};
+
+
+
+
+    \foreach \s in {1,...,\n}
+    {
+      \draw[->, >=latex] ({30 + 360/\n * (\s - 1)+\margin}:0.95*\radius)
+        arc ({30 + 360/\n * (\s - 1)+\margin}:{30 + 360/\n * (\s)-\margin}:0.95*\radius);
+      \draw[<-, >=latex] ({30 + 360/\n * (\s - 1)+\margin}:1.05*\radius)
+        arc ({30 + 360/\n * (\s - 1)+\margin}:{30 + 360/\n * (\s)-\margin}:1.05*\radius);
+
+      \draw[->, >=latex, thick, shift={({90 + 30 + 360/\n * (\s - 1)+\margin}:.15)}] ({30 + 360/\n * (\s - 1)}:0.17*\radius)
+        -- ({30 + 360/\n * (\s - 1)}:0.84*\radius);
+      \draw[<-, >=latex, shift={({-90 + 30 + 360/\n * (\s - 1)+\margin}:.15)}] ({30 + 360/\n * (\s - 1)}:0.15*\radius)
+        -- ({30 + 360/\n * (\s - 1)}:0.82*\radius);
+
+    }
+    \end{tikzpicture}
+\end{document}

@@ -52,7 +52,7 @@ repos:
     rev: "v2.3.0"
     hooks:
       - id: codespell
-        args: ["-L", "sur,nd", "--skip", "devdoc/*"]
+        args: ["-L", "sur,nd,fro", "--skip", "devdoc/*"]
 
   # - repo: https://github.com/numpy/numpydoc
   #   rev: "v1.6.0"

@@ -193,3 +193,4 @@ skshapes/data/edges_extraction.cpp
 doc/source/api/*
 doc/source/stubs/*
 doc/source/sg_execution_times.rst
+doc/source/explanation/**/*.aux
