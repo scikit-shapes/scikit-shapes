@@ -17,7 +17,7 @@ def _point_convolution(
     *,
     kernel: Literal["uniform", "gaussian"] = "gaussian",
     scale: Number | None = None,
-    window: Literal[None, "ball", "knn", "spectral"] = None,
+    window: Literal["ball", "knn", "spectral"] | None = None,
     cutoff: Number | None = None,
     geodesic: bool = False,
     normalize: bool = False,
