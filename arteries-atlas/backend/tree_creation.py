@@ -19,7 +19,7 @@ def compute_edge_lenghts(tree):
     return tree
 
 
-def compute_downstream(tree):
+def compute_downstream(tree, orientation=0, reverse=False):
     pos, radius, edge_length = tree.features["pos"], tree.features["radius"], tree.features["edge_length"]
     parents = tree.parents()
 
@@ -31,13 +31,16 @@ def compute_downstream(tree):
 
     tree.features["downstream_volume"] = vols
     tree.features["downstream_barycenter"] = bars
-    tree.features["score"] = - bars[:, 0]
+
+    if reverse:
+        tree.features["score"] = bars[:, orientation]
+    else:
+        tree.features["score"] = - bars[:, orientation]
 
     return tree
 
 
-def reorder_branches(tree, scores): # TODO vérifier
-
+def reorder_branches(tree, scores):
     order = np.arange(tree.size)
     sectors = np.arange(tree.size) + 1
 
@@ -55,39 +58,6 @@ def reorder_branches(tree, scores): # TODO vérifier
     return tree
 
 
-def initialize_angles(tree):
-    # TODO nettoyer à terme
-    scores, vols = tree.features["score"], tree.features["downstream_volume"]
-
-    rel_angles = np.zeros((tree.size, 2), dtype=np.float32)
-    rel_angles[tree.root] = [0, 1]
-
-    for node in tree.bifurcations(non_terminal=True)[:, 0]:
-        children = tree.node_children(node)
-        children = children[np.argsort(scores[children])]
-
-        cum_angles = np.cumsum(vols[children])
-        cum_angles = np.concatenate([[0], cum_angles / cum_angles[-1]])
-
-        rel_angles[children, 0], rel_angles[children, 1] = cum_angles[:-1], cum_angles[1:]
-
-    angle_ranges = np.zeros(shape=(tree.size, 2), dtype=np.float32)
-    angle_ranges[tree.root] = [0, np.pi]
-
-    for branch in tree.branches():
-        branch_range = angle_ranges[branch[0], 0] + (angle_ranges[branch[0], 1] - angle_ranges[branch[0], 0]) * \
-                       rel_angles[branch[1]]
-        angle_ranges[branch[1]:branch[2]] = branch_range
-
-    angles = np.expand_dims((angle_ranges[:, 0] + angle_ranges[:, 1]) / 2, axis=-1)
-
-    tree.features["range"] = (angle_ranges[:, 1] - angle_ranges[:, 0]) / np.maximum(1, tree.out_degrees()).squeeze() # DEBUG
-    tree.features["angle"] = angles
-    tree.features["initial_angle"] = tree.features["angle"].copy()
-
-    return tree
-
-
 def compute_embeddings(tree):
     if "emb" not in tree.features:
         tree.features["emb"] = np.zeros(shape=(tree.size, 2), dtype=np.float32)
@@ -98,11 +68,21 @@ def compute_embeddings(tree):
     return tree
 
 
-def compute_reference_angles(tree, priority, smoothing=5):
+def compute_reference_angles(tree, priority, smoothing=5, tangent_smoothing=0):
     pos = tree.features["pos"]
     parents = tree.parents()
 
-    tang = pos - pos[parents]
+    if tangent_smoothing > 0:
+        cur_parent_level = parents
+        ancesters_pos = []
+        for _ in range(tangent_smoothing):
+            ancesters_pos.append(pos[cur_parent_level])
+            cur_parent_level = parents[cur_parent_level]
+        barycenter_pos = np.array(ancesters_pos).mean(axis=0)
+    else:
+        barycenter_pos = pos[parents]
+
+    tang = pos - barycenter_pos
     tang = tang / (np.linalg.norm(tang, axis=1, keepdims=True) + 1e-6)
 
     normals = np.zeros(tang.shape)
@@ -117,7 +97,7 @@ def compute_reference_angles(tree, priority, smoothing=5):
 
     ## Correct root angle
     for i in  tree.branch_index()[tree.node_children(tree.root)]:
-        phi[tree.branches()[i,1]:tree.branches()[i,1]+4] = 0 # TODO débugger
+        phi[tree.branches()[i,1]:tree.branches()[i,1]+4] = 0
 
     if smoothing > 0:
         for branch in tree.branches():
@@ -126,7 +106,6 @@ def compute_reference_angles(tree, priority, smoothing=5):
 
             weight = np.convolve(np.ones(branch[2] - branch[1]), ker, "same")
             phi[branch[1]:branch[2]] = np.convolve(phi[branch[1]:branch[2]], ker, "same") / weight
-
 
 
     # Change the curvature values at the junction to make them compatible with the new children order
@@ -146,6 +125,6 @@ def compute_reference_angles(tree, priority, smoothing=5):
 
         tree.features["phi"] = phi.copy().reshape(-1, 1)
 
-    tree.features["true_angle"] = tree.propagate(phi.reshape(-1,1)) # TODO debug
+    tree.features["true_angle"] = tree.propagate(phi.reshape(-1,1))
 
     return tree

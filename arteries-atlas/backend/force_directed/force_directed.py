@@ -16,7 +16,7 @@ def structure_force(tree):
 
 def bending_force(tree, mu=2):
     angles, phi, edge_lengths, radius = tree.features["angle"], tree.features["phi"], tree.features["edge_length"], \
-    tree.features["radius"]
+        tree.features["radius"]
     parents = tree.parents()
 
     force = (radius ** mu) * (phi + angles[parents] - angles) / (edge_lengths + edge_lengths[parents] + 1e-6)
@@ -49,7 +49,16 @@ def repulsion_force(tree, sigma=300):
     return angular_forces / (edge_lengths + 1e-6)
 
 
-def compute_force(tree, iters=200, alpha=0.1, beta=0.1, gamma=0.1, mu=2, sigma=300, momentum=1, clip=None):
+def compute_force(tree,
+                  iters=200,
+                  alpha=0.1,
+                  beta=0.1,
+                  gamma=0.1,
+                  mu=2,
+                  sigma=300,
+                  momentum=1,
+                  junction_size=30,
+                  clip=None):
     old_angles = tree.features["angle"].copy()
 
     for i in range(iters):
@@ -60,7 +69,7 @@ def compute_force(tree, iters=200, alpha=0.1, beta=0.1, gamma=0.1, mu=2, sigma=3
             old_angles = cur_angles
 
         total_force = alpha * repulsion_force(tree, sigma) + beta * structure_force(tree) + gamma * bending_force(tree,
-                                                                                                                   mu)
+                                                                                                                  mu)
 
         if clip is not None:
             total_force = total_force.clip(-clip, clip)
@@ -74,12 +83,15 @@ def compute_force(tree, iters=200, alpha=0.1, beta=0.1, gamma=0.1, mu=2, sigma=3
                 begin_junction = branch[1]
                 end_junction = branch[1] + max(tree.coarse_features["cut"][tree.bifurcations_index(branch[1])] - 15, 0)
 
-                u = min(end_junction - begin_junction, 30)
+                u = min(end_junction - begin_junction, junction_size)
                 t = 0.1 + np.zeros((end_junction - begin_junction, 1))
-                t[-u:, 0] = np.minimum(1, 0.1 + (np.arange(u) / u))
+                t[-u:, 0] = np.minimum(1, 0.1 + (np.arange(u) / (u + 1e-5)))
 
-                tree.features["angle"][begin_junction:end_junction] = t * tree.features["angle"][begin_junction:end_junction] + (1 - t) * (
-                            tree.features["angle"][branch[0]] + tree.features["true_angle"][begin_junction:end_junction])
+                tree.features["angle"][begin_junction:end_junction] = t * tree.features["angle"][
+                                                                          begin_junction:end_junction] + (1 - t) * (
+                                                                              tree.features["angle"][branch[0]] +
+                                                                              tree.features["true_angle"][
+                                                                              begin_junction:end_junction])
 
         compute_embeddings(tree)
 
