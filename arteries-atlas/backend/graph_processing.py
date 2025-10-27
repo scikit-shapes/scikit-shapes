@@ -11,7 +11,7 @@ def laplacian_smoothing(vals: np.ndarray, adjmatrix: scipy.sparse.csr_matrix, it
     vals: (N, 3) np.ndarray of np.float32.
         Array of values at each node of the graph.
 
-    adjmatrix : (N, N) scipy.sparse.csr_matrix of np.float32
+    adjmatrix: (N, N) scipy.sparse.csr_matrix of np.float32
         Adjacency matrix of the skeleton graph.
 
     iters: int
@@ -32,12 +32,18 @@ def laplacian_smoothing(vals: np.ndarray, adjmatrix: scipy.sparse.csr_matrix, it
     return smoothed.squeeze()
 
 
-def graph_root(adjmatrix: scipy.sparse.csr_matrix, features: dict) -> int:
+def graph_root(adjmatrix: scipy.sparse.csr_matrix,
+               features: dict,
+               radius_threshold: float = 3,
+               orientation: int = 2,
+               reverse: bool = False
+               ) -> int:
     """
-    Set the root of the vascular graph.
+    Determine and set the root node of a vascular graph.
 
-    The chosest root is the lowest node (in terms of Z position) among the nodes of the largest connected component with
-    radius larger than 3.
+    The root is selected as the node with either the smallest or largest coordinate value
+    (along a specified dimension) among the nodes belonging to the largest connected
+    component whose radius exceeds `radius_threshold`.
 
     Parameters
     ----------
@@ -49,27 +55,47 @@ def graph_root(adjmatrix: scipy.sparse.csr_matrix, features: dict) -> int:
         "pos": (N,3) np.ndarray of np.float32 with the 3D position of the graph nodes;
         "radius": (N,1) np.ndarray of np.float32.
 
+    radius_threshold : float
+        The minimum vessel radius for a node to be eligible as the graph root.
+
+    orientation : int
+        Index of the spatial dimension used to determine the root.
+
+    reverse: bool
+        If False, the root is the node with the smallest coordinate value in the specified dimension.
+        If True, the root is the node with the largest coordinate value in the corresponding dimension.
+
     Returns
     -------
-    root: int
-        Index of the graph root.
-
+    root : int
+        Index of the selected root node.
     """
     pos, radius = features["pos"], features["radius"]
 
     _, components = scipy.sparse.csgraph.connected_components(adjmatrix, directed=False)
     largest_component = np.bincount(components).argmax()
-    eligible_roots = np.argwhere(np.logical_and(components == largest_component, radius > 3)).squeeze()
+    eligible_roots = np.argwhere(np.logical_and(components == largest_component, radius > radius_threshold)).squeeze()
 
-    return eligible_roots[pos[eligible_roots, 2].argmin()]
+    if reverse:
+        return eligible_roots[pos[eligible_roots, orientation].argmax()]
+    else:
+        return eligible_roots[pos[eligible_roots, orientation].argmin()]
 
 
-def merge_components_to_root(adjmatrix: scipy.sparse.csr_matrix, features: dict, root: int) -> scipy.sparse.csr_matrix:
+def merge_components_to_root(adjmatrix: scipy.sparse.csr_matrix,
+                             features: dict,
+                             root: int,
+                             orientation: int = 2,
+                             reverse: bool = False,
+                             min_component_size: int = 100,
+                             max_dist_to_root: float = 50
+                             ) -> scipy.sparse.csr_matrix:
     """
-    Merge the meaning connected components to the largest connected component of the graph.
+    Merge relevant connected components into the largest connected component of the graph.
 
-    Nodes are linked to the root as soon as their Z position is lower than the root and their euclidean distance to the
-    root is lower than 50.
+    This operation connects additional components to the root node when they are sufficiently large, touch the image
+    border, and are located close enough to the root node. It helps correct cropping artifacts that may split the
+    vascular structure into multiple disconnected parts.
 
     Parameters
     ----------
@@ -83,30 +109,45 @@ def merge_components_to_root(adjmatrix: scipy.sparse.csr_matrix, features: dict,
     root: int
         Index of the graph root.
 
+    orientation : int
+        Spatial dimension used to determine the border of the image that is taken into account.
+
+    reverse: bool
+        If False, the border contains the nodes with minimal coordinate values in that dimension.
+        If True, the border contains the nodes with maximal coordinate values in that dimension.
+
+    min_component_size : int
+        Minimum number of nodes a component must contain to be eligible for merging.
+
+    max_dist_to_root : float
+        Maximum allowed distance between a node and the root for it to be considered for merging.
+
     Returns
     -------
-    merged_adjmatrix: (N, N) scipy.sparse.csr_matrix of bool
-        Adjacency matrix of the merged graph.
-
+    merged_adjmatrix : (N, N) scipy.sparse.csr_matrix of bool
+        Adjacency matrix of the graph after merging.
     """
     pos = features["pos"]
 
-    bottom_nodes = np.argwhere(pos[:, 2] < (pos[root, 2] + 1)).squeeze()
+    if reverse:
+        border_nodes = np.argwhere(pos[:, orientation] > (pos[root, orientation] - 1)).squeeze()
+    else:
+        border_nodes = np.argwhere(pos[:, orientation] < (pos[root, orientation] + 1)).squeeze()
 
     _, components = scipy.sparse.csgraph.connected_components(adjmatrix, directed=False)
     component_sizes = np.bincount(components)
 
-    dist_to_root = np.sqrt(np.sum(((pos[root, :] - pos[bottom_nodes, :]) ** 2), axis=1))
+    dist_to_root = np.sqrt(np.sum(((pos[root, :] - pos[border_nodes, :]) ** 2), axis=1))
 
     valid_bottom_nodes = np.argwhere(np.logical_and(
-        dist_to_root < 50,
-        component_sizes[components[bottom_nodes]] > 100
+        dist_to_root < max_dist_to_root,
+        component_sizes[components[border_nodes]] > min_component_size
     )).squeeze()
 
-    bottom_nodes = bottom_nodes[valid_bottom_nodes]
+    border_nodes = border_nodes[valid_bottom_nodes]
 
-    row = np.concatenate([bottom_nodes, np.repeat(root, bottom_nodes.shape)])
-    col = np.concatenate([np.repeat(root, bottom_nodes.shape), bottom_nodes])
+    row = np.concatenate([border_nodes, np.repeat(root, border_nodes.shape)])
+    col = np.concatenate([np.repeat(root, border_nodes.shape), border_nodes])
     data = np.ones(shape=row.shape, dtype=bool)
 
     bottom_edges = scipy.sparse.csr_matrix((data, (row, col)), shape=adjmatrix.shape)
@@ -135,7 +176,6 @@ def smooth_val(val: np.ndarray, adjmatrix: scipy.sparse.csr_matrix, iters: int =
         Smoothed values.
 
     """
-    # degrees = np.maximum(1, np.array(adjmatrix.sum(axis=1))).squeeze()
     degrees = np.maximum(1, adjmatrix.sum(axis=1))
     smoothed = val.reshape(-1, 1)
 
@@ -184,7 +224,6 @@ def keep_largest_component(adjmatrix: scipy.sparse.csr_matrix, features: dict, r
 
 
 def edge_weights(adjmatrix: scipy.sparse.csr_matrix, features: dict) -> scipy.sparse.csr_matrix:
-    # TODO améliorer critère
     """
     Compute edges weights of the graph, used as inputs of the minimum spanning tree algorithm.
 

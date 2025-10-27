@@ -18,7 +18,7 @@ def recursive_layout(tree: BranchingTree, smoothing=10):
     tree.coarse_features["cut"] = np.zeros(shape=tree.coarse_size, dtype=int)
 
     tessellation = Tessellation(size=tree.coarse_size, root=0, root_anchors=np.zeros((2, 2)),
-                               root_cone=np.array([0, np.pi]), root_orientation=np.pi / 2)
+                                root_cone=np.array([0, np.pi]), root_orientation=np.pi / 2)
 
     tree.features["angle"][tree.root] = np.pi / 2
 
@@ -82,7 +82,7 @@ def embed_branches(tree, junction, tessellation, smoothing):
     lengths = [tree.features["edge_length"][b[1]:b[2]] for b in branches]
     branched_trajectories = BranchedTrajectories(lengths, target_angles, initial_node=tree.features["emb"][node])
 
-    limit_angles = np.array([bounding_box.orientation for bounding_box in children_boxes])  # TODO trouver plus propre
+    limit_angles = np.array([bounding_box.orientation for bounding_box in children_boxes])
 
     splitting_angles = np.array([bounding_box.cone[0] for bounding_box in children_boxes])
     splitting_angles = np.append(splitting_angles, children_boxes[-1].cone[1])
@@ -125,7 +125,7 @@ def cut_angles(branched_trajectories, target_angles, limit_angles, cuts, smoothi
         traj.update_angles(lmbda * limit_angle + (1 - lmbda) * target_angles[i].reshape(-1, 1))
 
 
-def extend_tessellation(tree: BranchingTree, junction, tessellation):  # TODO débugger
+def extend_tessellation(tree: BranchingTree, junction, tessellation):
     node = tree.branch_roots(junction)
     children = tree.junction_children(junction)
 
@@ -182,7 +182,7 @@ def place_intermediate_anchor(tree, left_child: int, right_child: int, left_box:
     middle_anchor = (right_imp * left_box.anchors[1] + left_imp * right_box.anchors[0]) / (left_imp + right_imp)
     left_branch, right_branch = tree.branches(left_child - 1), tree.branches(right_child - 1)
 
-    left_emb = tree.features["emb"][left_branch[1]:left_branch[2]]  # TODO vérifier
+    left_emb = tree.features["emb"][left_branch[1]:left_branch[2]]
     right_emb = tree.features["emb"][right_branch[1]:right_branch[2]]
 
     border_vector = left_box.border_vectors()[1]
@@ -200,7 +200,7 @@ def place_intermediate_anchor(tree, left_child: int, right_child: int, left_box:
             middle_anchor = projection(left_box.anchors[1], left_box.base_vector(), leftest,
                                        left_box.border_vectors()[1])
 
-    else:  # TODO vérifier qu'on ne peut pas être dans les deux cas à la fois
+    else:
         collision_indices = np.argwhere(
             path_semiplane_collisions(left_emb, right_box.anchors[0], right_box.orientation_vector()))
 
@@ -232,11 +232,12 @@ def prune_terminal_boxes(tree, children, children_boxes):
                                     children_boxes[left].border_vectors()[1]):
 
                     current_anchors[0] = projection(current_anchors[0], current_box.base_vector(),
-                                                    children_boxes[left].anchors[0], children_boxes[left].border_vectors()[0])
+                                                    children_boxes[left].anchors[0],
+                                                    children_boxes[left].border_vectors()[0])
 
                     current_box.update(left_cone=children_boxes[left].cone[0])
                     children_boxes[left].update(right_anchor=children_boxes[left].anchors[0],
-                                             right_cone=children_boxes[left].cone[0])
+                                                right_cone=children_boxes[left].cone[0])
 
                     already_pruned[left] = True
                 else:
@@ -248,11 +249,12 @@ def prune_terminal_boxes(tree, children, children_boxes):
                 if lower_projection(children_boxes[right].anchors[0], current_anchors[1],
                                     children_boxes[right].border_vectors()[0]):
                     current_anchors[1] = projection(current_anchors[1], current_box.base_vector(),
-                                                    children_boxes[right].anchors[1], children_boxes[right].border_vectors()[1])
+                                                    children_boxes[right].anchors[1],
+                                                    children_boxes[right].border_vectors()[1])
 
                     current_box.update(right_cone=children_boxes[right].cone[1])
                     children_boxes[right].update(left_anchor=children_boxes[right].anchors[1],
-                                             left_cone=children_boxes[right].cone[1])
+                                                 left_cone=children_boxes[right].cone[1])
 
                     already_pruned[right] = True
                 else:
