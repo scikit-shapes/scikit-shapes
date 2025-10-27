@@ -24,7 +24,7 @@ class UniqueOutput(NamedTuple):
     counts: torch.Tensor | None = None
 
 
-@typecheck
+# @typecheck
 def _apply_pointwise_unary_operation(
     operation: callable, *, image: ImageStructure, **kwargs
 ) -> ImageStructure | Mask:
@@ -68,7 +68,7 @@ def _apply_pointwise_unary_operation(
         raise TypeError(msg)
 
 
-@typecheck
+# @typecheck
 def _apply_pointwise_binary_operation(
     operation: callable,
     *,
@@ -267,7 +267,7 @@ class ImageStructure(GridStructure):
     #### Pointwise operations ####
     ##############################
 
-    @typecheck
+    # @typecheck
     def apply_pointwise(
         self,
         operation: callable,

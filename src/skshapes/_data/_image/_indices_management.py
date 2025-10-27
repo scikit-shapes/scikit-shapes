@@ -653,7 +653,7 @@ def indices_union(
 ####################################
 
 
-@typecheck
+# @typecheck
 def apply_at_indices(
     *,
     operation: callable,
