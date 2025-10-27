@@ -149,7 +149,7 @@ class KeOpsSquaredDistances:
 def squared_distances(
     *,
     points,
-    window: Literal[None, "ball", "knn", "spectral"] = None,
+    window: Literal["ball", "knn", "spectral"] | None = None,
     cutoff: Number | None = None,
     geodesic: bool = False,
     kernel: Callable | None = None,
