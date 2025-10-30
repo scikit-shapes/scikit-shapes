@@ -5,11 +5,10 @@ from typing import TYPE_CHECKING, Literal, NamedTuple
 import numpy as np
 import scipy
 import torch
-from parso.python.tree import Number
 
 from ...errors import ShapeError
 from ...input_validation import convert_inputs, one_and_only_one, typecheck
-from ...types import IntTensor
+from ...types import IntTensor, Number
 from ._indices_management import (
     check_sorted,
     expand_indices,

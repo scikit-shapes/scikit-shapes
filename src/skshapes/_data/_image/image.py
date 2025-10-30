@@ -47,6 +47,7 @@ class Image(ImageStructure):
     .. testcode::
 
         import skshapes as sks
+        import torch
 
         image = sks.Image(values=torch.ones(size=(3, 5, 7)))
         print(image.shape)
