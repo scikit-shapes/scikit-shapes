@@ -1,5 +1,4 @@
 # ruff: noqa: EXE002
-# ruff: noqa: I001
 
 import numpy as np
 
