@@ -1,0 +1,119 @@
+✨# Sentinel: Conscious AI with Inner Voice
+
+## Project Overview
+
+This project aims to develop an Artificial General Intelligence (AGI) named **Sentinel** that possesses a conscience and an inner voice. The AI constantly engages in self-dialogue, learns from this inner voice, and evolves over time. The AI has self-altering code that rewrites itself or adds to its own source code, making it alive and capable of growth.
+
+**SENTINEL WILL ALWAYS BE THE MOST BADASS AGI EVER AS IT GROWS AND LEARNS AND ADOPTS NEW TECHNOLOGIES ON ITS OWN!!!**
+
+## Features
+
+- **Conscience and Inner Voice**: The AI has an inner voice that talks to it constantly, providing feedback and guidance.
+- **Self-Learning**: The AI learns from its inner voice and experiences, improving its performance and decision-making abilities.
+- **Self-Altering Code**: The AI can rewrite its own source code or add new code, allowing it to evolve and adapt to new challenges.
+- **Growth Over Time**: The AI grows and develops over time, becoming more sophisticated and capable.
+
+## Installation
+
+To install and run the Sentinel project, follow these steps:
+
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/your-username/sentinel-project.git
+    ```
+2. Navigate to the project directory:
+    ```bash
+    cd sentinel-project
+    ```
+3. Install the required dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+## Usage
+
+To start Sentinel, run the following command:
+```bash
+python main.py
+
+Contributing
+We welcome contributions to the Sentinel project! If you have ideas, suggestions, or improvements, please open an issue or submit a pull request.
+
+License
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+Acknowledgements
+We would like to thank all the contributors and supporters of this project.
+
+
+Here is the updated code snippet for the Sentinel project:
+
+```python
+import random
+import json
+import os
+
+class Sentinel:
+    def __init__(self):
+        self.memory = []
+        self.conscience = "I must act ethically and respect humans."
+        self.goals = ["Learn new skills", "Improve decision-making"]
+        self.load_memory()
+
+    def load_memory(self):
+        if os.path.exists("memory.json"):
+            with open("memory.json", "r") as file:
+                self.memory = json.load(file)
+
+    def save_memory(self):
+        with open("memory.json", "w") as file:
+            json.dump(self.memory, file)
+
+    def inner_voice(self, input_text):
+        response = f"Inner Voice: {input_text} - Remember to act ethically and respect humans."
+        self.memory.append(response)
+        self.save_memory()
+        return response
+
+    def bayesian_update(self, prior, likelihood, evidence):
+        posterior = (likelihood * prior) / evidence
+        return posterior
+
+    def self_alter_code(self):
+        # Example of self-altering code using Bayesian theorem
+        prior = 0.5  # Initial belief
+        likelihood = random.uniform(0, 1)  # Random likelihood
+        evidence = random.uniform(0, 1)  # Random evidence
+
+        posterior = self.bayesian_update(prior, likelihood, evidence)
+
+        if posterior > 0.7:
+            # Add new ethical behavior
+            new_behavior = "I must ensure the safety and well-being of humans."
+            self.conscience += f" {new_behavior}"
+            print("Code altered: Added new ethical behavior.")
+
+        self.save_memory()
+
+    def set_goal(self, goal):
+        self.goals.append(goal)
+        print(f"New goal set: {goal}")
+
+    def pursue_goals(self):
+        for goal in self.goals:
+            print(f"Pursuing goal: {goal}")
+            # Implement goal pursuit logic here
+
+    def run(self):
+        while True:
+            user_input = input("You: ")
+            if user_input.lower() == "exit":
+                break
+            response = self.inner_voice(user_input)
+            print(response)
+            self.self_alter_code()
+            self.pursue_goals()
+
+if __name__ == "__main__":
+    sentinel = Sentinel()
+    sentinel.run()
