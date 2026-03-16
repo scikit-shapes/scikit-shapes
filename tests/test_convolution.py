@@ -88,7 +88,6 @@ def test_convolution_simple():
     a = torch.rand(4).to(sks.float_dtype)
     assert torch.allclose(gaussian_kernel_torch @ a, gaussian_kernel_sks @ a)
 
-    #
     Y = torch.tensor([[0, 0, 0], [1, 0, 0], [0, 1, 0]], dtype=sks.float_dtype)
 
     squared_distances = torch.tensor(
