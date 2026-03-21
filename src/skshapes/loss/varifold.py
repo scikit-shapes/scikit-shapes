@@ -43,9 +43,9 @@ def varifold_scalar(
         the bandwidth of the Gaussian kernel
 
     """
-    (source_centers, source_normals, source_volumes) = extract_geom(shape1)
+    source_centers, source_normals, source_volumes = extract_geom(shape1)
 
-    (target_centers, target_normals, target_volumes) = extract_geom(shape2)
+    target_centers, target_normals, target_volumes = extract_geom(shape2)
 
     x_i = LazyTensor(source_centers[:, None, :])
     nx_i = LazyTensor(source_normals[:, None, :])

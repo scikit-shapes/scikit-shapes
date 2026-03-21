@@ -24,7 +24,6 @@ else:
 # int dtype is int64
 int_dtype = torch.int64
 
-#
 
 try:
     import taichi
