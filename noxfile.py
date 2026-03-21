@@ -1,9 +1,16 @@
+#!/usr/bin/env -S uv run --script
+
+# /// script
+# dependencies = ["nox"]
+# ///
+
 import nox
 
 # If a package is not installed in the virtualenv, raise an error
 # (default is False and the package is loaded from the system)
 nox.options.error_on_external_run = True
-
+nox.needs_version = "2025.10.14"
+nox.options.default_venv_backend = "uv|virtualenv"
 
 # From https://github.com/facebookresearch/hydra/blob/main/noxfile.py
 def install_cpu_torch(session: nox.Session) -> None:
@@ -51,3 +58,7 @@ def documentation(session: nox.Session) -> None:
 
     session.run("sphinx-apidoc",  "-o",  "doc/source/api/", "--module-first", "--force", "src/skshapes")
     session.run("sphinx-build", "-b", "html", "doc/source/", "doc/_build/html")
+
+
+if __name__ == "__main__":
+    nox.main()

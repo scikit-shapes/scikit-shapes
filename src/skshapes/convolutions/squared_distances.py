@@ -70,13 +70,13 @@ class KeOpsSquaredDistances:
             point_labels = grid_cluster(points, bin_size)
 
             # Compute the ranges and centroids associated to the bins
-            x_ranges, x_centroids, weights_c = cluster_ranges_centroids(
+            x_ranges, x_centroids, _weights_c = cluster_ranges_centroids(
                 points, point_labels
             )
 
             # To fit the block-sparse structure of our kernel, we will need to
             # sort the points to make clusters contiguous in memory.
-            sorted_labels, perm = torch.sort(point_labels.view(-1))
+            _sorted_labels, perm = torch.sort(point_labels.view(-1))
             sorted_points = points[perm]
             # Invert the permutation
             _, inv_perm = torch.sort(perm)

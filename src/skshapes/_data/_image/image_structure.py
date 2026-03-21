@@ -171,7 +171,7 @@ def _apply_pointwise_binary_operation(
         raise TypeError(msg)
 
 
-class ImageStructure(GridStructure):
+class ImageStructure(GridStructure):  # noqa: PLW1641 (no __hash__ method)
     @convert_inputs
     @typecheck
     def __init__(

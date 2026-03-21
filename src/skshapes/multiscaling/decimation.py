@@ -137,7 +137,7 @@ class Decimation:
 
         (
             decimated_points,
-            decimated_triangles,
+            _decimated_triangles,
             collapses,
         ) = fast_simplification.simplify(
             points=points,

@@ -9,9 +9,9 @@ from pathlib import Path
 from sphinx_gallery.sorting import ExplicitOrder
 
 # Allow to import local modules
-sys.path.insert(0, str(Path().resolve()))
-sys.path.insert(0, str(Path(__file__).parent.resolve()))
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.resolve()))
+sys.path.insert(0, str(Path().cwd()))
+sys.path.insert(0, str(Path(__file__).parent.cwd()))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.cwd()))
 sys.path.insert(0, str(Path(__file__).parent / "_ext"))
 # conf_module is where we define dynamic_scraper and reset_pyvista
 # pyvista configuration

@@ -16,8 +16,8 @@ def add_features(polydata: pv.PolyData, features: dict) -> None:
         Dictionary of (N) np.ndarray containing the features to add to the Polydata.
 
     """
-    for ft in features:
-        polydata[ft] = features[ft]  # TODO harmoniser shape
+    for ft, _value in features.items():
+        polydata[ft] = _value  # TODO harmoniser shape
 
 
 def graph_polyline(adjmatrix: scipy.sparse.csr_array, pos: np.ndarray, features: dict | None = None) -> pv.PolyData:

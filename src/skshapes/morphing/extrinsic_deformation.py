@@ -162,7 +162,7 @@ class ExtrinsicDeformation(BaseModel):
 
             if len(y_0) == 3:
                 (
-                    path_p,
+                    _path_p,
                     path_q,
                     path_pts,
                 ) = odeint(
@@ -178,7 +178,7 @@ class ExtrinsicDeformation(BaseModel):
 
             if len(y_0) == 2:
                 (
-                    path_p,
+                    _path_p,
                     path_q,
                 ) = odeint(
                     func=self.ode_module,

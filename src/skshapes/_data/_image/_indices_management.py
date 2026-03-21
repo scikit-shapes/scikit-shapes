@@ -168,7 +168,7 @@ def flatten_grid(grid: torch.Tensor, *, shape: ImageShape) -> torch.Tensor:
         Flattened tensor of shape ``(Q,)`` or ``(Q,V_1,...,V_K)``, with ``Q = X_1*...*X_D``.
 
     """
-    return grid.reshape((-1,) + grid.shape[len(shape) :])
+    return grid.reshape((-1, *grid.shape[len(shape) :]))
 
 
 @typecheck
@@ -802,7 +802,7 @@ def shift_indices(
 
         # (N,C_1,...,C_L)
         new_indices = torch.zeros(
-            size=(flat_indices.shape[0],) + offsets.shape[:-1],
+            size=(flat_indices.shape[0], *offsets.shape[:-1]),
             dtype=torch.int64,
             device=device,
         )
@@ -810,7 +810,7 @@ def shift_indices(
         for axis in range(dim):
             new_axis_coords = (
                 (flat_indices // periods[axis]) % shape[axis]
-            ).repeat((1,) + offsets.shape[:-1])
+            ).repeat((1, *offsets.shape[:-1]))
             new_axis_coords.add_(offsets[None, ..., axis])
             new_axis_coords.clamp_(
                 torch.tensor(0, device=device), shape[axis] - 1
@@ -943,9 +943,9 @@ def neighborhood_values(
 
     # Initialize the neighborhood values with the input constant (or with zeros if the constant is None)
     values_shape = (
-        (flat_mask_indices.shape[0],)
-        + offsets.shape[:-1]
-        + flat_values.shape[1:]
+        flat_mask_indices.shape[0],
+        *offsets.shape[:-1],
+        *flat_values.shape[1:],
     )
     if constant is None:
         values = torch.zeros(

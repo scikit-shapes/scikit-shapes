@@ -428,7 +428,7 @@ def _init_pca_alignment_scale(
 
     def compute_pca(points):
         centered = points - torch.mean(points, dim=0)
-        U, S, Vt = torch.linalg.svd(centered.T @ centered)
+        U, _S, _Vt = torch.linalg.svd(centered.T @ centered)
         return U
 
     source_axes = compute_pca(source_points)
@@ -459,7 +459,7 @@ def _init_pca_alignment(
 
     def compute_pca(points):
         centered = points - torch.mean(points, dim=0)
-        U, S, Vt = torch.linalg.svd(centered.T @ centered)
+        U, _S, _Vt = torch.linalg.svd(centered.T @ centered)
         return U
 
     source_axes = compute_pca(source_points)

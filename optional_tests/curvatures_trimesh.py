@@ -1,7 +1,7 @@
-# ruff: noqa
+# ruff: noqa: T201 (print statements for debugging)
 
-import pytest
 import numpy as np
+import pytest
 
 import skshapes as sks
 
@@ -39,7 +39,7 @@ def test_sphere_trimesh():
         return Hs, Ks
 
     def plot_histogram_curvatures(curvs_1, curvs_2):
-        fig, axs = plt.subplots(1, 2, figsize=(6, 3))
+        _fig, axs = plt.subplots(1, 2, figsize=(6, 3))
         # Display statistics on curvs_1
         for curv in [curvs_1, curvs_2]:
             print(
@@ -107,7 +107,7 @@ def test_sphere_trimesh():
                 "kmin:",
                 kmin.mean(),
             )
-        print("")
+        print()
 
     # print(shape_sks.triangle_normals)
     # print(shape_sks.point_normals(scale=None))

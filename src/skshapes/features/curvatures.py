@@ -402,7 +402,7 @@ def _point_quadratic_fits(
     assert Xm.shape == (N, 3)
 
     # Local quadratic coefficients in tangent space:
-    coefs, nuv, r2 = self.point_quadratic_coefficients(scale=scale, **kwargs)
+    coefs, nuv, _r2 = self.point_quadratic_coefficients(scale=scale, **kwargs)
     assert coefs.shape == (N, 6)
     for key in ["n", "u", "v"]:
         assert nuv[key].shape == (N, 3)
@@ -677,7 +677,7 @@ def _point_mean_gauss_curvatures(
         assert Xm.shape == (N, 3)
 
         # Local quadratic coefficients in tangent space:
-        coefs, nuv, r2 = self.point_quadratic_coefficients(
+        coefs, nuv, _r2 = self.point_quadratic_coefficients(
             scale=scale, **kwargs
         )
         assert coefs.shape == (N, 6)

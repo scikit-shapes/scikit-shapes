@@ -30,6 +30,43 @@ dependencies = [
 taichi = ["taichi"]
 all = ["skshapes[taichi]"] # https://stackoverflow.com/questions/75490231/pip-pyproject-toml-can-optional-dependency-groups-require-other-optional-depend
 
+[dependency-groups]
+test = [
+  "black",
+  "flake8",
+  "hypothesis",
+  "pre-commit",
+  "pytest",
+  "pytest-cov",
+  "pytest-sphinx @ git+https://github.com/jeanfeydy/pytest-sphinx.git",
+]
+dev = [
+  { include-group = "test" },
+]
+docs = [
+  "furo",
+  "myst_parser>=0.13",
+  # To generate GIFs
+  "imageio",
+  # Sphinx + theme/plugins
+  "sphinx>=4.0",
+  "sphinx-autodoc-typehints",
+  "sphinx-copybutton",
+  "sphinx-design",
+  "sphinx-gallery<= 0.15.0",
+  "sphinx-math-dollar",
+  "sphinx-rtd-theme",
+  # To generate interactive scenes
+  "ipython",
+  "jupyterlab",
+  "trame",
+  "trame_vtk",
+  "trame_vuetify",
+  # For multiscale registration example, could be nice to have another implementation of
+  # projection on surface mesh in the future
+  "trimesh",
+  "rtree",
+]
 
 [project.urls]
 Documentation = "https://scikit-shapes.github.io/scikit-shapes/"
@@ -37,8 +74,10 @@ Repository = "https://github.com/scikit-shapes/scikit-shapes"
 
 [tool.black]
 line-length = 79
+target-version = ["py311", "py312", "py313"]
 
 [tool.pytest.ini_options]
+log_level = "INFO"
 minversion = "6.0"
 addopts = [
     "-ra",
@@ -72,11 +111,13 @@ testpaths = [
 
 [tool.repo-review]
 ignore = [
+    "PY004", # doc/ instead of docs/
     "PC140", # MyPy
     "PC170", # PyGrep (because no rst files)
     "PC180", # Prettier
     "MY", # MyPy
-    "RTD" # ReadTheDocs
+    "RTD", # ReadTheDocs
+    "RF003", # Let me be explicit about the "src" directory in the config below
     ]
 
 
@@ -116,6 +157,8 @@ ignore = [
   "PYI041",   # Use `float` instead of `int | float
   "RET505",   # Unnecessary `elif`/`else` after `return` statement
   "C408",     # Allow for dict(a=1) instead of {"a": 1}
+  "PLC0415",  # Allow for local imports to avoid circular imports
+  "PGH004",   # Allow ruff: noqa
 ]
 typing-modules = ["skshapes.types"]
 

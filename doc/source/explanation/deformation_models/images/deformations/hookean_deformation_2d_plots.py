@@ -359,7 +359,7 @@ def create_animation(deformation_type: str) -> None:
 
     fig_height = max(4, min(8, fig_height))
 
-    fig, ax = setup_clean_figure(
+    _fig, ax = setup_clean_figure(
         figsize=(fig_width, fig_height), xlim=(xmin, xmax), ylim=(ymin, ymax)
     )
 

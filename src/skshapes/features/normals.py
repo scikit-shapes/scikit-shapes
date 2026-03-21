@@ -399,4 +399,4 @@ def tangent_vectors(normals) -> FloatTensor:
     uv = torch.stack(
         (1 + s * x * x * a, s * b, -s * x, b, s + y * y * a, -y), dim=-1
     )
-    return uv.view(uv.shape[:-1] + (2, 3))
+    return uv.view((*uv.shape[:-1], 2, 3))

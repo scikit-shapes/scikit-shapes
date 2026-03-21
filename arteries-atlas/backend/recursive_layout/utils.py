@@ -75,7 +75,7 @@ def solve_next_collisions(branched_trajectories, cuts, end_angles, bounds):
 
 
 def _solve_next_trajectory_collisions(trajectories, cuts):
-    trepassing_trajectories, trepassing_indices = multiple_paths_collisions(list(trajectories))
+    trepassing_trajectories, _trepassing_indices = multiple_paths_collisions(list(trajectories))
 
     still_collisions = False
     if trepassing_trajectories.size > 0:
