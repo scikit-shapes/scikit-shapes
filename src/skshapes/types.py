@@ -49,7 +49,7 @@ IntTensorArray = JaxInt[torch.Tensor, "_"]
 Float1dTensor = JaxFloat[torch.Tensor, "_"]
 Float2dTensor = JaxFloat[torch.Tensor, "_ _"]
 Float3dTensor = JaxFloat[torch.Tensor, "_ _ _"]
-FloatScalar = JaxFloat[torch.Tensor, ""]
+FloatScalar = float | JaxFloat[torch.Tensor, ""]
 Int1dTensor = JaxInt[torch.Tensor, "_"]
 
 FloatSequence = (

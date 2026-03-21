@@ -68,7 +68,7 @@ class Image(ImageStructure):
 
     .. testcode::
 
-        print(shape.dim)
+        print(image.dim)
 
     .. testoutput::
 
@@ -76,7 +76,7 @@ class Image(ImageStructure):
 
     .. testcode::
 
-        print(shape.values_shape)
+        print(image.values_shape)
 
     .. testoutput::
 
@@ -84,7 +84,7 @@ class Image(ImageStructure):
 
     .. testcode::
 
-        print(shape.values_dim)
+        print(image.values_dim)
 
     .. testoutput::
 

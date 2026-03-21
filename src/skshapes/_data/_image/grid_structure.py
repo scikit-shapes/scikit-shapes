@@ -9,7 +9,7 @@ class GridStructure:
     @convert_inputs
     @typecheck
     def __init__(self, shape: tuple[int, ...], device: torch.device) -> None:
-        self._shape = shape
+        self._shape = tuple(shape)
         self._device = device
 
         self._dim = len(shape)

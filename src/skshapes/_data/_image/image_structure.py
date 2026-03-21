@@ -184,7 +184,7 @@ class ImageStructure(GridStructure):
     ) -> None:
         super().__init__(shape=shape, device=device)
 
-        self._values_shape = values_shape
+        self._values_shape = tuple(values_shape)
 
         self._values_dim = len(values_shape)
         self._full_shape = self._shape + self._values_shape
