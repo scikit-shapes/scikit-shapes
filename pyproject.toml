@@ -16,7 +16,7 @@ dependencies = [
     "pykeops",
     "geomloss",
     "jaxtyping",
-    "beartype==0.17.2",
+    "beartype",
     "pyvista",
     "vedo",
     "fast-simplification",

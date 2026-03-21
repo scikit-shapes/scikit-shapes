@@ -177,7 +177,7 @@ def smooth_curvatures_2(
     batch=None,
     normals: Points | None = None,
     reg: Number = 0.01,
-) -> dict[FloatTensor]:
+) -> dict[str, FloatTensor]:
     """Curvature as a dictionary of tensors for mean and Gauss."""
     # Number of points:
     N = points.shape[0]
