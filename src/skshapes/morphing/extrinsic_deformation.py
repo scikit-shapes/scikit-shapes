@@ -127,7 +127,6 @@ class ExtrinsicDeformation(BaseModel):
             raise ShapeError(msg)
 
         p = parameter
-        p.requires_grad = True
 
         if self.control_points is False or shape.control_points is None:
             q = shape.points.clone()
@@ -136,7 +135,12 @@ class ExtrinsicDeformation(BaseModel):
             points = shape.points.clone()
             q = shape.control_points.points.clone()
             points.requires_grad = True
-        q.requires_grad = True
+
+        if not p.requires_grad:
+            p.requires_grad = True
+
+        if not q.requires_grad:
+            q.requires_grad = True
 
         # Compute the regularization
         regularization = torch.tensor(0.0, device=shape.device)

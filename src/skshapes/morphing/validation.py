@@ -1,11 +1,13 @@
 """Validation utilities for morphing module."""
 
+from math import prod
 from typing import Any
 
 import torch
+import torch.random
 
 from ..input_validation import typecheck
-from ..types import shape_type
+from ..types import float_dtype, shape_type
 from .basemodel import BaseModel
 
 
@@ -19,7 +21,7 @@ def validate_polydata_morphing_model(model: Any, shape: shape_type) -> None:
 
     It checks that the parameter tensor can be initialized automatically from the
     model and that the `morph` induces a transformation that is differentiable
-    with respect to the parameter.
+    with respect to the parameter, even if the parameter is a non-leaf variable.
 
     Parameters
     ----------
@@ -53,9 +55,17 @@ def validate_polydata_morphing_model(model: Any, shape: shape_type) -> None:
         error_msg = "The model must have a method parameter_shape"
         raise NotImplementedError(error_msg)
 
-    # Initialize parameter with zeros, inferring shape from model
-    parameter = model.inital_parameter(shape=shape)
-    parameter.requires_grad = True
+    # Initialize the parameter as a non leaf variable
+    # (See PR https://github.com/scikit-shapes/scikit-shapes/pull/60)
+    # x -> parameter -> morph() -> loss
+    # and check that the gradient is actually propagated from loss
+    # to x
+    parameter_shape = list(model.parameter_shape(shape=shape))
+
+    x = torch.rand(parameter_shape[0], dtype=float_dtype)
+    x.requires_grad = True
+
+    parameter = x.repeat(prod(parameter_shape[1:])).reshape(parameter_shape)
 
     # Apply morphing and compute a dummy loss function
     output = model.morph(
@@ -64,6 +74,6 @@ def validate_polydata_morphing_model(model: Any, shape: shape_type) -> None:
     loss = torch.sum(output.morphed_shape.points)
     loss.backward()
 
-    # Check that the gradient has the same shape as the parameter
+    # Check that the gradient has the same shape as the leaf variable parameter
     # (torch will raise an error here if parameter grad is not defined)
-    assert parameter.grad.shape == parameter.shape
+    assert x.grad.shape == x.shape
