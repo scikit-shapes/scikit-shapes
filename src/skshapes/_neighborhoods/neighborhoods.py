@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from functools import partial
 
-from pydantic import BaseModel
-
 from ..input_validation import typecheck
 from ..linear_operators import LinearOperator
 from ..types import (
@@ -13,7 +11,7 @@ from ..types import (
 from .spectrum import Spectrum
 
 
-class DiffusionParameters(BaseModel):
+class DiffusionParameters:
     method: Literal["implicit euler", "exponential", "spectral"]
 
 
