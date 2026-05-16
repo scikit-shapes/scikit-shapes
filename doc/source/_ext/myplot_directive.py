@@ -191,6 +191,8 @@ mpl.use("agg")
 
 __version__ = 2
 
+# ruff: noqa: UP031
+
 
 # -----------------------------------------------------------------------------
 # Registration hook
@@ -326,7 +328,7 @@ def contains_doctest(text):
         return False
     except SyntaxError:
         pass
-    r = re.compile(r'^\s*>>>', re.M)
+    r = re.compile(r'^\s*>>>', re.MULTILINE)
     m = r.search(text)
     return bool(m)
 
@@ -494,7 +496,6 @@ def _run_code(code, code_path, ns=None, function_name=None):
     name, if function_name is not None.
     """
 
-    from pathlib import Path
     # Change the working directory to the directory of the example, so
     # it can get at its data files, if any.  Add its path to sys.path
     # so it can import any helper modules sitting beside it.
@@ -575,7 +576,7 @@ def get_plot_formats(config):
         elif isinstance(fmt, tuple | list) and len(fmt) == 2:
             formats.append((str(fmt[0]), int(fmt[1])))
         else:
-            raise PlotError('invalid image format "%r" in plot_formats' % fmt)  # noqa: UP031
+            raise PlotError('invalid image format "%r" in plot_formats' % fmt)
     return formats
 
 
@@ -789,7 +790,7 @@ def run(arguments, content, options, state_machine, state, lineno):
         code = textwrap.dedent("\n".join(map(str, content)))
         counter = document.attributes.get('_plot_counter', 0) + 1
         document.attributes['_plot_counter'] = counter
-        base, ext = os.path.splitext(os.path.basename(source_file_name))  # noqa: PTH119, PTH122
+        base, _ext = os.path.splitext(os.path.basename(source_file_name))  # noqa: PTH119, PTH122
         output_base = '%s-%d.py' % (base, counter)
         function_name = None
         caption = options.get('caption', '')

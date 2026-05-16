@@ -409,7 +409,7 @@ class OldNeighborhoods(neighborhoods_type):
     def _smooth_without_scaling(
         self, signal: PointVectorSignals
     ) -> PointVectorSignals:
-        if self.smoothing_method in ["exp(x)=1/(1-x)"]:
+        if self.smoothing_method == "exp(x)=1/(1-x)":
             # Implements a step of implicit Euler integration for the heat equation.
             # This corresponds to applying a linear operator with the same
             # eigenvectors as the Laplacian, but with eigenvalues lambda_i <= 0

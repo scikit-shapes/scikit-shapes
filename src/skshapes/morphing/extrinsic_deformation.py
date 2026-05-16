@@ -90,7 +90,7 @@ class ExtrinsicDeformation(BaseModel):
         parameter: Points,
         return_path: bool = False,
         return_regularization: bool = False,
-        final_time: float = 1.0,
+        final_time: FloatScalar = 1.0,
     ) -> MorphingOutput:
         """Morph a shape using the kernel deformation algorithm.
 
@@ -162,7 +162,7 @@ class ExtrinsicDeformation(BaseModel):
 
             if len(y_0) == 3:
                 (
-                    path_p,
+                    _path_p,
                     path_q,
                     path_pts,
                 ) = odeint(
@@ -178,7 +178,7 @@ class ExtrinsicDeformation(BaseModel):
 
             if len(y_0) == 2:
                 (
-                    path_p,
+                    _path_p,
                     path_q,
                 ) = odeint(
                     func=self.ode_module,
@@ -236,7 +236,7 @@ class ExtrinsicDeformation(BaseModel):
         return torch.sum(p * (K @ p)) / 2
 
     @typecheck
-    def ode_func(self, t: float, y: type_y) -> type_y:  # noqa: ARG002
+    def ode_func(self, t: FloatScalar, y: type_y) -> type_y:  # noqa: ARG002
         """ODE function."""
         if len(y) == 2:
             p, q = y
@@ -355,6 +355,6 @@ class ODEModule(torch.nn.Module):
         super().__init__()
         self.func = func
 
-    def __call__(self, t: float, y: type_y) -> type_y:
+    def __call__(self, t: FloatScalar, y: type_y) -> type_y:
         """Call the ODE function."""
         return self.func(t, y)

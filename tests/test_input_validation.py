@@ -16,7 +16,7 @@ def func_one_and_only_one(a: int | None = None, b: int | None = None):
     info("b = %s", b)
 
 
-def test_one_and_only_one_decorator(func=func_one_and_only_one):
+def test_one_and_only_one_decorator():
     """Test the one_and_only_one decorator.
 
     This test checks that the one_and_only_one decorator raises an error
@@ -24,6 +24,7 @@ def test_one_and_only_one_decorator(func=func_one_and_only_one):
     specified in the decorator or when none of the arguments is specified.
 
     """
+    func = func_one_and_only_one
     func(a=1)  # ok
     func(b=1)  # ok
     with pytest.raises(InputStructureError):
@@ -44,7 +45,7 @@ def func_no_more_than_one(a: int | None = None, b: int | None = None):
     info("b = %s", b)
 
 
-def test_no_more_than_one(func=func_no_more_than_one):
+def test_no_more_than_one():
     """Test the no_more_than_one decorator.
 
     This test checks that the no_more_than_one decorator raises an error
@@ -52,6 +53,7 @@ def test_no_more_than_one(func=func_no_more_than_one):
     specified in the decorator.
 
     """
+    func = func_no_more_than_one
     func(a=1)  # ok
     func(b=1)  # ok
     func()  # ok

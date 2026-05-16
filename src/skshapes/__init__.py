@@ -1,6 +1,6 @@
 """Scikit-Shapes: shape analysis in python."""
 
-from ._data import Circle, PolyData, Sphere
+from ._data import Circle, Image, Mask, PolyData, SparseImage, Sphere
 from ._features import *
 from ._neighborhoods import *
 from .applications import *
@@ -11,6 +11,7 @@ from .globals import (
     int_dtype,
     taichi_available,
 )
+from .images import *
 from .input_validation import *
 from .linear_operators import *
 from .loss import *
@@ -24,21 +25,28 @@ from .types import *
 __version__ = "0.3.1"
 
 __all__ = [
-    "PolyData",
-    "Sphere",
     "Circle",
+    "Circle",
+    "Image",
+    "Mask",
     "Neighborhoods",
+    "PolyData",
+    "SparseImage",
     "Spectrum",
-    "types",
-    "convolutions",
+    "Sphere",
     "applications",
-    "triangle_mesh",
+    "convolutions",
+    "features",
+    "images",
+    "input_validation",
+    "linear_operators",
     "loss",
     "morphing",
-    "linear_operators",
+    "multiscaling",
     "neighborhoods",
     "optimization",
-    "multiscaling",
     "tasks",
-    "input_validation",
+    "triangle_mesh",
+    "types",
+    "types",
 ]

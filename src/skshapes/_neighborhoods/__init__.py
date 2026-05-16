@@ -9,8 +9,8 @@ from .spectrum import Spectrum
 from .trivial_neighborhoods import TrivialNeighborhoods
 
 __all__ = [
+    "Neighborhoods",
     "OldNeighborhoods",
     "Spectrum",
-    "Neighborhoods",
     "_point_neighborhoods",
 ]

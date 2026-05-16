@@ -129,7 +129,7 @@ class Neighborhoods:
     - :math:`Q = (I + \Delta)^{-1}` for implicit Euler integration of the heat equation,
       where $I$ is the identity operator on $\mathcal{F}$.
 
-    The Laplacian $\Delta$, smoothing $S$ and diffusion $Q$ are all symmmetric with respect to the mass matrix $M$.
+    The Laplacian $\Delta$, smoothing $S$ and diffusion $Q$ are all symmetric with respect to the mass matrix $M$.
     This means that for all functions $f$ and $g$ in $\mathcal{F}$, we have:
 
     .. math::

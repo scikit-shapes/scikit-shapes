@@ -222,7 +222,7 @@ def compute_coordinates(
 
     mesh = Trimesh(vertices=vertices, faces=faces)
 
-    closest, distance, triangle_id = closest_point(
+    closest, _distance, triangle_id = closest_point(
         mesh=mesh, points=fine_points
     )
 

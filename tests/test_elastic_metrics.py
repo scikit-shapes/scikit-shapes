@@ -70,14 +70,14 @@ def test_metric_validation():
 
     with pytest.raises(
         ValueError,
-        match="The metric must be differentiable wrt the velocities.",
+        match=r"The metric must be differentiable wrt the velocities.",
     ):
         metric_validation(invalid_metric_diff)
 
-    with pytest.raises(ValueError, match="The metric must return a tensor."):
+    with pytest.raises(ValueError, match=r"The metric must return a tensor."):
         metric_validation(invalid_metric_numpy_output)
 
-    with pytest.raises(ValueError, match="The metric must return a scalar."):
+    with pytest.raises(ValueError, match=r"The metric must return a scalar."):
         metric_validation(invalid_metric_not_scalar)
 
     metric_validation(valid_metric)

@@ -1,15 +1,14 @@
 """Polygonal data (point clouds, curves, surfaces), segmentation maps and images."""
 
 from math import pi
-from typing import Union
 
 import pyvista
 import torch
 
 from ..input_validation import typecheck
 from ..types import polydata_type
+from ._image import Image, Mask, SparseImage
 from .data_attributes import DataAttributes
-from .image import Image
 from .polydata import PolyData
 
 Shape = PolyData | Image

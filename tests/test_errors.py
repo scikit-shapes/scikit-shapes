@@ -154,7 +154,7 @@ def test_errors_decimation():
         pointcloud.resample(ratio=0.1)
 
     with pytest.raises(
-        ValueError, match="n_points must be lower than mesh.n_points"
+        ValueError, match=r"n_points must be lower than mesh.n_points"
     ):
         mesh_1.resample(n_points=100000)
 

@@ -333,8 +333,8 @@ def test_cotan_weigths():
     }
 
     # Check the cotan weights
-    for key in expected_cotan_weights:
-        assert torch.isclose(cotan_weights[key], expected_cotan_weights[key])
+    for key, _value in expected_cotan_weights.items():
+        assert torch.isclose(cotan_weights[key], _value)
 
 
 test_cotan_weigths()
