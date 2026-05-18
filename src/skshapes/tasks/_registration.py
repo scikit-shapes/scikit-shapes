@@ -1,4 +1,5 @@
 # Draft for our new, object-oriented API
+from ..input_validation import one_and_only_one
 
 
 class Registration:
@@ -18,15 +19,17 @@ class Registration:
         self.tol = tol
 
     def preprocess(self):
-        pass
+        # N.B.: Under the hood, we may call custom setters
+        self.source_module.base_shape_ = self.source_
+        self.target_module.base_shape_ = self.target_
 
     def postprocess(self):
         pass
 
     def training_step(self):
         # "Shooting" step: apply the parametrics transformations to the source and target
-        source_registered = self.source_module(self.source_)
-        target_registered = self.target_module(self.target_)
+        source_registered = self.source_module.morphed_shape_
+        target_registered = self.target_module.morphed_shape_
 
         # "Matching" step: compute the coupling between the registered source and target
         # This usually corresponds to a closest point matching,
@@ -49,13 +52,21 @@ class Registration:
         self.target_module.fit(target_correspondences, step_size=0.5)
 
     @property
-    def has_converged(self):
+    def has_converged_(self):
         return False
+
+    @property
+    def penalty_(self):
+        return (
+            self.loss.penalty_
+            + self.source_module.penalty_
+            + self.target_module.penalty_
+        )
 
     @property
     def training_schedule(self):
         for _it in range(self.max_iter):
-            if self.has_converged:
+            if self.has_converged_:
                 return
 
             # By default, we just yield self without any modification.
@@ -76,3 +87,18 @@ class Registration:
         self.postprocess()
 
         return self
+
+    @one_and_only_one(["source_signal", "target_signal"])
+    def transfer(
+        self,
+        *,
+        source_signal=None,
+        target_signal=None,
+        reg=None,
+    ):
+        if source_signal is not None:
+            # Transfer from the source to the target
+            return self.loss.transfer(source_signal=source_signal, reg=reg)
+        else:
+            # Transfer from the target to the source
+            return self.loss.transfer(target_signal=target_signal, reg=reg)

@@ -181,6 +181,7 @@ def test_convolution_functional(
     assert torch.allclose(A, B, atol=1e-4)
 
 
+@torch.sparse.check_sparse_tensor_invariants()
 def test_mesh_convolution_constant_signal():
     """Test that a constant signal is kept unchanged."""
     mesh = sks.Sphere()
