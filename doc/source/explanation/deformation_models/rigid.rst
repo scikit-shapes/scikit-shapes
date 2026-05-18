@@ -87,7 +87,7 @@ quadratic penalty of the form
 
 .. math::
 
-\text{Regularization}(\theta) ;=; |\theta|_{\Lambda}^{2},
+  \text{Regularization}(\theta) ;=; |\theta|_{\Lambda}^{2},
 
 where $\Lambda$ is a symmetric positive-definite matrix.  In the simplest case
 $\Lambda = \lambda I$ (ridge penalty) with a small $\lambda > 0$.

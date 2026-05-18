@@ -2,7 +2,7 @@ Scikit-Shapes: Shape analysis in Python
 =======================================
 
 Welcome to the documentation of Scikit-Shapes, an open source library for shape analysis in Python.
-Our source code is available on `GitHub <https://github.com/scikit-shapes/scikit-shapes>`_.
+Our source code is available on `GitHub <https://github.com/scikit-shapes/scikit-shapes>`__.
 
 To get started, check out the installation instructions and have a look at the examples.
 
@@ -15,7 +15,7 @@ To get started, check out the installation instructions and have a look at the e
 Licensing and citations
 -----------------------
 
-This library is licensed under the permissive `MIT license <https://en.wikipedia.org/wiki/MIT_License>`_,
+This library is licensed under the permissive `MIT license <https://en.wikipedia.org/wiki/MIT_License>`__,
 which is fully compatible with both **academic** and **commercial** applications.
 
 Scikit-Shapes provides a user-friendly interface for a collection of research papers,
@@ -42,22 +42,22 @@ Acknowledgements
 
 Authors:
 
-- `Jean Feydy <https://www.jeanfeydy.com/>`_ (2023-), project leader.
-- `Louis Pujol <https://www.linkedin.com/in/louis-pujol-722997225/>`_ (2023-24), core developer.
+- `Jean Feydy <https://www.jeanfeydy.com/>`__ (2023-), project leader.
+- `Louis Pujol <https://www.linkedin.com/in/louis-pujol-722997225/>`__ (2023-24), core developer.
 
 This library is maintained in the
-`HeKA team <https://team.inria.fr/heka/fr/>`_,
+`HeKA team <https://team.inria.fr/heka/fr/>`__,
 a joint research group between
-`INRIA <https://www.inria.fr/en>`_,
-`INSERM <https://www.inserm.fr/en>`_
+`INRIA <https://www.inria.fr/en>`__,
+`INSERM <https://www.inserm.fr/en>`__
 and the
-`Université Paris Cité <https://u-paris.fr/en/>`_.
+`Université Paris Cité <https://u-paris.fr/en/>`__.
 It is funded by
-`INRIA <https://inria.fr/en>`_, the
-`PRAIRIE-PSAI <https://prairie-institute.fr/>`_
+`INRIA <https://inria.fr/en>`__, the
+`PRAIRIE-PSAI <https://prairie-institute.fr/>`__
 institute,
 and is distributed under the permissive
-`MIT license <https://github.com/scikit-shapes/scikit-shapes/blob/main/LICENSE>`_.
+`MIT license <https://github.com/scikit-shapes/scikit-shapes/blob/main/LICENSE>`__.
 
 
 Content
