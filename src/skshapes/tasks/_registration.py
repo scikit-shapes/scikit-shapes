@@ -6,15 +6,17 @@ class Registration:
     def __init__(
         self,
         *,
-        loss,
+        coupling,
         source_module,
         target_module,
+        optimizer="alternating",
         max_iter=100,
         tol=0.0,
     ):
-        self.loss = loss
+        self.coupling = coupling
         self.source_module = source_module
         self.target_module = target_module
+        self.optimizer = optimizer
         self.max_iter = max_iter
         self.tol = tol
 
@@ -27,29 +29,43 @@ class Registration:
         pass
 
     def training_step(self):
-        # "Shooting" step: apply the parametrics transformations to the source and target
-        source_registered = self.source_module.morphed_shape_
-        target_registered = self.target_module.morphed_shape_
+        if self.optimizer == "alternating":
+            # "Shooting" step: apply the parametrics transformations to the source and target
+            source_registered = self.source_module.morphed_shape_
+            target_registered = self.target_module.morphed_shape_
 
-        # "Matching" step: compute the coupling between the registered source and target
-        # This usually corresponds to a closest point matching,
-        # or to an optimal transport solve.
-        self.loss.fit(source_registered, target_registered)
+            # "Matching" step: compute the coupling between the registered source and target
+            # This usually corresponds to a closest point matching,
+            # or to an optimal transport solve.
+            self.coupling.fit(source_registered, target_registered)
 
-        # Turn the coupling into correspondences.
-        # source_correspondences has the same shape and topology as self.source_,
-        # with additional "precision" attributes that specify a point-wise loss function
-        # and can be used to define a point-to-plane loss, for instance.
-        source_correspondences = self.loss.source_correspondences_
-        target_correspondences = self.loss.target_correspondences_
+            # Turn the coupling into correspondences.
+            # source_correspondences has the same shape and topology as self.source_,
+            # with additional "precision" attributes that specify a point-wise loss function
+            # and can be used to define a point-to-plane loss, for instance.
+            source_correspondences = self.coupling.source_correspondences_
+            target_correspondences = self.coupling.target_correspondences_
 
-        # Use the correspondences to update the parametric transformations.
-        # This is usually the compute-intensive part of the algorithm,
-        # involving a linear solve, an SVD decomposition, etc.
-        # step_size should be used to control the ratio between the source
-        # and target updates, without overshooting.
-        self.source_module.fit(source_correspondences, step_size=0.5)
-        self.target_module.fit(target_correspondences, step_size=0.5)
+            # Use the correspondences to update the parametric transformations.
+            # This is usually the compute-intensive part of the algorithm,
+            # involving a linear solve, an SVD decomposition, etc.
+            # step_size should be used to control the ratio between the source
+            # and target updates, without overshooting.
+            self.source_module.fit(source_correspondences, step_size=0.5)
+            self.target_module.fit(target_correspondences, step_size=0.5)
+
+        else:
+
+            def closure():
+                self.optimizer.zero_grad()
+                source_registered = self.source_module.morphed_shape_
+                target_registered = self.target_module.morphed_shape_
+                self.coupling.fit(source_registered, target_registered)
+                loss = self.penalty_
+                loss.backward()
+                return loss
+
+            self.optimizer.step(closure)
 
     @property
     def has_converged_(self):
@@ -58,7 +74,7 @@ class Registration:
     @property
     def penalty_(self):
         return (
-            self.loss.penalty_
+            self.coupling.penalty_
             + self.source_module.penalty_
             + self.target_module.penalty_
         )
@@ -98,7 +114,7 @@ class Registration:
     ):
         if source_signal is not None:
             # Transfer from the source to the target
-            return self.loss.transfer(source_signal=source_signal, reg=reg)
+            return self.coupling.transfer(source_signal=source_signal, reg=reg)
         else:
             # Transfer from the target to the source
-            return self.loss.transfer(target_signal=target_signal, reg=reg)
+            return self.coupling.transfer(target_signal=target_signal, reg=reg)
