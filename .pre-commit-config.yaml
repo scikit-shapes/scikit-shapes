@@ -32,7 +32,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: "26.3.1"
+    rev: "26.5.1"
     hooks:
       - id: black
         alias: black
@@ -49,7 +49,7 @@ repos:
           - black==24.10.0
 
   - repo: https://github.com/codespell-project/codespell
-    rev: "v2.4.2"
+    rev: "v2.4.3"
     hooks:
       - id: codespell
         args: ["-L", "sur,nd,fro", "--skip", "devdoc/*"]
@@ -60,13 +60,13 @@ repos:
   #     - id: numpydoc-validation
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.15.6"
+    rev: "v0.16.5"
     hooks:
       - id: ruff-check
         args: ["--fix", "--show-fixes"]
         # args: ["--fix", "--unsafe-fixes", "--show-fixes"]
 
   - repo: https://github.com/scientific-python/cookie
-    rev: 2026.03.02
+    rev: 2026.08.14
     hooks:
       - id: sp-repo-review
