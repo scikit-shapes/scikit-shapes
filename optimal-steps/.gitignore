@@ -1,0 +1,5 @@
+# Outputs of the scripts and of the notebook
+results/
+
+# macOS
+.DS_Store

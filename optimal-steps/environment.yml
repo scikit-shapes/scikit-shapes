@@ -1,0 +1,29 @@
+# conda env create -f environment.yml
+# conda activate diffeo_registration_env
+
+# if you get the error message :
+# CondaError: Run 'conda init' before 'conda activate'
+# do
+# source $(conda info --base)/etc/profile.d/conda.sh
+# and then activate the env
+
+name: diffeo_registration_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12.12
+  - cmake
+  - eigen
+  - pip
+  - pip:
+    - open3d==0.19.0
+    - pyvista==0.46.5
+    - pykeops==2.3
+    - keopscore==2.3
+    - torch==2.10.0
+    - scipy
+    - pooch
+    # for the notebook (or: pip install -e ".[notebook]")
+    - jupyter
+    - plotly
