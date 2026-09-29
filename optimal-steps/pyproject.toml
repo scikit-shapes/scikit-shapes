@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "optimal-steps-registration"
+version = "1.0.0"
+description = "Optimal Steps for Fast Diffeomorphic Shape Registration (MICCAI)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Hadrien Bigo-Balland" },
+    { name = "Jean Feydy" },
+    { name = "Tom Boeken" },
+]
+dependencies = [
+    "numpy>=1.24",
+    "torch>=2.1",
+    "pykeops>=2.2,<3",
+    "keopscore>=2.2,<3",
+    "open3d>=0.17",
+    "pyvista>=0.43",
+    "scipy>=1.10",
+    "pooch>=1.6",
+]
+
+[project.optional-dependencies]
+notebook = ["jupyter", "plotly>=5"]
+
+[project.scripts]
+register-shapes = "optimal_steps.cli:main"
+
+[tool.setuptools]
+packages = ["optimal_steps"]
+py-modules = ["register", "register_pair", "register_batch", "register_vertebrae", "register_lungs"]

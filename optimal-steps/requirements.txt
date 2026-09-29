@@ -1,0 +1,18 @@
+# Runtime dependencies (pip install -r requirements.txt)
+#
+# Pins are deliberately loose so the code can be installed into an existing
+# PyTorch/CUDA environment. The exact versions used for the paper are in
+# environment.yml (torch 2.10, pykeops 2.3, open3d 0.19, pyvista 0.46).
+#
+# Note: torch is listed without an index URL. If you need a specific CUDA
+# build, install torch first following https://pytorch.org/get-started/locally/
+# and then run `pip install -r requirements.txt` (the existing torch is kept).
+
+numpy>=1.24
+torch>=2.1
+pykeops>=2.2,<3
+keopscore>=2.2,<3
+open3d>=0.17
+pyvista>=0.43
+scipy>=1.10
+pooch>=1.6

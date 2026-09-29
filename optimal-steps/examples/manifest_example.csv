@@ -1,0 +1,4 @@
+source,target,source_label,target_label,id
+../data/templates_vertebrae/template_6.ply,../data/verse/dataset-01training/derivatives/sub-gl090/sub-gl090_dir-ax_seg-vert_msk.nii.gz,,6,gl090_C6
+../data/templates_vertebrae/template_7.ply,../data/verse/dataset-01training/derivatives/sub-gl090/sub-gl090_dir-ax_seg-vert_msk.nii.gz,,7,gl090_C7
+../data/templates_vertebrae/template_8.ply,../data/verse/dataset-01training/derivatives/sub-gl090/sub-gl090_dir-ax_seg-vert_msk.nii.gz,,8,gl090_T1
