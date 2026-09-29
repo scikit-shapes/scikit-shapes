@@ -37,7 +37,6 @@ from pathlib import Path
 
 import numpy as np
 import pyvista as pv
-
 from register_batch import (
     add_config_arguments,
     config_from_args,

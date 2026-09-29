@@ -2,7 +2,6 @@
 
 import time
 from dataclasses import dataclass, fields
-from typing import Optional, Union
 
 import numpy as np
 import pyvista as pv
@@ -20,27 +19,27 @@ class RegistrationResult:
     deformed_points: np.ndarray
     source_mesh: pv.PolyData
     deformed_mesh: pv.PolyData
-    rigid_transform: Optional[np.ndarray]
-    scale_factors: Optional[np.ndarray]
+    rigid_transform: np.ndarray | None
+    scale_factors: np.ndarray | None
     timings: dict
-    trajectory_q: Optional[np.ndarray] = None
-    model: Optional[DiffeomorphicRegistration] = None  # with return_history=True
-    target_mesh: Optional[pv.PolyData] = None
+    trajectory_q: np.ndarray | None = None
+    model: DiffeomorphicRegistration | None = None  # with return_history=True
+    target_mesh: pv.PolyData | None = None
 
 
 def register(
-    source: Union[str, pv.PolyData],
-    target: Union[str, pv.PolyData],
-    source_landmark_indices: Optional[np.ndarray] = None,
-    target_landmark_indices: Optional[np.ndarray] = None,
-    config: Optional[RegistrationConfig] = None,
-    source_label: Optional[int] = None,
-    target_label: Optional[int] = None,
-    max_points: Optional[int] = None,
+    source: str | pv.PolyData,
+    target: str | pv.PolyData,
+    source_landmark_indices: np.ndarray | None = None,
+    target_landmark_indices: np.ndarray | None = None,
+    config: RegistrationConfig | None = None,
+    source_label: int | None = None,
+    target_label: int | None = None,
+    max_points: int | None = None,
     rigid_align: bool = True,
     return_history: bool = False,
-    source_features: Optional[Union[np.ndarray, torch.Tensor]] = None,
-    target_features: Optional[Union[np.ndarray, torch.Tensor]] = None,
+    source_features: np.ndarray | torch.Tensor | None = None,
+    target_features: np.ndarray | torch.Tensor | None = None,
 ) -> RegistrationResult:
 
     if config is None:

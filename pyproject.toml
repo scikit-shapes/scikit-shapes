@@ -124,6 +124,9 @@ ignore = [
 # See: https://learn.scientific-python.org/development/guides/style/#PC190
 [tool.ruff]
 src = ["src"]
+exclude = [
+    "optimal-steps",
+]
 
 [tool.ruff.lint]
 extend-select = [

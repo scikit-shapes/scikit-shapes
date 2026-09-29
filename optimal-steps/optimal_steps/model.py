@@ -1,14 +1,18 @@
 """The diffeomorphic registration of the paper: matching, regularisation, deformation."""
 
 import logging
-from typing import Optional, Union
 
 import numpy as np
 import pyvista as pv
 import torch
 from pykeops.torch import LazyTensor
 
-from .config import LAMBDA_REG_REFERENCE_POINTS, RegistrationConfig, per_scale, resolve_device
+from .config import (
+    LAMBDA_REG_REFERENCE_POINTS,
+    RegistrationConfig,
+    per_scale,
+    resolve_device,
+)
 from .geometry import compute_vertex_areas, get_average_edge_length
 from .losses import LOSSES
 from .matching import compute_fpfh, effective_targets
@@ -33,8 +37,8 @@ class DiffeomorphicRegistration:
         source_mesh: pv.PolyData,
         target_mesh: pv.PolyData,
         config: RegistrationConfig,
-        source_features: Optional[Union[np.ndarray, torch.Tensor]] = None,
-        target_features: Optional[Union[np.ndarray, torch.Tensor]] = None,
+        source_features: np.ndarray | torch.Tensor | None = None,
+        target_features: np.ndarray | torch.Tensor | None = None,
         source_landmark_indices=None,
         target_landmark_indices=None,
     ):
@@ -223,8 +227,8 @@ class DiffeomorphicRegistration:
         self,
         points: torch.Tensor,
         normals: torch.Tensor,
-        fpfh: Optional[torch.Tensor] = None,
-        custom: Optional[torch.Tensor] = None,
+        fpfh: torch.Tensor | None = None,
+        custom: torch.Tensor | None = None,
     ) -> torch.Tensor:
         # Single place where a feature vector is assembled, for the source and
         # the target alike: the two sides then carry the same blocks in the same

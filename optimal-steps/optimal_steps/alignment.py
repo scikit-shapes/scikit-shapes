@@ -1,7 +1,6 @@
 """Rigid + anisotropic pre-alignment (RANSAC on FPFH features, then ICP)."""
 
 import logging
-from typing import Tuple
 
 import numpy as np
 import open3d as o3d
@@ -12,7 +11,7 @@ def align_rigid(
     source: pv.PolyData,
     target: pv.PolyData,
     voxel_size: float = 2.0,
-) -> Tuple[pv.PolyData, np.ndarray, np.ndarray]:
+) -> tuple[pv.PolyData, np.ndarray, np.ndarray]:
 
     logger = logging.getLogger(__name__)
 

@@ -20,8 +20,8 @@ import time
 from pathlib import Path
 
 from optimal_steps import load_input, register
-from register_batch import add_config_arguments, config_from_args, parse_max_points
 from optimal_steps.metrics import evaluate_registration
+from register_batch import add_config_arguments, config_from_args, parse_max_points
 
 EXAMPLE_SOURCE = "data/templates_vertebrae/template_7.ply"
 EXAMPLE_TARGET = "data/verse/dataset-01training/derivatives/sub-gl090/sub-gl090_dir-ax_seg-vert_msk.nii.gz"

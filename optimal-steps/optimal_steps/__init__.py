@@ -20,11 +20,16 @@ Modules:
 """
 
 # Must stay the first import: sets up the compiler KeOps uses on macOS, before pykeops is imported.
-from . import _keops_setup  # noqa: F401  # isort: skip
+from . import _keops_setup  # isort: skip
 
 from .alignment import align_rigid
 from .api import RegistrationResult, register
-from .config import LAMBDA_REG_REFERENCE_POINTS, RegistrationConfig, per_scale, resolve_device
+from .config import (
+    LAMBDA_REG_REFERENCE_POINTS,
+    RegistrationConfig,
+    per_scale,
+    resolve_device,
+)
 from .geometry import compute_vertex_areas, get_average_edge_length
 from .io import load_input
 from .losses import LOSSES, PlaneToPlaneLoss, PointToPlaneLoss, PointToPointLoss
@@ -33,9 +38,9 @@ from .model import DiffeomorphicRegistration
 from .solver import cg
 
 __all__ = [
-    "DiffeomorphicRegistration",
     "LAMBDA_REG_REFERENCE_POINTS",
     "LOSSES",
+    "DiffeomorphicRegistration",
     "PlaneToPlaneLoss",
     "PointToPlaneLoss",
     "PointToPointLoss",

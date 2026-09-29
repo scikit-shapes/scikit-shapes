@@ -2,7 +2,7 @@
 
 Code accompanying the MICCAI paper:
 
-> **Optimal Steps for Fast Diffeomorphic Shape Registration**  
+> **Optimal Steps for Fast Diffeomorphic Shape Registration**
 > Hadrien Bigo-Balland, Jean Feydy & Tom Boeken.
 
 ---
@@ -109,27 +109,32 @@ The simplest way to use the code on your own data:
 from optimal_steps import register, RegistrationConfig
 
 config = RegistrationConfig(
-    sigma_init=10.0,   # initial kernel width (mm) - ~1/10 to 1/5 of the shape diameter
-    sigma_final=4.0,   # final kernel width (mm)  - ~2 to 5× the average point spacing
-    n_scales=4,        # number of coarse-to-fine levels
-    outer_steps=4,     # Gauss-Newton steps per scale
-    lambda_reg=0.5,    # regularisation weight λ, higher = stiffer (see "Key hyperparameters")
-    use_fpfh=True,     # use FPFH geometric descriptors for matching
-    fpfh_weight=[0.1, 0.3, 0.0, 0.0],  # weight of FPFH alignment term per scale (coarse → fine, relative to point distances)
+    sigma_init=10.0,  # initial kernel width (mm) - ~1/10 to 1/5 of the shape diameter
+    sigma_final=4.0,  # final kernel width (mm)  - ~2 to 5× the average point spacing
+    n_scales=4,  # number of coarse-to-fine levels
+    outer_steps=4,  # Gauss-Newton steps per scale
+    lambda_reg=0.5,  # regularisation weight λ, higher = stiffer (see "Key hyperparameters")
+    use_fpfh=True,  # use FPFH geometric descriptors for matching
+    fpfh_weight=[
+        0.1,
+        0.3,
+        0.0,
+        0.0,
+    ],  # weight of FPFH alignment term per scale (coarse → fine, relative to point distances)
     fpfh_radius=10.0,  # neighbourhood radius (mm) for FPFH computation
-    normal_weight=0.05, # weight of normal alignment term (relative to point distances)
+    normal_weight=0.05,  # weight of normal alignment term (relative to point distances)
     use_symmetric_correspondences=True,  # use bidirectional correspondences (recommended)
     trust_symmetric=0.7,  # weight κ of the backward matches (0 = forward only), see "Key hyperparameters"
 )
 
 result = register(
-    source="path/to/source.ply",   # mesh, point cloud or segmentation (see "Accepted input formats"),
-    target="path/to/target.ply",   # or a pyvista.PolyData
+    source="path/to/source.ply",  # mesh, point cloud or segmentation (see "Accepted input formats"),
+    target="path/to/target.ply",  # or a pyvista.PolyData
     config=config,
-    source_label=7,   # label index to extract (only for .nii.gz inputs)
+    source_label=7,  # label index to extract (only for .nii.gz inputs)
     target_label=7,
-    max_points=10000, # downsample target to this number of points (None for no downsampling)
-    rigid_align=True, # pre-align with RANSAC + ICP
+    max_points=10000,  # downsample target to this number of points (None for no downsampling)
+    rigid_align=True,  # pre-align with RANSAC + ICP
     # optional, see "Landmark-constrained registration" below:
     # source_landmark_indices=[i0, i1, i2], target_landmark_indices=[j0, j1, j2],
     # optional, your own per-point descriptors, see "Custom features" below:
@@ -137,10 +142,10 @@ result = register(
 )
 
 # Deformed source mesh
-result.deformed_mesh   # pyvista.PolyData with updated vertex positions
-result.deformed_points # numpy array (N, 3)
-result.source_mesh     # source after the rigid + anisotropic pre-alignment
-result.target_mesh     # target mesh
+result.deformed_mesh  # pyvista.PolyData with updated vertex positions
+result.deformed_points  # numpy array (N, 3)
+result.source_mesh  # source after the rigid + anisotropic pre-alignment
+result.target_mesh  # target mesh
 ```
 
 `register_pair.py` does exactly this from the command line, and saves the meshes and prints
@@ -354,10 +359,12 @@ from optimal_steps import register, load_input, RegistrationConfig
 src_mesh, _ = load_input("data/templates_vertebrae/template_7.ply")
 tgt_mesh, _ = load_input("path/to/seg.nii.gz", label=7, max_points=10000)
 
-def descriptor(mesh):          # here: mean curvature, rescaled to [0, 1]
+
+def descriptor(mesh):  # here: mean curvature, rescaled to [0, 1]
     c = np.asarray(mesh.curvature("mean"), dtype=np.float32).reshape(-1, 1)
     lo, hi = np.percentile(c, [2, 98])
     return np.clip((c - lo) / (hi - lo), 0.0, 1.0)
+
 
 result = register(
     src_mesh,
@@ -366,10 +373,10 @@ result = register(
         n_scales=4,
         use_fpfh=True,
         fpfh_weight=[0.1, 0.3, 0.0, 0.0],
-        feature_weight=[0.2, 0.2, 0.0, 0.0],   # scalar or one value per scale
+        feature_weight=[0.2, 0.2, 0.0, 0.0],  # scalar or one value per scale
     ),
-    source_features=descriptor(src_mesh),      # (n_source_points, n_channels)
-    target_features=descriptor(tgt_mesh),      # (n_target_points, n_channels)
+    source_features=descriptor(src_mesh),  # (n_source_points, n_channels)
+    target_features=descriptor(tgt_mesh),  # (n_target_points, n_channels)
 )
 ```
 

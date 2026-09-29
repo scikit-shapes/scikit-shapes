@@ -9,7 +9,7 @@ To get started, check out the installation instructions and have a look at the e
 .. warning::
 
    This library is still in very active development.
-   We expect to release a first usable version in September 2025.
+   We expect to release a first usable version by the end of 2026.
 
 
 Licensing and citations

@@ -1,6 +1,5 @@
 """Matching: FPFH descriptors and target position of every source point (Section 2 of the paper)."""
 
-from typing import Optional
 
 import open3d.core as o3c
 import open3d.t.geometry as tgeo
@@ -37,7 +36,7 @@ def effective_targets(
     points: torch.Tensor,
     forward_targets: torch.Tensor,
     target_points: torch.Tensor,
-    backward_matches: Optional[torch.Tensor],
+    backward_matches: torch.Tensor | None,
     trust_symmetric: float,
 ) -> torch.Tensor:
     """Target position z_i of every source point (Section 2 of the paper).

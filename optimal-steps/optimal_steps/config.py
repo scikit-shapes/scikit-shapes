@@ -3,7 +3,6 @@
 import logging
 import sys
 from dataclasses import dataclass
-from typing import List, Optional, Union
 
 import torch
 
@@ -16,7 +15,7 @@ class RegistrationConfig:
     solver_precision_mm: float = 1e-4
 
     # Registration & Metrics
-    lambda_reg: Union[float, List[float]] = 0.5
+    lambda_reg: float | list[float] = 0.5
     metric_type: str = "plane2plane"
     metric_alpha: float = 1.0
     metric_beta: float = 0.1
@@ -28,19 +27,19 @@ class RegistrationConfig:
     use_fpfh: bool = True
     # weight of the user-provided custom features, relative to point distances
     # (scalar, or one value per scale like fpfh_weight)
-    feature_weight: Union[float, List[float]] = 5.0
-    sigmas: Optional[List[float]] = None
+    feature_weight: float | list[float] = 5.0
+    sigmas: list[float] | None = None
     sigma_init: float = 30.0
     sigma_final: float = 7.0
     n_scales: int = 4
-    fpfh_weight: Union[float, List[float]] = 0.0
+    fpfh_weight: float | list[float] = 0.0
     fpfh_radius: float = 10.0
     normal_weight: float = 0.1
-    trust_symmetric: Union[float, List[float]] = 0.0
+    trust_symmetric: float | list[float] = 0.0
 
     # Incompressibility
-    incompressibility_weight: Union[float, List[float]] = 0.0
-    incompressibility_radius: Optional[float] = None
+    incompressibility_weight: float | list[float] = 0.0
+    incompressibility_radius: float | None = None
 
     # Device: "auto" (CUDA if available, else CPU), "cuda" or "cpu"
     device: str = "auto"
@@ -94,7 +93,7 @@ def resolve_device(requested: str = "auto") -> torch.device:
     return device
 
 
-def per_scale(value, n_scales: int, name: str, factor: float = 1.0) -> List[float]:
+def per_scale(value, n_scales: int, name: str, factor: float = 1.0) -> list[float]:
     """One value per scale: a scalar is repeated, a list must have one value per scale."""
     if isinstance(value, (list, tuple)):
         if len(value) != n_scales:

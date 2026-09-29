@@ -1,7 +1,6 @@
 """Loading of meshes, point clouds and segmentations (surface extraction)."""
 
 from pathlib import Path
-from typing import Optional, Tuple
 
 import numpy as np
 import pyvista as pv
@@ -49,7 +48,7 @@ def gaussian_smooth_gpu(tensor, sigma_mm, spacing, truncate=2.0):
 def _extract_mesh_from_volume(
     vol: pv.ImageData,
     label: int,
-    max_points: Optional[int] = None,
+    max_points: int | None = None,
     smooth_sigma_mm: float = 0.5,
     padding: int = 10,
 ) -> pv.PolyData:
@@ -101,9 +100,9 @@ _VOLUME_EXTENSIONS = {".nii", ".nii.gz", ".mha", ".mhd"}
 
 def load_input(
     path: str,
-    label: Optional[int] = None,
-    max_points: Optional[int] = None,
-) -> Tuple[pv.PolyData, bool]:
+    label: int | None = None,
+    max_points: int | None = None,
+) -> tuple[pv.PolyData, bool]:
 
     p = Path(path)
     suffix = "".join(p.suffixes).lower()

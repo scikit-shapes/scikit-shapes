@@ -32,13 +32,10 @@ import logging
 import time
 import traceback
 from pathlib import Path
-from typing import Optional
 
 import numpy as np
-
 from optimal_steps import RegistrationConfig, load_input, register, resolve_device
 from optimal_steps.metrics import evaluate_registration
-
 
 # Configuration used for the VerSe experiments of the paper.
 VERSE_CONFIG = dict(
@@ -75,13 +72,13 @@ RESULT_COLUMNS = [
 ]
 
 
-def _optional_int(value) -> Optional[int]:
+def _optional_int(value) -> int | None:
     if value is None or str(value).strip() in ("", "none", "None", "nan"):
         return None
     return int(float(value))
 
 
-def _default_id(target: str, target_label: Optional[int]) -> str:
+def _default_id(target: str, target_label: int | None) -> str:
     name = Path(target).name
     for suffix in (".nii.gz", ".nii", ".ply", ".vtk", ".stl", ".obj", ".vtp"):
         if name.endswith(suffix):
@@ -121,7 +118,7 @@ def read_manifest(path: str) -> list:
     return rows
 
 
-def undo_rigid(points: np.ndarray, rigid_transform: Optional[np.ndarray]) -> np.ndarray:
+def undo_rigid(points: np.ndarray, rigid_transform: np.ndarray | None) -> np.ndarray:
     """Map points from the target frame back to the source frame."""
     if rigid_transform is None:
         return points.astype(np.float32)
@@ -135,7 +132,7 @@ class _SourceCache:
     def __init__(self):
         self._cache = {}
 
-    def get(self, path: str, label: Optional[int]):
+    def get(self, path: str, label: int | None):
         key = (path, label)
         if key not in self._cache:
             self._cache[key] = load_input(path, label=label, max_points=None)
@@ -148,7 +145,7 @@ def register_row(
     config: RegistrationConfig,
     output_dir: Path,
     sources: _SourceCache,
-    max_points: Optional[int],
+    max_points: int | None,
     rigid_align: bool = True,
     compute_metrics: bool = True,
 ) -> dict:
@@ -200,7 +197,7 @@ def run_manifest(
     rows: list,
     config: RegistrationConfig,
     output_dir: str,
-    max_points: Optional[int] = 10000,
+    max_points: int | None = 10000,
     rigid_align: bool = True,
     compute_metrics: bool = True,
     skip_existing: bool = False,
@@ -310,7 +307,7 @@ def add_config_arguments(parser: argparse.ArgumentParser):
     g.add_argument("--device", default="auto", choices=["auto", "cuda", "cpu"])
 
 
-def parse_max_points(value: str) -> Optional[int]:
+def parse_max_points(value: str) -> int | None:
     return None if str(value).lower() == "none" else int(value)
 
 
