@@ -1,0 +1,38 @@
+skshapes.convolutions.constant\_kernel
+======================================
+
+.. automodule:: skshapes.convolutions.constant_kernel
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      constant_1_kernel
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Constant1Kernel
+   
+   
+
+   
+   
+   
+
+
+

@@ -1,0 +1,81 @@
+
+
+.. _sphx_glr_auto_examples_multiscaling:
+
+.. _multiscale_examples:
+
+Working at multiple scales
+---------------------------
+
+Representing data efficiently at different scales is a core feature of scikit-shapes. In addition to data compression, we provide tools to preserve features across scales and implement multi-grid or level-of-detail methods.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The skshapes.multiscaling.multiscale.Multiscale class preserves landmarks across scales.">
+
+.. only:: html
+
+  .. image:: /auto_examples/multiscaling/images/thumb/sphx_glr_plot_multiscaling_landmarks_thumb.gif
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_multiscaling_plot_multiscaling_landmarks.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling and landmarks</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="We use the skshapes.multiscaling.multiscale.Multiscale class to create a multiscale decompositi...">
+
+.. only:: html
+
+  .. image:: /auto_examples/multiscaling/images/thumb/sphx_glr_plot_multiscaling_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_multiscaling_plot_multiscaling.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling with triangle meshes</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="We propagate a signal across the different shapes of a multiscale representation, using rules t...">
+
+.. only:: html
+
+  .. image:: /auto_examples/multiscaling/images/thumb/sphx_glr_plot_signal_multiscale_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_multiscaling_plot_signal_multiscale.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Multiscaling and signal propagation</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/multiscaling/plot_multiscaling_landmarks
+   /auto_examples/multiscaling/plot_multiscaling
+   /auto_examples/multiscaling/plot_signal_multiscale
+

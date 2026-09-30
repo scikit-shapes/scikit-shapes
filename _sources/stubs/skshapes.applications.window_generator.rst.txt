@@ -1,0 +1,23 @@
+skshapes.applications.window\_generator
+=======================================
+
+.. automodule:: skshapes.applications.window_generator
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

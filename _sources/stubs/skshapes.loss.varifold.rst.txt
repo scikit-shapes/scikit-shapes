@@ -1,0 +1,39 @@
+skshapes.loss.varifold
+======================
+
+.. automodule:: skshapes.loss.varifold
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      extract_geom
+      varifold_scalar
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      VarifoldLoss
+   
+   
+
+   
+   
+   
+
+
+

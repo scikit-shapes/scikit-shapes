@@ -1,0 +1,6 @@
+skshapes.images.filters.gaussian\_blur
+======================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: gaussian_blur

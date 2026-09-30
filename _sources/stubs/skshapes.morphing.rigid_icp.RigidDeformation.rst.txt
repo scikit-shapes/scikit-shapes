@@ -1,0 +1,28 @@
+skshapes.morphing.rigid\_icp.RigidDeformation
+=============================================
+
+.. currentmodule:: skshapes.morphing.rigid_icp
+
+.. autoclass:: RigidDeformation
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RigidDeformation.__init__
+      ~RigidDeformation.fit
+      ~RigidDeformation.initialize
+      ~RigidDeformation.optimization_step
+      ~RigidDeformation.transform
+   
+   
+
+   
+   
+   

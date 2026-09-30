@@ -1,0 +1,33 @@
+skshapes.images
+===============
+
+.. automodule:: skshapes.images
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   filters
+   utils
+

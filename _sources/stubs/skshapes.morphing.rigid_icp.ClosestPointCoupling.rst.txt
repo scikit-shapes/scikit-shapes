@@ -1,0 +1,31 @@
+skshapes.morphing.rigid\_icp.ClosestPointCoupling
+=================================================
+
+.. currentmodule:: skshapes.morphing.rigid_icp
+
+.. autoclass:: ClosestPointCoupling
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ClosestPointCoupling.__init__
+      ~ClosestPointCoupling.fit
+      ~ClosestPointCoupling.initialize
+      ~ClosestPointCoupling.to_dense
+      ~ClosestPointCoupling.to_sparse
+      ~ClosestPointCoupling.transfer
+      ~ClosestPointCoupling.transform
+      ~ClosestPointCoupling.transport
+   
+   
+
+   
+   
+   

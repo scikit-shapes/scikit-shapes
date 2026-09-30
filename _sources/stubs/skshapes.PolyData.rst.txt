@@ -1,0 +1,91 @@
+skshapes.PolyData
+=================
+
+.. currentmodule:: skshapes
+
+.. autoclass:: PolyData
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~PolyData.__init__
+      ~PolyData.add_landmarks
+      ~PolyData.bounding_grid
+      ~PolyData.cache_clear
+      ~PolyData.copy
+      ~PolyData.edge_lengths
+      ~PolyData.edge_midpoints
+      ~PolyData.edge_points
+      ~PolyData.k_ring_graph
+      ~PolyData.knn_graph
+      ~PolyData.mesh_convolution
+      ~PolyData.normalize
+      ~PolyData.plot
+      ~PolyData.point_convolution
+      ~PolyData.point_curvature_colors
+      ~PolyData.point_curvedness
+      ~PolyData.point_frames
+      ~PolyData.point_masses
+      ~PolyData.point_mean_gauss_curvatures
+      ~PolyData.point_moments
+      ~PolyData.point_neighborhoods
+      ~PolyData.point_normals
+      ~PolyData.point_principal_curvatures
+      ~PolyData.point_quadratic_coefficients
+      ~PolyData.point_quadratic_fits
+      ~PolyData.point_shape_indices
+      ~PolyData.resample
+      ~PolyData.save
+      ~PolyData.to
+      ~PolyData.to_point_cloud
+      ~PolyData.to_pyvista
+      ~PolyData.to_vedo
+      ~PolyData.to_weighted_points
+      ~PolyData.triangle_area_normals
+      ~PolyData.triangle_areas
+      ~PolyData.triangle_centroids
+      ~PolyData.triangle_normals
+      ~PolyData.triangle_points
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~PolyData.control_points
+      ~PolyData.device
+      ~PolyData.dim
+      ~PolyData.edge_data
+      ~PolyData.edges
+      ~PolyData.is_point_cloud
+      ~PolyData.is_triangle_mesh
+      ~PolyData.is_wireframe
+      ~PolyData.landmark_indices
+      ~PolyData.landmark_points
+      ~PolyData.landmark_points_3D
+      ~PolyData.landmarks
+      ~PolyData.mean_point
+      ~PolyData.n_edges
+      ~PolyData.n_landmarks
+      ~PolyData.n_points
+      ~PolyData.n_triangles
+      ~PolyData.point_data
+      ~PolyData.point_densities
+      ~PolyData.points
+      ~PolyData.radius
+      ~PolyData.standard_deviation
+      ~PolyData.stiff_edges
+      ~PolyData.triangle_data
+      ~PolyData.triangles
+   
+   

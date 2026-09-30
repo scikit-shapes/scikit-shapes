@@ -1,0 +1,6 @@
+skshapes.features.implicit\_quadrics
+====================================
+
+.. currentmodule:: skshapes.features
+
+.. autofunction:: implicit_quadrics

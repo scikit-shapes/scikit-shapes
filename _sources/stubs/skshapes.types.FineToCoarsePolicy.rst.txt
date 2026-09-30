@@ -1,0 +1,32 @@
+skshapes.types.FineToCoarsePolicy
+=================================
+
+.. currentmodule:: skshapes.types
+
+.. autoclass:: FineToCoarsePolicy
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~FineToCoarsePolicy.__init__
+      ~FineToCoarsePolicy.count
+      ~FineToCoarsePolicy.index
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~FineToCoarsePolicy.reduce
+   
+   

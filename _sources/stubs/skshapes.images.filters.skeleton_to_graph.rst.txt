@@ -1,0 +1,6 @@
+skshapes.images.filters.skeleton\_to\_graph
+===========================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: skeleton_to_graph

@@ -1,0 +1,31 @@
+skshapes.triangle\_mesh.edge\_topology.EdgeTopology
+===================================================
+
+.. currentmodule:: skshapes.triangle_mesh.edge_topology
+
+.. autoclass:: EdgeTopology
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~EdgeTopology.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~EdgeTopology.boundary_edges
+      ~EdgeTopology.manifold_edges
+   
+   

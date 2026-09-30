@@ -1,0 +1,36 @@
+skshapes.triangle\_mesh.geometry
+================================
+
+.. automodule:: skshapes.triangle_mesh.geometry
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      cotan_weights
+      dihedral_angles
+      edge_centers
+      edge_lengths
+      triangle_areas
+      triangle_centers
+      triangle_normals
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

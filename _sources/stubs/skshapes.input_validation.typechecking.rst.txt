@@ -1,0 +1,30 @@
+skshapes.input\_validation.typechecking
+=======================================
+
+.. automodule:: skshapes.input_validation.typechecking
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      typecheck
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

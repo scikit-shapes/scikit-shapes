@@ -1,0 +1,56 @@
+skshapes.SparseImage
+====================
+
+.. currentmodule:: skshapes
+
+.. autoclass:: SparseImage
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~SparseImage.__init__
+      ~SparseImage.apply_pointwise
+      ~SparseImage.apply_reduction
+      ~SparseImage.convolution
+      ~SparseImage.copy
+      ~SparseImage.fill
+      ~SparseImage.histogram
+      ~SparseImage.isin
+      ~SparseImage.masked_convolution
+      ~SparseImage.max
+      ~SparseImage.min
+      ~SparseImage.plot
+      ~SparseImage.reshape_values
+      ~SparseImage.to
+      ~SparseImage.to_dense
+      ~SparseImage.unique
+      ~SparseImage.values_at
+      ~SparseImage.zeros
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SparseImage.constant
+      ~SparseImage.device
+      ~SparseImage.dim
+      ~SparseImage.dtype
+      ~SparseImage.full_shape
+      ~SparseImage.numel
+      ~SparseImage.shape
+      ~SparseImage.values
+      ~SparseImage.values_dim
+      ~SparseImage.values_shape
+   
+   

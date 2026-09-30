@@ -1,0 +1,6 @@
+skshapes.images.filters.sphere\_offsets
+=======================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: sphere_offsets

@@ -1,0 +1,137 @@
+
+
+.. _sphx_glr_auto_examples_registration:
+
+Registering and aligning shapes with each other
+-----------------------------------------------
+
+.. warning::
+
+    The API shown below is a draft, and will soon be completely revamped.
+
+The registration class allows to express various registration algorithm within the same framework.
+
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbnails">
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="Intrinsic and extrinsic deformations are two different approaches to non-rigid deformation.">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_karateka_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_karateka.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Intrinsic vs Extrinsic deformation</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip=" This is an example of rigid alignment in 2D for meshes with points in dense correspondence.">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_rigid_0_2d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_rigid_0_2d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Rigid alignment in 2D</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="In this example, we demonstrate how to perform rigid registration (also known alignment) of two...">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_rigid_1_3d_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_rigid_1_3d.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Rigid alignment in 3D with landmarks</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="LDDMM is a deformation method based on geodesic shooting in the space of diffeomorphisms. In sc...">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_lddmm_0_skulls_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_lddmm_0_skulls.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Registration with LDDMM</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This notebook illustrates the interest of normalizing the cometric in the LDDMM model. We consi...">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_lddmm_1_normalization_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_lddmm_1_normalization.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">LDDMM with normalized kernel</div>
+    </div>
+
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip=" This examples is an implementation of the paper &quot;Geometric Modeling in Shape Space&quot; by Kilian,...">
+
+.. only:: html
+
+  .. image:: /auto_examples/registration/images/thumb/sphx_glr_plot_multiscale_elastic_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_auto_examples_registration_plot_multiscale_elastic.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Elastic metric and multiscale strategy</div>
+    </div>
+
+
+.. raw:: html
+
+    </div>
+
+
+.. toctree::
+   :hidden:
+
+   /auto_examples/registration/plot_karateka
+   /auto_examples/registration/plot_rigid_0_2d
+   /auto_examples/registration/plot_rigid_1_3d
+   /auto_examples/registration/plot_lddmm_0_skulls
+   /auto_examples/registration/plot_lddmm_1_normalization
+   /auto_examples/registration/plot_multiscale_elastic
+

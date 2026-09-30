@@ -1,0 +1,30 @@
+skshapes.convolutions.constant\_kernel.Constant1Kernel
+======================================================
+
+.. currentmodule:: skshapes.convolutions.constant_kernel
+
+.. autoclass:: Constant1Kernel
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Constant1Kernel.__init__
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Constant1Kernel.T
+   
+   

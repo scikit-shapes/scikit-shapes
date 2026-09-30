@@ -1,0 +1,50 @@
+skshapes.Image
+==============
+
+.. currentmodule:: skshapes
+
+.. autoclass:: Image
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Image.__init__
+      ~Image.apply_pointwise
+      ~Image.apply_reduction
+      ~Image.copy
+      ~Image.histogram
+      ~Image.isin
+      ~Image.max
+      ~Image.min
+      ~Image.plot
+      ~Image.to
+      ~Image.unique
+      ~Image.values_at
+      ~Image.zeros
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Image.device
+      ~Image.dim
+      ~Image.dtype
+      ~Image.full_shape
+      ~Image.numel
+      ~Image.shape
+      ~Image.values
+      ~Image.values_dim
+      ~Image.values_shape
+   
+   

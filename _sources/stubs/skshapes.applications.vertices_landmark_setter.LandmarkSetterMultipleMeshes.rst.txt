@@ -1,0 +1,98 @@
+skshapes.applications.vertices\_landmark\_setter.LandmarkSetterMultipleMeshes
+=============================================================================
+
+.. currentmodule:: skshapes.applications.vertices_landmark_setter
+
+.. autoclass:: LandmarkSetterMultipleMeshes
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LandmarkSetterMultipleMeshes.__init__
+      ~LandmarkSetterMultipleMeshes.add
+      ~LandmarkSetterMultipleMeshes.add_ambient_occlusion
+      ~LandmarkSetterMultipleMeshes.add_button
+      ~LandmarkSetterMultipleMeshes.add_callback
+      ~LandmarkSetterMultipleMeshes.add_depth_of_field
+      ~LandmarkSetterMultipleMeshes.add_global_axes
+      ~LandmarkSetterMultipleMeshes.add_hint
+      ~LandmarkSetterMultipleMeshes.add_hover_legend
+      ~LandmarkSetterMultipleMeshes.add_icon
+      ~LandmarkSetterMultipleMeshes.add_inset
+      ~LandmarkSetterMultipleMeshes.add_legend_box
+      ~LandmarkSetterMultipleMeshes.add_observer
+      ~LandmarkSetterMultipleMeshes.add_renderer_frame
+      ~LandmarkSetterMultipleMeshes.add_scale_indicator
+      ~LandmarkSetterMultipleMeshes.add_shadows
+      ~LandmarkSetterMultipleMeshes.add_slider
+      ~LandmarkSetterMultipleMeshes.add_slider3d
+      ~LandmarkSetterMultipleMeshes.add_spline_tool
+      ~LandmarkSetterMultipleMeshes.at
+      ~LandmarkSetterMultipleMeshes.azimuth
+      ~LandmarkSetterMultipleMeshes.background
+      ~LandmarkSetterMultipleMeshes.break_interaction
+      ~LandmarkSetterMultipleMeshes.check_actors_trasform
+      ~LandmarkSetterMultipleMeshes.clear
+      ~LandmarkSetterMultipleMeshes.close
+      ~LandmarkSetterMultipleMeshes.color_picker
+      ~LandmarkSetterMultipleMeshes.compute_screen_coordinates
+      ~LandmarkSetterMultipleMeshes.compute_world_coordinate
+      ~LandmarkSetterMultipleMeshes.dolly
+      ~LandmarkSetterMultipleMeshes.elevation
+      ~LandmarkSetterMultipleMeshes.export
+      ~LandmarkSetterMultipleMeshes.fill_event
+      ~LandmarkSetterMultipleMeshes.fly_to
+      ~LandmarkSetterMultipleMeshes.fov
+      ~LandmarkSetterMultipleMeshes.freeze
+      ~LandmarkSetterMultipleMeshes.get_actors
+      ~LandmarkSetterMultipleMeshes.get_meshes
+      ~LandmarkSetterMultipleMeshes.get_volumes
+      ~LandmarkSetterMultipleMeshes.initialize_interactor
+      ~LandmarkSetterMultipleMeshes.interactive
+      ~LandmarkSetterMultipleMeshes.look_at
+      ~LandmarkSetterMultipleMeshes.move_camera
+      ~LandmarkSetterMultipleMeshes.parallel_projection
+      ~LandmarkSetterMultipleMeshes.pick_area
+      ~LandmarkSetterMultipleMeshes.play
+      ~LandmarkSetterMultipleMeshes.pop
+      ~LandmarkSetterMultipleMeshes.print
+      ~LandmarkSetterMultipleMeshes.process_events
+      ~LandmarkSetterMultipleMeshes.record
+      ~LandmarkSetterMultipleMeshes.remove
+      ~LandmarkSetterMultipleMeshes.remove_all_observers
+      ~LandmarkSetterMultipleMeshes.remove_callback
+      ~LandmarkSetterMultipleMeshes.remove_lights
+      ~LandmarkSetterMultipleMeshes.render
+      ~LandmarkSetterMultipleMeshes.render_hidden_lines
+      ~LandmarkSetterMultipleMeshes.reset_camera
+      ~LandmarkSetterMultipleMeshes.reset_clipping_range
+      ~LandmarkSetterMultipleMeshes.reset_viewup
+      ~LandmarkSetterMultipleMeshes.roll
+      ~LandmarkSetterMultipleMeshes.screenshot
+      ~LandmarkSetterMultipleMeshes.show
+      ~LandmarkSetterMultipleMeshes.start
+      ~LandmarkSetterMultipleMeshes.timer_callback
+      ~LandmarkSetterMultipleMeshes.toimage
+      ~LandmarkSetterMultipleMeshes.use_depth_peeling
+      ~LandmarkSetterMultipleMeshes.user_mode
+      ~LandmarkSetterMultipleMeshes.zoom
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~LandmarkSetterMultipleMeshes.actors
+      ~LandmarkSetterMultipleMeshes.camera
+   
+   

@@ -1,0 +1,35 @@
+skshapes.applications
+=====================
+
+.. automodule:: skshapes.applications
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   barycentric_landmark_setter
+   browser
+   vertices_landmark_setter
+   window_generator
+

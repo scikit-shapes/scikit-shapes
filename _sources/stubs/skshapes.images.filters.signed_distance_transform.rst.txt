@@ -1,0 +1,6 @@
+skshapes.images.filters.signed\_distance\_transform
+===================================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: signed_distance_transform

@@ -1,0 +1,251 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>As-Rigid-As-Possible (ARAP) Deformations &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script>window.MathJax = {"tex": {"macros": {"RR": "{\\bf R}", "bold": ["{\\bf #1}", 1], "t": ["{#1}^{\\mathsf{T}}", 1], "T": "\\mkern-3mu", "target": ["\\widehat{#1}", 1]}, "tags": "ams"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Hookean elastic material" href="hookean.html" />
+    <link rel="prev" title="Piece-wise rigid transformations" href="piecewise_rigid.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">How Scikit-Shapes works</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tasks">Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loss-functions">Loss functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#deformation-models">Deformation models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="translation.html">Translations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rigid.html">Rigid transformations (translation + rotation)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rigid_icp.html">Rigid ICP (Iterative Closest Point)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="similarity.html">Similarities (translation + rotation + scaling)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="affine.html">Affine transformations (translation + rotation + scaling + shearing)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_general.html">Linear models - general case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_displacement.html">Linear models - parameterized by displacement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_momentum.html">Linear models - parameterized by momentum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_code.html">Linear models - parameterized by latent code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="thin_plate_splines.html">Thin plate splines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multi_affine.html">Multi-affine deformations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="piecewise_rigid.html">Piece-wise rigid transformations</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">As-Rigid-As-Possible (ARAP) Deformations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#arap-energy">ARAP energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alternating-minimization-approach">Alternating minimization approach</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="hookean.html">Hookean elastic material</a></li>
+<li class="toctree-l3"><a class="reference internal" href="xpbd.html">Extended Position-Based Dynamics (XPBD)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hookean_xpbd.html">Hookean elastic material with XPBD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="neo_hookean_xpbd.html">Neo-Hookean elastic material with XPBD</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">How Scikit-Shapes works</a></li>
+      <li class="breadcrumb-item active">As-Rigid-As-Possible (ARAP) Deformations</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/explanation/deformation_models/arap.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="as-rigid-as-possible-arap-deformations">
+<span id="explanation-deformation-arap"></span><h1>As-Rigid-As-Possible (ARAP) Deformations<a class="headerlink" href="#as-rigid-as-possible-arap-deformations" title="Link to this heading"></a></h1>
+<p>This page describes <strong>As-Rigid-As-Possible (ARAP)</strong> (<a class="reference internal" href="#sorkinealexa07" id="id1"><span>[SorkineAlexa07]</span></a>) deformation models.
+Piece-wise rigid models allow independent rigid transformations for each part,
+which can introduce discontinuities or blending artifacts at the transitions between parts.
+ARAP models relax piece-wise rigidity by seeking deformations that are locally as rigid as possible,
+leading to more globally coherent results. The intuition is to use a discretized version of the Laplace-Beltrami
+operator to measure the deviation from being locally rigid.
+Note that ARAP works well for meshes, and can also be applied to point clouds via neighbor graphs.</p>
+<section id="arap-energy">
+<h2>ARAP energy<a class="headerlink" href="#arap-energy" title="Link to this heading"></a></h2>
+<p>Given source vertex positions <span class="math notranslate nohighlight">\(\mathbf{p}=\{p_i\}\)</span> and a set of positional constraints (handles)</p>
+<div class="math notranslate nohighlight">
+\[p'_k = c_k, \qquad k\in\mathcal{F},\]</div>
+<p>ARAP model finds new vertex positions <span class="math notranslate nohighlight">\(\mathbf{p}'=\{p'_i\}\)</span> that satisfy the constraints and minimize the local deviation from rigid deformations. This can be measured by the non-convex ARAP energy</p>
+<div class="math notranslate nohighlight">
+\[E(\mathbf{p}',\{R_i\})
+=\sum_i w_i \sum_{j\in\mathcal{N}(i)}
+w_{ij}\left\Vert(p'_i-p'_j)-R_i(p_i-p_j)\right\Vert^2,\]</div>
+<p>where</p>
+<ul>
+<li><p>the per-vertex rotations <span class="math notranslate nohighlight">\(R_i \in SO(3)\)</span> act as latent variables: they are not prescribed in advance, but are instead optimized internally during the alternating minimization process.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\mathcal{N}(i)\)</span> denotes the neighbors of vertex <span class="math notranslate nohighlight">\(i\)</span>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(w_{ij}\)</span> are scalar weights, we want them to compensate for non-uniformly shaped cells and prevent discretization bias. For meshes, we typically take cotangent weights because they encode local geometry very well:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[w_{ij} = \frac{1}{2}(\cot \alpha_{ij} + \cot \beta_{ij}),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\alpha_{ij}\)</span> and <span class="math notranslate nohighlight">\(\beta_{ij}\)</span> are the angles opposite to the edge <span class="math notranslate nohighlight">\((i,j)\)</span> in the mesh triangles.
+Furthermore, for these weights, the weighted sum <span class="math notranslate nohighlight">\(\sum_{j\in\mathcal{N}(i)} w_{ij} (p'_i - p'_j)\)</span> discretizes
+the coordinate-wise Laplace–Beltrami operator applied to the position function <span class="math notranslate nohighlight">\(\mathbf{p}'\)</span>.
+In flat Euclidean spaces, this operator vanishes under rigid deformations, whereas non-affine deformations produce a non-zero
+Laplacian.
+For meshless ARAP (with a neighbor graph), we can use constant or distance-based weights (e.g. <span class="math notranslate nohighlight">\(w_{ij} = 1/\left\Vert p_i - p_j \right\Vert^2\)</span>) instead of cotangent weights.</p>
+</div></blockquote>
+</li>
+</ul>
+<p>The ARAP energy can be interpreted as a generalized mass-spring system: each edge <span class="math notranslate nohighlight">\((i,j)\)</span> behaves like a spring
+whose rest length and orientation are dynamically adjusted via the local rotation <span class="math notranslate nohighlight">\(R_i\)</span>. Instead of preserving only
+distances (as in a classical spring system), ARAP springs attempt to preserve the local rigid motion (both distances and relative orientations).
+The weights <span class="math notranslate nohighlight">\(w_{ij}\)</span> act as stiffnesses for the springs, encoding the local geometric structure. Unlike classical springs, ARAP springs adjust both the rest
+length and local frame to minimize deformation.
+<span class="math notranslate nohighlight">\(SO(3)\)</span> being non-convex, the minimization of the ARAP energy is a non-convex problem, and the solution may converge to a local minimum.
+Since both the vertex positions <span class="math notranslate nohighlight">\(\mathbf{p}'\)</span> and the local rotations <span class="math notranslate nohighlight">\(R_i\)</span> are unknown, we use an
+alternating minimization approach: at each iteration, we fix one set of variables and optimize over the other, in two steps.</p>
+</section>
+<section id="alternating-minimization-approach">
+<h2>Alternating minimization approach<a class="headerlink" href="#alternating-minimization-approach" title="Link to this heading"></a></h2>
+<ol class="arabic">
+<li><p><strong>Local step</strong> – closed-form update of <span class="math notranslate nohighlight">\(R_i\)</span>.
+For fixed <span class="math notranslate nohighlight">\(\mathbf{p}'\)</span>, assemble the covariance</p>
+<div class="math notranslate nohighlight">
+\[S_i=\sum_{j\in\mathcal{N}(i)}
+     w_{ij}(p_i-p_j)(p'_i-p'_j)^{\top},\]</div>
+<p>then perform SVD (singular value decomposition) <span class="math notranslate nohighlight">\(S_i=U_i\Sigma_iV_i^{\top}\)</span> to extract the optimal rotation aligning the original and deformed edges at <span class="math notranslate nohighlight">\(i\)</span></p>
+<div class="math notranslate nohighlight">
+\[R_i = V_iU_i^{\top}.\]</div>
+<p>We implement the following details to ensure robustness:</p>
+<ul class="simple">
+<li><p>If <span class="math notranslate nohighlight">\(\det(R_i) &lt; 0\)</span> after the SVD decomposition <span class="math notranslate nohighlight">\(S_i = U_i \Sigma_i V_i^\top\)</span>, flip the sign of the last column of <span class="math notranslate nohighlight">\(V_i\)</span> before recomputing <span class="math notranslate nohighlight">\(R_i = V_i U_i^\top\)</span>, to ensure a proper rotation (<span class="math notranslate nohighlight">\(\det(R_i) &gt; 0\)</span>).</p></li>
+<li><p>When <span class="math notranslate nohighlight">\(S_i\)</span> is near-singular (for example, if neighbors are nearly colinear or coplanar), small numerical instabilities may occur during SVD. To improve robustness, it can help to regularize the covariance by adding a small multiple of the identity matrix, <span class="math notranslate nohighlight">\(S_i \leftarrow S_i + \epsilon I\)</span>, with a tiny <span class="math notranslate nohighlight">\(\epsilon &gt; 0\)</span>.</p></li>
+</ul>
+</li>
+<li><p><strong>Global step</strong> – solve a sparse SPD (symmetric positive definite, thus uniquely solvable) system for <span class="math notranslate nohighlight">\(\mathbf{p}'\)</span>.
+<span class="math notranslate nohighlight">\(\frac{\partial E}{\partial p'_i}=0\)</span> gives the linear sparse system</p>
+<div class="math notranslate nohighlight">
+\[\sum_{j\in\mathcal{N}(i)} w_{ij}(p'_i-p'_j)
+=\sum_{j\in\mathcal{N}(i)}
+  \frac{w_{ij}}{2}\left(R_i\!+\!R_j\right)(p_i-p_j).\]</div>
+<p>which rewrites in matrix form as <span class="math notranslate nohighlight">\(\mathbf{L}\mathbf{p}'=\mathbf{b}\)</span> with
+<span class="math notranslate nohighlight">\(\mathbf{L}\)</span> the SPD cotangent-weighted discrete Laplacian. We apply Dirichlet boundary conditions
+for the constrained indices <span class="math notranslate nohighlight">\(\mathcal{F}\)</span> by erasing the
+corresponding rows and columns from the Laplacian matrix <span class="math notranslate nohighlight">\(\mathbf{L}\)</span>,
+and updating the right-hand side <span class="math notranslate nohighlight">\(\mathbf{b}\)</span> accordingly to substitute
+the fixed values <span class="math notranslate nohighlight">\(p'_k = c_k\)</span>. Erasing rows and columns to apply Dirichlet constraints
+is equivalent to modifying the original system by assigning infinite stiffness to the
+constrained vertices. We then find the unique solution guaranteed by symmetric positive definiteness
+using precomputed Cholesky factorization of <span class="math notranslate nohighlight">\(\mathbf{L}\)</span>.</p>
+</li>
+</ol>
+<p><strong>Remarks:</strong></p>
+<ul class="simple">
+<li><p>The local steps at each vertex <span class="math notranslate nohighlight">\(i\)</span> are independent and can be parallelized across vertices for efficiency.</p></li>
+<li><p>Each iteration (local step + global step) monotonically decreases the ARAP energy, typically leading to fast convergence to a local minimum in practice. In practice, for small deformations and good initializations, a few iterations are sufficient to converge to a good minimum.</p></li>
+</ul>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<div role="list" class="citation-list">
+<div class="citation" id="sorkinealexa07" role="doc-biblioentry">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">SorkineAlexa07</a><span class="fn-bracket">]</span></span>
+<p>Olga Sorkine and Marc Alexa. “As-Rigid-As-Possible Surface Modeling.”
+In Symposium on Geometry processing (Vol. 4, pp. 109-116), 2007.</p>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="piecewise_rigid.html" class="btn btn-neutral float-left" title="Piece-wise rigid transformations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="hookean.html" class="btn btn-neutral float-right" title="Hookean elastic material" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

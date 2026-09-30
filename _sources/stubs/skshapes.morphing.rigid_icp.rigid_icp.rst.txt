@@ -1,0 +1,6 @@
+skshapes.morphing.rigid\_icp.rigid\_icp
+=======================================
+
+.. currentmodule:: skshapes.morphing.rigid_icp
+
+.. autofunction:: rigid_icp

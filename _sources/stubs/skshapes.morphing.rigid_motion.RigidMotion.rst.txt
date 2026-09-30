@@ -1,0 +1,29 @@
+skshapes.morphing.rigid\_motion.RigidMotion
+===========================================
+
+.. currentmodule:: skshapes.morphing.rigid_motion
+
+.. autoclass:: RigidMotion
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~RigidMotion.__init__
+      ~RigidMotion.copy
+      ~RigidMotion.create_path
+      ~RigidMotion.inital_parameter
+      ~RigidMotion.morph
+      ~RigidMotion.parameter_shape
+   
+   
+
+   
+   
+   

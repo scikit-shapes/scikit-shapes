@@ -1,0 +1,23 @@
+skshapes.triangle\_mesh.shell\_energy
+=====================================
+
+.. automodule:: skshapes.triangle_mesh.shell_energy
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

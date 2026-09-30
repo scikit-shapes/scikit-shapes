@@ -1,0 +1,6 @@
+skshapes.convolutions.constant\_kernel.constant\_1\_kernel
+==========================================================
+
+.. currentmodule:: skshapes.convolutions.constant_kernel
+
+.. autofunction:: constant_1_kernel

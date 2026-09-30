@@ -1,0 +1,407 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hookean elastic material &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script>window.MathJax = {"tex": {"macros": {"RR": "{\\bf R}", "bold": ["{\\bf #1}", 1], "t": ["{#1}^{\\mathsf{T}}", 1], "T": "\\mkern-3mu", "target": ["\\widehat{#1}", 1]}, "tags": "ams"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Extended Position-Based Dynamics (XPBD)" href="xpbd.html" />
+    <link rel="prev" title="As-Rigid-As-Possible (ARAP) Deformations" href="arap.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">How Scikit-Shapes works</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tasks">Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loss-functions">Loss functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#deformation-models">Deformation models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="translation.html">Translations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rigid.html">Rigid transformations (translation + rotation)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rigid_icp.html">Rigid ICP (Iterative Closest Point)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="similarity.html">Similarities (translation + rotation + scaling)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="affine.html">Affine transformations (translation + rotation + scaling + shearing)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_general.html">Linear models - general case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_displacement.html">Linear models - parameterized by displacement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_momentum.html">Linear models - parameterized by momentum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_code.html">Linear models - parameterized by latent code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="thin_plate_splines.html">Thin plate splines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multi_affine.html">Multi-affine deformations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="piecewise_rigid.html">Piece-wise rigid transformations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arap.html">As-Rigid-As-Possible (ARAP) Deformations</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Hookean elastic material</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#small-perturbations-of-identity">Small perturbations of identity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#examples-of-hookean-energy-responses">Examples of Hookean energy responses</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="xpbd.html">Extended Position-Based Dynamics (XPBD)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hookean_xpbd.html">Hookean elastic material with XPBD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="neo_hookean_xpbd.html">Neo-Hookean elastic material with XPBD</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">How Scikit-Shapes works</a></li>
+      <li class="breadcrumb-item active">Hookean elastic material</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/explanation/deformation_models/hookean.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="hookean-elastic-material">
+<span id="explanation-deformation-hookean"></span><h1>Hookean elastic material<a class="headerlink" href="#hookean-elastic-material" title="Link to this heading"></a></h1>
+<p>The Hookean elastic model describes linear elastic behavior of materials through a direct proportionality between stress and strain. Hooke’s law states:</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{S} = \mathbf{C}\,\boldsymbol{\varepsilon}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\mathbf{S}\)</span> is the stress tensor (force per unit area).</p></li>
+<li><p><span class="math notranslate nohighlight">\(\mathbf{C}\)</span> is the fourth-order elasticity tensor encoding material stiffness.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\boldsymbol{\varepsilon}\)</span> is the Green-Lagrange strain tensor defined as:</p></li>
+</ul>
+<p>This relation holds as long as the deformation remains small, meaning the material stays near its rest configuration (:math:|boldsymbol{varepsilon}| ll 1). This small-strain assumption defines what is often referred to as the Hookean regime.</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I})\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{F}\)</span> is the deformation gradient and <span class="math notranslate nohighlight">\(\mathbf{I}\)</span> is the identity matrix, measures how much the material is deformed.</p>
+<p>The Hookean model corresponds to a quadratic energy potential given by:</p>
+<div class="math notranslate nohighlight" id="equation-potential-energy-hookean">
+\begin{align}
+W(\mathbf{F}) = \frac{1}{2}\boldsymbol{\varepsilon}:\mathbf{C}\boldsymbol{\varepsilon} = \frac{1}{2}\boldsymbol{\varepsilon}:\mathbf{S}
+\end{align}</div><p>where “:” denotes the double inner product, or tensor contraction.</p>
+<p>Its gradient is given as expected by:</p>
+<div class="math notranslate nohighlight">
+\[\frac{\partial W}{\partial \varepsilon} = \mathbf{C}\boldsymbol{\varepsilon} = \mathbf{S},\]</div>
+<p>meaning <span class="math notranslate nohighlight">\(W(\mathbf{F})\)</span> is the energy potential associated with the stresses <span class="math notranslate nohighlight">\(\mathbf{S}\)</span>.</p>
+<section id="small-perturbations-of-identity">
+<h2>Small perturbations of identity<a class="headerlink" href="#small-perturbations-of-identity" title="Link to this heading"></a></h2>
+<p>Let’s assume we are in the case of Hooke’s regime where <span class="math notranslate nohighlight">\(\mathbf{F}\)</span> is a small perturbation of the identity matrix, i.e., <span class="math notranslate nohighlight">\(x^{t+1} = F x^t\)</span> where <span class="math notranslate nohighlight">\(\mathbf{F} = \mathbf{I} + \nabla \mathbf{u}\)</span>. In this case, we can approximate the strain tensor as:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{\varepsilon} = \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T + \nabla \mathbf{u}^T\nabla \mathbf{u}) \approx \frac{1}{2}(\nabla \mathbf{u} + \nabla \mathbf{u}^T)\]</div>
+<p>because nabla mathbf{u}^Tnabla mathbf{u} is negligible (<span class="math notranslate nohighlight">\(\Vert\nabla u\Vert \ll 1\)</span>) for small perturbations (linear model).</p>
+<p>But, in Euclidean coordinates, and for an isotropic material, <span class="math notranslate nohighlight">\(\mathbf{C}\)</span> is defined as</p>
+<div class="math notranslate nohighlight">
+\[C_{ijkl} = \lambda \delta_{ij}\delta_{kl} + \mu (\delta_{ik}\delta_{jl} + \delta_{il}\delta_{jk})\]</div>
+<p>where <span class="math notranslate nohighlight">\(\delta_{ij}\)</span> is the Kronecker delta, and <span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\mu\)</span> are the Lamé parameters.</p>
+<p>We then have</p>
+<div class="math notranslate nohighlight">
+\[\mathbf{C}\boldsymbol{\varepsilon} = \lambda \mathrm{tr}(\boldsymbol{\varepsilon})\mathbf{I} + 2\mu \boldsymbol{\varepsilon}\]</div>
+<p>Substituting this into the energy potential, we obtain:</p>
+<div class="math notranslate nohighlight">
+\[W(\mathbf{F}) = \frac{\lambda}{2} (\mathrm{tr}(\boldsymbol{\varepsilon}))^2 + \mu \boldsymbol{\varepsilon}:\boldsymbol{\varepsilon}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathrm{tr}(\boldsymbol{\varepsilon})\)</span> is the trace of the strain tensor, and <span class="math notranslate nohighlight">\(\|\boldsymbol{\varepsilon}\|^2\)</span> is the Frobenius norm of the strain tensor.</p>
+<p>The first term of the equation simplifies to :</p>
+<div class="math notranslate nohighlight">
+\[\frac{\lambda}{2}(\mathrm{tr}(\boldsymbol{\varepsilon}))^2 = \frac{\lambda}{2}(\varepsilon_{xx} + \varepsilon_{yy} + \varepsilon_{zz})^2\]</div>
+<p>and the second term simplifies to:</p>
+<div class="math notranslate nohighlight">
+\[\mu \boldsymbol{\varepsilon}:\boldsymbol{\varepsilon} = \mu (\varepsilon_{xx}^2 + \varepsilon_{yy}^2 + \varepsilon_{zz}^2 + 2\varepsilon_{xy}^2 + 2\varepsilon_{xz}^2 + 2\varepsilon_{yz}^2)\]</div>
+<p>This means that the energy potential is a quadratic function of the deformation gradient <span class="math notranslate nohighlight">\(\nabla \mathbf{u}\)</span>, and can be expressed as:</p>
+<div class="math notranslate nohighlight">
+\[W(\mathbf{F}) =
+\left(\mu + \frac{\lambda}{2}\right)(\varepsilon_{xx}^2 + \varepsilon_{yy}^2 + \varepsilon_{zz}^2)
++ \lambda (\varepsilon_{xx} \varepsilon_{yy} + \varepsilon_{xx} \varepsilon_{zz} + \varepsilon_{yy} \varepsilon_{zz})
++ 2\mu (\varepsilon_{xy}^2 + \varepsilon_{xz}^2 + \varepsilon_{yz}^2)\]</div>
+<p>where <span class="math notranslate nohighlight">\(\varepsilon_{ij} = \frac{1}{2}(\partial_i u_j + \partial_j u_i)\)</span>.</p>
+<p>Here,</p>
+<ul class="simple">
+<li><p>the terms <span class="math notranslate nohighlight">\(\varepsilon_{ii}\)</span> represent the energy contribution from normal (axial) strain along the coordinate axes,</p></li>
+<li><p>the mixed terms <span class="math notranslate nohighlight">\(\varepsilon_{ii} \varepsilon_{jj}\)</span> represent the coupling between normal strains along different axes, contributing to the energy associated with volumetric deformation,</p></li>
+<li><p>the terms <span class="math notranslate nohighlight">\(\varepsilon_{ij}^2\)</span> represent the energy contribution from shear strain in the <span class="math notranslate nohighlight">\((i, j)\)</span> plane, penalizing angular distortions between coordinate directions.</p></li>
+</ul>
+</section>
+<section id="examples-of-hookean-energy-responses">
+<h2>Examples of Hookean energy responses<a class="headerlink" href="#examples-of-hookean-energy-responses" title="Link to this heading"></a></h2>
+<p>The Hookean model predicts a quadratic energy response with respect to the strain tensor <span class="math notranslate nohighlight">\(\boldsymbol{\varepsilon}\)</span> for small deformations, as the energy potential is of the form:</p>
+<div class="math notranslate nohighlight">
+\[W(\mathbf{F}) = \frac{1}{2} \boldsymbol{\varepsilon} : \mathbf{C} \boldsymbol{\varepsilon}\]</div>
+<p>To validate this behavior in practice, we simulate several canonical deformations and plot the total elastic energy as a function of the deformation parameter.</p>
+<p>We first start with the most simple deformation non-zero energy mode that can be expressed as an affine transformation, i.e., isotropic scaling.</p>
+<p>The isotropic scaling deformation is defined as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{F} = s \cdot \mathbf{I} = \begin{bmatrix} s &amp; 0 \\ 0 &amp; s \end{bmatrix}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(s\)</span> is the scaling factor.</p>
+<p>The strain tensor is then given by:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I}) = \frac{1}{2}(s^2 - 1)\mathbf{I}.\]</div>
+<p>As we can see, the components of the strain tensor are quadratic in the scaling factor <span class="math notranslate nohighlight">\(s\)</span>. We then expect the elastic energy potential to be a quartic function of <span class="math notranslate nohighlight">\(s\)</span>. We can then give an expression of the elastic energy potential as:</p>
+<div class="math notranslate nohighlight">
+\[W(s) = \frac{\lambda + \mu}{2}(s^2 - 1)^2\]</div>
+<p>where <span class="math notranslate nohighlight">\(\lambda\)</span> and <span class="math notranslate nohighlight">\(\mu\)</span> are the Lamé parameters.</p>
+<p>This means that the energy potential is a quartic function of the scaling factor <span class="math notranslate nohighlight">\(s\)</span>, and a quadratic function of the strain tensor <span class="math notranslate nohighlight">\(\boldsymbol{\varepsilon}\)</span>.</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/hookean-2.svg" class="plot-directive" src="../../_images/hookean-2.svg" />
+</figure>
+</div></blockquote>
+<p>We also investigate 3D deformation modes that cannot be expressed as simple affine transformations, such as torsion and bending. These deformations are nonuniform but can still be analyzed under the Hookean regime by computing the Green–Lagrange strain pointwise.</p>
+<p>We define the twisting deformation around the Z-axis with its deformation gradient as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{F}(x, y, z) =
+\begin{bmatrix}
+\cos\theta(z) &amp; -\sin\theta(z) &amp; -\frac{\theta_{\text{twist}}}{L}(x\sin\theta(z) + y\cos\theta(z)) \\
+\sin\theta(z) &amp; \cos\theta(z) &amp; \frac{\theta_{\text{twist}}}{L}(x\cos\theta(z) - y\sin\theta(z)) \\
+0 &amp; 0 &amp; 1
+\end{bmatrix}\end{split}\]</div>
+<div class="line-block">
+<div class="line">where <span class="math notranslate nohighlight">\(\theta(z) = \frac{z}{L}\theta_{\text{twist}}\)</span> is the angle of twist at position <span class="math notranslate nohighlight">\(z\)</span> along the column’s axis,</div>
+<div class="line"><span class="math notranslate nohighlight">\(L\)</span> is the length of the column, and <span class="math notranslate nohighlight">\(\theta_{\text{twist}}\)</span> is the maximum twist angle (in radians), corresponding</div>
+<div class="line">to the twist angle at the top of the column (<span class="math notranslate nohighlight">\(z = L\)</span>).</div>
+</div>
+<p>This deformation gradient is given pointwise, as the deformation is nonuniform.</p>
+<p>Let’s consider a column of length <span class="math notranslate nohighlight">\(L\)</span>:</p>
+<figure class="align-default">
+<img alt="../../_images/hookean-561f96b16fb35fb5_00_00.png" src="../../_images/hookean-561f96b16fb35fb5_00_00.png" />
+</figure>
+<p>that is twisted around the Z-axis with a maximum twist angle of <span class="math notranslate nohighlight">\(\theta_{\text{twist}} = \pi\)</span> radians:</p>
+<figure class="align-default">
+<img alt="../../_images/hookean-5aa332c9410ebd7e_00_00.png" src="../../_images/hookean-5aa332c9410ebd7e_00_00.png" />
+</figure>
+<p>The strain tensor is then given by:</p>
+<div class="math notranslate nohighlight">
+\[\boldsymbol{\varepsilon} = \frac{1}{2}(\mathbf{F}^T \mathbf{F} - \mathbf{I}) = \frac{\theta_{\text{twist}}}{L} \left(x^2+y^2\right) + 1.\]</div>
+<p>Here, the deformation being nonuniform, the strain tensor is also given pointwise. We see that it is quadratic in the parameter <span class="math notranslate nohighlight">\(\theta_{\text{twist}}\)</span>, we then expect the elastic energy potential to be a quartic function of <span class="math notranslate nohighlight">\(\theta_{\text{twist}}\)</span>.</p>
+<p>We can then give a pointwise expression of the elastic energy potential as:</p>
+<div class="math notranslate nohighlight">
+\[W(\theta_{\text{twist}}, x, y) = \frac{\lambda}{8}\frac{\theta_{\text{twist}}^4}{L^4}(x^2 + y^2)^2 + \frac{\mu}{4}\frac{\theta_{\text{twist}}^2}{L^2}\left(2x^2 + 2y^2 + \frac{\theta_{\text{twist}}^2}{L^2}(x^2 + y^2)^2\right)\]</div>
+<p>As expected, the energy potential is a quartic function of the twist angle <span class="math notranslate nohighlight">\(\theta_{\text{twist}}\)</span>, and a quadratic function of the strain tensor <span class="math notranslate nohighlight">\(\boldsymbol{\varepsilon}\)</span>.</p>
+<p>If we compute the sum of the elastic energy potential over the whole column with finite elements, we obtain the total elastic energy profile:</p>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/hookean-3.svg" class="plot-directive" src="../../_images/hookean-3.svg" />
+</figure>
+</div></blockquote>
+<p>that looks quadratic.</p>
+<p><strong>Description of standard deformations and their energies</strong></p>
+<p><strong>Isotropic scaling</strong></p>
+<blockquote>
+<div><ul>
+<li><p><strong>Description</strong>: Uniform expansion or compression in all directions</p>
+</li>
+<li><p><strong>Deformation gradient</strong>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{F} = s \cdot \mathbf{I} = \begin{bmatrix} s &amp; 0 \\ 0 &amp; s \end{bmatrix}\end{split}\]</div>
+</li>
+<li><p><strong>Elastic energy potential</strong>:</p>
+<div class="math notranslate nohighlight">
+\[W(s) = \frac{\lambda + \mu}{2}(s^2 - 1)^2\]</div>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/hookean-5.svg" class="plot-directive" src="../../_images/hookean-5.svg" />
+</figure>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>Uniaxial stretch / compression</strong></p>
+<blockquote>
+<div><ul>
+<li><p><strong>Description</strong>: Stretch or compress along the X axis</p>
+</li>
+<li><p><strong>Deformation gradient</strong>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{F} = \begin{bmatrix} 1 + \varepsilon &amp; 0 \\ 0 &amp; 1 \end{bmatrix}\end{split}\]</div>
+</li>
+<li><p><strong>Elastic energy potential</strong>:</p>
+<div class="math notranslate nohighlight">
+\[W(\varepsilon) = \frac{\lambda + 2\mu}{8}(\varepsilon^2 - 1)^2\]</div>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/hookean-7.svg" class="plot-directive" src="../../_images/hookean-7.svg" />
+</figure>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>Pure shear</strong></p>
+<blockquote>
+<div><ul>
+<li><p><strong>Description</strong>: Shear in the X direction along the Y axis</p>
+</li>
+<li><p><strong>Deformation gradient</strong>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{F} = \begin{bmatrix} 1 &amp; \gamma \\ 0 &amp; 1 \end{bmatrix}\end{split}\]</div>
+</li>
+<li><p><strong>Elastic energy potential</strong>:</p>
+<div class="math notranslate nohighlight">
+\[W(\gamma) = \frac{\lambda + 2\mu}{8}\gamma^4 + \frac{\mu}{2}\gamma^2\]</div>
+<blockquote>
+<div><figure class="align-default">
+<img alt="../../_images/hookean-9.svg" class="plot-directive" src="../../_images/hookean-9.svg" />
+</figure>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>Bending (3D)</strong></p>
+<blockquote>
+<div><ul>
+<li><p><strong>Description</strong>: Beam bent along XZ plane (Euler-Bernoulli model for a cantilever beam)</p></li>
+<li><p><strong>Deformation gradient</strong>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{F}(x, z) =
+\begin{bmatrix}
+1 - z\theta_x'\cos\theta_x &amp; 0 &amp; -\sin\theta_x \\
+0 &amp; 1 &amp; 0 \\
+w'(x) - z\theta_x'\sin\theta_x &amp; 0 &amp; \cos\theta_x
+\end{bmatrix}\end{split}\]</div>
+<div class="line-block">
+<div class="line">where <span class="math notranslate nohighlight">\(w(x) = \frac{F}{6EI}x^2(3L - x)\)</span> is the deflection of the beam at position <span class="math notranslate nohighlight">\(x\)</span>,</div>
+<div class="line"><span class="math notranslate nohighlight">\(F\)</span> is the force applied at the end of the beam,</div>
+<div class="line"><span class="math notranslate nohighlight">\(\theta_x = \arctan w'(x)\)</span> is the angle of rotation of the beam at position <span class="math notranslate nohighlight">\(x\)</span>,</div>
+<div class="line">and <span class="math notranslate nohighlight">\(\theta_x' = \frac{d\theta_x}{dx}\)</span> is the derivative of the angle of rotation with respect to <span class="math notranslate nohighlight">\(x\)</span>.</div>
+</div>
+</li>
+<li><p><strong>Elastic energy potential</strong>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}W(F, x, z) = \frac{\lambda}{8}\left(z^2\theta_x'^2 + w'(x)^2 - 2z\theta_x'(\cos\theta_x + w'(x)\sin\theta_x)\right) \\
++ \frac{\mu}{4}\left((z^2\theta_x'^2 + w'(x)^2 - 2z\theta_x'(\cos\theta_x + w'(x)\sin\theta_x))^2 + 2(w'(x)\cos\theta_x - \sin\theta_x)^2\right)\end{split}\]</div>
+</li>
+</ul>
+</div></blockquote>
+<p><strong>Torsion (3D)</strong></p>
+<blockquote>
+<div><ul>
+<li><p><strong>Description</strong>: Twisting column around the Z axis</p>
+<figure class="align-default">
+<img alt="../../_images/hookean-b3dcb10c02ed20f2_00_00.png" src="../../_images/hookean-b3dcb10c02ed20f2_00_00.png" />
+</figure>
+</li>
+<li><p><strong>Deformation gradient</strong>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\mathbf{F}(x, y, z) =
+\begin{bmatrix}
+\cos\theta(z) &amp; -\sin\theta(z) &amp; -\frac{\theta_{\text{twist}}}{L}(x\sin\theta(z) + y\cos\theta(z)) \\
+\sin\theta(z) &amp; \cos\theta(z) &amp; \frac{\theta_{\text{twist}}}{L}(x\cos\theta(z) - y\sin\theta(z)) \\
+0 &amp; 0 &amp; 1
+\end{bmatrix}\end{split}\]</div>
+<div class="line-block">
+<div class="line">where <span class="math notranslate nohighlight">\(\theta(z) = \frac{z}{L}\theta_{\text{twist}}\)</span> is the angle of twist at position <span class="math notranslate nohighlight">\(z\)</span> along the column’s axis,</div>
+<div class="line"><span class="math notranslate nohighlight">\(L\)</span> is the length of the column,</div>
+<div class="line">and <span class="math notranslate nohighlight">\(\theta_{\text{twist}}\)</span> is the maximum twist angle (in radians), corresponding to the twist angle at the top of the column (<span class="math notranslate nohighlight">\(z = L\)</span>)</div>
+</div>
+</li>
+<li><p><strong>Elastic energy potential</strong>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}W(\theta_{\text{twist}}, x, y) = \frac{\lambda}{8}\frac{\theta_{\text{twist}}^4}{L^4}(x^2 + y^2)^2 \\
++ \frac{\mu}{4}\frac{\theta_{\text{twist}}^2}{L^2}\left(2x^2 + 2y^2 + \frac{\theta_{\text{twist}}^2}{L^2}(x^2 + y^2)^2\right)\end{split}\]</div>
+</li>
+</ul>
+</div></blockquote>
+<section id="rigid-rotations-and-rigid-translations">
+<h3>Rigid rotations and rigid translations<a class="headerlink" href="#rigid-rotations-and-rigid-translations" title="Link to this heading"></a></h3>
+<p>Let’s now see what happens in the other cases of Hooke’s regime, i.e., when the deformation is a rigid rotation or a rigid translation.</p>
+<p>For a rigid translation, <span class="math notranslate nohighlight">\(x^{t+1} = x^t + \mathbf{u}\)</span>. In this case, the deformation gradient is simply the identity matrix, and the strain tensor is zero.</p>
+<p>For a rigid rotation, <span class="math notranslate nohighlight">\(x^{t+1} = R x^t\)</span> where <span class="math notranslate nohighlight">\(R\)</span> is a rotation matrix. In this case, the deformation gradient is <span class="math notranslate nohighlight">\(R\)</span>, and the strain tensor is again zero.</p>
+<p>These deformations are called zero-energy modes because they do not contribute to the energy potential.</p>
+</section>
+<section id="zero-energy-modes">
+<h3>Zero Energy Modes<a class="headerlink" href="#zero-energy-modes" title="Link to this heading"></a></h3>
+<p>Rigid translations and rotations do not produce strain and therefore store no elastic energy.</p>
+<p>They form the set of deformation modes that lie entirely within the nullspace of the elastic energy. A well-defined Hookean model must be invariant under these transformations.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="arap.html" class="btn btn-neutral float-left" title="As-Rigid-As-Possible (ARAP) Deformations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="xpbd.html" class="btn btn-neutral float-right" title="Extended Position-Based Dynamics (XPBD)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

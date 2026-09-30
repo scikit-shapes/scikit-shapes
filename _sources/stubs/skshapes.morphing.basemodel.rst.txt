@@ -1,0 +1,31 @@
+skshapes.morphing.basemodel
+===========================
+
+.. automodule:: skshapes.morphing.basemodel
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      BaseModel
+   
+   
+
+   
+   
+   
+
+
+

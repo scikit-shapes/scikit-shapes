@@ -1,0 +1,6 @@
+skshapes.triangle\_mesh.geometry.dihedral\_angles
+=================================================
+
+.. currentmodule:: skshapes.triangle_mesh.geometry
+
+.. autofunction:: dihedral_angles

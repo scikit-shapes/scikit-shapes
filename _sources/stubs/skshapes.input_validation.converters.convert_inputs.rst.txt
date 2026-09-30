@@ -1,0 +1,6 @@
+skshapes.input\_validation.converters.convert\_inputs
+=====================================================
+
+.. currentmodule:: skshapes.input_validation.converters
+
+.. autofunction:: convert_inputs

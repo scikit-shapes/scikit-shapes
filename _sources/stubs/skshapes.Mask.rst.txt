@@ -1,0 +1,48 @@
+skshapes.Mask
+=============
+
+.. currentmodule:: skshapes
+
+.. autoclass:: Mask
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~Mask.__init__
+      ~Mask.connected_components
+      ~Mask.convolution
+      ~Mask.copy
+      ~Mask.difference
+      ~Mask.intersection
+      ~Mask.masked_convolution
+      ~Mask.plot
+      ~Mask.symmetric_difference
+      ~Mask.to
+      ~Mask.to_image
+      ~Mask.to_sparseimage
+      ~Mask.union
+   
+   
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~Mask.device
+      ~Mask.dim
+      ~Mask.indices
+      ~Mask.n_points
+      ~Mask.numel
+      ~Mask.shape
+      ~Mask.values
+   
+   

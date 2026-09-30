@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rigid ICP (Iterative Closest Point) &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script>window.MathJax = {"tex": {"macros": {"RR": "{\\bf R}", "bold": ["{\\bf #1}", 1], "t": ["{#1}^{\\mathsf{T}}", 1], "T": "\\mkern-3mu", "target": ["\\widehat{#1}", 1]}, "tags": "ams"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Similarities (translation + rotation + scaling)" href="similarity.html" />
+    <link rel="prev" title="Rigid transformations (translation + rotation)" href="rigid.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">How Scikit-Shapes works</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#tasks">Tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loss-functions">Loss functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#deformation-models">Deformation models</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="translation.html">Translations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rigid.html">Rigid transformations (translation + rotation)</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Rigid ICP (Iterative Closest Point)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#parameters">Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#weighted-icp-objective">Weighted ICP Objective</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#iteratively-reweighted-least-squares-irls">Iteratively Reweighted Least Squares (IRLS)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#robust-m-estimator-interpretation">Robust M-estimator Interpretation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#choice-of-rho-and-corresponding-w-i">Choice of <span class="math notranslate nohighlight">\(\rho\)</span> (and corresponding $w_i)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#alternating-optimization">Alternating Optimization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#initialization-of-r-and-t">Initialization of <span class="math notranslate nohighlight">\(R\)</span> and <span class="math notranslate nohighlight">\(t\)</span></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#choice-of-l-i">Choice of <span class="math notranslate nohighlight">\(L_i\)</span></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="similarity.html">Similarities (translation + rotation + scaling)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="affine.html">Affine transformations (translation + rotation + scaling + shearing)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_general.html">Linear models - general case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_displacement.html">Linear models - parameterized by displacement</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_momentum.html">Linear models - parameterized by momentum</a></li>
+<li class="toctree-l3"><a class="reference internal" href="linear_code.html">Linear models - parameterized by latent code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="thin_plate_splines.html">Thin plate splines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multi_affine.html">Multi-affine deformations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="piecewise_rigid.html">Piece-wise rigid transformations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arap.html">As-Rigid-As-Possible (ARAP) Deformations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hookean.html">Hookean elastic material</a></li>
+<li class="toctree-l3"><a class="reference internal" href="xpbd.html">Extended Position-Based Dynamics (XPBD)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hookean_xpbd.html">Hookean elastic material with XPBD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="neo_hookean_xpbd.html">Neo-Hookean elastic material with XPBD</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">How Scikit-Shapes works</a></li>
+      <li class="breadcrumb-item active">Rigid ICP (Iterative Closest Point)</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/explanation/deformation_models/rigid_icp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rigid-icp-iterative-closest-point">
+<span id="explanation-deformation-rigid-icp"></span><h1>Rigid ICP (Iterative Closest Point)<a class="headerlink" href="#rigid-icp-iterative-closest-point" title="Link to this heading"></a></h1>
+<p>We recall the notations introduced in our <a class="reference internal" href="rigid.html#explanation-deformation-rigid"><span class="std std-ref">explanation of rigid deformations</span></a>: a rigid deformation model parameterized by the pair <span class="math notranslate nohighlight">\((R,t)\)</span> transforms a source shape <span class="math notranslate nohighlight">\(A = \{a_i\}\)</span> into a target-aligned shape <span class="math notranslate nohighlight">\(A_{\theta}\)</span>, such that:</p>
+<div class="math notranslate nohighlight">
+\[\text{Model}(\theta; A) = A_{\theta}, \quad \text{where} \quad \theta = (R, t).\]</div>
+<p>Here, we describe the classic <strong>Rigid ICP</strong> algorithm, designed to estimate the optimal rigid transformation parameters <span class="math notranslate nohighlight">\((R,t)\)</span> aligning the source points <span class="math notranslate nohighlight">\(A\)</span> with target points <span class="math notranslate nohighlight">\(B = \{b_j\}\)</span>.</p>
+<section id="parameters">
+<h2>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Rotation matrix</strong> <span class="math notranslate nohighlight">\(R \in SO(3)\)</span>.</p></li>
+<li><p><strong>Translation vector</strong> <span class="math notranslate nohighlight">\(t \in \mathbb{R}^3\)</span>.</p></li>
+</ul>
+</section>
+<section id="weighted-icp-objective">
+<h2>Weighted ICP Objective<a class="headerlink" href="#weighted-icp-objective" title="Link to this heading"></a></h2>
+<p>Let <span class="math notranslate nohighlight">\(\sigma\)</span> represent tentative correspondences, mapping each source point <span class="math notranslate nohighlight">\(a_i\)</span> to a matched target point <span class="math notranslate nohighlight">\(b_{\sigma(i)}\)</span>. Each source point <span class="math notranslate nohighlight">\(a_i\)</span> is assigned:</p>
+<ul class="simple">
+<li><p>A positive-definite local metric <span class="math notranslate nohighlight">\(L_i \succ 0\)</span>, computed from the corresponding point <span class="math notranslate nohighlight">\(b_{\sigma(i)}\)</span> encoding how source points can be transformed.</p></li>
+<li><p>A scalar weight <span class="math notranslate nohighlight">\(w_i &gt; 0\)</span>.</p></li>
+</ul>
+<p>Optionally, we include a Gaussian prior on the parameters via a diagonal precision matrix <span class="math notranslate nohighlight">\(\Lambda = \lambda I\)</span>.</p>
+</section>
+<section id="iteratively-reweighted-least-squares-irls">
+<h2>Iteratively Reweighted Least Squares (IRLS)<a class="headerlink" href="#iteratively-reweighted-least-squares-irls" title="Link to this heading"></a></h2>
+<p>At each IRLS iteration, given the residuals from the previous iteration, we fix scalar weights <span class="math notranslate nohighlight">\(\{w_i\}\)</span> (based on a robust estimator). The weighted least-squares cost we minimize is:</p>
+<div class="math notranslate nohighlight">
+\[C(R, t; \sigma) = \sum_i w_i \lVert R\,a_i + t - b_{\sigma(i)} \rVert_{L_i}^{2} + \lVert \theta \rVert_{\Lambda}^{2},\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\lVert v \rVert_{L_i}^{2} = v^{\top} \,L_i\, v\)</span> is the Mahalanobis norm squared.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\lVert \theta \rVert_{\Lambda}^{2}\)</span> represents the prior regularization term.</p></li>
+</ul>
+</section>
+<section id="robust-m-estimator-interpretation">
+<h2>Robust M-estimator Interpretation<a class="headerlink" href="#robust-m-estimator-interpretation" title="Link to this heading"></a></h2>
+<p>To robustify ICP against outliers, we express our true objective using a robust M-estimator:</p>
+<div class="math notranslate nohighlight">
+\[C_{\mathrm{M}}(R, t; \sigma) = \sum_{i} \rho(e_i) + \lVert \theta \rVert_{\Lambda}^2,
+\quad
+e_i = \lVert R\,a_i + t - b_{\sigma(i)} \rVert_{L_i},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\rho: [0, \infty) \to [0, \infty)\)</span> is a robust loss function (e.g. Huber or Tukey).</p>
+<p>At each iteration, we linearize <span class="math notranslate nohighlight">\(\rho\)</span> around current residuals <span class="math notranslate nohighlight">\(e_i\)</span>, defining influence and weights:</p>
+<div class="math notranslate nohighlight">
+\[\psi(e_i) = \frac{d \,\rho(e_i)}{d\,e_i}, \quad w_i = \frac{\psi(e_i)}{e_i}, \quad (e_i &gt; 0).\]</div>
+<p>If <span class="math notranslate nohighlight">\(e_i = 0\)</span>, one typically sets <span class="math notranslate nohighlight">\(w_i = \psi'(0)\)</span>, assuming <span class="math notranslate nohighlight">\(\psi'(0)\)</span> is finite.</p>
+<p>We solve the weighted least-squares problem above iteratively until convergence, yielding a local minimizer of <span class="math notranslate nohighlight">\(C_{\mathrm{M}}\)</span>.</p>
+</section>
+<section id="choice-of-rho-and-corresponding-w-i">
+<h2>Choice of <span class="math notranslate nohighlight">\(\rho\)</span> (and corresponding $w_i)<a class="headerlink" href="#choice-of-rho-and-corresponding-w-i" title="Link to this heading"></a></h2>
+<ul>
+<li><p><strong><span class="math notranslate nohighlight">\(L_1\)</span> (absolute value)</strong> – <em>zero parameter, works “out of the box”</em></p>
+<div class="math notranslate nohighlight">
+\[\rho(e) = |e|, \qquad
+w(e)   = \frac{1}{|e| + \varepsilon}\]</div>
+</li>
+<li><p><strong>Variable Trimming (Var-Trim)</strong> – <em>hard rejection with adaptive overlap</em></p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\rho(e;\tau) =
+  \begin{cases}
+    e^2 &amp; \text{if } e \leq \tau,\\
+    \tau^2 &amp; \text{otherwise},
+  \end{cases}
+\qquad
+w(e;\tau) =
+  \begin{cases}
+    1 &amp; \text{if } e \leq \tau,\\
+    0 &amp; \text{otherwise}.
+  \end{cases}\end{split}\]</div>
+<p>Here <span class="math notranslate nohighlight">\(\tau\)</span> is recomputed at each iteration so that we keep a fixed proportion
+(typically 70–90 %) of the smallest residuals.</p>
+</li>
+<li><p><strong>Cauchy (fixed scale)</strong> – <em>single break-point <span class="math notranslate nohighlight">\(k\)</span></em></p>
+<div class="math notranslate nohighlight">
+\[\rho(e;k) = \frac{k^2}{2}\,\log\!\bigl(1 + (e/k)^2\bigr), \qquad
+w(e;k)   = \frac{1}{1 + (e/k)^2}\]</div>
+</li>
+<li><p><strong>Cauchy MAD (auto-scaled)</strong> – <em>robust, almost parameter-free</em></p>
+<p>At each IRLS outer loop compute the median absolute deviation</p>
+<div class="math notranslate nohighlight">
+\[s = 1.4826 \,\text{MAD}(e),\]</div>
+<p>then normalise residuals <span class="math notranslate nohighlight">\(\tilde e = e / s\)</span> and reuse the Cauchy form with
+<span class="math notranslate nohighlight">\(k \approx 1\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\rho(\tilde e) = \frac{k^2}{2}\,\log\!\bigl(1 + (\tilde e/k)^2\bigr), \qquad
+w(\tilde e)   = \frac{1}{1 + (\tilde e/k)^2}\]</div>
+</li>
+</ul>
+</section>
+<section id="alternating-optimization">
+<h2>Alternating Optimization<a class="headerlink" href="#alternating-optimization" title="Link to this heading"></a></h2>
+<p>Rigid ICP alternates between two steps:</p>
+<ol class="arabic">
+<li><p><strong>Correspondence step:</strong> Identify nearest target points for each source point under the current transformation:</p>
+<div class="math notranslate nohighlight">
+\[\sigma(i) = \mathrm{argmin}_j \;\lVert R\,a_i + t - b_j \rVert_{L_i}^2.\]</div>
+<p><strong>Compute local metrics</strong> <span class="math notranslate nohighlight">\(L_i\)</span> based on the current correspondences <span class="math notranslate nohighlight">\(\sigma(i)\)</span>.</p>
+</li>
+<li><p><strong>Registration step:</strong> Solve the weighted Procrustes problem given fixed correspondences:</p>
+<div class="math notranslate nohighlight">
+\[(R, t) = \underset{R \in SO(3),\,t \in \mathbb{R}^3}{\mathrm{argmin}}
+\sum_i w_i \lVert R\,a_i + t - b_{\sigma(i)} \rVert_{L_i}^2 + \lVert \theta \rVert_{\Lambda}^2.\]</div>
+<p>Closed-form solution:</p>
+<ul>
+<li><dl>
+<dt>Compute weighted centroids:</dt><dd><div class="math notranslate nohighlight">
+\[\bar{a} = \frac{\sum_i w_i \,a_i}{\sum_i w_i}, \quad
+\bar{b} = \frac{\sum_i w_i \,b_{\sigma(i)}}{\sum_i w_i}.\]</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Construct weighted cross-covariance:</dt><dd><div class="math notranslate nohighlight">
+\[H \;=\; \sum_i w_i\, (a_i - \bar{a})\, (b_{\sigma(i)} - \bar{b})^{\top}.\]</div>
+</dd>
+</dl>
+</li>
+<li><p>Perform SVD: <span class="math notranslate nohighlight">\(H = U \,\Sigma\, V^{\top}\)</span>, set <span class="math notranslate nohighlight">\(R = V\,U^{\top}\)</span> (correct for <span class="math notranslate nohighlight">\(\det R &lt; 0\)</span>), then <span class="math notranslate nohighlight">\(t = \bar{b} - R\,\bar{a}\)</span>.</p></li>
+</ul>
+</li>
+</ol>
+<p>Iterate until changes in cost <span class="math notranslate nohighlight">\(C\)</span> become negligible or a maximum iteration count is reached.</p>
+</section>
+<section id="initialization-of-r-and-t">
+<h2>Initialization of <span class="math notranslate nohighlight">\(R\)</span> and <span class="math notranslate nohighlight">\(t\)</span><a class="headerlink" href="#initialization-of-r-and-t" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>FPFH + RANSAC:</strong>
+Compute local FPFH descriptor, sample
+minimal sets, and keep the transform that maximises the inlier count.
+<em>When to use:</em> medium overlap (≈ 40–80 %), unknown rotation, outliers &lt; 90 %.</p></li>
+<li><p><strong>PCA alignment:</strong>
+Aligns the first (or first two) principal axes of the clouds before refinement.
+<em>When to use:</em> strongly elongated or planar geometry (pipes, façades, trunks),
+clouds already fairly close.</p></li>
+<li><p><strong>Centroid + SVD:</strong>
+Solves Procrustes on a handful of coarse matches, then refines.
+<em>When to use:</em> high overlap (&gt; 60 %) with some reliable correspondences.</p></li>
+<li><p><strong>Centroid shift only:</strong>
+Simply translates the source cloud onto the target barycentre.
+<em>When to use:</em> nearly overlapping captures (multi-frame of the same sensor),
+initial error &lt; 10 cm and &lt; 10°.</p></li>
+</ul>
+</section>
+<section id="choice-of-l-i">
+<h2>Choice of <span class="math notranslate nohighlight">\(L_i\)</span><a class="headerlink" href="#choice-of-l-i" title="Link to this heading"></a></h2>
+<ul>
+<li><p>In many 3D-registration problems, the most reliable constraint at each point <span class="math notranslate nohighlight">\(a_i\)</span> is how far it lies from the tangent plane of the underlying surface. When we have normals information, we then use a point-to-plane local metric that is defined as</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[L_i = \alpha_i \, n_{\sigma(i)} \, n_{\sigma(i)}^{\top} + \beta (I - n_{\sigma(i)} n_{\sigma(i)}^{\top}),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\alpha\;\gg\; \beta &gt; 0\)</span> are scalar weights, and <span class="math notranslate nohighlight">\(n_{\sigma(i)}\)</span> is the normal vector at point <span class="math notranslate nohighlight">\(b_{\sigma(i)}\)</span> corresponding to <span class="math notranslate nohighlight">\(a_i\)</span>.
+With this metric, displacements along <span class="math notranslate nohighlight">\(n_{\sigma(i)}\)</span> are penalized more than displacements in the tangent plane.</p>
+</div></blockquote>
+</li>
+<li><p>In the absence of normal information, a point-to-point (isotropic) metric can be used instead:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[L_i = I,\]</div>
+</div></blockquote>
+</li>
+<li><p>If both source and target have normals of good quality, we can use the plane-to-plane metric as an alternative:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[L_i + L'_{\sigma(i)}, \quad
+L_i = \alpha_i\, n_i\, n_i^\top, \quad
+L'_{\sigma(i)} = \alpha'_{\sigma(i)}\, n'_{\sigma(i)}\, {n'_{\sigma(i)}}^\top.\]</div>
+</div></blockquote>
+</li>
+<li><p>Finally, for more refined capture of the local geometry of the shapes, one can use the local covariance at the cost of inverting matrices:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
+\[L_i = (\Sigma_i + \Sigma’_{\sigma(i)})^{-1}.\]</div>
+<p>where <span class="math notranslate nohighlight">\(\Sigma_i\)</span> is the local covariance matrix at point <span class="math notranslate nohighlight">\(a_i\)</span>, and <span class="math notranslate nohighlight">\(\Sigma’_{\sigma(i)}\)</span> is the local covariance matrix at point <span class="math notranslate nohighlight">\(b_{\sigma(i)}\)</span>.</p>
+</div></blockquote>
+</li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="rigid.html" class="btn btn-neutral float-left" title="Rigid transformations (translation + rotation)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="similarity.html" class="btn btn-neutral float-right" title="Similarities (translation + rotation + scaling)" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

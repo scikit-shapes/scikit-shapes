@@ -1,0 +1,32 @@
+skshapes.morphing.extrinsic\_deformation
+========================================
+
+.. automodule:: skshapes.morphing.extrinsic_deformation
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      ExtrinsicDeformation
+      ODEModule
+   
+   
+
+   
+   
+   
+
+
+

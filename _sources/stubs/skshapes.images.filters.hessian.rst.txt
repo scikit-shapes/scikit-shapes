@@ -1,0 +1,6 @@
+skshapes.images.filters.hessian
+===============================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: hessian

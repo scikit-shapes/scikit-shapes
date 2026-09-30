@@ -1,0 +1,23 @@
+skshapes.convolutions.mesh\_convolution
+=======================================
+
+.. automodule:: skshapes.convolutions.mesh_convolution
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+

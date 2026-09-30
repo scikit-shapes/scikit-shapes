@@ -1,0 +1,6 @@
+skshapes.images.filters.image\_otsu\_threshold
+==============================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: image_otsu_threshold

@@ -1,0 +1,6 @@
+skshapes.input\_validation.converters.detect\_array\_dtypes
+===========================================================
+
+.. currentmodule:: skshapes.input_validation.converters
+
+.. autofunction:: detect_array_dtypes

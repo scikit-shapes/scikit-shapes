@@ -1,0 +1,6 @@
+skshapes.images.filters.hysteresis\_threshold
+=============================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: hysteresis_threshold

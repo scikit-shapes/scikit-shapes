@@ -1,0 +1,536 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overview of the registration algorithm &mdash; Scikit-Shapes 0.3.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/plot_directive.css" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery.css?v=61a4c737" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=56c72f64" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=4621528c"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+      <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+      <script>window.MathJax = {"tex": {"macros": {"RR": "{\\bf R}", "bold": ["{\\bf #1}", 1], "t": ["{#1}^{\\mathsf{T}}", 1], "T": "\\mkern-3mu", "target": ["\\widehat{#1}", 1]}, "tags": "ams"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Landmarks" href="../loss_functions/landmark.html" />
+    <link rel="prev" title="Computing local moments" href="../features/moments.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            Scikit-Shapes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../motivation.html">Why Scikit-Shapes?</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../user_guide/index.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../auto_examples/index.html">Gallery of examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stubs/skshapes.html">API reference</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">How Scikit-Shapes works</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../index.html#features">Features</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html#tasks">Tasks</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Overview of the registration algorithm</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#quadratic-proxies">Quadratic proxies</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#closed-form-solutions">Closed-form solutions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#efficient-implementations">Efficient implementations</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#standard-methods">Standard methods</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#loss-functions">Loss functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#deformation-models">Deformation models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Scikit-Shapes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">How Scikit-Shapes works</a></li>
+      <li class="breadcrumb-item active">Overview of the registration algorithm</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/explanation/tasks/registration.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="overview-of-the-registration-algorithm">
+<span id="explanation-registration"></span><h1>Overview of the registration algorithm<a class="headerlink" href="#overview-of-the-registration-algorithm" title="Link to this heading"></a></h1>
+<p>Let us consider a source shape <span class="math notranslate nohighlight">\(A\)</span> and a target shape <span class="math notranslate nohighlight">\(B\)</span>.</p>
+<p>We formulate the registration of <span class="math notranslate nohighlight">\(A\)</span> onto <span class="math notranslate nohighlight">\(B\)</span> as an optimization problem
+of the form:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\theta^\star ~\gets~ \arg \min_{\theta} ~&amp;
+\underbrace{
+\text{Regularization}(\theta) ~+~ \text{Loss}(\,\text{Model}(\,\theta \,;\, A\,),~ B\,)
+}_{\text{Objective}(\theta)}
+\\
+&amp;\text{subject to}~~~\text{Constraints}(\theta) = E~.\end{split}\]</div>
+<p>In the equation above:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\theta\)</span> is a <strong>vector of parameters</strong> of length P.
+It characterizes the transformation <span class="math notranslate nohighlight">\(A_\theta = \text{Model}(\,\theta \,;\, A\,)\)</span>
+from the source shape <span class="math notranslate nohighlight">\(A\)</span> onto the target shape <span class="math notranslate nohighlight">\(B\)</span>.
+For instance, it could be a (flattened) <strong>transformation matrix</strong>
+for an affine registration, or a set of <strong>control points</strong> for a free-form deformation.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{Regularization}(\theta)\)</span> is a non-negative scalar that penalizes
+the deviation of the parameter vector <span class="math notranslate nohighlight">\(\theta\)</span> from a set of “desirable”
+or “plausible” parameters.
+It is often used to enforce <strong>smoothness</strong> or <strong>biomechanical constraints</strong>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{Loss}(A_\theta,B)\)</span> is a non-negative scalar that measures the discrepancy
+between the transformed source shape <span class="math notranslate nohighlight">\(A_\theta\)</span> and the target shape <span class="math notranslate nohighlight">\(B\)</span>.
+Common examples include the <strong>closest point</strong> (“Hausdorff”) or
+<strong>optimal transport</strong> (“Wasserstein”) distances.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\text{Constraints}(\theta) = E\)</span> is a set of C equality constraints that
+the parameter vector <span class="math notranslate nohighlight">\(\theta\)</span> must satisfy.
+For instance, it could be a set of <strong>landmark constraints</strong> that pinpoint
+the location of specific anatomical landmarks between
+the source and target shapes.</p></li>
+</ul>
+<section id="quadratic-proxies">
+<h2>Quadratic proxies<a class="headerlink" href="#quadratic-proxies" title="Link to this heading"></a></h2>
+<p>Inspired by the
+<a class="reference external" href="https://xgboost.readthedocs.io/en/stable/tutorials/model.html">XGBoost</a>
+library, we tackle the registration problem by iteratively
+solving a sequence of <strong>quadratic approximations of the objective function</strong>.
+Starting from an initial guess <span class="math notranslate nohighlight">\(\theta_0\)</span>, which usually corresponds to
+the identity transformation:</p>
+<div class="math notranslate nohighlight">
+\[\text{Model}(\,\theta_0 \,;\, A\,) ~=~
+A_{\theta_0} ~=~ A \qquad\text{and}\qquad
+\text{Regularization}(\theta_0) ~=~ 0~,\]</div>
+<p>we <strong>iterate until convergence</strong> the update:</p>
+<div class="math notranslate nohighlight" id="equation-quadratic-proxy-update">
+\begin{align}
+\theta_{t+1} ~\gets~ \arg \min_{\theta} ~&amp;
+\tfrac{1}{2}\| \theta - \target{\theta}_t\|^2_{R_t}
+~+~
+\tfrac{1}{2}\| M_t \theta - \target{X}_t\|^2_{L_t}
+\\
+&amp;\text{subject to}~~~ \t{C}_t \T \theta = \target{E}_t~. \nonumber
+\end{align}</div><p>In the equation above, <span class="math notranslate nohighlight">\(\target{\theta}_t\)</span>, <span class="math notranslate nohighlight">\(R_t\)</span>, <span class="math notranslate nohighlight">\(M_t\)</span>, <span class="math notranslate nohighlight">\(\target{X}_t\)</span>, <span class="math notranslate nohighlight">\(L_t\)</span>, <span class="math notranslate nohighlight">\(C_t\)</span> and <span class="math notranslate nohighlight">\(\target{E}_t\)</span>
+are vectors and matrices that may depend on the current estimate <span class="math notranslate nohighlight">\(\theta_t\)</span>.
+The notation:</p>
+<div class="math notranslate nohighlight">
+\[\| x \|^2_{A} ~:=~ \text{trace}(\t{x}\T A x)\]</div>
+<p>refers to the squared norm of the vector <span class="math notranslate nohighlight">\(x\)</span> with respect to the positive (semi-)definite matrix <span class="math notranslate nohighlight">\(A\)</span>.
+We now introduce every term of this equation.</p>
+<section id="regularization-term-left-side">
+<h3>Regularization term - left side<a class="headerlink" href="#regularization-term-left-side" title="Link to this heading"></a></h3>
+<p>Given a current parameter value <span class="math notranslate nohighlight">\(\theta_t\)</span>,
+we approximate the regularization term as:</p>
+<div class="math notranslate nohighlight">
+\[\text{Regularization}(\theta) ~\simeq~
+\tfrac{1}{2}\| \theta - \target{\theta}_t\|^2_{R_t}\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\target{\theta}_t\)</span> is the target parameter estimated from our current estimate <span class="math notranslate nohighlight">\(\theta_t\)</span>,
+a vector of length P.
+It is often equal to a <strong>vector of zeroes</strong>, or to the projection of <span class="math notranslate nohighlight">\(\theta_t\)</span>
+on a set of “desirable” parameters, such as the group of rotation matrices.</p></li>
+<li><p><span class="math notranslate nohighlight">\(R_t\)</span> is a P-by-P positive (semi-)definite matrix that penalizes
+the deviation between the current guess <span class="math notranslate nohighlight">\(\theta\)</span> and the target <span class="math notranslate nohighlight">\(\target{\theta}\)</span>.
+It typically puts more emphasis on the high frequencies of the deformation
+to <strong>penalize tears and topological changes</strong>.</p></li>
+</ul>
+</section>
+<section id="data-attachment-term-right-side">
+<h3>Data attachment term - right side<a class="headerlink" href="#data-attachment-term-right-side" title="Link to this heading"></a></h3>
+<p>Inspired by the Gauss-Newton and Levenberg-Marquardt methods,
+we <strong>linearize the deformation model</strong> around the current estimate <span class="math notranslate nohighlight">\(\theta_t\)</span>
+but use a <strong>quadratic approximation of the loss function</strong>.
+We refer to Section 17.2.2 of
+<a class="reference external" href="https://arxiv.org/abs/2403.14606">the Elements of Differentiable Programming</a>
+for an in-depth discussion.</p>
+<p>More precisely, given a current parameter value <span class="math notranslate nohighlight">\(\theta_t\)</span>,
+we approximate the deformation model as:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{Model}(\,\theta \,;\, A\,) ~&amp;\simeq~
+\underbrace{\text{Model}(\,\theta_t \,;\, A\,)}_{X_t}
+~+~
+\underbrace{\text{d}_\theta\text{Model}(\,\theta_t \,;\, A\,)}_{M_t} \cdot (\theta - \theta_t) \\
+&amp;=~
+X_t - M_t \theta_t + M_t \theta \\\end{split}\]</div>
+<p>Likewise, we approximate the loss function as:</p>
+<div class="math notranslate nohighlight">
+\[\text{Loss}(\,A_\theta, ~B\,) ~\simeq~
+\tfrac{1}{2}\| X_\theta - \widetilde{X}_t\|^2_{L_t} .\]</div>
+<p>In the equation above:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(X_\theta\)</span> represents a <strong>vector of features</strong> of length F
+that characterizes the shape <span class="math notranslate nohighlight">\(A_{\theta} = \text{Model}(\,\theta \,;\, A\,)\)</span>.
+Usually, this is simply a <strong>flattened vector of coordinates</strong> <span class="math notranslate nohighlight">\(xyz\)</span>
+and F is equal to three times the number of points in the source shape A.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\widetilde{X}_t\)</span> is a vector of target shape features of length F.</p></li>
+<li><p><span class="math notranslate nohighlight">\(L_t\)</span> is a F-by-F positive (semi-)definite matrix that penalizes
+the deviation between the current guess <span class="math notranslate nohighlight">\(X\)</span> and the target <span class="math notranslate nohighlight">\(\widetilde{X}\)</span>.
+It is typically <strong>(block-)diagonal</strong> and puts more weight on points
+that are known with high confidence, such as landmarks.</p></li>
+</ul>
+<p>Combining the two steps above, we obtain the following approximation
+for the second term of the objective function:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{Loss}(\,\text{Model}(\,\theta \,;\, A\,),~ B\,) ~&amp;\simeq~
+\tfrac{1}{2}\| X_t - M_t \theta_t + M_t \theta - \widetilde{X}_t\|^2_{L_t}
+\\
+&amp;=~
+\tfrac{1}{2}\| M_t \theta -
+\underbrace{(\widetilde{X}_t - X_t + M_t \theta_t)}_{\target{X}_t}\|^2_{L_t}~.\end{split}\]</div>
+<p>In this formula, the <strong>Loss</strong> function is responsible for providing
+the target vector of features <span class="math notranslate nohighlight">\(\widetilde{X}_t\)</span>
+and the quadratic metric <span class="math notranslate nohighlight">\(L_t\)</span>
+while the deformation <strong>Model</strong> provides
+the current guess <span class="math notranslate nohighlight">\(X_t\)</span> and the differential <span class="math notranslate nohighlight">\(M_t\)</span>.</p>
+</section>
+<section id="constraints">
+<h3>Constraints<a class="headerlink" href="#constraints" title="Link to this heading"></a></h3>
+<p>Finally, we linearize the constraints around the current estimate <span class="math notranslate nohighlight">\(\theta_t\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\text{Constraints}(\theta) ~&amp;\simeq~
+\text{Constraints}(\theta_t) +
+\underbrace{\text{d}_\theta\text{Constraints}(\theta_t)}_{\t{C}_t} \cdot (\theta - \theta_t) \\
+&amp;=~
+\text{Constraints}(\theta_t) - \t{C}_t \T \theta_t + \t{C}_t \T \theta ~.\end{split}\]</div>
+<p>We then approximate the constraint:</p>
+<div class="math notranslate nohighlight">
+\[\text{Constraints}(\theta) = E\]</div>
+<p>with the linear equation:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}E &amp;= \text{Constraints}(\theta_t) - \t{C}_t \T \theta_t + \t{C}_t \T \theta \\
+\Longleftrightarrow~~
+\t{C}_t \T \theta &amp;=
+\underbrace{E + \t{C}_t \T \theta_t - \text{Constraints}(\theta_t)}_{\target{E}_t}~.\end{split}\]</div>
+<p>The constraint matrix <span class="math notranslate nohighlight">\(C_t\)</span> usually has <strong>few columns</strong>:
+for instance, one for each landmark that must be preserved.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For the sake of simplicity, we now drop the <span class="math notranslate nohighlight">\(t\)</span> indices
+from the matrices and vectors <span class="math notranslate nohighlight">\(\target{\theta}_t\)</span>, <span class="math notranslate nohighlight">\(M_t\)</span>, etc.</p>
+</div>
+</section>
+</section>
+<section id="closed-form-solutions">
+<h2>Closed-form solutions<a class="headerlink" href="#closed-form-solutions" title="Link to this heading"></a></h2>
+<p>As discussed in standard references on
+<a class="reference external" href="https://en.wikipedia.org/wiki/Quadratic_programming#Equality_constraints">quadratic programming</a>,
+the solution <span class="math notranslate nohighlight">\(\theta_{t+1}\)</span> of the optimization problem <a class="reference internal" href="#equation-quadratic-proxy-update">(1)</a>
+is such that:</p>
+<div class="math notranslate nohighlight" id="equation-quadratic-solution-general-case">
+\begin{align}
+\begin{bmatrix}
+  O &amp; C \\
+  \t{C} &amp; 0
+\end{bmatrix}
+\begin{bmatrix}
+  \theta_{t+1} \\
+  \lambda
+  \end{bmatrix}
+  ~=~
+\begin{bmatrix}
+  T \\
+  \target{E}
+\end{bmatrix}
+\end{align}</div><p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(O := R + \t{M} \T L M\)</span> is a P-by-P positive definite matrix: the <strong>objective</strong> operator.</p></li>
+<li><p><span class="math notranslate nohighlight">\(T := R \target{\theta} + \t{M} \T L \target{X}\)</span> is a vector of length P: the <strong>target</strong> values.</p></li>
+<li><p><span class="math notranslate nohighlight">\(C = C_t\)</span> is the P-by-C matrix of constraints.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\target{E} = \target{E}_t\)</span> is the vector of C constraint values.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\lambda\)</span> is the vector of Lagrange multipliers, of length C.</p></li>
+</ul>
+<p>When the P-by-P objective operator <span class="math notranslate nohighlight">\(O\)</span> and the C-by-C restriction
+<span class="math notranslate nohighlight">\((\t{C}\T O^{-1}C)\)</span> are invertible, the solution simplifies to:</p>
+<div class="math notranslate nohighlight" id="equation-quadratic-solution-invertible">
+\begin{align}
+\theta_{t+1} ~\gets~
+O^{-1}~ \big(~
+  T
+  -
+  C (\t{C}\T O^{-1}C)^{-1}
+  (
+    \t{C}\T O^{-1}T
+    - \target{E}
+  )~
+\big)
+\end{align}</div><p>When there is no constraint, we can simply compute:</p>
+<div class="math notranslate nohighlight" id="equation-quadratic-solution-no-constraint">
+\begin{align}
+\theta_{t+1} ~\gets~
+O^{-1}T~
+~=~(R + \t{M} \T L M)^{-1} (R \target{\theta} + \t{M} \T L \target{X})~.
+\end{align}</div><p>If the target parameter <span class="math notranslate nohighlight">\(\target{\theta}\)</span> is equal to a vector of zeroes,
+this simplifies further to:</p>
+<div class="math notranslate nohighlight" id="equation-quadratic-solution-no-constraint-zero-target">
+\begin{align}
+\theta_{t+1} ~\gets~
+(R + \t{M} \T L M)^{-1} \t{M} \T L \target{X}~.
+\end{align}</div><p>Assuming that the model differential <span class="math notranslate nohighlight">\(M\)</span> and the
+loss metric <span class="math notranslate nohighlight">\(L\)</span> are invertible, we write:</p>
+<div class="math notranslate nohighlight" id="equation-quadratic-solution-no-constraint-zero-target-invertible">
+\begin{align}
+\theta_{t+1} ~\gets~
+(L^{-1} M^{-\mathsf{T}} \T R + M)^{-1} \target{X}~,
+\end{align}</div><p>where <span class="math notranslate nohighlight">\(\target{X} = \widetilde{X} - X\)</span> is the difference between the target
+<span class="math notranslate nohighlight">\(\widetilde{X}_t\)</span> and the current guess <span class="math notranslate nohighlight">\(X_t\)</span> for the vector of features
+that characterizes the deformed shape <span class="math notranslate nohighlight">\(A_{\theta_t}\)</span>.</p>
+</section>
+<section id="efficient-implementations">
+<h2>Efficient implementations<a class="headerlink" href="#efficient-implementations" title="Link to this heading"></a></h2>
+<p>Efficient shape registration is about <strong>implementing these equations
+with optimum speed and memory footprint</strong> for different choices
+of the operators <span class="math notranslate nohighlight">\(R\)</span> (regularization), <span class="math notranslate nohighlight">\(M\)</span> (model), <span class="math notranslate nohighlight">\(L\)</span> (loss) and <span class="math notranslate nohighlight">\(C\)</span> (constraints).</p>
+<p>We split this complexity in two complementary parts:</p>
+<ul class="simple">
+<li><p>The <strong>“loss”</strong> Python module interacts with the target shape <span class="math notranslate nohighlight">\(B\)</span>.
+It is responsible for the operator <span class="math notranslate nohighlight">\(L\)</span> and may create some constraints.</p></li>
+<li><p>The <strong>deformation “model”</strong> Python module handles the parameter vector <span class="math notranslate nohighlight">\(\theta\)</span>,
+the operators <span class="math notranslate nohighlight">\(R\)</span> and <span class="math notranslate nohighlight">\(M\)</span> and may create some constraints <span class="math notranslate nohighlight">\(C\)</span>.
+It is ultimately responsible for implementing the step
+from <span class="math notranslate nohighlight">\(\theta_t\)</span> to <span class="math notranslate nohighlight">\(\theta_{t+1}\)</span>, following the most relevant
+equation from <a class="reference internal" href="#equation-quadratic-solution-general-case">(2)</a> to <a class="reference internal" href="#equation-quadratic-solution-no-constraint-zero-target-invertible">(6)</a>.</p></li>
+</ul>
+<p>Our algorithm to register the source <span class="math notranslate nohighlight">\(A\)</span> onto the target <span class="math notranslate nohighlight">\(B\)</span> can then be summarized as:</p>
+<ul class="simple">
+<li><p><strong>Initialization</strong>:</p>
+<ul>
+<li><p>Let the <strong>model</strong> set <span class="math notranslate nohighlight">\(\theta_0\)</span> to the identity transformation,
+i.e. start with an initial guess <span class="math notranslate nohighlight">\(A_{\theta_0}\)</span> that is equal to the source shape <span class="math notranslate nohighlight">\(A\)</span>.</p></li>
+</ul>
+</li>
+<li><p><strong>Iterative optimization loop</strong>, updating <span class="math notranslate nohighlight">\(\theta_t\)</span> to <span class="math notranslate nohighlight">\(\theta_{t+1}\)</span> until convergence:</p>
+<ul>
+<li><p>Let the <strong>model</strong> compute the current guess <span class="math notranslate nohighlight">\(A_{\theta_t} = \text{Model}(\theta_t\,;\,A)\)</span>.</p></li>
+<li><p>Let the <strong>loss</strong> take as input the current guess <span class="math notranslate nohighlight">\(A_{\theta_t}\)</span> and the target shape <span class="math notranslate nohighlight">\(B\)</span>
+to output the target vector of features <span class="math notranslate nohighlight">\(\widetilde{X}_t\)</span> and the
+loss metric <span class="math notranslate nohighlight">\(L_t\)</span>.</p></li>
+<li><p>Let the <strong>model</strong> compute the differential <span class="math notranslate nohighlight">\(M_t\)</span> and the full target vector <span class="math notranslate nohighlight">\(\target{X}_t\)</span>.</p></li>
+<li><p>Let the <strong>model</strong> compute the update <span class="math notranslate nohighlight">\(\theta_{t+1}\)</span> from <span class="math notranslate nohighlight">\(\theta_t\)</span>.
+The choice of the most relevant equation from <a class="reference internal" href="#equation-quadratic-solution-general-case">(2)</a> to <a class="reference internal" href="#equation-quadratic-solution-no-constraint-zero-target-invertible">(6)</a>
+is dependent on the structure of the model operator <span class="math notranslate nohighlight">\(M_t\)</span>
+and the regularization metric <span class="math notranslate nohighlight">\(R_t\)</span>.</p></li>
+</ul>
+</li>
+<li><p><strong>Finalization</strong>:</p>
+<ul>
+<li><p>Let the <strong>model</strong> compute the final shape <span class="math notranslate nohighlight">\(A^\star = \text{Model}(\theta^\star\,;\,A)\)</span>
+and the regularization penalty <span class="math notranslate nohighlight">\(\text{Regularization}(\theta^\star)\)</span>.</p></li>
+<li><p>Let the <strong>loss</strong> compute the discrepancy
+<span class="math notranslate nohighlight">\(\text{Loss}(A^\star, B)\)</span> between the final shape <span class="math notranslate nohighlight">\(A^\star\)</span> and the target shape <span class="math notranslate nohighlight">\(B\)</span>.</p></li>
+<li><p>Return the <strong>optimal parameter</strong> <span class="math notranslate nohighlight">\(\theta^\star\)</span>, the <strong>final shape</strong> <span class="math notranslate nohighlight">\(A^\star\)</span>,
+the final loss and regularization penalty to the user.</p></li>
+</ul>
+</li>
+</ul>
+<section id="loss-functions">
+<h3>Loss functions<a class="headerlink" href="#loss-functions" title="Link to this heading"></a></h3>
+<p>In this context, a loss function is a Python class that implements:</p>
+<ul class="simple">
+<li><p>A method <code class="xref py py-class docutils literal notranslate"><span class="pre">loss.value(A,</span> <span class="pre">B)</span></code> that takes as input two shapes
+(instances of <a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData" title="skshapes.PolyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolyData</span></code></a>)
+and returns a scalar that measures the discrepancy between the two shapes.</p></li>
+<li><p>A method <code class="xref py py-class docutils literal notranslate"><span class="pre">loss.quadratic_proxy(A,</span> <span class="pre">B)</span></code> that takes as input two shapes
+and returns the fundamental information that is required by the optimization loop:
+a positive (semi-)definite loss metric <span class="math notranslate nohighlight">\(L\)</span>
+and a scaled vector of F target features <span class="math notranslate nohighlight">\(L\widetilde{X}\)</span>.
+A default option is to rely on the first or second derivatives of <code class="xref py py-class docutils literal notranslate"><span class="pre">loss.value(A,</span> <span class="pre">B)</span></code>,
+which corresponds to implementing a semi-implicit Euler or Newton scheme
+on the full objective function.
+We typically override this with custom proxies for efficiency.</p></li>
+</ul>
+<p>We provide a set of standard loss functions in the <a class="reference internal" href="../../stubs/skshapes.loss.html#module-skshapes.loss" title="skshapes.loss"><code class="xref py py-mod docutils literal notranslate"><span class="pre">skshapes.loss</span></code></a> module:</p>
+<ul class="simple">
+<li><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">LandmarkLoss</span></code> implements simple
+<a class="reference internal" href="../loss_functions/landmark.html#explanation-loss-landmark"><span class="std std-ref">point-wise penalties and constraints</span></a>.
+They are used to pin points that are clearly identified in both shapes.</p></li>
+<li><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">ClosestPointLoss</span></code> implements
+penalties based on
+<a class="reference internal" href="../loss_functions/closest_point.html#explanation-loss-closest-point"><span class="std std-ref">nearest neighbor projections</span></a>.
+These are also known as (soft-)Hausdorff distances and correspond
+to the log-likelihoods of Gaussian Mixture models.</p></li>
+<li><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">KernelLoss</span></code> implements penalties
+based on
+<a class="reference internal" href="../loss_functions/kernel.html#explanation-loss-kernel"><span class="std std-ref">kernel convolutions</span></a>.
+These are also known as Maximum Mean Discrepancies (MMD) or
+electrostatic Coulomb penalties.</p></li>
+<li><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">OptimalTransportLoss</span></code> implements penalties
+based on
+<a class="reference internal" href="../loss_functions/optimal_transport.html#explanation-loss-optimal-transport"><span class="std std-ref">optimal transport correspondences</span></a>.
+These are also known as Wasserstein or
+Earth Mover’s Distances (EMD).</p></li>
+</ul>
+<p>Crucially, we support <strong>positive linear combinations</strong> of existing
+loss functions. Mathematically, this corresponds to concatenating
+the constraints that come from each loss and adjusting the
+formulas for the objective operator <span class="math notranslate nohighlight">\(O\)</span> and the target vector <span class="math notranslate nohighlight">\(T\)</span>
+in <a class="reference internal" href="#equation-quadratic-solution-general-case">(2)</a>.
+If we consider a loss function:</p>
+<div class="math notranslate nohighlight">
+\[\text{Loss}(\,A_\theta, ~B\,) ~=~ \sum_i w_i\, \text{Loss}_i(\,A_\theta, ~B\,)
+~\simeq~ \sum_i  \tfrac{w_i}{2}\| X_\theta - \widetilde{X}_i\|^2_{L_i}~,\]</div>
+<p>then the target vector <span class="math notranslate nohighlight">\(T\)</span> and the objective operator <span class="math notranslate nohighlight">\(O\)</span> become:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}O ~&amp;:=~ R +  \t{M}\T
+\underbrace{\big(\sum_i w_i L_i\big)}_{L_\text{sum}}
+M~,\\
+T ~&amp;:=~ R \target{\theta} + \t{M} \T \big(\sum_i w_i  L_i \target{X}_i\big) \\
+&amp;=~
+R \target{\theta} + \t{M}\T \big(\sum_i w_i  L_i (\widetilde{X}_i + M \theta - X)\big) \\
+&amp;=~
+R \target{\theta} + \t{M}\T \big[
+  \underbrace{\big(\sum_i w_i  L_i \widetilde{X}_i\big)}_{(L\widetilde{X})_\text{sum}}
+  +
+  L_\text{sum} (M \theta - X)
+  \big]~.\end{split}\]</div>
+<p>Going further, you may implement a <strong>custom loss function</strong> by following
+the <a class="reference internal" href="../loss_functions/custom.html#explanation-loss-custom"><span class="std std-ref">user guide</span></a>.</p>
+</section>
+<section id="deformation-models">
+<h3>Deformation models<a class="headerlink" href="#deformation-models" title="Link to this heading"></a></h3>
+<p>Likewise,
+a deformation model is a Python class that provides:</p>
+<ul class="simple">
+<li><p>Access to the parameters <span class="math notranslate nohighlight">\(\theta\)</span> as Python attributes.
+We follow the
+<a class="reference external" href="https://scikit-learn.org/stable/developers/develop.html#estimated-attributes">scikit-learn convention</a>
+and name these tensors with trailing underscores:
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">model.affine_transformation_matrix_</span></code>,
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">model.control_points_</span></code> , etc.</p></li>
+<li><p>A method <code class="xref py py-class docutils literal notranslate"><span class="pre">model.fit(shape)</span></code> that takes as input a source shape <span class="math notranslate nohighlight">\(A\)</span>
+(an instance of <a class="reference internal" href="../../stubs/skshapes.PolyData.html#skshapes.PolyData" title="skshapes.PolyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolyData</span></code></a>) and allocates
+the relevant amount of memory for the parameters <span class="math notranslate nohighlight">\(\theta\)</span>.
+The initial value <span class="math notranslate nohighlight">\(\theta_0\)</span> corresponds to the identity transformation,
+and the model may perform some useful pre-computations at this stage.</p></li>
+<li><p>A method <code class="xref py py-class docutils literal notranslate"><span class="pre">model.transform()</span></code> that returns
+the deformed shape <span class="math notranslate nohighlight">\(A_\theta\)</span>.</p></li>
+<li><p>A method <code class="xref py py-class docutils literal notranslate"><span class="pre">model.regularization_penalty()</span></code> that returns
+the current value for the regularization penalty <span class="math notranslate nohighlight">\(\text{Regularization}(\theta)\)</span>.</p></li>
+<li><p>A method <code class="xref py py-class docutils literal notranslate"><span class="pre">model.optimization_step(scaled_target,</span> <span class="pre">weights)</span></code>
+that takes as input a vector of scaled target features <span class="math notranslate nohighlight">\(L\widetilde{X}\)</span>,
+a metric <span class="math notranslate nohighlight">\(L\)</span> and performs the update from <span class="math notranslate nohighlight">\(\theta_t\)</span> to <span class="math notranslate nohighlight">\(\theta_{t+1}\)</span>.
+In practice, <span class="math notranslate nohighlight">\(L\widetilde{X}\)</span> is encoded as a N-by-F tensor
+where N denotes the number of points in the source shape <span class="math notranslate nohighlight">\(A\)</span>.
+The metric <span class="math notranslate nohighlight">\(L\)</span> is encoded as a non-negative vector of N weights
+if it is a diagonal operator, or
+as a N-by-F-by-F collection of positive (semi-)definite matrices
+if it is block-diagonal.</p></li>
+</ul>
+<p>We provide a set of standard deformation models in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">model</span></code> module:</p>
+<ul class="simple">
+<li><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">AffineDeformation</span></code> model provides access to
+all methods that are parameterized by an
+<a class="reference internal" href="../deformation_models/affine.html#explanation-deformation-affine"><span class="std std-ref">affine transformation matrix</span></a>.
+This includes:</p>
+<ul>
+<li><p><a class="reference internal" href="../deformation_models/translation.html#explanation-deformation-translation"><span class="std std-ref">Pure translations</span></a>, which are parameterized by a single vector.</p></li>
+<li><p><a class="reference internal" href="../deformation_models/rigid.html#explanation-deformation-rigid"><span class="std std-ref">Rigid transformations</span></a>, which are parameterized by
+a translation vector and a rotation matrix.</p></li>
+<li><p><a class="reference internal" href="../deformation_models/similarity.html#explanation-deformation-similarity"><span class="std std-ref">Similarity transformations</span></a>, which are parameterized by
+a translation vector, a rotation matrix and an isotropic scaling factor.</p></li>
+<li><p><a class="reference internal" href="../deformation_models/affine.html#explanation-deformation-affine"><span class="std std-ref">Affine transformations</span></a>, which are parameterized by
+a translation vector and a full transformation matrix.</p></li>
+</ul>
+</li>
+<li><p>The <code class="xref py py-class docutils literal notranslate"><span class="pre">FreeFormDeformation</span></code> model provides access to
+all methods that rely on control points.
+Mathematically speaking,  <a class="reference internal" href="../loss_functions/landmark.html#explanation-loss-landmark"><span class="std std-ref">landmarks loss</span></a> (),
+which is used to pin points that are clearly identified in both shapes.</p></li>
+</ul>
+</section>
+</section>
+<section id="standard-methods">
+<h2>Standard methods<a class="headerlink" href="#standard-methods" title="Link to this heading"></a></h2>
+<p>Scikit-shapes allows you to use any deformation model with any loss function.
+This allows you to reproduce reference methods such as:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Thin-plate splines</strong> with a <strong>landmarks constraints</strong>, as in
+<a class="reference external" href="https://cseweb.ucsd.edu/classes/sp03/cse252/bookstein.pdf">Principal warps: thin-plate splines and the decomposition of deformations</a>
+by Fred L. Bookstein (1989).</p></li>
+</ul>
+</div></blockquote>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../features/moments.html" class="btn btn-neutral float-left" title="Computing local moments" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../loss_functions/landmark.html" class="btn btn-neutral float-right" title="Landmarks" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023-2025, The Scikit-Shapes team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

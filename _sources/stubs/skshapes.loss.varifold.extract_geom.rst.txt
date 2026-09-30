@@ -1,0 +1,6 @@
+skshapes.loss.varifold.extract\_geom
+====================================
+
+.. currentmodule:: skshapes.loss.varifold
+
+.. autofunction:: extract_geom

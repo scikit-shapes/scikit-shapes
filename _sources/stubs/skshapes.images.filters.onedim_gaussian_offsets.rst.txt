@@ -1,0 +1,6 @@
+skshapes.images.filters.onedim\_gaussian\_offsets
+=================================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: onedim_gaussian_offsets

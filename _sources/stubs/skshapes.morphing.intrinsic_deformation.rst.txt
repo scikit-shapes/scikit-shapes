@@ -1,0 +1,40 @@
+skshapes.morphing.intrinsic\_deformation
+========================================
+
+.. automodule:: skshapes.morphing.intrinsic_deformation
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      as_isometric_as_possible
+      metric_validation
+      shell_energy_metric
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      IntrinsicDeformation
+   
+   
+
+   
+   
+   
+
+
+

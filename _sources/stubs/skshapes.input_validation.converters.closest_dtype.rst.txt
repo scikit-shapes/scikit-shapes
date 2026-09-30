@@ -1,0 +1,6 @@
+skshapes.input\_validation.converters.closest\_dtype
+====================================================
+
+.. currentmodule:: skshapes.input_validation.converters
+
+.. autofunction:: closest_dtype

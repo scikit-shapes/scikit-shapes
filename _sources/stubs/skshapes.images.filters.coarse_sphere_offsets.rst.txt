@@ -1,0 +1,6 @@
+skshapes.images.filters.coarse\_sphere\_offsets
+===============================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: coarse_sphere_offsets

@@ -1,0 +1,28 @@
+skshapes.morphing.non\_rigid\_icp.NonRigidDeformation
+=====================================================
+
+.. currentmodule:: skshapes.morphing.non_rigid_icp
+
+.. autoclass:: NonRigidDeformation
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~NonRigidDeformation.__init__
+      ~NonRigidDeformation.fit
+      ~NonRigidDeformation.initialize
+      ~NonRigidDeformation.optimization_step
+      ~NonRigidDeformation.transform
+   
+   
+
+   
+   
+   

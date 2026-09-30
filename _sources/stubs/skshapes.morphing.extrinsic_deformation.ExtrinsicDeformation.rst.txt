@@ -1,0 +1,31 @@
+skshapes.morphing.extrinsic\_deformation.ExtrinsicDeformation
+=============================================================
+
+.. currentmodule:: skshapes.morphing.extrinsic_deformation
+
+.. autoclass:: ExtrinsicDeformation
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~ExtrinsicDeformation.H
+      ~ExtrinsicDeformation.K
+      ~ExtrinsicDeformation.__init__
+      ~ExtrinsicDeformation.copy
+      ~ExtrinsicDeformation.inital_parameter
+      ~ExtrinsicDeformation.morph
+      ~ExtrinsicDeformation.ode_func
+      ~ExtrinsicDeformation.parameter_shape
+   
+   
+
+   
+   
+   

@@ -1,0 +1,6 @@
+skshapes.images.filters.skeletonize
+===================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: skeletonize

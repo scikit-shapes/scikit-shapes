@@ -1,0 +1,6 @@
+skshapes.images.filters.manhattan\_offsets
+==========================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: manhattan_offsets

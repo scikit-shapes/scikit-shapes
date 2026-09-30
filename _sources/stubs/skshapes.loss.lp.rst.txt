@@ -1,0 +1,33 @@
+skshapes.loss.lp
+================
+
+.. automodule:: skshapes.loss.lp
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      L2Loss
+      LandmarkLoss
+      LpLoss
+   
+   
+
+   
+   
+   
+
+
+

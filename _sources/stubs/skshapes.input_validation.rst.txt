@@ -1,0 +1,34 @@
+skshapes.input\_validation
+==========================
+
+.. automodule:: skshapes.input_validation
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   converters
+   notnone_rules
+   typechecking
+

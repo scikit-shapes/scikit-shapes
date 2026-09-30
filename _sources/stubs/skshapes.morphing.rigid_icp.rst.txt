@@ -1,0 +1,39 @@
+skshapes.morphing.rigid\_icp
+============================
+
+.. automodule:: skshapes.morphing.rigid_icp
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      rigid_icp
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      ClosestPointCoupling
+      RigidDeformation
+   
+   
+
+   
+   
+   
+
+
+

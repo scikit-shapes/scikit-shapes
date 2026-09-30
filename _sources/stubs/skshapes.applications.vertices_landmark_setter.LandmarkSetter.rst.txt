@@ -1,0 +1,25 @@
+skshapes.applications.vertices\_landmark\_setter.LandmarkSetter
+===============================================================
+
+.. currentmodule:: skshapes.applications.vertices_landmark_setter
+
+.. autoclass:: LandmarkSetter
+   :members:
+   :show-inheritance:
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+   
+      ~LandmarkSetter.__init__
+      ~LandmarkSetter.start
+   
+   
+
+   
+   
+   

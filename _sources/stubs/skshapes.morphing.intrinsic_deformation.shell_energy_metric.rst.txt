@@ -1,0 +1,6 @@
+skshapes.morphing.intrinsic\_deformation.shell\_energy\_metric
+==============================================================
+
+.. currentmodule:: skshapes.morphing.intrinsic_deformation
+
+.. autofunction:: shell_energy_metric

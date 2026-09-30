@@ -1,0 +1,6 @@
+skshapes.images.filters.frangi\_filter
+======================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: frangi_filter

@@ -1,0 +1,6 @@
+skshapes.images.filters.cube\_offsets
+=====================================
+
+.. currentmodule:: skshapes.images.filters
+
+.. autofunction:: cube_offsets

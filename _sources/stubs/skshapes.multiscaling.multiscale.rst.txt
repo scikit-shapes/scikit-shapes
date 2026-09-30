@@ -1,0 +1,31 @@
+skshapes.multiscaling.multiscale
+================================
+
+.. automodule:: skshapes.multiscaling.multiscale
+
+   
+   
+   
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Multiscale
+   
+   
+
+   
+   
+   
+
+
+

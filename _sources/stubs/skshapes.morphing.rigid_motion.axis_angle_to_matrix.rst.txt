@@ -1,0 +1,6 @@
+skshapes.morphing.rigid\_motion.axis\_angle\_to\_matrix
+=======================================================
+
+.. currentmodule:: skshapes.morphing.rigid_motion
+
+.. autofunction:: axis_angle_to_matrix

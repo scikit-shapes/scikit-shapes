@@ -1,0 +1,6 @@
+skshapes.applications.barycentric\_landmark\_setter.barycentric\_coordinates
+============================================================================
+
+.. currentmodule:: skshapes.applications.barycentric_landmark_setter
+
+.. autofunction:: barycentric_coordinates

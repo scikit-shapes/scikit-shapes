@@ -1,0 +1,6 @@
+skshapes.Circle
+===============
+
+.. currentmodule:: skshapes
+
+.. autofunction:: Circle

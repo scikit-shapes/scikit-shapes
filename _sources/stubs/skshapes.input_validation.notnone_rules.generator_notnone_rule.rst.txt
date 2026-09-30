@@ -1,0 +1,6 @@
+skshapes.input\_validation.notnone\_rules.generator\_notnone\_rule
+==================================================================
+
+.. currentmodule:: skshapes.input_validation.notnone_rules
+
+.. autofunction:: generator_notnone_rule

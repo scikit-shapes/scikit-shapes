@@ -1,0 +1,63 @@
+﻿API reference
+=============
+
+
+.. automodule:: skshapes
+
+   
+   
+   
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      Circle
+      Sphere
+   
+   
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+      :template: custom-class-template.rst
+   
+      Image
+      Mask
+      PolyData
+      SparseImage
+   
+   
+
+   
+   
+   
+
+
+
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :template: custom-module-template.rst
+   :recursive:
+
+   applications
+   convolutions
+   features
+   images
+   input_validation
+   loss
+   morphing
+   multiscaling
+   optimization
+   tasks
+   triangle_mesh
+   types
+

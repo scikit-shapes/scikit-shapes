@@ -1,0 +1,6 @@
+skshapes.images.utils.eigenvalues
+=================================
+
+.. currentmodule:: skshapes.images.utils
+
+.. autofunction:: eigenvalues
