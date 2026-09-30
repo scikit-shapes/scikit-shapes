@@ -20,7 +20,7 @@ jobs:
 
     build_documentation:
         name: Build Documentation
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-latest
 
         permissions:
           deployments: write

@@ -52,12 +52,13 @@ def _mesh_convolution(
             dtype=float_dtype
         )  # TODO: repeat_interleave or not??
 
-    S = torch.sparse_coo_tensor(
-        indices=indices,
-        values=values,
-        size=(n_points, n_points),
-        device=self.device,
-    )
+    with torch.sparse.check_sparse_tensor_invariants(enable=False):
+        S = torch.sparse_coo_tensor(
+            indices=indices,
+            values=values,
+            size=(n_points, n_points),
+            device=self.device,
+        )
 
     degrees = S @ torch.ones(n_points, device=self.device, dtype=float_dtype)
 
