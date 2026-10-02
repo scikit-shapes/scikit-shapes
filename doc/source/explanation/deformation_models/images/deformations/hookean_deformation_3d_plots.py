@@ -409,7 +409,7 @@ def _setup_column_visualization(surface, color, window_size, subtitle=None):
     length = DEFORMATION_CONFIG["twisting"]["length_column"]
     p.camera.position = (2.5, 2.0, 2.5)
     p.camera.focal_point = (0.0, 0.0, length / 2)
-    p.camera.view_up = (0, 0, 1)
+    p.camera.up = (0, 0, 1)
     p.camera.zoom(0.8)
     p.camera.parallel_projection = True
 
@@ -562,7 +562,7 @@ def _setup_column_subplot(
 
     plotter.camera.position = camera_settings["position"]
     plotter.camera.focal_point = camera_settings["focal_point"]
-    plotter.camera.view_up = camera_settings["view_up"]
+    plotter.camera.up = camera_settings["up"]
     plotter.camera.zoom(camera_settings["zoom"])
     plotter.camera.parallel_projection = True
 
@@ -607,7 +607,7 @@ def side_by_side_twisting(generate_half: bool = True):
     camera_settings = {
         "position": (2.5, 2.0, 2.5),
         "focal_point": (0.0, 0.0, length / 2),
-        "view_up": (0, 0, 1),
+        "up": (0, 0, 1),
         "zoom": 0.8,
     }
 

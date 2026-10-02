@@ -1,15 +1,46 @@
 """Types aliases and utility functions for scikit-shapes."""
 
-from typing import Literal, NamedTuple
+import sys
+from typing import Literal
 
 import numpy as np
 import torch
 from beartype import beartype
-from beartype.typing import Annotated
+from beartype.typing import (
+    Annotated,
+    Callable,
+    Generic,
+    NamedTuple,
+    TypeVar,
+)
 from beartype.vale import Is
 from jaxtyping import Float, Float32, Float64, Int, Int32, Int64
 
 from .globals import float_dtype, int_dtype
+
+if sys.version_info >= (3, 12):
+    # Python 3.12+: `type` statement is available
+    def define_alias(alias_name, target):
+        # We use exec to avoid using a forbidden syntax in earlier Python versions
+        exec(f"type {alias_name} = {target.__name__}", globals())
+
+elif sys.version_info >= (3, 10):  # noqa: UP036
+    # Python 3.10+: TypeAlias available in typing
+    from typing import TypeAlias
+
+    def define_alias(alias_name, target):
+        globals()[alias_name]: TypeAlias = target
+
+else:
+    # Fallback: just assign the name, no real type alias
+    def define_alias(alias_name, target):
+        globals()[alias_name] = target
+
+
+TypeVar = TypeVar  # noqa: PLW0127 Just to re-export it
+Generic = Generic  # noqa: PLW0127 Just to re-export it
+Callable = Callable  # noqa: PLW0127 Just to re-export it
+
 
 # Type aliases
 Number = int | float
@@ -70,16 +101,19 @@ Double2dTensor = JaxDouble[torch.Tensor, "_ _"]
 Points2d = JaxFloat[torch.Tensor, "_ 2"]
 Points3d = JaxFloat[torch.Tensor, "_ 3"]
 
+
 PointMasses = JaxFloat[torch.Tensor, "n_points"]
 PointDensities = JaxFloat[torch.Tensor, "n_points"]
-PointVectorSignals = JaxFloat[torch.Tensor, "n_points n_channels"]
-PointAnySignals = JaxFloat[torch.Tensor, "n_points *channels"]
+PointVectorSignals = JaxFloat[torch.Tensor, "n_points n_features"]
+PointAnySignals = JaxFloat[torch.Tensor, "n_points *features"]
+
+Signal = PointVectorSignals
 
 PointDisplacements = JaxFloat[torch.Tensor, "n_points dim"]
 PointCovariances = JaxFloat[torch.Tensor, "n_points dim dim"]
-PointSymmetricTensors = JaxFloat[torch.Tensor, "n_points dim dim *channels"]
+PointSymmetricTensors = JaxFloat[torch.Tensor, "n_points dim dim *features"]
 
-PointEigenvectors = JaxFloat[torch.Tensor, "n_points n_modes"]
+PointEigenvectors = JaxFloat[torch.Tensor, "n_modes n_points n_features"]
 Eigenvalues = JaxFloat[torch.Tensor, "n_modes"]
 
 EdgeLengths = JaxFloat[torch.Tensor, "n_edges"]
@@ -105,6 +139,15 @@ PointsSequence = PointsSequence2D | PointsSequence3D
 
 Edges = JaxInt[torch.Tensor, "_ 2"]
 Triangles = JaxInt[torch.Tensor, "_ 3"]
+
+# Alias for lists of lists, numpy arrays and tensors that will get converted
+# to Float32 or Int64 tensors by @convert_inputs, but get a more concise
+# documentation in conf.py, via the autodoc_type_aliases variable.
+PointsLike = Points
+EdgesLike = Edges
+TrianglesLike = Triangles
+PointDensitiesLike = PointDensities
+LandmarksSequence = IntSequence
 
 # Jaxtyping does not provide annotation for sparse tensors
 # Then we use the torch.Tensor type and checks are made at runtime

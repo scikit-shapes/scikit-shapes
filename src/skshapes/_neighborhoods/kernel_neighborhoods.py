@@ -8,7 +8,7 @@ from ..types import (
     Points,
     PointVectorSignals,
 )
-from .neighborhoods import Neighborhoods
+from .old_neighborhoods import OldNeighborhoods
 
 
 def keops_kernel(
@@ -38,7 +38,7 @@ def keops_kernel(
     return K_ij
 
 
-class KernelNeighborhoods(Neighborhoods):
+class KernelNeighborhoods(OldNeighborhoods):
 
     @typecheck
     def __init__(

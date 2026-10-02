@@ -1275,6 +1275,19 @@ class RigidDeformation:
                 self.s_init,
             )
 
+    @property
+    def transformation_matrix(self) -> torch.Tensor:
+        # Check if the transformation parameters have been initialized
+        if not all(hasattr(self, attr) for attr in ["R", "t", "s_global"]):
+            msg = "Transformation not initialized. Call the 'initialize' or 'fit' method before accessing the matrix."
+            raise AttributeError(msg)
+
+        matrix = torch.eye(4, device=self.device, dtype=self.R.dtype)
+        matrix[:3, :3] = self.s_global * self.R
+        matrix[:3, 3] = self.t
+
+        return matrix
+
 
 def rigid_icp(
     source_shape: torch.Tensor | Any,

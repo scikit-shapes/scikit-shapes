@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import torch
 
 from ..input_validation import typecheck
@@ -16,7 +18,7 @@ from ..types import (
 def _point_masses(self) -> PointMasses:
     """Point weights.
 
-    These correspond to:
+    A ``(n_points,)`` Tensor that contains the point masses. These correspond to:
 
     - Unit values for point clouds.
     - Half of the sum of the lengths of adjacent edges for wireframe meshes.
@@ -25,10 +27,6 @@ def _point_masses(self) -> PointMasses:
     If ``self.point_densities`` is defined, the point masses are multiplied by these
     point densities.
 
-    Returns
-    -------
-    point_masses
-        A ``(n_points,)`` Tensor that contains the point masses.
 
     Examples
     --------
@@ -139,12 +137,9 @@ def _point_masses(self) -> PointMasses:
 def _edge_points(self) -> EdgePoints:
     """The coordinates of edge vertices.
 
-    Returns
-    -------
-    edge_points
-        A ``(n_edges, 2, dim)`` Tensor (where the dimension of the ambient space
-        ``dim`` is typically 2 or 3) that contains the coordinates of edge vertices,
-        so that ``self.edge_points[e, i, :] == self.points[self.edges[e, i], :]``.
+    A ``(n_edges, 2, dim)`` Tensor (where the dimension of the ambient space
+    ``dim`` is typically 2 or 3) that contains the coordinates of edge vertices,
+    so that ``self.edge_points[e, i, :] == self.points[self.edges[e, i], :]``.
 
 
     Examples
@@ -224,13 +219,10 @@ def _edge_points(self) -> EdgePoints:
 def _triangle_points(self) -> TrianglePoints:
     """The coordinates of triangle vertices.
 
-    Returns
-    -------
-    triangle_points
-        A ``(n_triangles, 3, dim)`` Tensor (where the dimension of the ambient space
-        ``dim`` is typically 2 or 3) that contains the coordinates of triangle
-        vertices, so that
-        ``self.triangle_points[t, i, :] == self.points[self.triangle[t, i], :]``.
+    A ``(n_triangles, 3, dim)`` Tensor (where the dimension of the ambient space
+    ``dim`` is typically 2 or 3) that contains the coordinates of triangle
+    vertices, so that
+    ``self.triangle_points[t, i, :] == self.points[self.triangle[t, i], :]``.
 
 
     Examples
@@ -292,11 +284,8 @@ def _triangle_points(self) -> TrianglePoints:
 def _edge_midpoints(self) -> EdgeMidpoints:
     """The coordinates of points at the center of each edge.
 
-    Returns
-    -------
-    edge_midpoints
-        A ``(n_edges, dim)`` Tensor (where the dimension of the ambient space
-        ``dim`` is typically 2 or 3) that contains the coordinates of edge midpoints.
+    A ``(n_edges, dim)`` Tensor (where the dimension of the ambient space
+    ``dim`` is typically 2 or 3) that contains the coordinates of edge midpoints.
 
 
     Examples
@@ -337,10 +326,7 @@ def _edge_midpoints(self) -> EdgeMidpoints:
 def _edge_lengths(self) -> EdgeLengths:
     """The lengths of all edge segments.
 
-    Returns
-    -------
-    edge_lengths
-        A ``(n_edges,)`` Tensor that contains the lengths of all the edge segments.
+    A ``(n_edges,)`` Tensor that contains the lengths of all the edge segments.
 
     Examples
     --------
@@ -381,12 +367,9 @@ def _edge_lengths(self) -> EdgeLengths:
 def _triangle_centroids(self) -> TriangleCentroids:
     """The coordinates of points at the arithmetic center of each triangle.
 
-    Returns
-    -------
-    triangle_centroids
-        A ``(n_triangle, dim)`` Tensor (where the dimension of the ambient space
-        ``dim`` is typically 2 or 3) that contains the coordinates of all
-        triangle centers.
+    A ``(n_triangle, dim)`` Tensor (where the dimension of the ambient space
+    ``dim`` is typically 2 or 3) that contains the coordinates of all
+    triangle centers.
 
 
     Examples
@@ -418,14 +401,11 @@ def _triangle_centroids(self) -> TriangleCentroids:
 def _triangle_areas(self) -> TriangleAreas:
     """The areas of the mesh triangles.
 
-    Returns
-    -------
-    triangle_areas
-        A ``(n_triangles,)`` Tensor that contains a non-negative area value for each
-        triangle. Please note that the orientation of triangles is not taken into
-        account here. If you need to compute the signed area of a 2D triangle,
-        please consider using :attr:`~skshapes.PolyData.triangle_area_normals`
-        and extract the third coordinate of the normal vectors.
+    A ``(n_triangles,)`` Tensor that contains a non-negative area value for each
+    triangle. Please note that the orientation of triangles is not taken into
+    account here. If you need to compute the signed area of a 2D triangle,
+    please consider using :attr:`~skshapes.PolyData.triangle_area_normals`
+    and extract the third coordinate of the normal vectors.
 
     Examples
     --------
