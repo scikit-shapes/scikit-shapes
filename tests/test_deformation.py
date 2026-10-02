@@ -55,3 +55,35 @@ def test_copy_model(model):
     model_copy.n_steps = 2 * model.n_steps
     # Assert that the number of steps is different
     assert model_copy.n_steps != model.n_steps
+
+
+def test_extrinsic_deformation_autograd():
+    """Make sur that extrinsic deformation can be called with a parameter with requires_autograd"""
+
+    model = sks.ExtrinsicDeformation(
+        n_steps=2,
+        kernel="gaussian",
+        scale=0.5,
+    )
+
+    mesh = sks.Sphere().decimate(n_points=20)
+
+    x = torch.rand(3)
+    x.requires_grad = True
+    parameter_shape = model.parameter_shape(shape=mesh)
+    parameter = x.repeat(parameter_shape[0]).reshape(parameter_shape)
+
+    morphed_mesh_1 = model.morph(
+        shape=mesh,
+        parameter=parameter,
+    ).morphed_shape
+
+    parameter_copy_nograd = parameter.detach().clone()
+    parameter_copy_nograd.requires_grad = False
+
+    morphed_mesh_2 = model.morph(
+        shape=mesh,
+        parameter=parameter_copy_nograd,
+    ).morphed_shape
+
+    assert torch.allclose(morphed_mesh_1.points, morphed_mesh_2.points)
