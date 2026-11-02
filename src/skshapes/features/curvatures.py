@@ -450,7 +450,7 @@ def _point_quadratic_fits(
     VV = coefs[:, 2]
     U = coefs[:, 3]
     V = coefs[:, 4]
-    O = coefs[:, 5]  # noqa: E741 (ambiguous variable name)
+    O = coefs[:, 5]
 
     quadratic = torch.stack(
         [UU, UV / 2, U / 2, UV / 2, VV, V / 2, U / 2, V / 2, O], dim=-1
