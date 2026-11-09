@@ -220,7 +220,7 @@ def test_multidimensional_matrix_multiplication():
 
     # take a random index (i, j, k, l) and assert that the output is correct
     # at this index
-    i, j, k, l = randint(n), randint(a), randint(b), randint(c)  # noqa: E741
+    i, j, k, l = randint(n), randint(a), randint(b), randint(c)
     assert torch.isclose(
         result[i, j, k, l],
         sum([matrix[i, ii] * A[ii, j, k, l] for ii in range(m)]).to(
